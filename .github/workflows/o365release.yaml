@@ -1,0 +1,27 @@
+name: O365 Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release_zip_file:
+    name: Prepare release asset
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/checkout@v4"
+      - name: Release Asset
+        uses: "rogerselwyn/actions/release-asset@main"
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          component: o365_calendar
+
+  releasenotes:
+    name: Prepare release notes
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/checkout@v4"
+      - name: Release Notes
+        uses: "rogerselwyn/actions/release-notes@main"
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}

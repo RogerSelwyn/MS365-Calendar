@@ -1,0 +1,10 @@
+{
+    "services": {
+        "scan_for_calendars": "mdi:calendar-sync",
+        "scan_for_todo_lists": "mdi:clipboard-list",
+        "respond_calendar_event": "mdi:calendar-arrow-left",
+        "create_calendar_event": "mdi:calendar-plus",
+        "modify_calendar_event": "mdi:calendar-edit",
+        "remove_calendar_event": "mdi:calendar-remove"
+    }
+}
