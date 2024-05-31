@@ -25,7 +25,6 @@ from homeassistant.helpers.network import get_url
 from homeassistant.helpers.selector import BooleanSelector
 from O365 import Account, FileSystemTokenBackend
 
-from .classes.permissions import Permissions
 from .const import (
     AUTH_CALLBACK_NAME,
     AUTH_CALLBACK_PATH_ALT,
@@ -42,7 +41,9 @@ from .const import (
     DOMAIN,
     TOKEN_FILE_MISSING,
 )
-from .const_calendar import (
+from .helpers.config_entry import MS365ConfigEntry
+from .helpers.filemgmt import build_config_file_path
+from .integration_specific.const_calendar import (
     CONF_BASIC_CALENDAR,
     CONF_CALENDAR_LIST,
     CONF_DEVICE_ID,
@@ -56,14 +57,13 @@ from .const_calendar import (
     CONF_TRACK_NEW_CALENDAR,
     YAML_CALENDARS_FILENAME,
 )
-from .helpers.config_entry import MS365ConfigEntry
-from .helpers.filemgmt import build_config_file_path
-from .helpers.filemgmt_calendar import (
+from .integration_specific.filemgmt_calendar import (
     build_yaml_filename,
     read_calendar_yaml_file,
     write_calendar_yaml_file,
 )
-from .helpers.utils import build_entity_id
+from .integration_specific.permissions import Permissions
+from .integration_specific.utils_calendar import build_calendar_entity_id
 from .schema import (
     CONFIG_SCHEMA,
     REQUEST_AUTHORIZATION_DEFAULT_SCHEMA,
@@ -499,7 +499,9 @@ class MS365CalendarOptionsFlowHandler(config_entries.OptionsFlow):
         return update
 
     async def _async_delete_calendar(self, calendar):
-        entity_id = build_entity_id(calendar, self._entry.data[CONF_ACCOUNT_NAME])
+        entity_id = build_calendar_entity_id(
+            calendar, self._entry.data[CONF_ACCOUNT_NAME]
+        )
         ent_reg = entity_registry.async_get(self.hass)
         entities = entity_registry.async_entries_for_config_entry(
             ent_reg, self._entry.entry_id

@@ -8,7 +8,6 @@ from homeassistant.core import HomeAssistant
 from O365 import Account, FileSystemTokenBackend
 from oauthlib.oauth2.rfc6749.errors import InvalidClientError
 
-from .classes.permissions import Permissions
 from .const import (
     CONF_ACCOUNT_NAME,
     CONF_CLIENT_ID,
@@ -17,8 +16,9 @@ from .const import (
     CONST_UTC_TIMEZONE,
     TOKEN_FILE_MISSING,
 )
-from .const_calendar import PLATFORMS
 from .helpers.config_entry import MS365ConfigEntry, MS365Data
+from .integration_specific.const_calendar import PLATFORMS
+from .integration_specific.permissions import Permissions
 
 _LOGGER = logging.getLogger(__name__)
 

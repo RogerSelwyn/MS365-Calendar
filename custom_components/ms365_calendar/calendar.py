@@ -33,7 +33,10 @@ from .const import (
     DOMAIN,
     EVENT_HA_EVENT,
 )
-from .const_calendar import (
+from .helpers.config_entry import MS365ConfigEntry
+from .helpers.filemgmt import build_config_file_path
+from .helpers.utils import clean_html
+from .integration_specific.const_calendar import (
     ATTR_ALL_DAY,
     ATTR_COLOR,
     ATTR_DATA,
@@ -63,21 +66,19 @@ from .const_calendar import (
     YAML_CALENDARS_FILENAME,
     EventResponse,
 )
-from .helpers.calendar_utils import (
+from .integration_specific.filemgmt_calendar import (
+    async_update_calendar_file,
+    build_yaml_filename,
+    load_yaml_file,
+)
+from .integration_specific.utils_calendar import (
     add_call_data_to_event,
+    build_calendar_entity_id,
     format_event_data,
     get_end_date,
     get_hass_date,
     get_start_date,
 )
-from .helpers.config_entry import MS365ConfigEntry
-from .helpers.filemgmt import build_config_file_path
-from .helpers.filemgmt_calendar import (
-    async_update_calendar_file,
-    build_yaml_filename,
-    load_yaml_file,
-)
-from .helpers.utils import build_entity_id, clean_html
 from .schema import (
     CALENDAR_SERVICE_CREATE_SCHEMA,
     CALENDAR_SERVICE_MODIFY_SCHEMA,
@@ -125,7 +126,7 @@ async def _async_setup_add_entities(
         for entity in calendar.get(CONF_ENTITIES):
             if not entity[CONF_TRACK]:
                 continue
-            entity_id = build_entity_id(
+            entity_id = build_calendar_entity_id(
                 entity.get(CONF_DEVICE_ID), entry.data[CONF_ACCOUNT_NAME]
             )
 

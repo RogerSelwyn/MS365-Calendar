@@ -23,7 +23,7 @@ from .const import (
     CONF_SHARED_MAILBOX,
     CONF_URL,
 )
-from .const_calendar import (
+from .integration_specific.const_calendar import (
     ATTR_ATTENDEES,
     ATTR_BODY,
     ATTR_CATEGORIES,
