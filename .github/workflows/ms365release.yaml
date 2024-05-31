@@ -1,4 +1,4 @@
-name: O365 Release
+name: MS365 Release
 
 on:
   release:
