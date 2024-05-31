@@ -14,7 +14,7 @@ jobs:
         uses: "rogerselwyn/actions/release-asset@main"
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          component: o365_calendar
+          component: ms365_calendar
 
   releasenotes:
     name: Prepare release notes
