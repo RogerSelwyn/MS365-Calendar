@@ -55,8 +55,8 @@ from .const import (
     YAML_CALENDARS_FILENAME,
 )
 from .helpers.config_entry import MS365ConfigEntry
-from .helpers.filemgmt import (
-    build_config_file_path,
+from .helpers.filemgmt import build_config_file_path
+from .helpers.filemgmt_calendar import (
     build_yaml_filename,
     read_calendar_yaml_file,
     write_calendar_yaml_file,

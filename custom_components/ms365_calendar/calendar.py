@@ -69,9 +69,9 @@ from .helpers.calendar_utils import (
     get_start_date,
 )
 from .helpers.config_entry import MS365ConfigEntry
-from .helpers.filemgmt import (
+from .helpers.filemgmt import build_config_file_path
+from .helpers.filemgmt_calendar import (
     async_update_calendar_file,
-    build_config_file_path,
     build_yaml_filename,
     load_yaml_file,
 )
