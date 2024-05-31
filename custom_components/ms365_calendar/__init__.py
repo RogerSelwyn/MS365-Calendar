@@ -17,8 +17,8 @@ from .const import (
     TOKEN_FILE_MISSING,
 )
 from .helpers.config_entry import MS365ConfigEntry, MS365Data
-from .integration_specific.const_calendar import PLATFORMS
-from .integration_specific.permissions import Permissions
+from .integration_specific.const_integration import PLATFORMS
+from .integration_specific.permissions_integration import Permissions
 
 _LOGGER = logging.getLogger(__name__)
 

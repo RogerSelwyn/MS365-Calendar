@@ -36,7 +36,7 @@ from .const import (
 from .helpers.config_entry import MS365ConfigEntry
 from .helpers.filemgmt import build_config_file_path
 from .helpers.utils import clean_html
-from .integration_specific.const_calendar import (
+from .integration_specific.const_integration import (
     ATTR_ALL_DAY,
     ATTR_COLOR,
     ATTR_DATA,
@@ -66,25 +66,25 @@ from .integration_specific.const_calendar import (
     YAML_CALENDARS_FILENAME,
     EventResponse,
 )
-from .integration_specific.filemgmt_calendar import (
+from .integration_specific.filemgmt_integration import (
     async_update_calendar_file,
     build_yaml_filename,
     load_yaml_file,
 )
-from .integration_specific.utils_calendar import (
+from .integration_specific.schema_integration import (
+    CALENDAR_SERVICE_CREATE_SCHEMA,
+    CALENDAR_SERVICE_MODIFY_SCHEMA,
+    CALENDAR_SERVICE_REMOVE_SCHEMA,
+    CALENDAR_SERVICE_RESPOND_SCHEMA,
+    YAML_CALENDAR_DEVICE_SCHEMA,
+)
+from .integration_specific.utils_integration import (
     add_call_data_to_event,
     build_calendar_entity_id,
     format_event_data,
     get_end_date,
     get_hass_date,
     get_start_date,
-)
-from .schema import (
-    CALENDAR_SERVICE_CREATE_SCHEMA,
-    CALENDAR_SERVICE_MODIFY_SCHEMA,
-    CALENDAR_SERVICE_REMOVE_SCHEMA,
-    CALENDAR_SERVICE_RESPOND_SCHEMA,
-    YAML_CALENDAR_DEVICE_SCHEMA,
 )
 
 _LOGGER = logging.getLogger(__name__)
