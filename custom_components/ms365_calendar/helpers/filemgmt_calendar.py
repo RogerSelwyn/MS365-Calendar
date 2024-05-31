@@ -8,6 +8,8 @@ from voluptuous.error import Error as VoluptuousError
 
 from ..const import (
     CONF_ACCOUNT_NAME,
+)
+from ..const_calendar import (
     CONF_CAL_ID,
     CONF_DEVICE_ID,
     CONF_ENTITIES,

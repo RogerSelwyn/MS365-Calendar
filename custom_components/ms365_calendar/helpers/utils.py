@@ -5,7 +5,7 @@ import logging
 from bs4 import BeautifulSoup
 from homeassistant.util import slugify
 
-from ..const import CALENDAR_ENTITY_ID_FORMAT
+from ..const_calendar import CALENDAR_ENTITY_ID_FORMAT
 
 _LOGGER = logging.getLogger(__name__)
 

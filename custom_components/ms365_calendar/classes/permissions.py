@@ -4,18 +4,20 @@ import logging
 
 from ..const import (
     CONF_ACCOUNT_NAME,
+    CONF_SHARED_MAILBOX,
+    PERM_OFFLINE_ACCESS,
+    PERM_SHARED,
+    PERM_USER_READ,
+)
+from ..const_calendar import (
     CONF_BASIC_CALENDAR,
     CONF_ENABLE_UPDATE,
     CONF_GROUPS,
-    CONF_SHARED_MAILBOX,
     PERM_CALENDARS_READ,
     PERM_CALENDARS_READBASIC,
     PERM_CALENDARS_READWRITE,
     PERM_GROUP_READ_ALL,
     PERM_GROUP_READWRITE_ALL,
-    PERM_OFFLINE_ACCESS,
-    PERM_SHARED,
-    PERM_USER_READ,
 )
 from .base_permissions import BasePermissions
 

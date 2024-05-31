@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 from O365.calendar import Attendee  # pylint: disable=no-name-in-module)
 
-from ..const import (
+from ..const_calendar import (
     ATTR_ATTENDEES,
     ATTR_BODY,
     ATTR_CATEGORIES,

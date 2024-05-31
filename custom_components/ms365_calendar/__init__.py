@@ -4,7 +4,6 @@ import functools as ft
 import json
 import logging
 
-from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from O365 import Account, FileSystemTokenBackend
 from oauthlib.oauth2.rfc6749.errors import InvalidClientError
@@ -18,11 +17,10 @@ from .const import (
     CONST_UTC_TIMEZONE,
     TOKEN_FILE_MISSING,
 )
+from .const_calendar import PLATFORMS
 from .helpers.config_entry import MS365ConfigEntry, MS365Data
 
 _LOGGER = logging.getLogger(__name__)
-
-PLATFORMS: list[Platform] = [Platform.CALENDAR]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):

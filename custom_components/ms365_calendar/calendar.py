@@ -29,13 +29,17 @@ from homeassistant.util import dt as dt_util
 from requests.exceptions import HTTPError, RetryError
 
 from .const import (
+    CONF_ACCOUNT_NAME,
+    DOMAIN,
+    EVENT_HA_EVENT,
+)
+from .const_calendar import (
     ATTR_ALL_DAY,
     ATTR_COLOR,
     ATTR_DATA,
     ATTR_EVENT_ID,
     ATTR_HEX_COLOR,
     ATTR_OFFSET,
-    CONF_ACCOUNT_NAME,
     CONF_CAL_ID,
     CONF_DEVICE_ID,
     CONF_ENABLE_UPDATE,
@@ -49,9 +53,7 @@ from .const import (
     CONF_TRACK_NEW_CALENDAR,
     CONST_GROUP,
     DEFAULT_OFFSET,
-    DOMAIN,
     EVENT_CREATE_CALENDAR_EVENT,
-    EVENT_HA_EVENT,
     EVENT_MODIFY_CALENDAR_EVENT,
     EVENT_MODIFY_CALENDAR_RECURRENCES,
     EVENT_REMOVE_CALENDAR_EVENT,

@@ -16,6 +16,14 @@ from O365.calendar import (  # pylint: disable=no-name-in-module
 )
 
 from .const import (
+    CONF_ACCOUNT_NAME,
+    CONF_ALT_AUTH_METHOD,
+    CONF_CLIENT_ID,
+    CONF_CLIENT_SECRET,
+    CONF_SHARED_MAILBOX,
+    CONF_URL,
+)
+from .const_calendar import (
     ATTR_ATTENDEES,
     ATTR_BODY,
     ATTR_CATEGORIES,
@@ -32,12 +40,8 @@ from .const import (
     ATTR_START,
     ATTR_SUBJECT,
     ATTR_TYPE,
-    CONF_ACCOUNT_NAME,
-    CONF_ALT_AUTH_METHOD,
     CONF_BASIC_CALENDAR,
     CONF_CAL_ID,
-    CONF_CLIENT_ID,
-    CONF_CLIENT_SECRET,
     CONF_DEVICE_ID,
     CONF_ENABLE_UPDATE,
     CONF_ENTITIES,
@@ -47,9 +51,7 @@ from .const import (
     CONF_HOURS_FORWARD_TO_GET,
     CONF_MAX_RESULTS,
     CONF_SEARCH,
-    CONF_SHARED_MAILBOX,
     CONF_TRACK,
-    CONF_URL,
     EventResponse,
 )
 
