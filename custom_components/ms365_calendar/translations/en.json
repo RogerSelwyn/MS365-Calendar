@@ -1,9 +1,60 @@
 {
-    "issues": {
-        "deprecated_legacy_configuration": {
-            "title": "Deprecated Secondary/Legacy configuration method",
-            "description": "Secondary/Legacy configuration method is now deprecated and will be removed in a future release. Please migrate to the Primary configuration method. Click 'Learn More' for details on configuration. A potential configuration has been placed in the o365_storage folder."
+    "config": {
+        "abort": {
+            "reconfigure_successful": "Re-configuration was successful"
         },
+        "error": {
+            "already_configured": "This account name has already been used. Use re-configure."
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "account_name": "Uniquely identifying name for the account",
+                    "client_id": "Client ID",
+                    "client_secret": "Client Secret",
+                    "alt_auth_method": "Use alternate (more complex) authentication",
+                    "enable_update": "Enable update services",
+                    "basic_calendar": "Enable read only basic calendar",
+                    "groups": "Enable support for group calendars",
+                    "shared_mailbox": "Email address or ID of shared mailbox"
+                },
+                "description": "Enter previously created Azure App credentials"
+            },
+            "request_default": {
+                "title": "Authorization Required - {account_name}",
+                "description": "Complete the configuration by clicking on the link and copying the returned url into this field afterwards and submit\n\n[Link MS365 account]({auth_url}){failed_permissions}",
+                "data": {
+                    "url": "Returned URL"
+                }
+            },
+            "request_alt": {
+                "title": "Authorization Required - {account_name}",
+                "description": "To link your MS365 account, click the link, login, and authorize:\n\n[Link MS365 account]({auth_url}){failed_permissions}",
+                "submit": "I authorized successfully"
+            }
+        }
+    },
+    "options": {
+        "step": {
+            "user": {
+                "data": {
+                    "track_new_calendar": "Enable new calendars",
+                    "calendar_list": "Enabled calendars"
+                },
+                "description": "Setup options for {account_name}"
+            },
+            "calendar_config": {
+                "data": {
+                    "name": "Calendar friendly name",
+                    "end_offset": "Number of hours to offset the end time",
+                    "start_offset": "Number of hours to offset the start time",
+                    "max_results": "Max number of events to retrieve"
+                },
+                "description": "Setup options for {account_name} - calendar device_id {device_id}"
+            }
+        }
+    },
+    "issues": {
         "authorization": {
             "title": "Authorization Required - {account_name}",
             "fix_flow": {
@@ -31,7 +82,7 @@
         }
     },
     "exceptions": {
-        "o365_group_calendar_error": {
+        "ms365_group_calendar_error": {
             "message": "O365 Python does not have capability to update/respond to group calendar events: {entity_id}"
         },
         "not_authorised_to_event": {

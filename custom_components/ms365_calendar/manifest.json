@@ -4,13 +4,14 @@
   "codeowners": [
     "@RogerSelwyn"
   ],
+  "config_flow": true,
   "dependencies": [
     "configurator",
     "http"
   ],
-  "documentation": "https://github.com/RogerSelwyn/O365-HomeAssistant",
+  "documentation": "https://github.com/RogerSelwyn/MS365-Calendar",
   "iot_class": "cloud_polling",
-  "issue_tracker": "https://github.com/RogerSelwyn/O365-HomeAssistant/issues",
+  "issue_tracker": "https://github.com/RogerSelwyn/MS365-Calendar/issues",
   "loggers": [
     "custom_components.ms365_calendar",
     "O365"

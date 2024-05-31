@@ -12,7 +12,7 @@ from ..const import (
     CONF_GROUPS,
     CONF_SHARED_MAILBOX,
     DOMAIN,
-    O365_STORAGE_TOKEN,
+    MS365_STORAGE_TOKEN,
     PERM_CALENDARS_READ,
     PERM_CALENDARS_READBASIC,
     PERM_CALENDARS_READWRITE,
@@ -24,7 +24,7 @@ from ..const import (
     TOKEN_FILE_MISSING,
     TOKEN_FILENAME,
 )
-from ..utils.filemgmt import build_config_file_path
+from ..helpers.filemgmt import build_config_file_path
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ class Permissions:
         self._enable_update = self._config.get(CONF_ENABLE_UPDATE, False)
         self._requested_permissions = []
         self.token_filename = self._build_token_filename()
-        self.token_path = build_config_file_path(self._hass, O365_STORAGE_TOKEN)
+        self.token_path = build_config_file_path(self._hass, MS365_STORAGE_TOKEN)
         self._permissions = []
 
     @property

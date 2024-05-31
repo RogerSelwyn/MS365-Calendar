@@ -3,6 +3,9 @@
 import logging
 
 from bs4 import BeautifulSoup
+from homeassistant.util import slugify
+
+from ..const import CALENDAR_ENTITY_ID_FORMAT
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -23,3 +26,9 @@ def clean_html(html):
         return text.replace("\xa0", " ")
 
     return html
+
+
+def build_entity_id(device_id, account_name):
+    """Build calendar entity_id."""
+    name = f"{device_id}_{account_name}"
+    return CALENDAR_ENTITY_ID_FORMAT.format(slugify(name))

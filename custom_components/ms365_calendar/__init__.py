@@ -4,59 +4,40 @@ import functools as ft
 import json
 import logging
 
-import voluptuous as vol
-import yaml
-from homeassistant.helpers.issue_registry import IssueSeverity, async_create_issue
+from homeassistant.const import Platform
+from homeassistant.core import HomeAssistant
 from O365 import Account, FileSystemTokenBackend
 from oauthlib.oauth2.rfc6749.errors import InvalidClientError
 
 from .classes.permissions import Permissions
 from .const import (
-    CONF_ACCOUNT,
-    CONF_ACCOUNT_CONF,
     CONF_ACCOUNT_NAME,
-    CONF_ACCOUNTS,
     CONF_CLIENT_ID,
     CONF_CLIENT_SECRET,
-    CONF_FAILED_PERMISSIONS,
     CONF_SHARED_MAILBOX,
-    CONST_PRIMARY,
     CONST_UTC_TIMEZONE,
-    DOMAIN,
     TOKEN_FILE_MISSING,
 )
-from .helpers.setup import do_setup
-from .schema import MULTI_ACCOUNT_SCHEMA
+from .helpers.config_entry import MS365ConfigEntry, MS365Data
 
-CONFIG_SCHEMA = vol.Schema({DOMAIN: MULTI_ACCOUNT_SCHEMA}, extra=vol.ALLOW_EXTRA)
 _LOGGER = logging.getLogger(__name__)
 
-
-async def async_setup(hass, config):
-    """Set up the O365 platform."""
-    _LOGGER.debug("Startup")
-    conf = config.get(DOMAIN, {})
-
-    accounts = MULTI_ACCOUNT_SCHEMA(conf)[CONF_ACCOUNTS]
-
-    for account in accounts:
-        await _async_setup_account(hass, account)
-
-    _LOGGER.debug("Finish")
-    return True
+PLATFORMS: list[Platform] = [Platform.CALENDAR]
 
 
-async def _async_setup_account(hass, account_conf):
+async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
+    """Set up a config entry."""
+
     credentials = (
-        account_conf.get(CONF_CLIENT_ID),
-        account_conf.get(CONF_CLIENT_SECRET),
+        entry.data.get(CONF_CLIENT_ID),
+        entry.data.get(CONF_CLIENT_SECRET),
     )
-    account_name = account_conf.get(CONF_ACCOUNT_NAME, CONST_PRIMARY)
-    main_resource = account_conf.get(CONF_SHARED_MAILBOX)
+    account_name = entry.data.get(CONF_ACCOUNT_NAME)
+    main_resource = entry.data.get(CONF_SHARED_MAILBOX)
 
     _LOGGER.debug("Permissions setup")
-    perms = Permissions(hass, account_conf)
-    permissions, failed_permissions = await perms.async_check_authorizations()
+    perms = Permissions(hass, entry.data)
+    permissions, failed_permissions = await perms.async_check_authorizations()  # pylint: disable=unused-variable
     account, is_authenticated = await _async_try_authentication(
         hass, perms, credentials, main_resource, account_name
     )
@@ -65,16 +46,22 @@ async def _async_setup_account(hass, account_conf):
         _LOGGER.debug("do setup")
         check_token = await _async_check_token(hass, account, account_name)
         if check_token:
-            await do_setup(hass, account_conf, account, account_name, perms)
-    else:
-        await _async_authorization_repair(
-            hass,
-            account_conf,
-            account,
-            account_name,
-            failed_permissions,
-            permissions,
-        )
+            entry.runtime_data = MS365Data(perms, account, entry.options)
+            await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+            entry.async_on_unload(entry.add_update_listener(async_reload_entry))
+            return True
+    return False
+
+
+async def async_unload_entry(hass: HomeAssistant, entry: MS365ConfigEntry) -> bool:
+    """Unload a config entry."""
+    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+
+
+async def async_reload_entry(hass: HomeAssistant, entry: MS365ConfigEntry) -> None:
+    """Handle options update - only reload if the options have changed."""
+    if entry.runtime_data.options != entry.options:
+        await hass.config_entries.async_reload(entry.entry_id)
 
 
 async def _async_try_authentication(
@@ -125,45 +112,3 @@ async def _async_check_token(hass, account, account_name):
                 "Token error for account: %s. Error - %s", account_name, err.description
             )
         return False
-
-
-async def _async_authorization_repair(
-    hass,
-    account_conf,
-    account,
-    account_name,
-    failed_permissions,
-    token_missing,
-):
-    base_message = f"requesting authorization for account: {account_name}"
-    message = (
-        "No token file found;"
-        if token_missing == TOKEN_FILE_MISSING
-        else "Token doesn't have all required permissions;"
-    )
-    _LOGGER.warning("%s %s", message, base_message)
-    data = {
-        CONF_ACCOUNT_CONF: account_conf,
-        CONF_ACCOUNT: account,
-        CONF_ACCOUNT_NAME: account_name,
-        CONF_FAILED_PERMISSIONS: failed_permissions,
-    }
-    # Register a repair issue
-    async_create_issue(
-        hass,
-        DOMAIN,
-        "authorization",
-        data=data,
-        is_fixable=True,
-        # learn_more_url=url,
-        severity=IssueSeverity.ERROR,
-        translation_key="authorization",
-        translation_placeholders={
-            CONF_ACCOUNT_NAME: account_name,
-        },
-    )
-
-
-class _IncreaseIndent(yaml.Dumper):
-    def increase_indent(self, flow=False, indentless=False):
-        return super(_IncreaseIndent, self).increase_indent(flow, False)

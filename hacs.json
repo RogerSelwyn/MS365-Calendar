@@ -1,5 +1,5 @@
 {
-    "name": "Office 365 - Calendar",
+    "name": "Microsoft 365 - Calendar",
     "zip_release": true,
     "filename": "ms365_calendar.zip",
     "homeassistant": "2024.6.0",

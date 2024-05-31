@@ -4,7 +4,15 @@ nav_order: 6
 ---
 
 # Calendar configuration
-The integration uses an external `o365_calendars_<account_name>.yaml` file which is stored in the `o365_storage` directory.
+The integration uses an external `ms365_calendars_<account_name>.yaml` file which is stored in the `ms365_storage` directory. Much of this can be managed by the UI, but more complex items must be managed via the yaml file. Items that can by the standard integration configure UI are:
+* name
+* track
+* end_offset
+* start_offset
+* max_results
+
+Group calendars plus device_id, search and exclude must be managed via the yaml file.
+
 ## Example Calendar yaml:
 ```yaml
 - cal_id: xxxx
@@ -28,7 +36,7 @@ The integration uses an external `o365_calendars_<account_name>.yaml` file which
 
 Key | Type | Required | Description
 -- | -- | -- | --
-`cal_id` | `string` | `True` | O365 generated unique ID, DO NOT CHANGE
+`cal_id` | `string` | `True` | Microsoft 365 generated unique ID, DO NOT CHANGE
 `entities` | `list<entity>` | `True` | List of entities (see below) to generate from this calendar
 
 ### Entity configuration
@@ -42,6 +50,7 @@ Key | Type | Required | Description
 `exclude` | `list[string/regex]` | `False` | Exclude events where the subject contains any one of items in the list of strings
 `start_offset` | `integer` | `False` | Number of hours to offset the start time to search for events for (negative numbers to offset into the past).
 `end_offset` | `integer` | `False` | Number of hours to offset the end time to search for events for (negative numbers to offset into the past).
+`max_results` | `integer` | `False` | Max number of events to retrieve. Default is 999.
 
 ## Group calendars
 
@@ -50,7 +59,7 @@ The integration supports Group calendars in a fairly simple form. The below are 
 * There is no discovery. You will need to find them in the MS Graph api. Using the MS Graph API you can call https://graph.microsoft.com/v1.0/me/transitiveMemberOf/microsoft.graph.group to get the groups. You will need the relevant group's `id` for configuration purposes, see below
 * You can create events using the standard service, but you cannot modify/delete/respond to them.
 
-To configure a Group Calendar, add an extra section to `o365_calendars_<account_name>.yaml`. Set `cal_id` to `group:xxxxxxxxxxxxxxx` using the ID you found via the api above. Make sure to set the `device_id` to something unique.
+To configure a Group Calendar, add an extra section to `ms365_calendars_<account_name>.yaml`. Set `cal_id` to `group:xxxxxxxxxxxxxxx` using the ID you found via the api above. Make sure to set the `device_id` to something unique.
 
 ```yaml
   - cal_id: group:xxxx

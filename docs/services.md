@@ -6,21 +6,19 @@ nav_order: 15
 # Services
 
 ##  Calendar Services
-o365.create_calendar_event
+### ms365_calendar.create_calendar_event
 Create an event in the specified calendar - All parameters are shown in the available parameter list on the Developer Tools/Services tab.
-### o365.modify_calendar_event
+### ms365_calendar.modify_calendar_event
 Modify an event in the specified calendar - All parameters are shown in the available parameter list on the Developer Tools/Services tab. Not possible for group calendars.
-### o365.remove_calendar_event
+### ms365_calendar.remove_calendar_event
 Remove an event in the specified calendar - All parameters are shown in the available parameter list on the Developer Tools/Services tab. Not possible for group calendars.
-### o365.respond_calendar_event
+### ms365_calendar.respond_calendar_event
 Respond to an event in the specified calendar - All parameters are shown in the available parameter list on the Developer Tools/Services tab. Not possible for group calendars.
-### o365.scan_for_calendars
-Scan for new calendars and add to o365_calendars.yaml - No parameters. Does not scan for group calendars.
 
 #### Example create event service call
 
 ```yaml
-service: o365.create_calendar_event
+service: ms365_calendar.create_calendar_event
 target:
   entity_id:
     - calendar.user_primary

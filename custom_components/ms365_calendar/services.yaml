@@ -11,9 +11,9 @@ respond_calendar_event:
   description: "Respond to calendar event/invite"
   target:
     device:
-      integration: o365
+      integration: ms365_calendar
     entity:
-      integration: o365
+      integration: ms365_calendar
       domain: calendar
   fields:
     event_id:
@@ -48,9 +48,9 @@ create_calendar_event:
   description: Create new calendar event
   target:
     device:
-      integration: o365
+      integration: ms365_calendar
     entity:
-      integration: o365
+      integration: ms365_calendar
       domain: calendar
   fields:
     subject:
@@ -144,9 +144,9 @@ modify_calendar_event:
   description: Modify existing calendar event, all properties except event_id are optional.
   target:
     device:
-      integration: o365
+      integration: ms365_calendar
     entity:
-      integration: o365
+      integration: ms365_calendar
       domain: calendar
   fields:
     event_id:
@@ -244,9 +244,9 @@ remove_calendar_event:
   description: Delete calendar event
   target:
     device:
-      integration: o365
+      integration: ms365_calendar
     entity:
-      integration: o365
+      integration: ms365_calendar
       domain: calendar
   fields:
     event_id:

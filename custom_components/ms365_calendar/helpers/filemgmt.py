@@ -13,16 +13,17 @@ from ..const import (
     CONF_DEVICE_ID,
     CONF_ENTITIES,
     CONF_TRACK,
-    O365_STORAGE,
+    MS365_STORAGE,
     YAML_CALENDARS_FILENAME,
 )
 from ..schema import YAML_CALENDAR_DEVICE_SCHEMA
+from .config_entry import MS365ConfigEntry
 
 _LOGGER = logging.getLogger(__name__)
 
 
 def load_yaml_file(path, item_id, item_schema):
-    """Load the o365 yaml file."""
+    """Load the ms365 yaml file."""
     items = {}
     try:
         with open(path, encoding="utf8") as file:
@@ -50,7 +51,7 @@ def _write_yaml_file(yaml_filepath, cal):
 
 
 def _get_calendar_info(calendar, track_new_devices):
-    """Convert data from O365 into DEVICE_SCHEMA."""
+    """Convert data from MS365 into DEVICE_SCHEMA."""
     return YAML_CALENDAR_DEVICE_SCHEMA(
         {
             CONF_CAL_ID: calendar.calendar_id,
@@ -65,9 +66,11 @@ def _get_calendar_info(calendar, track_new_devices):
     )
 
 
-async def async_update_calendar_file(config, calendar, hass, track_new_devices):
+async def async_update_calendar_file(
+    entry: MS365ConfigEntry, calendar, hass, track_new_devices
+):
     """Update the calendar file."""
-    path = build_yaml_filename(config, YAML_CALENDARS_FILENAME)
+    path = build_yaml_filename(entry, YAML_CALENDARS_FILENAME)
     yaml_filepath = build_config_file_path(hass, path)
     existing_calendars = await hass.async_add_executor_job(
         load_yaml_file, yaml_filepath, CONF_CAL_ID, YAML_CALENDAR_DEVICE_SCHEMA
@@ -82,10 +85,22 @@ def build_config_file_path(hass, filepath):
     """Create config path."""
     root = hass.config.config_dir
 
-    return os.path.join(root, O365_STORAGE, filepath)
+    return os.path.join(root, MS365_STORAGE, filepath)
 
 
-def build_yaml_filename(conf, filename):
+def build_yaml_filename(conf: MS365ConfigEntry, filename):
     """Create the token file name."""
 
-    return filename.format(f"_{conf.get(CONF_ACCOUNT_NAME)}")
+    return filename.format(f"_{conf.data.get(CONF_ACCOUNT_NAME)}")
+
+
+def read_calendar_yaml_file(yaml_filepath):
+    """Read the yaml file."""
+    with open(yaml_filepath, encoding="utf8") as file:
+        return yaml.safe_load(file)
+
+
+def write_calendar_yaml_file(yaml_filepath, contents):
+    """Write the yaml file."""
+    with open(yaml_filepath, "w", encoding="UTF8") as out:
+        yaml.dump(contents, out, default_flow_style=False, encoding="UTF8")

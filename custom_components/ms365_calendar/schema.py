@@ -1,4 +1,4 @@
-"""Schema for O365 Integration."""
+"""Schema for MS365 Integration."""
 
 import datetime
 from collections.abc import Callable
@@ -33,7 +33,6 @@ from .const import (
     ATTR_SUBJECT,
     ATTR_TYPE,
     CONF_ACCOUNT_NAME,
-    CONF_ACCOUNTS,
     CONF_ALT_AUTH_METHOD,
     CONF_BASIC_CALENDAR,
     CONF_CAL_ID,
@@ -50,7 +49,6 @@ from .const import (
     CONF_SEARCH,
     CONF_SHARED_MAILBOX,
     CONF_TRACK,
-    CONF_TRACK_NEW_CALENDAR,
     CONF_URL,
     EventResponse,
 )
@@ -87,25 +85,16 @@ def _as_local_timezone(*keys: Any) -> Callable[[dict[str, Any]], dict[str, Any]]
     return validate
 
 
-MULTI_ACCOUNT_SCHEMA = vol.Schema(
-    {
-        CONF_ACCOUNTS: vol.Schema(
-            [
-                {
-                    vol.Required(CONF_CLIENT_ID): cv.string,
-                    vol.Required(CONF_CLIENT_SECRET): cv.string,
-                    vol.Optional(CONF_TRACK_NEW_CALENDAR, default=True): bool,
-                    vol.Optional(CONF_ENABLE_UPDATE, default=False): bool,
-                    vol.Optional(CONF_GROUPS, default=False): bool,
-                    vol.Required(CONF_ACCOUNT_NAME, ""): cv.string,
-                    vol.Optional(CONF_ALT_AUTH_METHOD, default=False): bool,
-                    vol.Optional(CONF_BASIC_CALENDAR, default=False): bool,
-                    vol.Optional(CONF_SHARED_MAILBOX, None): cv.string,
-                }
-            ]
-        )
-    }
-)
+CONFIG_SCHEMA = {
+    vol.Required(CONF_ACCOUNT_NAME): vol.All(cv.string, vol.Strip),
+    vol.Required(CONF_CLIENT_ID): vol.All(cv.string, vol.Strip),
+    vol.Required(CONF_CLIENT_SECRET): vol.All(cv.string, vol.Strip),
+    vol.Optional(CONF_ALT_AUTH_METHOD, default=False): cv.boolean,
+    vol.Optional(CONF_ENABLE_UPDATE, default=False): cv.boolean,
+    vol.Optional(CONF_BASIC_CALENDAR, default=False): cv.boolean,
+    vol.Optional(CONF_GROUPS, default=False): cv.boolean,
+    vol.Optional(CONF_SHARED_MAILBOX, default=""): cv.string,
+}
 
 CALENDAR_SERVICE_RESPOND_SCHEMA = {
     vol.Required(ATTR_EVENT_ID): cv.string,
@@ -169,11 +158,11 @@ YAML_CALENDAR_ENTITY_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_NAME): cv.string,
         vol.Required(CONF_DEVICE_ID): cv.string,
-        vol.Optional(CONF_HOURS_FORWARD_TO_GET, default=24): int,
-        vol.Optional(CONF_HOURS_BACKWARD_TO_GET, default=0): int,
+        vol.Required(CONF_HOURS_FORWARD_TO_GET, default=24): int,
+        vol.Required(CONF_HOURS_BACKWARD_TO_GET, default=0): int,
+        vol.Required(CONF_TRACK): cv.boolean,
         vol.Optional(CONF_SEARCH): cv.string,
         vol.Optional(CONF_EXCLUDE): [cv.string],
-        vol.Optional(CONF_TRACK): cv.boolean,
         vol.Optional(CONF_MAX_RESULTS): cv.positive_int,
     }
 )

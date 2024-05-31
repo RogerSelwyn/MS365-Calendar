@@ -21,9 +21,10 @@ from homeassistant.components.calendar import (
     is_offset_reached,
 )
 from homeassistant.const import CONF_NAME
+from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import entity_platform
-from homeassistant.helpers.entity import generate_entity_id
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import dt as dt_util
 from requests.exceptions import HTTPError, RetryError
 
@@ -34,11 +35,8 @@ from .const import (
     ATTR_EVENT_ID,
     ATTR_HEX_COLOR,
     ATTR_OFFSET,
-    CALENDAR_ENTITY_ID_FORMAT,
-    CONF_ACCOUNT,
     CONF_ACCOUNT_NAME,
     CONF_CAL_ID,
-    CONF_CAL_IDS,
     CONF_DEVICE_ID,
     CONF_ENABLE_UPDATE,
     CONF_ENTITIES,
@@ -46,7 +44,6 @@ from .const import (
     CONF_HOURS_BACKWARD_TO_GET,
     CONF_HOURS_FORWARD_TO_GET,
     CONF_MAX_RESULTS,
-    CONF_PERMISSIONS,
     CONF_SEARCH,
     CONF_TRACK,
     CONF_TRACK_NEW_CALENDAR,
@@ -64,6 +61,21 @@ from .const import (
     YAML_CALENDARS_FILENAME,
     EventResponse,
 )
+from .helpers.calendar_utils import (
+    add_call_data_to_event,
+    format_event_data,
+    get_end_date,
+    get_hass_date,
+    get_start_date,
+)
+from .helpers.config_entry import MS365ConfigEntry
+from .helpers.filemgmt import (
+    async_update_calendar_file,
+    build_config_file_path,
+    build_yaml_filename,
+    load_yaml_file,
+)
+from .helpers.utils import build_entity_id, clean_html
 from .schema import (
     CALENDAR_SERVICE_CREATE_SCHEMA,
     CALENDAR_SERVICE_MODIFY_SCHEMA,
@@ -71,73 +83,59 @@ from .schema import (
     CALENDAR_SERVICE_RESPOND_SCHEMA,
     YAML_CALENDAR_DEVICE_SCHEMA,
 )
-from .utils.calendar_utils import (
-    add_call_data_to_event,
-    format_event_data,
-    get_end_date,
-    get_hass_date,
-    get_start_date,
-)
-from .utils.filemgmt import (
-    async_update_calendar_file,
-    build_config_file_path,
-    build_yaml_filename,
-    load_yaml_file,
-)
-from .utils.utils import clean_html
 
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_platform(hass, config, add_entities, discovery_info=None):  # pylint: disable=unused-argument
-    """Set up the O365 platform."""
-    if discovery_info is None:
-        return None
-
-    account_name = discovery_info[CONF_ACCOUNT_NAME]
-    conf = hass.data[DOMAIN][account_name]
-    account = conf[CONF_ACCOUNT]
-    if not account.is_authenticated:
-        return False
+async def async_setup_entry(
+    hass: HomeAssistant,
+    entry: MS365ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
+    """Set up the MS365 platform."""
 
     update_supported = bool(
-        conf[CONF_ENABLE_UPDATE]
-        and conf[CONF_PERMISSIONS].validate_authorization(PERM_CALENDARS_READWRITE)
+        entry.data[CONF_ENABLE_UPDATE]
+        and entry.runtime_data.permissions.validate_authorization(
+            PERM_CALENDARS_READWRITE
+        )
     )
-    cal_ids = await _async_setup_add_entities(
-        hass, account, add_entities, conf, update_supported
+    await async_scan_for_calendars(hass, entry)
+    await _async_setup_add_entities(
+        hass, entry.runtime_data.account, async_add_entities, entry, update_supported
     )
-    hass.data[DOMAIN][account_name][CONF_CAL_IDS] = cal_ids
-    await _async_setup_register_services(hass, update_supported)
+
+    await _async_setup_register_services(update_supported)
 
     return True
 
 
 async def _async_setup_add_entities(
-    hass, account, add_entities, conf, update_supported
+    hass, account, async_add_entities, entry: MS365ConfigEntry, update_supported
 ):
-    yaml_filename = build_yaml_filename(conf, YAML_CALENDARS_FILENAME)
+    yaml_filename = build_yaml_filename(entry, YAML_CALENDARS_FILENAME)
     yaml_filepath = build_config_file_path(hass, yaml_filename)
     calendars = await hass.async_add_executor_job(
         load_yaml_file, yaml_filepath, CONF_CAL_ID, YAML_CALENDAR_DEVICE_SCHEMA
     )
-    cal_ids = {}
 
     for cal_id, calendar in calendars.items():
         for entity in calendar.get(CONF_ENTITIES):
             if not entity[CONF_TRACK]:
                 continue
-            entity_id = _build_entity_id(hass, entity, conf)
+            entity_id = build_entity_id(
+                entity.get(CONF_DEVICE_ID), entry.data[CONF_ACCOUNT_NAME]
+            )
 
             device_id = entity["device_id"]
             try:
-                cal = O365CalendarEntity(
+                cal = MS365CalendarEntity(
                     account,
                     cal_id,
                     entity,
                     entity_id,
                     device_id,
-                    conf,
+                    entry,
                     update_supported,
                 )
             except HTTPError:
@@ -148,24 +146,12 @@ async def _async_setup_add_entities(
                 )
                 continue
 
-            cal_ids[entity_id] = cal_id
-            add_entities([cal], True)
-    return cal_ids
+            async_add_entities([cal], True)
+    return
 
 
-def _build_entity_id(hass, entity, conf):
-    account_name = conf[CONF_ACCOUNT_NAME]
-    return generate_entity_id(
-        CALENDAR_ENTITY_ID_FORMAT,
-        f"{entity.get(CONF_DEVICE_ID)}_{account_name}",
-        hass=hass,
-    )
-
-
-async def _async_setup_register_services(hass, update_supported):
+async def _async_setup_register_services(update_supported):
     platform = entity_platform.async_get_current_platform()
-    calendar_services = CalendarServices(hass)
-    await calendar_services.async_scan_for_calendars(None)
 
     if update_supported:
         platform.async_register_entity_service(
@@ -189,13 +175,9 @@ async def _async_setup_register_services(hass, update_supported):
             "async_respond_calendar_event",
         )
 
-    hass.services.async_register(
-        DOMAIN, "scan_for_calendars", calendar_services.async_scan_for_calendars
-    )
 
-
-class O365CalendarEntity(CalendarEntity):
-    """O365 Calendar Event Processing."""
+class MS365CalendarEntity(CalendarEntity):
+    """MS365 Calendar Event Processing."""
 
     _unrecorded_attributes = frozenset((ATTR_DATA, ATTR_COLOR, ATTR_HEX_COLOR))
 
@@ -206,11 +188,11 @@ class O365CalendarEntity(CalendarEntity):
         entity,
         entity_id,
         device_id,
-        config,
+        entry: MS365ConfigEntry,
         update_supported,
     ):
-        """Initialise the O365 Calendar Event."""
-        self._config = config
+        """Initialise the MS365 Calendar Event."""
+        self._entry = entry
         self._account = account
         self._start_offset = entity.get(CONF_HOURS_BACKWARD_TO_GET)
         self._end_offset = entity.get(CONF_HOURS_FORWARD_TO_GET)
@@ -233,7 +215,7 @@ class O365CalendarEntity(CalendarEntity):
         max_results = entity.get(CONF_MAX_RESULTS)
         search = entity.get(CONF_SEARCH)
         exclude = entity.get(CONF_EXCLUDE)
-        return O365CalendarData(
+        return MS365CalendarData(
             account,
             self.entity_id,
             calendar_id,
@@ -272,9 +254,7 @@ class O365CalendarEntity(CalendarEntity):
     @property
     def unique_id(self):
         """Entity unique id."""
-        return (
-            f"{self._calendar_id}_{self._config[CONF_ACCOUNT_NAME]}_{self._device_id}"
-        )
+        return f"{self._calendar_id}_{self._entry.data[CONF_ACCOUNT_NAME]}_{self._device_id}"
 
     async def async_get_events(self, hass, start_date, end_date):
         """Get events."""
@@ -286,9 +266,9 @@ class O365CalendarEntity(CalendarEntity):
         event = deepcopy(self.data.event)
         if event:
             event.summary, offset = extract_offset(event.summary, DEFAULT_OFFSET)
-            start = O365CalendarData.to_datetime(event.start)
+            start = MS365CalendarData.to_datetime(event.start)
             self._offset_reached = is_offset_reached(start, offset)
-        results = await self.data.async_o365_get_events(
+        results = await self.data.async_ms365_get_events(
             self.hass,
             dt_util.utcnow() + timedelta(hours=self._start_offset),
             dt_util.utcnow() + timedelta(hours=self._end_offset),
@@ -479,7 +459,7 @@ class O365CalendarEntity(CalendarEntity):
         return await self.hass.async_add_executor_job(calendar.get_event, event_id)
 
     def _validate_permissions(self, error_message):
-        if not self._config[CONF_PERMISSIONS].validate_authorization(
+        if not self._entry.runtime_data.permissions.validate_authorization(
             PERM_CALENDARS_READWRITE
         ):
             raise ServiceValidationError(
@@ -501,8 +481,8 @@ class O365CalendarEntity(CalendarEntity):
         _LOGGER.debug("%s - %s", event_type, event_id)
 
 
-class O365CalendarData:
-    """O365 Calendar Data."""
+class MS365CalendarData:
+    """MS365 Calendar Data."""
 
     def __init__(
         self,
@@ -513,7 +493,7 @@ class O365CalendarData:
         exclude=None,
         limit=999,
     ):
-        """Initialise the O365 Calendar Data."""
+        """Initialise the MS365 Calendar Data."""
         self._limit = limit
         self.group_calendar = calendar_id.startswith(CONST_GROUP)
         self.calendar_id = calendar_id
@@ -539,7 +519,7 @@ class O365CalendarData:
             _LOGGER.warning("Error getting calendar events - %s", err)
             return False
 
-    async def async_o365_get_events(self, hass, start_date, end_date):
+    async def async_ms365_get_events(self, hass, start_date, end_date):
         """Get the events."""
         if not self.calendar:
             if not await self._async_get_calendar(hass):
@@ -624,7 +604,7 @@ class O365CalendarData:
 
     async def async_get_events(self, hass, start_date, end_date):
         """Get the via async."""
-        results = await self.async_o365_get_events(hass, start_date, end_date)
+        results = await self.async_ms365_get_events(hass, start_date, end_date)
         if not results:
             return []
 
@@ -652,7 +632,7 @@ class O365CalendarData:
     async def async_update(self, hass):
         """Do the update."""
         start_of_day_utc = dt_util.as_utc(dt_util.start_of_local_day())
-        results = await self.async_o365_get_events(
+        results = await self.async_ms365_get_events(
             hass,
             start_of_day_utc,
             start_of_day_utc + timedelta(days=1),
@@ -730,12 +710,12 @@ class O365CalendarData:
     @staticmethod
     def is_started(vevent):
         """Is it over."""
-        return dt_util.utcnow() >= O365CalendarData.to_datetime(get_start_date(vevent))
+        return dt_util.utcnow() >= MS365CalendarData.to_datetime(get_start_date(vevent))
 
     @staticmethod
     def is_finished(vevent):
         """Is it over."""
-        return dt_util.utcnow() >= O365CalendarData.to_datetime(get_end_date(vevent))
+        return dt_util.utcnow() >= MS365CalendarData.to_datetime(get_end_date(vevent))
 
     @staticmethod
     def to_datetime(obj):
@@ -761,36 +741,25 @@ class O365CalendarData:
         return dt_util.as_utc(date_obj)
 
 
-class CalendarServices:
-    """Calendar Services."""
+async def async_scan_for_calendars(hass, entry: MS365ConfigEntry):  # pylint: disable=unused-argument
+    """Scan for new calendars."""
 
-    def __init__(self, hass):
-        """Initialise the calendar services."""
-        self._hass = hass
-
-    async def async_scan_for_calendars(self, call):  # pylint: disable=unused-argument
-        """Scan for new calendars."""
-        for config in self._hass.data[DOMAIN]:
-            config = self._hass.data[DOMAIN][config]
-            if CONF_ACCOUNT in config:
-                schedule = config[CONF_ACCOUNT].schedule()
-                calendars = await self._hass.async_add_executor_job(
-                    schedule.list_calendars
-                )
-                track = config.get(CONF_TRACK_NEW_CALENDAR, True)
-                for calendar in calendars:
-                    await async_update_calendar_file(
-                        config,
-                        calendar,
-                        self._hass,
-                        track,
-                    )
+    schedule = entry.runtime_data.account.schedule()
+    calendars = await hass.async_add_executor_job(schedule.list_calendars)
+    track = entry.options.get(CONF_TRACK_NEW_CALENDAR, True)
+    for calendar in calendars:
+        await async_update_calendar_file(
+            entry,
+            calendar,
+            hass,
+            track,
+        )
 
 
 def _group_calendar_log(entity_id):
     raise ServiceValidationError(
         translation_domain=DOMAIN,
-        translation_key="o365_group_calendar_error",
+        translation_key="ms365_group_calendar_error",
         translation_placeholders={
             "entity_id": entity_id,
         },
