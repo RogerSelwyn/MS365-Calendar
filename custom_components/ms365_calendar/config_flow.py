@@ -33,7 +33,6 @@ from .const import (
     CONF_SHARED_MAILBOX,
     CONF_URL,
     CONST_UTC_TIMEZONE,
-    DOMAIN,
     TOKEN_FILE_MISSING,
 )
 from .helpers.config_entry import MS365ConfigEntry
@@ -41,8 +40,9 @@ from .integration_specific.config_flow_integration import (
     MS365OptionsFlowHandler,
     integration_reconfigure_schema,
 )
+from .integration_specific.const_integration import DOMAIN
 from .integration_specific.permissions_integration import Permissions
-from .integration_specific.schema_integration import CONFIG_SCHEMA_CALENDAR
+from .integration_specific.schema_integration import CONFIG_SCHEMA_INTEGRATION
 from .schema import (
     CONFIG_SCHEMA,
     REQUEST_AUTHORIZATION_DEFAULT_SCHEMA,
@@ -115,7 +115,7 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             errors[CONF_ACCOUNT_NAME] = "already_configured"
 
-        data = self._config_schema or CONFIG_SCHEMA | CONFIG_SCHEMA_CALENDAR
+        data = self._config_schema or CONFIG_SCHEMA | CONFIG_SCHEMA_INTEGRATION
         return self.async_show_form(
             step_id="user", data_schema=vol.Schema(data), errors=errors
         )

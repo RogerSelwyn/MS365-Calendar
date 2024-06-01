@@ -82,7 +82,7 @@ def _as_local_timezone(*keys: Any) -> Callable[[dict[str, Any]], dict[str, Any]]
     return validate
 
 
-CONFIG_SCHEMA_CALENDAR = {
+CONFIG_SCHEMA_INTEGRATION = {
     vol.Optional(CONF_ENABLE_UPDATE, default=False): cv.boolean,
     vol.Optional(CONF_BASIC_CALENDAR, default=False): cv.boolean,
     vol.Optional(CONF_GROUPS, default=False): cv.boolean,

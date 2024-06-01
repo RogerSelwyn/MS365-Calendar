@@ -1,5 +1,7 @@
 """Constants."""
 
+ATTR_DATA = "data"
+
 AUTH_CALLBACK_NAME = "api:ms365"
 AUTH_CALLBACK_PATH_ALT = "/api/ms365"
 AUTH_CALLBACK_PATH_DEFAULT = (
@@ -16,8 +18,6 @@ CONF_SHARED_MAILBOX = "shared_mailbox"
 CONF_URL = "url"
 
 CONST_UTC_TIMEZONE = "UTC"
-
-DOMAIN = "ms365_calendar"
 
 EVENT_HA_EVENT = "ha_event"
 

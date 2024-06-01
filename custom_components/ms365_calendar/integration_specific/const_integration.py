@@ -14,6 +14,7 @@ class EventResponse(Enum):
 
 
 PLATFORMS: list[Platform] = [Platform.CALENDAR]
+DOMAIN = "ms365_calendar"
 
 ATTR_ALL_DAY = "all_day"
 ATTR_ATTENDEES = "attendees"

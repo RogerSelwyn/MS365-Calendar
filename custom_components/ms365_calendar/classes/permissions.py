@@ -7,13 +7,13 @@ from copy import deepcopy
 
 from ..const import (
     CONF_ACCOUNT_NAME,
-    DOMAIN,
     MS365_STORAGE_TOKEN,
     PERM_OFFLINE_ACCESS,
     TOKEN_FILE_MISSING,
     TOKEN_FILENAME,
 )
 from ..helpers.filemgmt import build_config_file_path
+from ..integration_specific.const_integration import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 

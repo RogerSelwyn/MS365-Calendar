@@ -1,11 +1,3 @@
-scan_for_calendars:
-  name: Scan for new calendars
-  description: "Scan for newly available calendars"
-
-scan_for_todo_lists:
-  name: Scan for new todo lists
-  description: "Scan for newly available todo lists"
-
 respond_calendar_event:
   name: Respond to an event
   description: "Respond to calendar event/invite"

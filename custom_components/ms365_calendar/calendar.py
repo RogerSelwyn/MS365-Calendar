@@ -30,7 +30,6 @@ from requests.exceptions import HTTPError, RetryError
 
 from .const import (
     CONF_ACCOUNT_NAME,
-    DOMAIN,
     EVENT_HA_EVENT,
 )
 from .helpers.config_entry import MS365ConfigEntry
@@ -56,6 +55,7 @@ from .integration_specific.const_integration import (
     CONF_TRACK_NEW_CALENDAR,
     CONST_GROUP,
     DEFAULT_OFFSET,
+    DOMAIN,
     EVENT_CREATE_CALENDAR_EVENT,
     EVENT_MODIFY_CALENDAR_EVENT,
     EVENT_MODIFY_CALENDAR_RECURRENCES,
@@ -744,7 +744,7 @@ class MS365CalendarData:
         return dt_util.as_utc(date_obj)
 
 
-async def async_scan_for_calendars(hass, entry: MS365ConfigEntry):  # pylint: disable=unused-argument
+async def async_scan_for_calendars(hass, entry: MS365ConfigEntry):
     """Scan for new calendars."""
 
     schedule = entry.runtime_data.account.schedule()
