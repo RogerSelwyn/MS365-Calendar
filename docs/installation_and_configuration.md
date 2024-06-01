@@ -10,7 +10,7 @@ nav_order: 4
 1. Optionally you can set up the [permissions](./permissions.md), alternatively you will be requested to approve permissions when you authenticate to MS 365.
 1. Install this integration:
     * Recommended - see below, or
-    * Manually - Copy [these files](https://github.com/RogerSelwyn/MS365-Calendar/tree/main/custom_components/ms365_calendar) to custom_components/s365_calendar/.
+    * Manually - Copy [these files](https://github.com/RogerSelwyn/MS365-Calendar/tree/main/custom_components/ms365_calendar) to custom_components/ms365_calendar/.
 1. Restart your Home Assistant instance to enable the integration
 1. Add the integration via the `Devices & Services` dialogue. Follow the instructions in the install process (or see [Authentication](./authentication.md)) to establish the link between this integration and the Azure app
     * A persistent token will be created in the hidden directory config/ms365_storage/.MS365-token-cache
