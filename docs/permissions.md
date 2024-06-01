@@ -11,13 +11,13 @@ Under "API Permissions" click Add a permission, then Microsoft Graph, then Deleg
 
    | Feature  | Permissions                | Update | MS Graph Description                                  | Notes |
    |----------|----------------------------|:------:|-------------------------------------------------------|-------|
-   | Calendar | offline_access             |        | *Maintain access to data you have given it access to* |       |
+   | All      | offline_access             |        | *Maintain access to data you have given it access to* |       |
+   | All      | User.Read                  |        | *Sign in and read user profile*                       |       |
    | Calendar | Calendars.ReadBasic        |        | *Read basic details of user calendars*                | Used when `basic_calendar` is set to `true` |
    | Calendar | Calendars.Read             |        | *Read user calendars*                                 |       |
    | Calendar | Calendars.ReadWrite        | Y      | *Read and write user calendars*                       |       |
    | Calendar | Calendars.Read.Shared      |        | *Read user and shared calendars*                      | For shared mailboxes |
    | Calendar | Calendars.ReadWrite.Shared | Y      | *Read and write user and shared calendars*            | For shared mailboxes |
-   | Calendar | User.Read                  |        | *Sign in and read user profile*                       |       |
    | Group Calendar | Group.Read.All       |        | *Read all groups*                                     | Not supported in shared mailboxes |
    | Group Calendar | Group.ReadWrite.All  | Y      | *Read and write all groups*                           | Not supported in shared mailboxes |
    
