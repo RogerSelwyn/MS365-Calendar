@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.0.3 (2024/06/02)
+### 🧰 Maintenance
+- [Delete redundant files](https://github.com/RogerSelwyn/MS365-Calendar/commit/178070c6370585aad294c0be4c1c800cb31a5ef3) - @RogerSelwyn
+- [Remove redundant code](https://github.com/RogerSelwyn/MS365-Calendar/commit/720ba8f05491a7e9b584ea56cbd30ab2d177b8ef) - @RogerSelwyn
+- [Standardisation](https://github.com/RogerSelwyn/MS365-Calendar/commit/3456386ab999139cddb50e57bddc22d2a34f45ed) - @RogerSelwyn
+- [Standardise](https://github.com/RogerSelwyn/MS365-Calendar/commit/c575006c2eda9a124b79ec341c6536ebe117458b) - @RogerSelwyn
+
+### 📚 Documentation
+- [Update README.md](https://github.com/RogerSelwyn/MS365-Calendar/commit/2d800fc0cda0da5d81b2195def1fd22e2dcf832e) - @RogerSelwyn
+- [Update installation_and_configuration.md](https://github.com/RogerSelwyn/MS365-Calendar/commit/90701279d4d41b3d69a303506c57410f330ecbac) - @RogerSelwyn
+- [Update permissions.md](https://github.com/RogerSelwyn/MS365-Calendar/commit/e3f0329650fb8a5047abc7785a159e79388e450c) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v0.0.3](https://github.com/RogerSelwyn/MS365-Calendar/commit/02f90731680e58d26ce955e7f986152543d9ec6c) - @RogerSelwyn
+
 ## v0.0.2 (2024/05/31)
 ### 🧰 Maintenance
 - [Break out generic permission code from specific](https://github.com/RogerSelwyn/MS365-Calendar/commit/f03ca687b1b02dcdf1bbe97f6797b1bc8df8fd70) - @RogerSelwyn
