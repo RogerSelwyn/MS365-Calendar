@@ -1,6 +1,8 @@
 """Constants."""
 
 ATTR_DATA = "data"
+ATTR_ERROR = "error"
+ATTR_STATE = "state"
 
 AUTH_CALLBACK_NAME = "api:ms365"
 AUTH_CALLBACK_PATH_ALT = "/api/ms365"
@@ -13,11 +15,14 @@ CONF_ALT_AUTH_METHOD = "alt_auth_method"
 CONF_AUTH_URL = "auth_url"
 CONF_CLIENT_ID = "client_id"
 CONF_CLIENT_SECRET = "client_secret"  # nosec
+CONF_ENTITY_TYPE = "entity_type"
 CONF_FAILED_PERMISSIONS = "failed_permissions"
 CONF_SHARED_MAILBOX = "shared_mailbox"
 CONF_URL = "url"
 
 CONST_UTC_TIMEZONE = "UTC"
+
+DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 
 EVENT_HA_EVENT = "ha_event"
 

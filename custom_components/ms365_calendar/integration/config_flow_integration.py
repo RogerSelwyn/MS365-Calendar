@@ -1,4 +1,4 @@
-"""Configuration flow for the skyq platform."""
+"""Configuration flow for the MS365 platform."""
 
 from copy import deepcopy
 
@@ -18,6 +18,7 @@ from ..const import (
 )
 from ..helpers.config_entry import MS365ConfigEntry
 from ..helpers.filemgmt import build_config_file_path
+from ..helpers.utils import add_attribute_to_item
 from .const_integration import (
     CONF_BASIC_CALENDAR,
     CONF_CALENDAR_LIST,
@@ -140,15 +141,14 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
                         entity[CONF_DEVICE_ID]
                         == self._calendar_list_selected[self._calendar_no - 1]
                     ):
-                        entity[CONF_NAME] = user_input[CONF_NAME]
-                        entity[CONF_HOURS_FORWARD_TO_GET] = user_input[
-                            CONF_HOURS_FORWARD_TO_GET
-                        ]
-                        entity[CONF_HOURS_BACKWARD_TO_GET] = user_input[
-                            CONF_HOURS_BACKWARD_TO_GET
-                        ]
-                        if user_input.get(CONF_MAX_RESULTS):
-                            entity[CONF_MAX_RESULTS] = user_input[CONF_MAX_RESULTS]
+                        add_attribute_to_item(entity, user_input, CONF_NAME)
+                        add_attribute_to_item(
+                            entity, user_input, CONF_HOURS_FORWARD_TO_GET
+                        )
+                        add_attribute_to_item(
+                            entity, user_input, CONF_HOURS_BACKWARD_TO_GET
+                        )
+                        add_attribute_to_item(entity, user_input, CONF_MAX_RESULTS)
                         return await self.async_step_calendar_config()
 
         if self._calendar_no == len(self._calendar_list_selected):

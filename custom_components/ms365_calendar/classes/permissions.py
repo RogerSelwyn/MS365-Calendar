@@ -13,7 +13,7 @@ from ..const import (
     TOKEN_FILENAME,
 )
 from ..helpers.filemgmt import build_config_file_path
-from ..integration_specific.const_integration import DOMAIN
+from ..integration.const_integration import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 

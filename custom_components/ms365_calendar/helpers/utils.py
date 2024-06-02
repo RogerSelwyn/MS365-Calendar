@@ -19,3 +19,11 @@ def clean_html(html):
         return text.replace("\xa0", " ")
 
     return html
+
+
+def add_attribute_to_item(item, user_input, attribute):
+    """Add an attribute to an item."""
+    if user_input.get(attribute) is not None:
+        item[attribute] = user_input[attribute]
+    elif attribute in item:
+        del item[attribute]

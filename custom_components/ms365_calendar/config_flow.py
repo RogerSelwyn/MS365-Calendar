@@ -36,13 +36,13 @@ from .const import (
     TOKEN_FILE_MISSING,
 )
 from .helpers.config_entry import MS365ConfigEntry
-from .integration_specific.config_flow_integration import (
+from .integration.config_flow_integration import (
     MS365OptionsFlowHandler,
     integration_reconfigure_schema,
 )
-from .integration_specific.const_integration import DOMAIN
-from .integration_specific.permissions_integration import Permissions
-from .integration_specific.schema_integration import CONFIG_SCHEMA_INTEGRATION
+from .integration.const_integration import DOMAIN
+from .integration.permissions_integration import Permissions
+from .integration.schema_integration import CONFIG_SCHEMA_INTEGRATION
 from .schema import (
     CONFIG_SCHEMA,
     REQUEST_AUTHORIZATION_DEFAULT_SCHEMA,

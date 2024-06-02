@@ -46,8 +46,8 @@
             "calendar_config": {
                 "data": {
                     "name": "Calendar friendly name",
-                    "end_offset": "Number of hours to offset the end time",
-                    "start_offset": "Number of hours to offset the start time",
+                    "end_offset": "Hours to offset the end time",
+                    "start_offset": "Hours to offset the start time",
                     "max_results": "Max number of events to retrieve"
                 },
                 "description": "Setup options for {account_name} - calendar device_id {device_id}"

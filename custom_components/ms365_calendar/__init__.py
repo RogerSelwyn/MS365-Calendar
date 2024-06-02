@@ -17,8 +17,9 @@ from .const import (
     TOKEN_FILE_MISSING,
 )
 from .helpers.config_entry import MS365ConfigEntry, MS365Data
-from .integration_specific.const_integration import PLATFORMS
-from .integration_specific.permissions_integration import Permissions
+from .integration.const_integration import PLATFORMS
+from .integration.permissions_integration import Permissions
+from .integration.setup_integration import async_do_setup
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -44,7 +45,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
         _LOGGER.debug("do setup")
         check_token = await _async_check_token(hass, account, account_name)
         if check_token:
-            entry.runtime_data = MS365Data(perms, account, entry.options)
+            coordinator, sensors = await async_do_setup(hass, entry, account)
+            entry.runtime_data = MS365Data(
+                perms, account, coordinator, sensors, entry.options
+            )
             await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
             entry.async_on_unload(entry.add_update_listener(async_reload_entry))
             return True
