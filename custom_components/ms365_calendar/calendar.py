@@ -29,7 +29,8 @@ from homeassistant.util import dt as dt_util
 from requests.exceptions import HTTPError, RetryError
 
 from .const import (
-    CONF_ACCOUNT_NAME,
+    CONF_ENABLE_UPDATE,
+    CONF_ENTITY_NAME,
     EVENT_HA_EVENT,
 )
 from .helpers.config_entry import MS365ConfigEntry
@@ -44,7 +45,6 @@ from .integration.const_integration import (
     ATTR_OFFSET,
     CONF_CAL_ID,
     CONF_DEVICE_ID,
-    CONF_ENABLE_UPDATE,
     CONF_ENTITIES,
     CONF_EXCLUDE,
     CONF_HOURS_BACKWARD_TO_GET,
@@ -127,7 +127,7 @@ async def _async_setup_add_entities(
             if not entity[CONF_TRACK]:
                 continue
             entity_id = build_calendar_entity_id(
-                entity.get(CONF_DEVICE_ID), entry.data[CONF_ACCOUNT_NAME]
+                entity.get(CONF_DEVICE_ID), entry.data[CONF_ENTITY_NAME]
             )
 
             device_id = entity["device_id"]
@@ -257,7 +257,7 @@ class MS365CalendarEntity(CalendarEntity):
     @property
     def unique_id(self):
         """Entity unique id."""
-        return f"{self._calendar_id}_{self._entry.data[CONF_ACCOUNT_NAME]}_{self._device_id}"
+        return f"{self._calendar_id}_{self._entry.data[CONF_ENTITY_NAME]}_{self._device_id}"
 
     async def async_get_events(self, hass, start_date, end_date):
         """Get events."""

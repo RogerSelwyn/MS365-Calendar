@@ -4,7 +4,8 @@ import logging
 
 from ..classes.permissions import BasePermissions
 from ..const import (
-    CONF_ACCOUNT_NAME,
+    CONF_ENABLE_UPDATE,
+    CONF_ENTITY_NAME,
     CONF_SHARED_MAILBOX,
     PERM_OFFLINE_ACCESS,
     PERM_SHARED,
@@ -12,7 +13,6 @@ from ..const import (
 )
 from .const_integration import (
     CONF_BASIC_CALENDAR,
-    CONF_ENABLE_UPDATE,
     CONF_GROUPS,
     PERM_CALENDARS_READ,
     PERM_CALENDARS_READBASIC,
@@ -50,7 +50,7 @@ class Permissions(BasePermissions):
                 _LOGGER.warning(
                     "'enable_update' should not be true when 'basic_calendar' is true ."
                     + "for account: %s ReadBasic used. ",
-                    self._config[CONF_ACCOUNT_NAME],
+                    self._config[CONF_ENTITY_NAME],
                 )
             self._requested_permissions.append(PERM_CALENDARS_READBASIC + self._shared)
         elif self._enable_update:

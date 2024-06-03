@@ -16,6 +16,7 @@ from O365.calendar import (  # pylint: disable=no-name-in-module
 )
 
 from ..const import (
+    CONF_ENABLE_UPDATE,
     CONF_SHARED_MAILBOX,
 )
 from .const_integration import (
@@ -38,7 +39,6 @@ from .const_integration import (
     CONF_BASIC_CALENDAR,
     CONF_CAL_ID,
     CONF_DEVICE_ID,
-    CONF_ENABLE_UPDATE,
     CONF_ENTITIES,
     CONF_EXCLUDE,
     CONF_GROUPS,

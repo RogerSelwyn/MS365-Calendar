@@ -6,7 +6,7 @@ import os
 from copy import deepcopy
 
 from ..const import (
-    CONF_ACCOUNT_NAME,
+    CONF_ENTITY_NAME,
     MS365_STORAGE_TOKEN,
     PERM_OFFLINE_ACCESS,
     TOKEN_FILE_MISSING,
@@ -60,7 +60,7 @@ class BasePermissions:
                 "Minimum required permissions: '%s'. Not available in token '%s' for account '%s'.",
                 ", ".join(failed_permissions),
                 self.token_filename,
-                self._config[CONF_ACCOUNT_NAME],
+                self._config[CONF_ENTITY_NAME],
             )
             return False, failed_permissions
 
@@ -110,7 +110,7 @@ class BasePermissions:
 
     def _build_token_filename(self):
         """Create the token file name."""
-        return TOKEN_FILENAME.format(DOMAIN, f"_{self._config.get(CONF_ACCOUNT_NAME)}")
+        return TOKEN_FILENAME.format(DOMAIN, f"_{self._config.get(CONF_ENTITY_NAME)}")
 
     def _get_permissions(self):
         """Get the permissions from the token file."""

@@ -13,7 +13,8 @@ from homeassistant.helpers import entity_registry
 from homeassistant.helpers.selector import BooleanSelector
 
 from ..const import (
-    CONF_ACCOUNT_NAME,
+    CONF_ENABLE_UPDATE,
+    CONF_ENTITY_NAME,
     CONF_SHARED_MAILBOX,
 )
 from ..helpers.config_entry import MS365ConfigEntry
@@ -23,7 +24,6 @@ from .const_integration import (
     CONF_BASIC_CALENDAR,
     CONF_CALENDAR_LIST,
     CONF_DEVICE_ID,
-    CONF_ENABLE_UPDATE,
     CONF_ENTITIES,
     CONF_GROUPS,
     CONF_HOURS_BACKWARD_TO_GET,
@@ -44,7 +44,7 @@ BOOLEAN_SELECTOR = BooleanSelector()
 
 
 def integration_reconfigure_schema(entry_data):
-    """Extend the schame with integration specific attributes."""
+    """Extend the scheme with integration specific attributes."""
     return {
         vol.Optional(
             CONF_ENABLE_UPDATE, default=entry_data[CONF_ENABLE_UPDATE]
@@ -115,7 +115,7 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
         return self.async_show_form(
             step_id="user",
             description_placeholders={
-                CONF_ACCOUNT_NAME: self._entry.data[CONF_ACCOUNT_NAME]
+                CONF_ENTITY_NAME: self._entry.data[CONF_ENTITY_NAME]
             },
             data_schema=vol.Schema(
                 {
@@ -159,7 +159,7 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
         return self.async_show_form(
             step_id="calendar_config",
             description_placeholders={
-                CONF_ACCOUNT_NAME: self._entry.data[CONF_ACCOUNT_NAME],
+                CONF_ENTITY_NAME: self._entry.data[CONF_ENTITY_NAME],
                 CONF_DEVICE_ID: calendar_item[CONF_DEVICE_ID],
             },
             data_schema=vol.Schema(
@@ -210,7 +210,7 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def _async_delete_calendar(self, calendar):
         entity_id = build_calendar_entity_id(
-            calendar, self._entry.data[CONF_ACCOUNT_NAME]
+            calendar, self._entry.data[CONF_ENTITY_NAME]
         )
         ent_reg = entity_registry.async_get(self.hass)
         entities = entity_registry.async_entries_for_config_entry(

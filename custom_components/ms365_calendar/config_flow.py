@@ -24,11 +24,11 @@ from .const import (
     AUTH_CALLBACK_NAME,
     AUTH_CALLBACK_PATH_ALT,
     AUTH_CALLBACK_PATH_DEFAULT,
-    CONF_ACCOUNT_NAME,
     CONF_ALT_AUTH_METHOD,
     CONF_AUTH_URL,
     CONF_CLIENT_ID,
     CONF_CLIENT_SECRET,
+    CONF_ENTITY_NAME,
     CONF_FAILED_PERMISSIONS,
     CONF_SHARED_MAILBOX,
     CONF_URL,
@@ -87,9 +87,9 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input:
             self._user_input = user_input
             if not self._account_name:
-                self._account_name = user_input.get(CONF_ACCOUNT_NAME)
+                self._account_name = user_input.get(CONF_ENTITY_NAME)
             else:
-                user_input[CONF_ACCOUNT_NAME] = self._account_name
+                user_input[CONF_ENTITY_NAME] = self._account_name
             credentials = (
                 user_input.get(CONF_CLIENT_ID),
                 user_input.get(CONF_CLIENT_SECRET),
@@ -113,7 +113,7 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
                 return await self.async_step_request_default()
 
-            errors[CONF_ACCOUNT_NAME] = "already_configured"
+            errors[CONF_ENTITY_NAME] = "already_configured"
 
         data = self._config_schema or CONFIG_SCHEMA | CONFIG_SCHEMA_INTEGRATION
         return self.async_show_form(
@@ -139,7 +139,7 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema(REQUEST_AUTHORIZATION_DEFAULT_SCHEMA),
             description_placeholders={
                 CONF_AUTH_URL: self._url,
-                CONF_ACCOUNT_NAME: self._account_name,
+                CONF_ENTITY_NAME: self._account_name,
                 CONF_FAILED_PERMISSIONS: failed_permissions,
             },
             errors=errors,
@@ -167,7 +167,7 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="request_alt",
             description_placeholders={
                 CONF_AUTH_URL: self._url,
-                CONF_ACCOUNT_NAME: self._account_name,
+                CONF_ENTITY_NAME: self._account_name,
                 CONF_FAILED_PERMISSIONS: failed_permissions,
             },
             errors=errors,
@@ -271,7 +271,7 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Re-run configuration step."""
 
         self._reconfigure = True
-        self._account_name = entry_data[CONF_ACCOUNT_NAME]
+        self._account_name = entry_data[CONF_ENTITY_NAME]
         self._config_schema = {
             vol.Required(CONF_CLIENT_ID, default=entry_data[CONF_CLIENT_ID]): vol.All(
                 cv.string, vol.Strip

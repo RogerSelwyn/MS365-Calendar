@@ -9,9 +9,9 @@ from O365 import Account, FileSystemTokenBackend
 from oauthlib.oauth2.rfc6749.errors import InvalidClientError
 
 from .const import (
-    CONF_ACCOUNT_NAME,
     CONF_CLIENT_ID,
     CONF_CLIENT_SECRET,
+    CONF_ENTITY_NAME,
     CONF_SHARED_MAILBOX,
     CONST_UTC_TIMEZONE,
     TOKEN_FILE_MISSING,
@@ -31,7 +31,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
         entry.data.get(CONF_CLIENT_ID),
         entry.data.get(CONF_CLIENT_SECRET),
     )
-    account_name = entry.data.get(CONF_ACCOUNT_NAME)
+    account_name = entry.data.get(CONF_ENTITY_NAME)
     main_resource = entry.data.get(CONF_SHARED_MAILBOX)
 
     _LOGGER.debug("Permissions setup")
