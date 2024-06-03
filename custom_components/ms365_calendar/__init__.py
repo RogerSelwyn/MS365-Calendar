@@ -106,7 +106,7 @@ async def _async_check_token(hass, account, account_name):
     except InvalidClientError as err:
         if "client secret" in err.description and "expired" in err.description:
             _LOGGER.warning(
-                "Client Secret expired for account: %s. Create new Client Secret in Azure App.",
+                "Client Secret expired for account: %s. Create new Client Secret in Entra ID App Registration.",
                 account_name,
             )
         else:

@@ -12,7 +12,7 @@ nav_order: 4
     * Recommended - see below, or
     * Manually - Copy [these files](https://github.com/RogerSelwyn/MS365-Calendar/tree/main/custom_components/ms365_calendar) to custom_components/ms365_calendar/.
 1. Restart your Home Assistant instance to enable the integration
-1. Add the integration via the `Devices & Services` dialogue. Follow the instructions in the install process (or see [Authentication](./authentication.md)) to establish the link between this integration and the Azure app
+1. Add the integration via the `Devices & Services` dialogue. Follow the instructions in the install process (or see [Authentication](./authentication.md)) to establish the link between this integration and the Entra ID App Registration
     * A persistent token will be created in the hidden directory config/ms365_storage/.MS365-token-cache
     * The `ms365_calendars_<account_name>.yaml` will be created under the config directory in the `ms365_storage` directory.
 1. [Configure Calendars](./calendar_configuration.md)
@@ -37,8 +37,8 @@ nav_order: 4
 Key | Type | Required | Description
 -- | -- | -- | --
 `account_name` | `string` | `True` | Uniquely identifying name for the account. Calendars entity names will be suffixed with this. `calendar.calendar_account1`. Do not use email address or spaces.
-`client_id` | `string` | `True` | Client ID from your Azure application.
-`client_secret` | `string` | `True` | Client Secret from your Azure application.
+`client_id` | `string` | `True` | Client ID from your Entra ID App Registration.
+`client_secret` | `string` | `True` | Client Secret from your Entra ID App Registration.
 `alt_auth_method` | `boolean` | `False` | If False (default), authentication is not dependent on internet access to your HA instance. [See Authentication](./authentication.md)
 `enable_update` | `boolean` | `False` | If True (**default is False**), this will enable the various services that allow the sending of emails and updates to calendars
 `basic_calendar` | `boolean` | `False` | If True (**default is False**), the permission requested will be `calendar.ReadBasic`. `enable_update: true` = true cannot be used if `basic_calendar: true`

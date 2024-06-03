@@ -18,7 +18,7 @@
                     "groups": "Enable support for group calendars",
                     "shared_mailbox": "Email address or ID of shared mailbox"
                 },
-                "description": "Enter previously created Azure App credentials"
+                "description": "Enter previously created Entra ID App Registration credentials"
             },
             "request_default": {
                 "title": "Authorization Required - {account_name}",

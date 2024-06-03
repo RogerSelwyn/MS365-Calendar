@@ -6,7 +6,7 @@ nav_order: 2
 # Prerequisites
 
 ## Getting the client ID and client secret
-To allow authentication, you first need to register your application at Azure App Registrations:
+To allow authentication, you first need to register your application at Entra ID App Registrations:
 
 1. Login at [Azure Portal (App Registrations)](https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationsListBlade). Personal accounts may receive an authentication notification that can be ignored.
 
