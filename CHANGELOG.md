@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.0.4 (2024/06/03)
+### 💥 Breaking Changes
+- [Rename account_name to entity_name](https://github.com/RogerSelwyn/MS365-Calendar/commit/637940cfcaa3d84c8066cd61ac92c7af58c9a09a) - @RogerSelwyn
+
+### 🧰 Maintenance
+- [Change Azure to Entra ID](https://github.com/RogerSelwyn/MS365-Calendar/commit/653294cd688c24904bfb4557298d9578a61d2f68) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v0.0.4](https://github.com/RogerSelwyn/MS365-Calendar/commit/433d996309c480acdf4f77f4acdab36d3a406040) - @RogerSelwyn
+
 ## v0.0.3 (2024/06/02)
 ### 🧰 Maintenance
 - [Delete redundant files](https://github.com/RogerSelwyn/MS365-Calendar/commit/178070c6370585aad294c0be4c1c800cb31a5ef3) - @RogerSelwyn
