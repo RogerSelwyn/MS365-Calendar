@@ -9,7 +9,7 @@
         "step": {
             "user": {
                 "data": {
-                    "account_name": "Uniquely identifying name for the account",
+                    "entity_name": "Uniquely identifying name for the account",
                     "client_id": "Client ID",
                     "client_secret": "Client Secret",
                     "alt_auth_method": "Use alternate (more complex) authentication",
@@ -21,14 +21,14 @@
                 "description": "Enter previously created Entra ID App Registration credentials"
             },
             "request_default": {
-                "title": "Authorization Required - {account_name}",
+                "title": "Authorization Required - {entity_name}",
                 "description": "Complete the configuration by clicking on the link and copying the returned url into this field afterwards and submit\n\n[Link MS365 account]({auth_url}){failed_permissions}",
                 "data": {
                     "url": "Returned URL"
                 }
             },
             "request_alt": {
-                "title": "Authorization Required - {account_name}",
+                "title": "Authorization Required - {entity_name}",
                 "description": "To link your MS365 account, click the link, login, and authorize:\n\n[Link MS365 account]({auth_url}){failed_permissions}",
                 "submit": "I authorized successfully"
             }
@@ -41,7 +41,7 @@
                     "track_new_calendar": "Enable new calendars",
                     "calendar_list": "Enabled calendars"
                 },
-                "description": "Setup options for {account_name}"
+                "description": "Setup options for {entity_name}"
             },
             "calendar_config": {
                 "data": {
@@ -50,30 +50,30 @@
                     "start_offset": "Hours to offset the start time",
                     "max_results": "Max number of events to retrieve"
                 },
-                "description": "Setup options for {account_name} - calendar device_id {device_id}"
+                "description": "Setup options for {entity_name} - calendar device_id {device_id}"
             }
         }
     },
     "issues": {
         "authorization": {
-            "title": "Authorization Required - {account_name}",
+            "title": "Authorization Required - {entity_name}",
             "fix_flow": {
                 "error": {
                     "invalid_url": "Error, the originating url does not seem to be a valid microsoft redirect",
-                    "minimum_permissions": "Minimum permissions not granted for account: {account_name}",
+                    "minimum_permissions": "Minimum permissions not granted for account: {entity_name}",
                     "missing_token_file": "Token file is missing after successful authentication, check log for file system errors",
                     "token_file_error": "Token file retrieval error, check log for errors from O365"
                 },
                 "step": {
                     "request_default": {
-                        "title": "Authorization Required - {account_name}",
+                        "title": "Authorization Required - {entity_name}",
                         "description": "Complete the configuration by clicking on the link and copying the returned url into this field afterwards and submit\n\n[Link MS365 account]({auth_url}){failed_permissions}",
                         "data": {
                             "url": "Returned URL"
                         }
                     },
                     "request_alt": {
-                        "title": "Authorization Required - {account_name}",
+                        "title": "Authorization Required - {entity_name}",
                         "description": "To link your MS365 account, click the link, login, and authorize:\n\n[Link MS365 account]({auth_url}){failed_permissions}",
                         "submit": "I authorized successfully"
                     }

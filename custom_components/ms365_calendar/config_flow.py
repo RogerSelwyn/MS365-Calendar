@@ -63,7 +63,7 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._permissions = []
         self._failed_permissions = []
         self._account = None
-        self._account_name = None
+        self._entity_name = None
         self._url = None
         self._callback_url = None
         self._state = None
@@ -86,10 +86,10 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input:
             self._user_input = user_input
-            if not self._account_name:
-                self._account_name = user_input.get(CONF_ENTITY_NAME)
+            if not self._entity_name:
+                self._entity_name = user_input.get(CONF_ENTITY_NAME)
             else:
-                user_input[CONF_ENTITY_NAME] = self._account_name
+                user_input[CONF_ENTITY_NAME] = self._entity_name
             credentials = (
                 user_input.get(CONF_CLIENT_ID),
                 user_input.get(CONF_CLIENT_SECRET),
@@ -99,7 +99,7 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self._alt_auth_method = user_input.get(CONF_ALT_AUTH_METHOD)
             self._permissions = Permissions(self.hass, user_input)
             self._account, is_authenticated = await self._async_try_authentication(
-                self._permissions, credentials, main_resource, self._account_name
+                self._permissions, credentials, main_resource, self._entity_name
             )
             if not is_authenticated or self._reconfigure:
                 scope = self._permissions.requested_permissions
@@ -139,7 +139,7 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema(REQUEST_AUTHORIZATION_DEFAULT_SCHEMA),
             description_placeholders={
                 CONF_AUTH_URL: self._url,
-                CONF_ENTITY_NAME: self._account_name,
+                CONF_ENTITY_NAME: self._entity_name,
                 CONF_FAILED_PERMISSIONS: failed_permissions,
             },
             errors=errors,
@@ -167,7 +167,7 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="request_alt",
             description_placeholders={
                 CONF_AUTH_URL: self._url,
-                CONF_ENTITY_NAME: self._account_name,
+                CONF_ENTITY_NAME: self._entity_name,
                 CONF_FAILED_PERMISSIONS: failed_permissions,
             },
             errors=errors,
@@ -182,7 +182,7 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             await self.hass.config_entries.async_reload(self._entry.entry_id)
             return self.async_abort(reason="reconfigure_successful")
 
-        return self.async_create_entry(title=self._account_name, data=self._user_input)
+        return self.async_create_entry(title=self._entity_name, data=self._user_input)
 
     async def _async_validate_response(self, user_input):
         errors = {}
@@ -225,7 +225,7 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return errors
 
     async def _async_try_authentication(
-        self, perms, credentials, main_resource, account_name
+        self, perms, credentials, main_resource, entity_name
     ):
         _LOGGER.debug("Setup token")
         token_backend = await self.hass.async_add_executor_job(
@@ -251,7 +251,7 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         except json.decoder.JSONDecodeError as err:
             _LOGGER.warning(
                 "Token corrupt for account - please delete and re-authenticate: %s. Error - %s",
-                account_name,
+                entity_name,
                 err,
             )
             return account, False
@@ -271,7 +271,7 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Re-run configuration step."""
 
         self._reconfigure = True
-        self._account_name = entry_data[CONF_ENTITY_NAME]
+        self._entity_name = entry_data[CONF_ENTITY_NAME]
         self._config_schema = {
             vol.Required(CONF_CLIENT_ID, default=entry_data[CONF_CLIENT_ID]): vol.All(
                 cv.string, vol.Strip

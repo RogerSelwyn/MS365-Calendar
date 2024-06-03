@@ -31,25 +31,25 @@ async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
         entry.data.get(CONF_CLIENT_ID),
         entry.data.get(CONF_CLIENT_SECRET),
     )
-    account_name = entry.data.get(CONF_ENTITY_NAME)
+    entity_name = entry.data.get(CONF_ENTITY_NAME)
     main_resource = entry.data.get(CONF_SHARED_MAILBOX)
 
     _LOGGER.debug("Permissions setup")
     perms = Permissions(hass, entry.data)
     permissions, failed_permissions = await perms.async_check_authorizations()  # pylint: disable=unused-variable
     account, is_authenticated = await _async_try_authentication(
-        hass, perms, credentials, main_resource, account_name
+        hass, perms, credentials, main_resource, entity_name
     )
 
     if is_authenticated and permissions and permissions != TOKEN_FILE_MISSING:
         _LOGGER.debug("do setup")
-        check_token = await _async_check_token(hass, account, account_name)
+        check_token = await _async_check_token(hass, account, entity_name)
         if check_token:
-            coordinator, sensors = await async_do_setup(hass, entry, account)
+            coordinator, sensors, platforms = await async_do_setup(hass, entry, account)
             entry.runtime_data = MS365Data(
                 perms, account, coordinator, sensors, entry.options
             )
-            await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+            await hass.config_entries.async_forward_entry_setups(entry, platforms)
             entry.async_on_unload(entry.add_update_listener(async_reload_entry))
             return True
     return False
@@ -67,7 +67,7 @@ async def async_reload_entry(hass: HomeAssistant, entry: MS365ConfigEntry) -> No
 
 
 async def _async_try_authentication(
-    hass, perms, credentials, main_resource, account_name
+    hass, perms, credentials, main_resource, entity_name
 ):
     _LOGGER.debug("Setup token")
     token_backend = await hass.async_add_executor_job(
@@ -93,13 +93,13 @@ async def _async_try_authentication(
     except json.decoder.JSONDecodeError as err:
         _LOGGER.warning(
             "Token corrupt for account - please delete and re-authenticate: %s. Error - %s",
-            account_name,
+            entity_name,
             err,
         )
         return account, False
 
 
-async def _async_check_token(hass, account, account_name):
+async def _async_check_token(hass, account, entity_name):
     try:
         await hass.async_add_executor_job(account.get_current_user)
         return True
@@ -107,10 +107,10 @@ async def _async_check_token(hass, account, account_name):
         if "client secret" in err.description and "expired" in err.description:
             _LOGGER.warning(
                 "Client Secret expired for account: %s. Create new Client Secret in Entra ID App Registration.",
-                account_name,
+                entity_name,
             )
         else:
             _LOGGER.warning(
-                "Token error for account: %s. Error - %s", account_name, err.description
+                "Token error for account: %s. Error - %s", entity_name, err.description
             )
         return False
