@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.0.5 (2024/06/04)
+### 💥 Breaking Changes
+- [Standardise entity name](https://github.com/RogerSelwyn/MS365-Calendar/commit/e9b7ffa958b86b2cf5eb36ae74f2cfd8f61e41ba) - @RogerSelwyn
+
+### 🧰 Maintenance
+- [Rename account_name to entity_name](https://github.com/RogerSelwyn/MS365-Calendar/commit/5c35b2d6047e2af42f6862176ee54bebae46bb09) - @RogerSelwyn
+- [Add translations for services](https://github.com/RogerSelwyn/MS365-Calendar/commit/b3edf2ce8fe1cb72452ffd1c16b8aedd01dec42e) - @RogerSelwyn
+
+### 📚 Documentation
+- [Update install & config](https://github.com/RogerSelwyn/MS365-Calendar/commit/a182bf95be04dcbaab5ab01976b212b03bc95fc8) - @RogerSelwyn
+- [Tweak](https://github.com/RogerSelwyn/MS365-Calendar/commit/a3c5959c82a1b63ff0275b5ebf17103b6968a7dd) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v0.0.5](https://github.com/RogerSelwyn/MS365-Calendar/commit/3083cc6d8bc0110a78b309fa2cdf2803819b970b) - @RogerSelwyn
+
 ## v0.0.4 (2024/06/03)
 ### 💥 Breaking Changes
 - [Rename account_name to entity_name](https://github.com/RogerSelwyn/MS365-Calendar/commit/637940cfcaa3d84c8066cd61ac92c7af58c9a09a) - @RogerSelwyn
