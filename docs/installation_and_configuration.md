@@ -43,5 +43,10 @@ Key | Type | Required | Description
 `enable_update` | `boolean` | `False` | If True (**default is False**), this will enable the various services that allow the sending of emails and updates to calendars
 `basic_calendar` | `boolean` | `False` | If True (**default is False**), the permission requested will be `calendar.ReadBasic`. `enable_update: true` = true cannot be used if `basic_calendar: true`
 `groups` | `boolean` | `False` | If True (**default is False**), will enable support for group calendars. No discovery is performed. You will need to know how to get the group ID from the MS Graph API. *Not for use on shared mailboxes*
-`track_new_calendar` | `boolean` | `False` | If True (default), will automatically generate a calendar_entity when a new calendar is detected. The system scans for new calendars only on startup.
 `shared_mailbox` | `string` | `False` | Email address or ID of shared mailbox 
+
+### Options variables
+
+Key | Type | Required | Description
+-- | -- | -- | --
+`track_new_calendar` | `boolean` | `False` | If True (default), will automatically generate a calendar_entity when a new calendar is detected. The system scans for new calendars only on startup or reconfiguration/reload.
