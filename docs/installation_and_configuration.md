@@ -14,7 +14,7 @@ nav_order: 4
 1. Restart your Home Assistant instance to enable the integration
 1. Add the integration via the `Devices & Services` dialogue. Follow the instructions in the install process (or see [Authentication](./authentication.md)) to establish the link between this integration and the Entra ID App Registration
     * A persistent token will be created in the hidden directory config/ms365_storage/.MS365-token-cache
-    * The `ms365_calendars_<account_name>.yaml` will be created under the config directory in the `ms365_storage` directory.
+    * The `ms365_calendars_<entity_name>.yaml` will be created under the config directory in the `ms365_storage` directory.
 1. [Configure Calendars](./calendar_configuration.md)
 1. Restart your Home Assistant instance.
 
@@ -36,7 +36,7 @@ nav_order: 4
 
 Key | Type | Required | Description
 -- | -- | -- | --
-`account_name` | `string` | `True` | Uniquely identifying name for the account. Calendars entity names will be suffixed with this. `calendar.calendar_account1`. Do not use email address or spaces.
+`entity_name` | `string` | `True` | Uniquely identifying name for the account. Calendars entity names will be suffixed with this. `calendar.calendar_account1`. Do not use email address or spaces.
 `client_id` | `string` | `True` | Client ID from your Entra ID App Registration.
 `client_secret` | `string` | `True` | Client Secret from your Entra ID App Registration.
 `alt_auth_method` | `boolean` | `False` | If False (default), authentication is not dependent on internet access to your HA instance. [See Authentication](./authentication.md)
