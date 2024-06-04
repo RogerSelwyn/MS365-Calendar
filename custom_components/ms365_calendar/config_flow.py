@@ -98,6 +98,7 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             main_resource = user_input.get(CONF_SHARED_MAILBOX)
             self._alt_auth_method = user_input.get(CONF_ALT_AUTH_METHOD)
             self._permissions = Permissions(self.hass, user_input)
+            self._permissions.token_filename = self._permissions.build_token_filename()
             self._account, is_authenticated = await self._async_try_authentication(
                 self._permissions, credentials, main_resource, self._entity_name
             )

@@ -27,7 +27,7 @@ class BasePermissions:
         self._config = config
 
         self._requested_permissions = []
-        self.token_filename = self._build_token_filename()
+        self.token_filename = self.build_token_filename()
         self.token_path = build_config_file_path(self._hass, MS365_STORAGE_TOKEN)
         self._permissions = []
 
@@ -108,7 +108,7 @@ class BasePermissions:
 
         return False
 
-    def _build_token_filename(self):
+    def build_token_filename(self):
         """Create the token file name."""
         return TOKEN_FILENAME.format(DOMAIN, f"_{self._config.get(CONF_ENTITY_NAME)}")
 

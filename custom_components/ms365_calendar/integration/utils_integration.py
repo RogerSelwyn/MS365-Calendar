@@ -163,5 +163,5 @@ def _process_byday(byday):
 
 def build_calendar_entity_id(device_id, entity_name):
     """Build calendar entity_id."""
-    name = f"{device_id}_{entity_name}"
+    name = f"{entity_name}_{device_id}"
     return CALENDAR_ENTITY_ID_FORMAT.format(slugify(name))
