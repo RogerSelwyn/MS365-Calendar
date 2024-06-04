@@ -9,7 +9,7 @@
         "step": {
             "user": {
                 "data": {
-                    "entity_name": "Uniquely identifying name for the account",
+                    "entity_name": "Uniquely identifying name for the entities",
                     "client_id": "Client ID",
                     "client_secret": "Client Secret",
                     "alt_auth_method": "Use alternate (more complex) authentication",
@@ -90,6 +90,136 @@
         },
         "not_authorised": {
             "message": "Not authorisied requires permission: {required_permission}"
+        }
+    },
+    "services": {
+        "respond_calendar_event": {
+            "name": "Respond to an event",
+            "description": "Respond to calendar event/invite",
+            "fields": {
+                "event_id": {
+                    "description": "ID for the event, can be found as an attribute on your calendar entity's events",
+                    "name": "Event ID"
+                },
+                "response": {
+                    "description": "The response to the invite [Accept, Tentative, Decline]",
+                    "name": "Response"
+                },
+                "message": {
+                    "description": "The response message to the invite (Optional)",
+                    "name": "Message"
+                },
+                "send_response": {
+                    "description": "Send the response to the organizer (Optional)",
+                    "name": "Send Response"
+                }
+            }
+        },
+        "create_calendar_event": {
+            "name": "Create a new event",
+            "description": "Create new calendar event",
+            "fields": {
+                "subject": {
+                    "description": "The subject of the created event",
+                    "name": "Subject"
+                },
+                "start": {
+                    "description": "The start time of the event",
+                    "name": "Start"
+                },
+                "end": {
+                    "description": "The end time of the event",
+                    "name": "End"
+                },
+                "body": {
+                    "description": "The body text for the event (optional)",
+                    "name": "Body"
+                },
+                "location": {
+                    "description": "The location for the event (optional)",
+                    "name": "Location"
+                },
+                "categories": {
+                    "description": "List of categories for the event (optional)",
+                    "name": "Categories"
+                },
+                "sensitivity": {
+                    "description": "The sensitivity for the event (optional) [Normal, Personal, Private, Confidential]",
+                    "name": "Sensitivity"
+                },
+                "show_as": {
+                    "description": "Show event as (optional) [Free, Tentative, Busy, Oof, WorkingElsewhere, Unknown]",
+                    "name": "Show_as"
+                },
+                "is_all_day": {
+                    "description": "Set whether event is all day (optional)",
+                    "name": "All Day"
+                },
+                "attendees": {
+                    "description": "List of attendees formatted as email: example@example.com type: Required, Optional, or Resource (optional)",
+                    "name": "Attendees"
+                }
+            }
+        },
+        "modify_calendar_event": {
+            "name": "Modify an event",
+            "description": "Modify existing calendar event, all properties except event_id are optional",
+            "fields": {
+                "event_id": {
+                    "description": "ID for the event, can be found as an attribute on your calendar entity's events",
+                    "name": "Event ID"
+                },
+                "subject": {
+                    "description": "The subject of the event",
+                    "name": "Subject"
+                },
+                "start": {
+                    "description": "The start time of the event",
+                    "name": "Start"
+                },
+                "end": {
+                    "description": "The end time of the event",
+                    "name": "End"
+                },
+                "body": {
+                    "description": "The body text for the event",
+                    "name": "Body"
+                },
+                "location": {
+                    "description": "The location for the event",
+                    "name": "Location"
+                },
+                "categories": {
+                    "description": "List of categories for the event",
+                    "name": "Categories"
+                },
+                "sensitivity": {
+                    "description": "The sensitivity for the event [Normal, Personal, Private, Confidential]",
+                    "name": "Sensitivity"
+                },
+                "show_as": {
+                    "description": "Show event as [Free, Tentative, Busy, Oof, WorkingElsewhere, Unknown]",
+                    "name": "Show_as"
+                },
+                "is_all_day": {
+                    "description": "Set whether event is all day",
+                    "name": "All Day"
+                },
+                "attendees": {
+                    "description": "List of attendees formatted as email: example@example.com type: Required, Optional, or Resource",
+                    "name": "Attendees"
+                }
+            }
+        },
+        "remove_calendar_event": {
+            "name": "Delete an event",
+            "description": "Delete calendar event",
+            "fields": {
+                "event_id": {
+                    "description": "ID for the event, can be found as an attribute on your calendar entity's events",
+                    "name": "Event ID"
+                }
+            }
         }
     }
 }
