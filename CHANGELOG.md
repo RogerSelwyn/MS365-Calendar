@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.0.6 (2024/07/08)
+### 🧰 Maintenance
+- [Update codeql.yml](https://github.com/RogerSelwyn/MS365-Calendar/commit/0a258b85500f5ebfd5d17b5bfbca714ff9448592) - @RogerSelwyn
+
+### ⬆️ Dependencies
+- [Bump O365 to 2.0.35](https://github.com/RogerSelwyn/MS365-Calendar/commit/9bbf2fd901c3d775674ac4f9440283623704e896) - @RogerSelwyn
+- [Bump O365 to 2.0.36](https://github.com/RogerSelwyn/MS365-Calendar/commit/a6eaed651214d0abbcaccb832a328b874fde8bd1) - @RogerSelwyn
+- [Auto update requirements.txt](https://github.com/RogerSelwyn/MS365-Calendar/commit/71312ad19695ebe2c3f14ea3624d6cd93bfe1225) - @actions-user
+
+### 📚 Documentation
+- [Update README.md](https://github.com/RogerSelwyn/MS365-Calendar/commit/2e03f7afbbc916a41977906b9cb094cf49e58777) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v0.0.6](https://github.com/RogerSelwyn/MS365-Calendar/commit/3dc30823814d9a82b7241a078f4b94b11dd9f791) - @RogerSelwyn
+
+
 ## v0.0.5 (2024/06/04)
 ### 💥 Breaking Changes
 - [Standardise entity name](https://github.com/RogerSelwyn/MS365-Calendar/commit/e9b7ffa958b86b2cf5eb36ae74f2cfd8f61e41ba) - @RogerSelwyn
