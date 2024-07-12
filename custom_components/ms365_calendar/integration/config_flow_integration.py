@@ -59,6 +59,11 @@ def integration_reconfigure_schema(entry_data):
     }
 
 
+def integration_validate_schema(user_input):  # pylint: disable=unused-argument
+    """Validate the user input."""
+    return {}
+
+
 class MS365OptionsFlowHandler(config_entries.OptionsFlow):
     """Config flow options for MS365."""
 

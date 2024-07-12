@@ -17,7 +17,6 @@ from homeassistant.components.http import HomeAssistantView
 from homeassistant.config_entries import ConfigFlowResult
 from homeassistant.core import callback
 from homeassistant.helpers.network import get_url
-from homeassistant.helpers.selector import BooleanSelector
 from O365 import Account, FileSystemTokenBackend
 
 from .const import (
@@ -39,6 +38,7 @@ from .helpers.config_entry import MS365ConfigEntry
 from .integration.config_flow_integration import (
     MS365OptionsFlowHandler,
     integration_reconfigure_schema,
+    integration_validate_schema,
 )
 from .integration.const_integration import DOMAIN
 from .integration.permissions_integration import Permissions
@@ -48,7 +48,6 @@ from .schema import (
     REQUEST_AUTHORIZATION_DEFAULT_SCHEMA,
 )
 
-BOOLEAN_SELECTOR = BooleanSelector()
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -85,7 +84,10 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
 
         if user_input:
+            errors = integration_validate_schema(user_input)
+        if user_input and not errors:
             self._user_input = user_input
+
             if not self._entity_name:
                 self._entity_name = user_input.get(CONF_ENTITY_NAME)
             else:
