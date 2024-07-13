@@ -213,9 +213,9 @@ class MS365CalendarEntity(CalendarEntity):
                 | CalendarEntityFeature.DELETE_EVENT
                 | CalendarEntityFeature.UPDATE_EVENT
             )
+        self._max_results = entity.get(CONF_MAX_RESULTS)
 
     def _init_data(self, account, calendar_id, entity):
-        max_results = entity.get(CONF_MAX_RESULTS)
         search = entity.get(CONF_SEARCH)
         exclude = entity.get(CONF_EXCLUDE)
         return MS365CalendarData(
@@ -224,7 +224,6 @@ class MS365CalendarEntity(CalendarEntity):
             calendar_id,
             search,
             exclude,
-            max_results,
         )
 
     @property
@@ -265,7 +264,7 @@ class MS365CalendarEntity(CalendarEntity):
 
     async def async_update(self):
         """Do the update."""
-        await self.data.async_update(self.hass)
+        await self.data.async_update(self.hass, self._max_results)
         event = deepcopy(self.data.event)
         if event:
             event.summary, offset = extract_offset(event.summary, DEFAULT_OFFSET)
@@ -275,6 +274,7 @@ class MS365CalendarEntity(CalendarEntity):
             self.hass,
             dt_util.utcnow() + timedelta(hours=self._start_offset),
             dt_util.utcnow() + timedelta(hours=self._end_offset),
+            self._max_results,
         )
 
         if results is not None:
@@ -494,10 +494,8 @@ class MS365CalendarData:
         calendar_id,
         search=None,
         exclude=None,
-        limit=999,
     ):
         """Initialise the MS365 Calendar Data."""
-        self._limit = limit
         self.group_calendar = calendar_id.startswith(CONST_GROUP)
         self.calendar_id = calendar_id
         if self.group_calendar:
@@ -522,14 +520,14 @@ class MS365CalendarData:
             _LOGGER.warning("Error getting calendar events - %s", err)
             return False
 
-    async def async_ms365_get_events(self, hass, start_date, end_date):
+    async def async_ms365_get_events(self, hass, start_date, end_date, limit=999):
         """Get the events."""
         if not self.calendar:
             if not await self._async_get_calendar(hass):
                 return []
 
         events = await self._async_calendar_schedule_get_events(
-            hass, self.calendar, start_date, end_date
+            hass, self.calendar, start_date, end_date, limit
         )
         if events is None:
             return None
@@ -568,7 +566,7 @@ class MS365CalendarData:
         return events
 
     async def _async_calendar_schedule_get_events(
-        self, hass, calendar_schedule, start_date, end_date
+        self, hass, calendar_schedule, start_date, end_date, limit
     ):
         """Get the events for the calendar."""
         query = calendar_schedule.new_query()
@@ -596,7 +594,7 @@ class MS365CalendarData:
             return await hass.async_add_executor_job(
                 ft.partial(
                     calendar_schedule.get_events,
-                    limit=self._limit,
+                    limit=limit,
                     query=query,
                     include_recurring=True,
                 )
@@ -632,13 +630,14 @@ class MS365CalendarData:
 
         return event_list
 
-    async def async_update(self, hass):
+    async def async_update(self, hass, limit):
         """Do the update."""
         start_of_day_utc = dt_util.as_utc(dt_util.start_of_local_day())
         results = await self.async_ms365_get_events(
             hass,
             start_of_day_utc,
             start_of_day_utc + timedelta(days=1),
+            limit,
         )
         if not results:
             _LOGGER.debug(
