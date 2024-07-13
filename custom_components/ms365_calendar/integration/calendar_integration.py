@@ -264,12 +264,15 @@ class MS365CalendarEntity(CalendarEntity):
 
     async def async_update(self):
         """Do the update."""
+        # Get today's event for HA Core.
         await self.data.async_update(self.hass, self._max_results)
         event = deepcopy(self.data.event)
         if event:
             event.summary, offset = extract_offset(event.summary, DEFAULT_OFFSET)
             start = MS365CalendarData.to_datetime(event.start)
             self._offset_reached = is_offset_reached(start, offset)
+
+        # Get events for extra attributes.
         results = await self.data.async_ms365_get_events(
             self.hass,
             dt_util.utcnow() + timedelta(hours=self._start_offset),
