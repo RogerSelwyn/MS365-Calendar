@@ -1,6 +1,7 @@
 """Utilities processes."""
 
 from bs4 import BeautifulSoup
+from homeassistant.helpers.entity import async_generate_entity_id
 
 
 def clean_html(html):
@@ -27,3 +28,12 @@ def add_attribute_to_item(item, user_input, attribute):
         item[attribute] = user_input[attribute]
     elif attribute in item:
         del item[attribute]
+
+
+def build_entity_id(hass, entity_id_format, name):
+    """Build an entity ID."""
+    return async_generate_entity_id(
+        entity_id_format,
+        name,
+        hass=hass,
+    )
