@@ -54,7 +54,8 @@ def integration_reconfigure_schema(entry_data):
         ): cv.boolean,
         vol.Optional(CONF_GROUPS, default=entry_data[CONF_GROUPS]): cv.boolean,
         vol.Optional(
-            CONF_SHARED_MAILBOX, default=entry_data[CONF_SHARED_MAILBOX]
+            CONF_SHARED_MAILBOX,
+            description={"suggested_value": entry_data.get(CONF_SHARED_MAILBOX, None)},
         ): cv.string,
     }
 
