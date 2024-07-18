@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.1.0 (2024/07/18)
+### ✨ Enhancements
+- [Add diagnostics support](https://github.com/RogerSelwyn/MS365-Calendar/commit/a19a95f862e479d1859878fc575417194706a8b9) - @RogerSelwyn
+
+### 🐛 Fixes
+- [Fix issue where calendar panel events were limited by `max_results`](https://github.com/RogerSelwyn/MS365-Calendar/commit/0929d60b4f460c1d1a7566f2989d42019f762a8e) - @RogerSelwyn
+- [Correct configuration of shared_mailbox](https://github.com/RogerSelwyn/MS365-Calendar/commit/be922a4e9310361d0cad57dae5c654eaf63ef758) - @RogerSelwyn
+- [Fix saving of config options](https://github.com/RogerSelwyn/MS365-Calendar/commit/b1fd4732ddae68eb7a4a8ea6dd49a06f52333c02) - @RogerSelwyn
+
+### 🧰 Maintenance
+- [Code updates in support of standardisation across MS365 integrations](https://github.com/RogerSelwyn/MS365-Calendar/commit/da1563f0274028d6ec77e7aa06e39ec89e58eb64) - @RogerSelwyn
+- [Consolidate sensor code to one place](https://github.com/RogerSelwyn/MS365-Calendar/commit/a8cbc85718ac69c8b2cdb47af08a966174d8da9b) - @RogerSelwyn
+- [Add comments for clarity](https://github.com/RogerSelwyn/MS365-Calendar/commit/f6945783a21c672a7f55417375004802f27a7c25) - @RogerSelwyn
+- [Consolidate duplicate code](https://github.com/RogerSelwyn/MS365-Calendar/commit/04673781026ca7768de4b73456b482b1ddf51556) - @RogerSelwyn
+
+### 🔖 Release
+- [v0.1.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/6f977cf3c95b6e50151b6fb41accd071f28d89cc) - @RogerSelwyn
+
 ## v0.0.6 (2024/07/08)
 ### 🧰 Maintenance
 - [Update codeql.yml](https://github.com/RogerSelwyn/MS365-Calendar/commit/0a258b85500f5ebfd5d17b5bfbca714ff9448592) - @RogerSelwyn
