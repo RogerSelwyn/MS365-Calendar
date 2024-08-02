@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.1.1 (2024/08/02)
+### 🐛 Fixes
+- [Capture errors from fetching events so as not to provide empty data attributes](https://github.com/RogerSelwyn/MS365-Calendar/commit/34d24bcc08b4ba540511e9b5a5361ea7d1881bee) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v0.1.1](https://github.com/RogerSelwyn/MS365-Calendar/commit/267959f8d0630a91a319fb7b5ec05262d50bb3b9) - @RogerSelwyn
+
 ## v0.1.0 (2024/07/18)
 ### ✨ Enhancements
 - [Add diagnostics support](https://github.com/RogerSelwyn/MS365-Calendar/commit/a19a95f862e479d1859878fc575417194706a8b9) - @RogerSelwyn
