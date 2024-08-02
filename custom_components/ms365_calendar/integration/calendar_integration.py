@@ -214,6 +214,7 @@ class MS365CalendarEntity(CalendarEntity):
                 | CalendarEntityFeature.UPDATE_EVENT
             )
         self._max_results = entity.get(CONF_MAX_RESULTS)
+        self._error = None
 
     def _init_data(self, account, calendar_id, entity):
         search = entity.get(CONF_SEARCH)
@@ -265,20 +266,30 @@ class MS365CalendarEntity(CalendarEntity):
     async def async_update(self):
         """Do the update."""
         # Get today's event for HA Core.
-        await self.data.async_update(self.hass, self._max_results)
-        event = deepcopy(self.data.event)
+        try:
+            await self.data.async_update(self.hass, self._max_results)
+            event = deepcopy(self.data.event)
+        except (HTTPError, RetryError, ConnectionError) as err:
+            self._log_error("Error getting calendar events for day", err)
+            return
+
         if event:
             event.summary, offset = extract_offset(event.summary, DEFAULT_OFFSET)
             start = MS365CalendarData.to_datetime(event.start)
             self._offset_reached = is_offset_reached(start, offset)
 
         # Get events for extra attributes.
-        results = await self.data.async_ms365_get_events(
-            self.hass,
-            dt_util.utcnow() + timedelta(hours=self._start_offset),
-            dt_util.utcnow() + timedelta(hours=self._end_offset),
-            self._max_results,
-        )
+        try:
+            results = await self.data.async_ms365_get_events(
+                self.hass,
+                dt_util.utcnow() + timedelta(hours=self._start_offset),
+                dt_util.utcnow() + timedelta(hours=self._end_offset),
+                self._max_results,
+            )
+        except (HTTPError, RetryError, ConnectionError) as err:
+            self._log_error("Error getting calendar events for data", err)
+            return
+        self._error = False
 
         if results is not None:
             self._data_attribute = [format_event_data(x) for x in results]
@@ -382,6 +393,13 @@ class MS365CalendarEntity(CalendarEntity):
             await self._async_update_calendar_event(
                 event_id, EVENT_MODIFY_CALENDAR_EVENT, subject, start, end, **kwargs
             )
+
+    def _log_error(self, error, err):
+        if not self._error:
+            _LOGGER.warning("%s - %s", error, err)
+            self._error = True
+        else:
+            _LOGGER.debug("Repeat error - %s - %s", error, err)
 
     async def _async_update_calendar_event(
         self, event_id, ha_event, subject, start, end, **kwargs
@@ -520,7 +538,7 @@ class MS365CalendarData:
             )
             return True
         except (HTTPError, RetryError, ConnectionError) as err:
-            _LOGGER.warning("Error getting calendar events - %s", err)
+            _LOGGER.warning("Error getting calendar - %s", err)
             return False
 
     async def async_ms365_get_events(self, hass, start_date, end_date, limit=999):
@@ -593,18 +611,15 @@ class MS365CalendarData:
         # As at March 2023 not contains is not supported by Graph API
         # if self._exclude is not None:
         #     query.chain("and").on_attribute("subject").negate().contains(self._exclude)
-        try:
-            return await hass.async_add_executor_job(
-                ft.partial(
-                    calendar_schedule.get_events,
-                    limit=limit,
-                    query=query,
-                    include_recurring=True,
-                )
+
+        return await hass.async_add_executor_job(
+            ft.partial(
+                calendar_schedule.get_events,
+                limit=limit,
+                query=query,
+                include_recurring=True,
             )
-        except (HTTPError, RetryError, ConnectionError) as err:
-            _LOGGER.warning("Error getting calendar events - %s", err)
-            return None
+        )
 
     async def async_get_events(self, hass, start_date, end_date):
         """Get the via async."""

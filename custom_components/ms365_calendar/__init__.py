@@ -42,7 +42,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
     )
 
     if is_authenticated and permissions and permissions != TOKEN_FILE_MISSING:
-        _LOGGER.debug("do setup")
+        _LOGGER.debug("Do setup")
         check_token = await _async_check_token(hass, account, entity_name)
         if check_token:
             coordinator, sensors, platforms = await async_do_setup(hass, entry, account)
