@@ -209,7 +209,7 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors[CONF_URL] = "invalid_url"
             return errors
 
-        result = await self.hass.async_add_executor_job(r
+        result = await self.hass.async_add_executor_job(
             ft.partial(
                 self._account.con.request_token,
                 url,
