@@ -9,7 +9,9 @@ from ..const import (
     CONF_ENTITY_NAME,
     MS365_STORAGE_TOKEN,
     PERM_OFFLINE_ACCESS,
+    TOKEN_FILE_CORRUPTED,
     TOKEN_FILE_MISSING,
+    TOKEN_FILE_PERMISSIONS,
     TOKEN_FILENAME,
 )
 from ..helpers.filemgmt import build_config_file_path
@@ -46,8 +48,11 @@ class BasePermissions:
             self._get_permissions
         )
 
-        if self.permissions == TOKEN_FILE_MISSING:
-            return TOKEN_FILE_MISSING, None
+        if (
+            self._permissions == TOKEN_FILE_CORRUPTED
+            or self._permissions == TOKEN_FILE_MISSING
+        ):
+            return self._permissions, None
         failed_permissions = []
         for permission in self.requested_permissions:
             if permission == PERM_OFFLINE_ACCESS:
@@ -62,7 +67,7 @@ class BasePermissions:
                 self.token_filename,
                 self._config[CONF_ENTITY_NAME],
             )
-            return False, failed_permissions
+            return TOKEN_FILE_PERMISSIONS, failed_permissions
 
         return True, None
 
@@ -118,8 +123,20 @@ class BasePermissions:
         if not os.path.exists(full_token_path) or not os.path.isfile(full_token_path):
             _LOGGER.warning("Could not locate token at %s", full_token_path)
             return TOKEN_FILE_MISSING
-        with open(full_token_path, "r", encoding="UTF-8") as file_handle:
-            raw = file_handle.read()
-            permissions = json.loads(raw)["scope"]
+        try:
+            with open(full_token_path, "r", encoding="UTF-8") as file_handle:
+                raw = file_handle.read()
+                permissions = json.loads(raw)["scope"]
+        except json.decoder.JSONDecodeError as err:
+            _LOGGER.warning(
+                (
+                    "Token corrupted for integration %s, unique identifier %s, "
+                    + "please re-configure and re-authenticate - %s"
+                ),
+                DOMAIN,
+                self._config[CONF_ENTITY_NAME],
+                err,
+            )
+            return TOKEN_FILE_CORRUPTED
 
         return permissions

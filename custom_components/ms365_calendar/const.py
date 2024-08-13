@@ -37,4 +37,6 @@ PERM_SHARED = ".Shared"
 
 
 TOKEN_FILENAME = "{0}{1}.token"  # nosec
+TOKEN_FILE_CORRUPTED = "corrupted"
 TOKEN_FILE_MISSING = "missing"
+TOKEN_FILE_PERMISSIONS = "permissions"

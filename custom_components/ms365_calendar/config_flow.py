@@ -16,6 +16,7 @@ from homeassistant import (
 from homeassistant.components.http import HomeAssistantView
 from homeassistant.config_entries import ConfigFlowResult
 from homeassistant.core import callback
+from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.network import get_url
 from O365 import Account, FileSystemTokenBackend
 
@@ -32,7 +33,9 @@ from .const import (
     CONF_SHARED_MAILBOX,
     CONF_URL,
     CONST_UTC_TIMEZONE,
+    TOKEN_FILE_CORRUPTED,
     TOKEN_FILE_MISSING,
+    TOKEN_FILE_PERMISSIONS,
 )
 from .helpers.config_entry import MS365ConfigEntry
 from .integration.config_flow_integration import (
@@ -102,7 +105,7 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self._permissions = Permissions(self.hass, user_input)
             self._permissions.token_filename = self._permissions.build_token_filename()
             self._account, is_authenticated = await self._async_try_authentication(
-                self._permissions, credentials, main_resource, self._entity_name
+                self._permissions, credentials, main_resource
             )
             if not is_authenticated or self._reconfigure:
                 scope = self._permissions.requested_permissions
@@ -183,6 +186,12 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 data=self._user_input,
             )
             await self.hass.config_entries.async_reload(self._entry.entry_id)
+            for error in [
+                TOKEN_FILE_CORRUPTED,
+                TOKEN_FILE_MISSING,
+                TOKEN_FILE_PERMISSIONS,
+            ]:
+                ir.async_delete_issue(self.hass, DOMAIN, error)
             return self.async_abort(reason="reconfigure_successful")
 
         return self.async_create_entry(title=self._entity_name, data=self._user_input)
@@ -200,7 +209,7 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors[CONF_URL] = "invalid_url"
             return errors
 
-        result = await self.hass.async_add_executor_job(
+        result = await self.hass.async_add_executor_job(r
             ft.partial(
                 self._account.con.request_token,
                 url,
@@ -218,18 +227,12 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             permissions,
             self._failed_permissions,
         ) = await self._permissions.async_check_authorizations()
-        if permissions == TOKEN_FILE_MISSING:
-            errors[CONF_URL] = "missing_token_file"
-            return errors
-
-        if not permissions:
-            errors[CONF_URL] = "minimum_permissions"
+        if permissions is not True:
+            errors[CONF_URL] = permissions
 
         return errors
 
-    async def _async_try_authentication(
-        self, perms, credentials, main_resource, entity_name
-    ):
+    async def _async_try_authentication(self, perms, credentials, main_resource):
         _LOGGER.debug("Setup token")
         token_backend = await self.hass.async_add_executor_job(
             ft.partial(
@@ -251,12 +254,7 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         try:
             return account, account.is_authenticated
 
-        except json.decoder.JSONDecodeError as err:
-            _LOGGER.warning(
-                "Token corrupt for account - please delete and re-authenticate: %s. Error - %s",
-                entity_name,
-                err,
-            )
+        except json.decoder.JSONDecodeError:
             return account, False
 
     async def async_step_reconfigure(
