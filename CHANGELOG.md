@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.1.1 (2024/08/13)
+### 🐛 Fixes
+- [Handle corrupted token file gracefully with repair](https://github.com/RogerSelwyn/MS365-Calendar/commit/04ddfe39754bd9e39c4c2773141ddebd83bafe2f) - @RogerSelwyn
+- [Extraneous letter](https://github.com/RogerSelwyn/MS365-Calendar/commit/415fc551eda955e199643818cf8d92fc62c1132e) - @RogerSelwyn
+
+### 🧰 Maintenance
+- [Minimum HA version 2024.8.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/9fd66cd636db91fe94b604127665bddf1d8e7828) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v0.1.2](https://github.com/RogerSelwyn/MS365-Calendar/commit/cf505f50271ca03f97eb6594f7bcf60de7bf2d84) - @RogerSelwyn
+
 ## v0.1.1 (2024/08/02)
 ### 🐛 Fixes
 - [Capture errors from fetching events so as not to provide empty data attributes](https://github.com/RogerSelwyn/MS365-Calendar/commit/34d24bcc08b4ba540511e9b5a5361ea7d1881bee) - @RogerSelwyn
