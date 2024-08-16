@@ -1,6 +1,5 @@
 """Main initialisation code."""
 
-import functools as ft
 import logging
 
 from homeassistant.core import HomeAssistant
@@ -37,8 +36,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
     perms = Permissions(hass, entry.data)
     permissions, failed_permissions = await perms.async_check_authorizations()  # pylint: disable=unused-variable
     if permissions is True:
-        account, is_authenticated = await _async_try_authentication(
-            hass, perms, credentials, main_resource
+        account, is_authenticated = await hass.async_add_executor_job(
+            _try_authentication, perms, credentials, main_resource
         )
     else:
         is_authenticated = False
@@ -82,24 +81,19 @@ async def async_reload_entry(hass: HomeAssistant, entry: MS365ConfigEntry) -> No
         await hass.config_entries.async_reload(entry.entry_id)
 
 
-async def _async_try_authentication(hass, perms, credentials, main_resource):
+def _try_authentication(perms, credentials, main_resource):
     _LOGGER.debug("Setup token")
-    token_backend = await hass.async_add_executor_job(
-        ft.partial(
-            FileSystemTokenBackend,
-            token_path=perms.token_path,
-            token_filename=perms.token_filename,
-        )
+    token_backend = FileSystemTokenBackend(
+        token_path=perms.token_path,
+        token_filename=perms.token_filename,
     )
+
     _LOGGER.debug("Setup account")
-    account = await hass.async_add_executor_job(
-        ft.partial(
-            Account,
-            credentials,
-            token_backend=token_backend,
-            timezone=CONST_UTC_TIMEZONE,
-            main_resource=main_resource,
-        )
+    account = Account(
+        credentials,
+        token_backend=token_backend,
+        timezone=CONST_UTC_TIMEZONE,
+        main_resource=main_resource,
     )
 
     return account, account.is_authenticated
