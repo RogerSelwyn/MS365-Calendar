@@ -48,10 +48,7 @@ class BasePermissions:
             self._get_permissions
         )
 
-        if (
-            self._permissions == TOKEN_FILE_CORRUPTED
-            or self._permissions == TOKEN_FILE_MISSING
-        ):
+        if self._permissions in [TOKEN_FILE_CORRUPTED, TOKEN_FILE_MISSING]:
             return self._permissions, None
         failed_permissions = []
         for permission in self.requested_permissions:

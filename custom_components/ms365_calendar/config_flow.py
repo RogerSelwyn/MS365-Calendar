@@ -84,10 +84,8 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_user(self, user_input=None):
         """Handle the initial step."""
-        errors = {}
+        errors = integration_validate_schema(user_input) if user_input else {}
 
-        if user_input:
-            errors = integration_validate_schema(user_input)
         if user_input and not errors:
             self._user_input = user_input
 
@@ -284,9 +282,7 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_ALT_AUTH_METHOD, default=entry_data[CONF_ALT_AUTH_METHOD]
             ): cv.boolean,
         }
-        self._config_schema = self._config_schema | integration_reconfigure_schema(
-            entry_data
-        )
+        self._config_schema |= integration_reconfigure_schema(entry_data)
 
         return await self.async_step_user()
 
