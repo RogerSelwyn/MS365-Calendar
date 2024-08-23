@@ -404,7 +404,7 @@ class MS365CalendarEntity(CalendarEntity):
     async def _async_update_calendar_event(
         self, event_id, ha_event, subject, start, end, **kwargs
     ):
-        event = await self._async_get_event_from_calendar(event_id)
+        event = await self.data.async_get_event(self.hass, event_id)
         event = add_call_data_to_event(event, subject, start, end, **kwargs)
         await self.hass.async_add_executor_job(event.save)
         self._raise_event(ha_event, event_id)
@@ -434,7 +434,7 @@ class MS365CalendarEntity(CalendarEntity):
             )
 
     async def _async_delete_calendar_event(self, event_id, ha_event):
-        event = await self._async_get_event_from_calendar(event_id)
+        event = await self.data.async_get_event(self.hass, event_id)
         await self.hass.async_add_executor_job(
             event.delete,
         )
@@ -457,7 +457,7 @@ class MS365CalendarEntity(CalendarEntity):
         self.async_schedule_update_ha_state(True)
 
     async def _async_send_response(self, event_id, response, send_response, message):
-        event = await self._async_get_event_from_calendar(event_id)
+        event = await self.data.async_get_event(self.hass, event_id)
         if response == EventResponse.Accept:
             await self.hass.async_add_executor_job(
                 ft.partial(event.accept_event, message, send_response=send_response)
@@ -477,10 +477,6 @@ class MS365CalendarEntity(CalendarEntity):
             await self.hass.async_add_executor_job(
                 ft.partial(event.decline_event, message, send_response=send_response)
             )
-
-    async def _async_get_event_from_calendar(self, event_id):
-        calendar = self.data.calendar
-        return await self.hass.async_add_executor_job(calendar.get_event, event_id)
 
     def _validate_permissions(self, error_message):
         if not self._entry.runtime_data.permissions.validate_authorization(
@@ -647,6 +643,10 @@ class MS365CalendarData:
                 )
 
         return event_list
+
+    async def async_get_event(self, hass, event_id):
+        """Get a single event by event_id."""
+        return await hass.async_add_executor_job(self.calendar.get_event, event_id)
 
     async def async_update(self, hass, limit):
         """Do the update."""
