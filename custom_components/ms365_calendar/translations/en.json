@@ -21,7 +21,7 @@
                     "enable_update": "Enable update services",
                     "basic_calendar": "Enable read only basic calendar",
                     "groups": "Enable support for group calendars",
-                    "shared_mailbox": "Email address or ID of shared mailbox"
+                    "shared_mailbox": "Email address or ID of 'shared' mailbox"
                 },
                 "description": "Enter previously created Entra ID App Registration credentials"
             },
