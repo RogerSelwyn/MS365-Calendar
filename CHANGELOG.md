@@ -1,6 +1,21 @@
 # Changelog
 
-## v0.1.1 (2024/08/13)
+## v0.1.3 (2024/09/04)
+### 🐛 Fixes
+- [Fix issue of o365 library accessing token within the event loop](https://github.com/RogerSelwyn/MS365-Calendar/commit/4cfc1e87c6dba1bf147a90d6e44ac8fa21990bfb) - @RogerSelwyn
+
+### 🧰 Maintenance
+- [Implement Sourcery.ai recomendations](https://github.com/RogerSelwyn/MS365-Calendar/commit/0f6e5be4eb0e4881ef7137bba426ff1d9b5056c7) - @RogerSelwyn
+- [Code simplification](https://github.com/RogerSelwyn/MS365-Calendar/commit/b6cac4e596f8247483b21ffe5a04bcbd021950c2) - @RogerSelwyn
+- [Emphasise 'shared' for shared_mailbox config](https://github.com/RogerSelwyn/MS365-Calendar/commit/06987394febdccbd2282bdaf2cdb19f52e2b62b4) - @RogerSelwyn
+
+### 📚 Documentation
+- [Update installation_and_configuration.md](https://github.com/RogerSelwyn/MS365-Calendar/commit/193c80749bc38e3677ebe330692286a2950b8aa4) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v0.1.3](https://github.com/RogerSelwyn/MS365-Calendar/commit/52c89fa559f3a9bf8e328b657c30b772321b5e60) - @RogerSelwyn
+
+## v0.1.2 (2024/08/13)
 ### 🐛 Fixes
 - [Handle corrupted token file gracefully with repair](https://github.com/RogerSelwyn/MS365-Calendar/commit/04ddfe39754bd9e39c4c2773141ddebd83bafe2f) - @RogerSelwyn
 - [Extraneous letter](https://github.com/RogerSelwyn/MS365-Calendar/commit/415fc551eda955e199643818cf8d92fc62c1132e) - @RogerSelwyn
