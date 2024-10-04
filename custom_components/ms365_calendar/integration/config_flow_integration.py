@@ -29,6 +29,7 @@ from .const_integration import (
     CONF_HOURS_BACKWARD_TO_GET,
     CONF_HOURS_FORWARD_TO_GET,
     CONF_MAX_RESULTS,
+    CONF_SENSITIVITY_EXCLUDE,
     CONF_TRACK,
     CONF_TRACK_NEW_CALENDAR,
     YAML_CALENDARS_FILENAME,
@@ -157,6 +158,9 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
                             entity, user_input, CONF_HOURS_BACKWARD_TO_GET
                         )
                         add_attribute_to_item(entity, user_input, CONF_MAX_RESULTS)
+                        add_attribute_to_item(
+                            entity, user_input, CONF_SENSITIVITY_EXCLUDE
+                        )
                         return await self.async_step_calendar_config()
 
         if self._calendar_no == len(self._calendar_list_selected):

@@ -51,6 +51,7 @@ from .const_integration import (
     CONF_HOURS_FORWARD_TO_GET,
     CONF_MAX_RESULTS,
     CONF_SEARCH,
+    CONF_SENSITIVITY_EXCLUDE,
     CONF_TRACK,
     CONF_TRACK_NEW_CALENDAR,
     CONST_GROUP,
@@ -223,12 +224,14 @@ class MS365CalendarEntity(CalendarEntity):
     def _init_data(self, calendar_id, entity):
         search = entity.get(CONF_SEARCH)
         exclude = entity.get(CONF_EXCLUDE)
+        sensitivity_exclude = entity.get(CONF_SENSITIVITY_EXCLUDE)
         return MS365CalendarData(
             self._account,
             self.entity_id,
             calendar_id,
             search,
             exclude,
+            sensitivity_exclude,
         )
 
     @property
@@ -515,6 +518,7 @@ class MS365CalendarData:
         calendar_id,
         search=None,
         exclude=None,
+        sensitivity_exclude=None,
     ):
         """Initialise the MS365 Calendar Data."""
         self._account = account
@@ -524,6 +528,7 @@ class MS365CalendarData:
         self.calendar = None
         self._search = search
         self._exclude = exclude
+        self._sensitivity_exclude = sensitivity_exclude
         self.event = None
         self._entity_id = entity_id
         self._error = False
@@ -619,6 +624,9 @@ class MS365CalendarData:
         # As at March 2023 not contains is not supported by Graph API
         # if self._exclude is not None:
         #     query.chain("and").on_attribute("subject").negate().contains(self._exclude)
+        if self._sensitivity_exclude is not None:
+            for item in self._sensitivity_exclude:
+                query.chain("and").on_attribute("sensitivity").unequal(item.value)
 
         return await hass.async_add_executor_job(
             ft.partial(

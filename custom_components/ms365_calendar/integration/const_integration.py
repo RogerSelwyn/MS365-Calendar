@@ -52,6 +52,7 @@ CONF_HOURS_BACKWARD_TO_GET = "start_offset"
 CONF_HOURS_FORWARD_TO_GET = "end_offset"
 CONF_MAX_RESULTS = "max_results"
 CONF_SEARCH = "search"
+CONF_SENSITIVITY_EXCLUDE = "sensitivity_exclude"
 CONF_TRACK = "track"
 CONF_TRACK_NEW_CALENDAR = "track_new_calendar"
 

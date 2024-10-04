@@ -36,7 +36,11 @@ def load_yaml_file(path, item_id, item_schema):
                     items[item[item_id]] = item_schema(item)
                 except VoluptuousError as exception:
                     # keep going
-                    _LOGGER.warning("Invalid Data: %s", exception)
+                    _LOGGER.warning(
+                        "Invalid Data - duplicate entries may be created in file %s: %s",
+                        path,
+                        exception,
+                    )
     except FileNotFoundError:
         # When YAML file could not be loaded/did not contain a dict
         return {}

@@ -46,6 +46,7 @@ from .const_integration import (
     CONF_HOURS_FORWARD_TO_GET,
     CONF_MAX_RESULTS,
     CONF_SEARCH,
+    CONF_SENSITIVITY_EXCLUDE,
     CONF_TRACK,
     EventResponse,
 )
@@ -157,6 +158,9 @@ YAML_CALENDAR_ENTITY_SCHEMA = vol.Schema(
         vol.Optional(CONF_SEARCH): cv.string,
         vol.Optional(CONF_EXCLUDE): [cv.string],
         vol.Optional(CONF_MAX_RESULTS): cv.positive_int,
+        vol.Optional(CONF_SENSITIVITY_EXCLUDE): vol.All(
+            cv.ensure_list, [vol.Coerce(EventSensitivity)]
+        ),
     }
 )
 
