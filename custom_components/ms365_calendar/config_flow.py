@@ -102,14 +102,21 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self._alt_auth_method = user_input.get(CONF_ALT_AUTH_METHOD)
             self._permissions = Permissions(self.hass, user_input)
             self._permissions.token_filename = self._permissions.build_token_filename()
-            self._account, is_authenticated = await self._async_try_authentication(
-                self._permissions, credentials, main_resource
+            self._account, is_authenticated = await self.hass.async_add_executor_job(
+                self._try_authentication,
+                self._permissions,
+                credentials,
+                main_resource,
             )
             if not is_authenticated or self._reconfigure:
                 scope = self._permissions.requested_permissions
                 self._callback_url = get_callback_url(self.hass, self._alt_auth_method)
-                self._url, self._state = self._account.con.get_authorization_url(
-                    requested_scopes=scope, redirect_uri=self._callback_url
+                self._url, self._state = await self.hass.async_add_executor_job(
+                    ft.partial(
+                        self._account.con.get_authorization_url,
+                        requested_scopes=scope,
+                        redirect_uri=self._callback_url,
+                    )
                 )
 
                 if self._alt_auth_method:
@@ -129,7 +136,7 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     ) -> data_entry_flow.FlowResult:
         """Handle the confirm step of a fix flow."""
         errors = {}
-        _LOGGER.debug("Token file: %s", self._account.con.token_backend)
+        # _LOGGER.debug("Token file: %s", self._account.con.token_backend)
         if user_input is not None:
             errors = await self._async_validate_response(user_input)
             if not errors:
@@ -230,24 +237,18 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return errors
 
-    async def _async_try_authentication(self, perms, credentials, main_resource):
+    def _try_authentication(self, perms, credentials, main_resource):
         _LOGGER.debug("Setup token")
-        token_backend = await self.hass.async_add_executor_job(
-            ft.partial(
-                FileSystemTokenBackend,
-                token_path=perms.token_path,
-                token_filename=perms.token_filename,
-            )
+        token_backend = FileSystemTokenBackend(
+            token_path=perms.token_path,
+            token_filename=perms.token_filename,
         )
         _LOGGER.debug("Setup account")
-        account = await self.hass.async_add_executor_job(
-            ft.partial(
-                Account,
-                credentials,
-                token_backend=token_backend,
-                timezone=CONST_UTC_TIMEZONE,
-                main_resource=main_resource,
-            )
+        account = Account(
+            credentials,
+            token_backend=token_backend,
+            timezone=CONST_UTC_TIMEZONE,
+            main_resource=main_resource,
         )
         try:
             return account, account.is_authenticated

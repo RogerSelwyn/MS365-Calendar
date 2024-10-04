@@ -15,6 +15,7 @@ class MS365Data:
 
     permissions: any
     account: any
+    is_authenticated: bool
     coordinator: any
     sensors: any
     options: MappingProxyType[str, Any]

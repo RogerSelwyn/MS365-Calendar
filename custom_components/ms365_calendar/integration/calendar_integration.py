@@ -97,6 +97,9 @@ async def async_integration_setup_entry(
 ) -> None:
     """Set up the MS365 platform."""
 
+    if not entry.runtime_data.is_authenticated:
+        return False
+
     update_supported = bool(
         entry.data[CONF_ENABLE_UPDATE]
         and entry.runtime_data.permissions.validate_authorization(
@@ -141,6 +144,7 @@ async def _async_setup_add_entities(
                     entry,
                     update_supported,
                 )
+                await cal.data.async_calendar_data_init(hass)
             except HTTPError:
                 _LOGGER.warning(
                     "No permission for calendar, please remove - Name: %s; Device: %s;",
@@ -204,7 +208,7 @@ class MS365CalendarEntity(CalendarEntity):
         self.entity_id = entity_id
         self._offset_reached = False
         self._data_attribute = []
-        self.data = self._init_data(account, calendar_id, entity)
+        self.data = self._init_data(calendar_id, entity)
         self._calendar_id = calendar_id
         self._device_id = device_id
         if update_supported:
@@ -216,11 +220,11 @@ class MS365CalendarEntity(CalendarEntity):
         self._max_results = entity.get(CONF_MAX_RESULTS)
         self._error = None
 
-    def _init_data(self, account, calendar_id, entity):
+    def _init_data(self, calendar_id, entity):
         search = entity.get(CONF_SEARCH)
         exclude = entity.get(CONF_EXCLUDE)
         return MS365CalendarData(
-            account,
+            self._account,
             self.entity_id,
             calendar_id,
             search,
@@ -513,19 +517,27 @@ class MS365CalendarData:
         exclude=None,
     ):
         """Initialise the MS365 Calendar Data."""
+        self._account = account
         self.group_calendar = calendar_id.startswith(CONST_GROUP)
         self.calendar_id = calendar_id
-        if self.group_calendar:
-            self._schedule = None
-            self.calendar = account.schedule(resource=self.calendar_id)
-        else:
-            self._schedule = account.schedule()
-            self.calendar = None
+        self._schedule = None
+        self.calendar = None
         self._search = search
         self._exclude = exclude
         self.event = None
         self._entity_id = entity_id
         self._error = False
+
+    async def async_calendar_data_init(self, hass):
+        """Async init of calendar data."""
+        if self.group_calendar:
+            self._schedule = None
+            self.calendar = await hass.async_add_executor_job(
+                ft.partial(self._account.schedule, resource=self.calendar_id)
+            )
+        else:
+            self._schedule = await hass.async_add_executor_job(self._account.schedule)
+            self.calendar = None
 
     async def _async_get_calendar(self, hass):
         try:
@@ -586,7 +598,7 @@ class MS365CalendarData:
         self, hass, calendar_schedule, start_date, end_date, limit
     ):
         """Get the events for the calendar."""
-        query = calendar_schedule.new_query()
+        query = await hass.async_add_executor_job(calendar_schedule.new_query)
         query = query.select(
             "subject",
             "body",
@@ -764,7 +776,7 @@ class MS365CalendarData:
 async def async_scan_for_calendars(hass, entry: MS365ConfigEntry):
     """Scan for new calendars."""
 
-    schedule = entry.runtime_data.account.schedule()
+    schedule = await hass.async_add_executor_job(entry.runtime_data.account.schedule)
     calendars = await hass.async_add_executor_job(schedule.list_calendars)
     track = entry.options.get(CONF_TRACK_NEW_CALENDAR, True)
     for calendar in calendars:

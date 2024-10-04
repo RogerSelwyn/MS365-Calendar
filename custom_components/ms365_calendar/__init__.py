@@ -49,7 +49,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
         if check_token:
             coordinator, sensors, platforms = await async_do_setup(hass, entry, account)
             entry.runtime_data = MS365Data(
-                perms, account, coordinator, sensors, entry.options
+                perms, account, is_authenticated, coordinator, sensors, entry.options
             )
             await hass.config_entries.async_forward_entry_setups(entry, platforms)
             entry.async_on_unload(entry.add_update_listener(async_reload_entry))
