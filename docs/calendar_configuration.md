@@ -51,6 +51,7 @@ Key | Type | Required | Description
 `start_offset` | `integer` | `False` | Number of hours to offset the start time to search for events for (negative numbers to offset into the past).
 `end_offset` | `integer` | `False` | Number of hours to offset the end time to search for events for (negative numbers to offset into the past).
 `max_results` | `integer` | `False` | Max number of events to retrieve. Default is 999.
+`sensitivity_exclude` | `list[string]` | `False` | List of sensitivities to exclude from the calendar (`normal`/`personal`/`private`/`confidential`)
 
 ## Group calendars
 
@@ -79,4 +80,14 @@ To exclude calendar items from being displayed, e.g. cancelled events, the exclu
     exclude:
      - "Cancelled"
      - "^In.*Junk$"
+```
+
+## Exclude
+
+To exclude specific sensitivities from being included in the calendar.
+
+```yaml
+    sensitivity_exclude:
+     - private
+     - confidential
 ```
