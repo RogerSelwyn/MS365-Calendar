@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.1.4 (2024/10/07)
+### ✨ Enhancements
+- [Add ability to exclude sensitivity types from calendar](https://github.com/RogerSelwyn/MS365-Calendar/commit/97d8bd0788a8f3c1b2b79e0c912e71f42c265f26) - @RogerSelwyn
+
+### 🐛 Fixes
+- [Ensure all calls to O365 library methods are async](https://github.com/RogerSelwyn/MS365-Calendar/commit/ae4ec1c20ef94fd12109918dffaac0e9c21c85b6) - @RogerSelwyn
+
+### 📚 Documentation
+- [Update docs for sensitivity_exclude](https://github.com/RogerSelwyn/MS365-Calendar/commit/8815fcdc7407a87fea3ee483a78e0b761e098610) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v0.1.4](https://github.com/RogerSelwyn/MS365-Calendar/commit/6627f8cab018bc3abe88502ca77241f819dbde45) - @RogerSelwyn
+
 ## v0.1.3 (2024/09/04)
 ### 🐛 Fixes
 - [Fix issue of o365 library accessing token within the event loop](https://github.com/RogerSelwyn/MS365-Calendar/commit/4cfc1e87c6dba1bf147a90d6e44ac8fa21990bfb) - @RogerSelwyn
