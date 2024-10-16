@@ -34,7 +34,6 @@ from ..const import (
     EVENT_HA_EVENT,
 )
 from ..helpers.config_entry import MS365ConfigEntry
-from ..helpers.filemgmt import build_config_file_path
 from ..helpers.utils import clean_html
 from .const_integration import (
     ATTR_ALL_DAY,
@@ -69,6 +68,7 @@ from .const_integration import (
 )
 from .filemgmt_integration import (
     async_update_calendar_file,
+    build_yaml_file_path,
     build_yaml_filename,
     load_yaml_file,
 )
@@ -121,7 +121,7 @@ async def _async_setup_add_entities(
     hass, account, async_add_entities, entry: MS365ConfigEntry, update_supported
 ):
     yaml_filename = build_yaml_filename(entry, YAML_CALENDARS_FILENAME)
-    yaml_filepath = build_config_file_path(hass, yaml_filename)
+    yaml_filepath = build_yaml_file_path(hass, yaml_filename)
     calendars = await hass.async_add_executor_job(
         load_yaml_file, yaml_filepath, CONF_CAL_ID, YAML_CALENDAR_DEVICE_SCHEMA
     )

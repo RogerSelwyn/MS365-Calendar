@@ -102,13 +102,17 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self._alt_auth_method = user_input.get(CONF_ALT_AUTH_METHOD)
             self._permissions = Permissions(self.hass, user_input)
             self._permissions.token_filename = self._permissions.build_token_filename()
-            self._account, is_authenticated = await self.hass.async_add_executor_job(
+            (
+                self._account,
+                is_authenticated,
+                auth_error,
+            ) = await self.hass.async_add_executor_job(
                 self._try_authentication,
                 self._permissions,
                 credentials,
                 main_resource,
             )
-            if not is_authenticated or self._reconfigure:
+            if not auth_error and (not is_authenticated or self._reconfigure):
                 scope = self._permissions.requested_permissions
                 self._callback_url = get_callback_url(self.hass, self._alt_auth_method)
                 self._url, self._state = await self.hass.async_add_executor_job(
@@ -124,7 +128,10 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
                 return await self.async_step_request_default()
 
-            errors[CONF_ENTITY_NAME] = "already_configured"
+            if auth_error:
+                errors[CONF_ENTITY_NAME] = "error_authenticating"
+            else:
+                errors[CONF_ENTITY_NAME] = "already_configured"
 
         data = self._config_schema or CONFIG_SCHEMA | CONFIG_SCHEMA_INTEGRATION
         return self.async_show_form(
@@ -142,16 +149,13 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if not errors:
                 return await self._async_create_update_entry()
 
-        failed_permissions = None
-        if self._failed_permissions:
-            failed_permissions = f"\n\n {', '.join(self._failed_permissions)}"
         return self.async_show_form(
             step_id="request_default",
             data_schema=vol.Schema(REQUEST_AUTHORIZATION_DEFAULT_SCHEMA),
             description_placeholders={
                 CONF_AUTH_URL: self._url,
                 CONF_ENTITY_NAME: self._entity_name,
-                CONF_FAILED_PERMISSIONS: failed_permissions,
+                CONF_FAILED_PERMISSIONS: self._failed_perms(),
             },
             errors=errors,
         )
@@ -170,18 +174,21 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self._callback_view = MS365AuthCallbackView()
             self.hass.http.register_view(self._callback_view)
 
-        failed_permissions = None
-        if self._failed_permissions:
-            failed_permissions = f"\n\nMissing - {', '.join(self._failed_permissions)}"
-
         return self.async_show_form(
             step_id="request_alt",
             description_placeholders={
                 CONF_AUTH_URL: self._url,
                 CONF_ENTITY_NAME: self._entity_name,
-                CONF_FAILED_PERMISSIONS: failed_permissions,
+                CONF_FAILED_PERMISSIONS: self._failed_perms(),
             },
             errors=errors,
+        )
+
+    def _failed_perms(self):
+        return (
+            f"\n\nMissing - {', '.join(self._failed_permissions)}"
+            if self._failed_permissions
+            else None
         )
 
     async def _async_create_update_entry(self):
@@ -251,10 +258,11 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             main_resource=main_resource,
         )
         try:
-            return account, account.is_authenticated
+            return account, account.is_authenticated, False
 
-        except json.decoder.JSONDecodeError:
-            return account, False
+        except json.decoder.JSONDecodeError as err:
+            _LOGGER.error("Error authenticating - JSONDecodeError - %s", err)
+            return account, False, err
 
     async def async_step_reconfigure(
         self,

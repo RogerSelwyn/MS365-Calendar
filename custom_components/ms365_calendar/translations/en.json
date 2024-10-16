@@ -5,6 +5,7 @@
         },
         "error": {
             "already_configured": "This account name has already been used. Use re-configure.",
+            "error_authenticating": "Error authenticating, JSONDecodeError, check log for errors",
             "invalid_url": "Error, the originating url does not seem to be a valid microsoft redirect",
             "permissions": "Minimum permissions not granted for account: {entity_name}",
             "corrupted": "Token file is corrupted after successful authentication, check log for file system errors",

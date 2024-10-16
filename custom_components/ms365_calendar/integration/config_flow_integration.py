@@ -18,7 +18,6 @@ from ..const import (
     CONF_SHARED_MAILBOX,
 )
 from ..helpers.config_entry import MS365ConfigEntry
-from ..helpers.filemgmt import build_config_file_path
 from ..helpers.utils import add_attribute_to_item
 from .const_integration import (
     CONF_BASIC_CALENDAR,
@@ -35,6 +34,7 @@ from .const_integration import (
     YAML_CALENDARS_FILENAME,
 )
 from .filemgmt_integration import (
+    build_yaml_file_path,
     build_yaml_filename,
     read_calendar_yaml_file,
     write_calendar_yaml_file,
@@ -89,7 +89,7 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
     ) -> FlowResult:
         """Set up the option flow."""
 
-        self._yaml_filepath = build_config_file_path(self.hass, self._yaml_filename)
+        self._yaml_filepath = build_yaml_file_path(self.hass, self._yaml_filename)
         self._calendars = await self.hass.async_add_executor_job(
             read_calendar_yaml_file,
             self._yaml_filepath,
