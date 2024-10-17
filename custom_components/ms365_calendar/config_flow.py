@@ -4,18 +4,19 @@ import functools as ft
 import json
 import logging
 from collections.abc import Mapping
-from typing import Any
+from typing import Any, Self
 
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from aiohttp import web_response
-from homeassistant import (
-    config_entries,  # exceptions
-    data_entry_flow,
-)
 from homeassistant.components.http import HomeAssistantView
-from homeassistant.config_entries import ConfigFlowResult
+from homeassistant.config_entries import (
+    CONN_CLASS_CLOUD_POLL,
+    ConfigFlow,
+    ConfigFlowResult,
+)
 from homeassistant.core import callback
+from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.network import get_url
 from O365 import Account, FileSystemTokenBackend
@@ -54,11 +55,11 @@ from .schema import (
 _LOGGER = logging.getLogger(__name__)
 
 
-class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
     """Example config flow."""
 
     VERSION = 1
-    CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
+    CONNECTION_CLASS = CONN_CLASS_CLOUD_POLL
 
     def __init__(self):
         """Initiliase the configuration flow."""
@@ -81,6 +82,10 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def async_get_options_flow(config_entry):
         """MS365 options callback."""
         return MS365OptionsFlowHandler(config_entry)
+
+    def is_matching(self, other_flow: Self) -> bool:
+        """Return True if other_flow is matching this flow."""
+        return other_flow.entity_name == self._entity_name
 
     async def async_step_user(self, user_input=None):
         """Handle the initial step."""
@@ -140,7 +145,7 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_request_default(
         self, user_input: dict[str, str] | None = None
-    ) -> data_entry_flow.FlowResult:
+    ) -> FlowResult:
         """Handle the confirm step of a fix flow."""
         errors = {}
         # _LOGGER.debug("Token file: %s", self._account.con.token_backend)
@@ -162,7 +167,7 @@ class MS365ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_request_alt(
         self, user_input: dict[str, str] | None = None
-    ) -> data_entry_flow.FlowResult:
+    ) -> FlowResult:
         """Handle the confirm step of a fix flow."""
         errors = {}
         if user_input is not None:
