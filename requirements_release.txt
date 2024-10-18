@@ -1,2 +1,2 @@
 PyGithub>=1.51
-ruff==0.6.9
+ruff==0.7.0
