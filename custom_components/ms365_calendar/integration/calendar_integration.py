@@ -284,7 +284,7 @@ class MS365CalendarEntity(CalendarEntity):
 
         # Get events for extra attributes.
         try:
-            results = await self.data.async_ms365_get_events(
+            results = await self.data.async_update_data(
                 self.hass,
                 dt_util.utcnow() + timedelta(hours=self._start_offset),
                 dt_util.utcnow() + timedelta(hours=self._end_offset),
@@ -664,6 +664,10 @@ class MS365CalendarData:
     async def async_get_event(self, hass, event_id):
         """Get a single event by event_id."""
         return await hass.async_add_executor_job(self.calendar.get_event, event_id)
+
+    async def async_update_data(self, hass, start_date, end_date, limit=999):
+        """Do the update for extra attributes."""
+        return await self.async_ms365_get_events(hass, start_date, end_date, limit)
 
     async def async_update(self, hass, limit):
         """Do the update."""
