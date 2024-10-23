@@ -354,8 +354,7 @@ class MS365CalendarEntity(CalendarEntity):
     async def async_create_calendar_event(self, subject, start, end, **kwargs):
         """Create the event."""
 
-        if not self._validate_permissions("create"):
-            return
+        self._validate_permissions("create")
 
         calendar = self.data.calendar
 
@@ -377,8 +376,7 @@ class MS365CalendarEntity(CalendarEntity):
     ):
         """Modify the event."""
 
-        if not self._validate_permissions("modify"):
-            return
+        self._validate_permissions("modify")
 
         if self.data.group_calendar:
             _group_calendar_log(self.entity_id)
@@ -421,8 +419,7 @@ class MS365CalendarEntity(CalendarEntity):
         recurrence_range: str | None = None,
     ):
         """Remove the event."""
-        if not self._validate_permissions("delete"):
-            return
+        self._validate_permissions("delete")
 
         if self.data.group_calendar:
             _group_calendar_log(self.entity_id)
@@ -449,8 +446,7 @@ class MS365CalendarEntity(CalendarEntity):
         self, event_id, response, send_response=True, message=None
     ):
         """Respond to calendar event."""
-        if not self._validate_permissions("respond to"):
-            return
+        self._validate_permissions("respond to")
 
         if self.data.group_calendar:
             _group_calendar_log(self.entity_id)
