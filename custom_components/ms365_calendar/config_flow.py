@@ -198,18 +198,15 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def _async_create_update_entry(self):
         if self._reconfigure:
-            self.hass.config_entries.async_update_entry(
-                self._entry,
-                data=self._user_input,
-            )
-            await self.hass.config_entries.async_reload(self._entry.entry_id)
             for error in [
                 TOKEN_FILE_CORRUPTED,
                 TOKEN_FILE_MISSING,
                 TOKEN_FILE_PERMISSIONS,
             ]:
                 ir.async_delete_issue(self.hass, DOMAIN, error)
-            return self.async_abort(reason="reconfigure_successful")
+            return self.async_update_reload_and_abort(
+                self._entry, data=self._user_input
+            )
 
         return self.async_create_entry(title=self._entity_name, data=self._user_input)
 
