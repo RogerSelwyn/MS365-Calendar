@@ -98,9 +98,6 @@ async def async_integration_setup_entry(
 ) -> None:
     """Set up the MS365 platform."""
 
-    if not entry.runtime_data.is_authenticated:
-        return False
-
     update_supported = bool(
         entry.data[CONF_ENABLE_UPDATE]
         and entry.runtime_data.permissions.validate_authorization(
