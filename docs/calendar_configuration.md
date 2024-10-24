@@ -82,7 +82,7 @@ To exclude calendar items from being displayed, e.g. cancelled events, the exclu
      - "^In.*Junk$"
 ```
 
-## Exclude
+## Sensitivity Exclude
 
 To exclude specific sensitivities from being included in the calendar.
 
