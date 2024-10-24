@@ -4,7 +4,7 @@ import functools as ft
 import logging
 import re
 from copy import deepcopy
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from operator import attrgetter
 from typing import Any
 
@@ -380,7 +380,6 @@ class MS365CalendarEntity(CalendarEntity):
 
         if self.data.group_calendar:
             _group_calendar_log(self.entity_id)
-            return
 
         if recurrence_range:
             await self._async_update_calendar_event(
@@ -423,7 +422,6 @@ class MS365CalendarEntity(CalendarEntity):
 
         if self.data.group_calendar:
             _group_calendar_log(self.entity_id)
-            return
 
         if recurrence_range:
             await self._async_delete_calendar_event(
@@ -450,7 +448,6 @@ class MS365CalendarEntity(CalendarEntity):
 
         if self.data.group_calendar:
             _group_calendar_log(self.entity_id)
-            return
 
         await self._async_send_response(event_id, response, send_response, message)
         self._raise_event(EVENT_RESPOND_CALENDAR_EVENT, event_id)
@@ -556,8 +553,6 @@ class MS365CalendarData:
         events = await self._async_calendar_schedule_get_events(
             hass, self.calendar, start_date, end_date, limit
         )
-        if events is None:
-            return None
 
         events = self._filter_events(events)
         events = self._sort_events(events)
@@ -740,11 +735,6 @@ class MS365CalendarData:
         return vevent
 
     @staticmethod
-    def is_all_day(vevent):
-        """Is it all day."""
-        return vevent.is_all_day
-
-    @staticmethod
     def is_started(vevent):
         """Is it over."""
         return dt_util.utcnow() >= MS365CalendarData.to_datetime(get_start_date(vevent))
@@ -757,24 +747,13 @@ class MS365CalendarData:
     @staticmethod
     def to_datetime(obj):
         """To datetime."""
-        if isinstance(obj, datetime):
-            date_obj = (
-                obj.replace(tzinfo=dt_util.get_default_time_zone())
-                if obj.tzinfo is None
-                else obj
-            )
-        elif isinstance(obj, date):
+        if not isinstance(obj, datetime):
             date_obj = dt_util.start_of_local_day(
                 dt_util.dt.datetime.combine(obj, dt_util.dt.time.min)
             )
-        elif "date" in obj:
-            date_obj = dt_util.start_of_local_day(
-                dt_util.dt.datetime.combine(
-                    dt_util.parse_date(obj["date"]), dt_util.dt.time.min
-                )
-            )
         else:
-            date_obj = dt_util.as_local(dt_util.parse_datetime(obj["dateTime"]))
+            date_obj = obj
+
         return dt_util.as_utc(date_obj)
 
 
