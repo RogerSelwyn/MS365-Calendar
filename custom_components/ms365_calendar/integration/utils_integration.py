@@ -51,13 +51,7 @@ def get_hass_date(obj, is_all_day):
 
 def get_end_date(obj):
     """Get the end date."""
-    if hasattr(obj, "end"):
-        return obj.end
-
-    if hasattr(obj, "duration"):
-        return obj.start + obj.duration.value
-
-    return obj.start + timedelta(days=1)
+    return obj.end
 
 
 def get_start_date(obj):
