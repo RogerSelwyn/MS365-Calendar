@@ -163,7 +163,9 @@ async def test_create_ms365_event(
                 "subject": "Department Party",
                 "body": "Meeting to provide technical review for 'Phoenix' design.",
                 "start": "2022-03-22T20:00:00.000Z",
-                "end": "2022-03-22T22:00:00.000Z",
+                "end": "2022-03-23T22:00:00.000Z",
+                "attendees": [{"email": "example@example.com", "type": "Required"}],
+                "is_all_day": True,
             },
             blocking=True,
             return_response=False,
@@ -399,6 +401,83 @@ async def test_update_recurring_event(
                     "summary": "Festival International de Jazz de Montreal",
                     "dtstart": "2024-10-24T07:00:00.0000000",
                     "dtend": "2024-10-24T07:30:00.0000000",
+                    "rrule": "COUNT=5;FREQ=DAILY",
+                },
+                "recurrence_range": "some range",
+                "recurrence_id": event_name,
+            },
+        )
+
+    assert mock_save.called
+
+    with patch("O365.calendar.Event.save") as mock_save:
+        await client.cmd_result(
+            "update",
+            {
+                "entity_id": calendar_name,
+                "uid": event_name,
+                "event": {
+                    "summary": "Festival International de Jazz de Montreal",
+                    "dtstart": "2024-10-24T07:00:00.0000000",
+                    "dtend": "2024-10-24T07:30:00.0000000",
+                    "rrule": "UNTIL=20990101T010101;FREQ=WEEKLY;BYDAY=MO",
+                },
+                "recurrence_range": "some range",
+                "recurrence_id": event_name,
+            },
+        )
+
+    assert mock_save.called
+
+    with patch("O365.calendar.Event.save") as mock_save:
+        await client.cmd_result(
+            "update",
+            {
+                "entity_id": calendar_name,
+                "uid": event_name,
+                "event": {
+                    "summary": "Festival International de Jazz de Montreal",
+                    "dtstart": "2024-10-24T07:00:00.0000000",
+                    "dtend": "2024-10-24T07:30:00.0000000",
+                    "rrule": "UNTIL=20990101T010101;FREQ=MONTHLY",
+                },
+                "recurrence_range": "some range",
+                "recurrence_id": event_name,
+            },
+        )
+
+    assert mock_save.called
+
+    with patch("O365.calendar.Event.save") as mock_save:
+        await client.cmd_result(
+            "update",
+            {
+                "entity_id": calendar_name,
+                "uid": event_name,
+                "event": {
+                    "summary": "Festival International de Jazz de Montreal",
+                    "dtstart": "2024-10-24T07:00:00.0000000",
+                    "dtend": "2024-10-24T07:30:00.0000000",
+                    "rrule": "FREQ=MONTHLY;BYDAY=+4FR",
+                },
+                "recurrence_range": "some range",
+                "recurrence_id": event_name,
+            },
+        )
+
+    assert mock_save.called
+
+    with patch("O365.calendar.Event.save") as mock_save:
+        await client.cmd_result(
+            "update",
+            {
+                "entity_id": calendar_name,
+                "uid": event_name,
+                "event": {
+                    "summary": "Festival International de Jazz de Montreal",
+                    "dtstart": "2024-10-24T07:00:00.0000000",
+                    "dtend": "2024-10-24T07:30:00.0000000",
+                    "rrule": "UNTIL=20990101T010101;FREQ=YEARLY",
                 },
                 "recurrence_range": "some range",
                 "recurrence_id": event_name,

@@ -1,5 +1,5 @@
 # pylint: disable=unused-argument, line-too-long
-"""Test odds and sods."""
+"""Test the diagnostics."""
 
 from homeassistant.core import HomeAssistant
 
@@ -17,7 +17,6 @@ async def test_diagnostics(
 ):
     """Test Diagnostics."""
     result = await async_get_config_entry_diagnostics(hass, base_config_entry)
-    print(result)
 
     assert "config_entry_data" in result
     assert result["config_entry_data"]["client_id"] == "**REDACTED**"

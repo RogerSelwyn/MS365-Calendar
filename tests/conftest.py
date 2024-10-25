@@ -2,11 +2,12 @@
 """Global fixtures for integration."""
 
 import os
-import pathlib
+import shutil
 import sys
 from collections.abc import Awaitable, Callable
 from copy import deepcopy
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 from unittest.mock import Mock, patch
 
@@ -41,13 +42,21 @@ pytest_plugins = "pytest_homeassistant_custom_component"  # pylint: disable=inva
 THIS_MODULE = sys.modules[__name__]
 
 
+@pytest.fixture(autouse=True, scope="session")
+def session_setup():
+    """Setup the testing session."""
+    Path(Path(__file__).parent.joinpath("data/storage/tokens")).mkdir(
+        parents=True, exist_ok=True
+    )
+    yield
+    shutil.rmtree(Path(__file__).parent.joinpath("data/storage"))
+
+
 @pytest.fixture(autouse=True)
 def storage_path_setup():
     """Setup the storage paths."""
-    tk_path = pathlib.Path(__file__).parent.joinpath("data/storage/tokens")
-    yml_path = pathlib.Path(__file__).parent.joinpath(
-        "data/storage/ms365_calendars_test.yaml"
-    )
+    tk_path = Path(__file__).parent.joinpath("data/storage/tokens")
+    yml_path = Path(__file__).parent.joinpath("data/storage/ms365_calendars_test.yaml")
 
     with patch.object(
         permissions,
@@ -90,13 +99,13 @@ def skip_notifications_fixture():
 @pytest.fixture(name="ms365_tidy_storage", autouse=True)
 def ms365_tidy_storage_fixture():
     """Tidy up tokens before test."""
-    directory = pathlib.Path(__file__).parent.joinpath("data/storage/tokens")
+    directory = Path(__file__).parent.joinpath("data/storage/tokens")
     files_in_directory = os.listdir(directory)
     for file in files_in_directory:
         path_to_file = os.path.join(directory, file)
         os.remove(path_to_file)
 
-    directory = pathlib.Path(__file__).parent.joinpath("data/storage")
+    directory = Path(__file__).parent.joinpath("data/storage")
     files_in_directory = os.listdir(directory)
     filtered_files = [file for file in files_in_directory if file.endswith(".yaml")]
     for file in filtered_files:
@@ -180,7 +189,6 @@ async def setup_update_integration(
     data = deepcopy(BASE_CONFIG_ENTRY)
     data["enable_update"] = True
     hass.config_entries.async_update_entry(base_config_entry, data=data)
-    print(base_config_entry.data)
 
     await hass.config_entries.async_setup(base_config_entry.entry_id)
     await hass.async_block_till_done()

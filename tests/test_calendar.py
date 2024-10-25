@@ -1,5 +1,5 @@
 # pylint: disable=unused-argument,line-too-long,wrong-import-order
-"""Test main calendar processing."""
+"""Test main calendar testing."""
 
 import logging
 from copy import deepcopy
