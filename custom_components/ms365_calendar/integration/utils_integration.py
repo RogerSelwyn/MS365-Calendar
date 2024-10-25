@@ -1,7 +1,7 @@
 """Calendar utilities processes."""
 
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from homeassistant.util import slugify
 from O365.calendar import Attendee  # pylint: disable=no-name-in-module)

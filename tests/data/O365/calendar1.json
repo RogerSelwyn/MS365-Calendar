@@ -1,0 +1,22 @@
+{
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('fake_user_id')/calendars/$entity",
+    "id": "calendar1",
+    "name": "Calendar",
+    "color": "auto",
+    "hexColor": "#000000",
+    "isDefaultCalendar": false,
+    "changeKey": "changekey1",
+    "canShare": true,
+    "canViewPrivateItems": true,
+    "canEdit": true,
+    "allowedOnlineMeetingProviders": [
+        "teamsForBusiness"
+    ],
+    "defaultOnlineMeetingProvider": "teamsForBusiness",
+    "isTallyingResponses": false,
+    "isRemovable": true,
+    "owner": {
+        "name": "John Doe",
+        "address": "john@nomail.com"
+    }
+}

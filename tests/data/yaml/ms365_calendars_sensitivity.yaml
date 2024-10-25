@@ -1,0 +1,18 @@
+
+- cal_id: calendar1
+  entities:
+  - device_id: Calendar1
+    end_offset: 24
+    name: Calendar1
+    start_offset: 0
+    track: true
+    sensitivity_exclude: 
+     - "private"
+
+- cal_id: group:calendar2
+  entities:
+  - device_id: Calendar2
+    end_offset: 24
+    name: Calendar2
+    start_offset: 0
+    track: false

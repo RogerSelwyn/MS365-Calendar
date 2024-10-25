@@ -1,0 +1,109 @@
+"""Mock setup."""
+
+from datetime import timedelta
+
+from .const import URL
+from .utils import mock_call, utcnow
+
+
+class MS365Mocks:
+    """Standard mocks."""
+
+    def standard_mocks(self, requests_mock):
+        """Setup the standard mocks."""
+        mock_call(requests_mock, URL.ME, "me")
+        mock_call(requests_mock, URL.CALENDARS, "calendars")
+        mock_call(requests_mock, URL.CALENDARS, "calendar1", "calendar1")
+        mock_call(
+            requests_mock,
+            URL.CALENDARS,
+            "calendar1_calendar_view",
+            "calendar1/calendarView",
+            start=utcnow().strftime("%Y-%m-%d"),
+            end=(utcnow() + timedelta(days=1)).strftime("%Y-%m-%d"),
+        )
+        mock_call(requests_mock, URL.CALENDARS, "calendar2", "group:calendar2")
+        mock_call(
+            requests_mock,
+            URL.GROUP_CALENDARS,
+            "calendar2_calendar_view",
+            "calendar2/calendar/calendarView",
+        )
+
+    def shared_mocks(self, requests_mock):
+        """Setup the standard mocks."""
+        mock_call(requests_mock, URL.ME, "me")
+        mock_call(requests_mock, URL.SHARED_CALENDARS, "calendars")
+        mock_call(requests_mock, URL.SHARED_CALENDARS, "calendar1", "calendar1")
+        mock_call(
+            requests_mock,
+            URL.SHARED_CALENDARS,
+            "calendar1_calendar_view",
+            "calendar1/calendarView",
+            start=utcnow().strftime("%Y-%m-%d"),
+            end=(utcnow() + timedelta(days=1)).strftime("%Y-%m-%d"),
+        )
+        mock_call(requests_mock, URL.CALENDARS, "calendar2", "group:calendar2")
+        mock_call(
+            requests_mock,
+            URL.GROUP_CALENDARS,
+            "calendar2_calendar_view",
+            "calendar2/calendar/calendarView",
+        )
+
+    def no_events_mocks(self, requests_mock):
+        """Setup the standard mocks."""
+        _generic_mocks(requests_mock)
+        mock_call(
+            requests_mock,
+            URL.CALENDARS,
+            "calendar1_calendar_view_none",
+            "calendar1/calendarView",
+            start=utcnow().strftime("%Y-%m-%d"),
+            end=(utcnow() + timedelta(days=1)).strftime("%Y-%m-%d"),
+        )
+
+    def all_day_event_mocks(self, requests_mock):
+        """Setup the standard mocks."""
+        _generic_mocks(requests_mock)
+        mock_call(
+            requests_mock,
+            URL.CALENDARS,
+            "calendar1_calendar_view_all_day",
+            "calendar1/calendarView",
+            start=utcnow().strftime("%Y-%m-%d"),
+            end=(utcnow() + timedelta(days=1)).strftime("%Y-%m-%d"),
+        )
+
+    def started_event_mocks(self, requests_mock):
+        """Setup the standard mocks."""
+        _generic_mocks(requests_mock)
+        mock_call(
+            requests_mock,
+            URL.CALENDARS,
+            "calendar1_calendar_view_started",
+            "calendar1/calendarView",
+            start=utcnow().strftime("%Y-%m-%d"),
+            end=(utcnow() + timedelta(days=1)).strftime("%Y-%m-%d"),
+        )
+
+    def not_started_event_mocks(self, requests_mock):
+        """Setup the standard mocks."""
+        _generic_mocks(requests_mock)
+        mock_call(
+            requests_mock,
+            URL.CALENDARS,
+            "calendar1_calendar_view_not_started",
+            "calendar1/calendarView",
+            start=utcnow().strftime("%Y-%m-%d"),
+            end=(utcnow() + timedelta(days=1)).strftime("%Y-%m-%d"),
+        )
+
+
+MS365MOCKS = MS365Mocks()
+
+
+def _generic_mocks(requests_mock):
+    mock_call(requests_mock, URL.ME, "me")
+    mock_call(requests_mock, URL.CALENDARS, "calendars_one")
+    mock_call(requests_mock, URL.CALENDARS, "calendar1", "calendar1")
