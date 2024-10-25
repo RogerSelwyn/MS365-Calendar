@@ -59,9 +59,7 @@ def _has_consistent_timezone(*keys: Any) -> Callable[[dict[str, Any]], dict[str,
         """Test that all keys that are datetime values have the same timezone."""
         tzinfos = []
         for key in keys:
-            if not (value := obj.get(key)) or not isinstance(value, datetime.datetime):
-                return obj
-            tzinfos.append(value.tzinfo)
+            tzinfos.append(obj.get(key).tzinfo)
         uniq_values = groupby(tzinfos)
         if len(list(uniq_values)) > 1:
             raise vol.Invalid("Expected all values to have the same timezone")
