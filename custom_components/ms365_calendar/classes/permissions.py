@@ -103,8 +103,10 @@ class BasePermissions:
             newops = ["Send"]
         elif operation == "ReadBasic":
             newops = ["ReadBasic", "Read", "ReadWrite"]
-        else:
+        elif operation == "Read":
             newops = ["Read", "ReadWrite"]
+        else:
+            newops = []
         for newop in newops:
             newperm = deepcopy(permission).replace(operation, newop)
             if newperm in self.permissions:
