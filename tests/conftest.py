@@ -4,71 +4,52 @@
 import os
 import shutil
 import sys
-from collections.abc import Awaitable, Callable
 from copy import deepcopy
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
-from aiohttp import ClientWebSocketResponse
-from aiohttp.test_utils import TestClient
-from homeassistant.core import Event, HomeAssistant
-from pytest_homeassistant_custom_component.typing import (
-    ClientSessionGenerator,
-    WebSocketGenerator,
-)
+from homeassistant.core import HomeAssistant
 from requests_mock import Mocker
 
-from custom_components.ms365_calendar.classes import permissions
-from custom_components.ms365_calendar.integration import filemgmt_integration
-from custom_components.ms365_calendar.integration.const_integration import DOMAIN
-
-from .helpers.const import BASE_CONFIG_ENTRY, TITLE
+from .const import STORAGE_LOCATION, TITLE, TOKEN_LOCATION
 from .helpers.mock_config_entry import MS365MockConfigEntry
-
-# from .helpers.mocks import (  # noqa: F401
-#     all_day_event_mocks,
-#     no_events_mocks,
-#     not_started_event_mocks,
-#     standard_mocks,
-#     started_event_mocks,
-# )
-from .helpers.mocks import MS365MOCKS
 from .helpers.utils import build_token_file
+from .integration import permissions
+from .integration.const import (
+    BASE_CONFIG_ENTRY,
+    BASE_TOKEN_PERMS,
+    DOMAIN,
+    UPDATE_TOKEN_PERMS,
+)
+from .integration.helpers.mocks import MS365MOCKS
 
-pytest_plugins = "pytest_homeassistant_custom_component"  # pylint: disable=invalid-name
+pytest_plugins = [
+    "pytest_homeassistant_custom_component",
+    "tests.integration.fixtures",
+]  # pylint: disable=invalid-name
 THIS_MODULE = sys.modules[__name__]
 
 
 @pytest.fixture(autouse=True, scope="session")
 def session_setup():
     """Setup the testing session."""
-    Path(Path(__file__).parent.joinpath("data/storage/tokens")).mkdir(
-        parents=True, exist_ok=True
-    )
+    Path(TOKEN_LOCATION).mkdir(parents=True, exist_ok=True)
     yield
-    shutil.rmtree(Path(__file__).parent.joinpath("data/storage"))
+    shutil.rmtree(STORAGE_LOCATION)
 
 
 @pytest.fixture(autouse=True)
-def storage_path_setup():
+def token_storage_path_setup():
     """Setup the storage paths."""
-    tk_path = Path(__file__).parent.joinpath("data/storage/tokens")
-    yml_path = Path(__file__).parent.joinpath("data/storage/ms365_calendars_test.yaml")
+    tk_path = TOKEN_LOCATION
 
     with patch.object(
         permissions,
         "build_config_file_path",
         return_value=tk_path,
     ):
-        with patch.object(
-            filemgmt_integration,
-            "build_config_file_path",
-            return_value=yml_path,
-        ):
-            yield
+        yield
 
 
 # This fixture enables loading custom integrations in all tests.
@@ -96,19 +77,12 @@ def skip_notifications_fixture():
         yield
 
 
-@pytest.fixture(name="ms365_tidy_storage", autouse=True)
-def ms365_tidy_storage_fixture():
+@pytest.fixture(name="ms365_tidy_token_storage", autouse=True)
+def ms365_tidy_token_storage_fixture():
     """Tidy up tokens before test."""
-    directory = Path(__file__).parent.joinpath("data/storage/tokens")
+    directory = TOKEN_LOCATION
     files_in_directory = os.listdir(directory)
     for file in files_in_directory:
-        path_to_file = os.path.join(directory, file)
-        os.remove(path_to_file)
-
-    directory = Path(__file__).parent.joinpath("data/storage")
-    files_in_directory = os.listdir(directory)
-    filtered_files = [file for file in files_in_directory if file.endswith(".yaml")]
-    for file in filtered_files:
         path_to_file = os.path.join(directory, file)
         os.remove(path_to_file)
 
@@ -148,7 +122,7 @@ def update_config_entry(hass: HomeAssistant) -> MS365MockConfigEntry:
 @pytest.fixture
 def base_token(request):
     """Setup a basic token."""
-    perms = "Calendars.Read"
+    perms = BASE_TOKEN_PERMS
     if hasattr(request, "param"):
         perms = request.param
     build_token_file(perms)
@@ -183,7 +157,7 @@ async def setup_update_integration(
     base_config_entry: MS365MockConfigEntry,
 ) -> None:
     """Fixture for setting up the component."""
-    build_token_file("Calendars.ReadWrite")
+    build_token_file(UPDATE_TOKEN_PERMS)
     MS365MOCKS.standard_mocks(requests_mock)
     base_config_entry.add_to_hass(hass)
     data = deepcopy(BASE_CONFIG_ENTRY)
@@ -192,87 +166,3 @@ async def setup_update_integration(
 
     await hass.config_entries.async_setup(base_config_entry.entry_id)
     await hass.async_block_till_done()
-
-
-@dataclass
-class ListenerSetupData:
-    """A collection of data set up by the listener_setup fixture."""
-
-    hass: HomeAssistant
-    client: TestClient
-    event_listener: Mock
-    events: any
-
-
-@pytest.fixture
-async def listener_setup(
-    hass: HomeAssistant,
-    hass_client_no_auth: ClientSessionGenerator,
-) -> ListenerSetupData:
-    """Set up integration, client and webhook url."""
-
-    client = await hass_client_no_auth()
-
-    events = []
-
-    async def event_listener(event: Event) -> None:
-        events.append(event)
-
-    hass.bus.async_listen(f"{DOMAIN}_create_calendar_event", event_listener)
-    hass.bus.async_listen(f"{DOMAIN}_modify_calendar_event", event_listener)
-    hass.bus.async_listen(f"{DOMAIN}_remove_calendar_event", event_listener)
-    hass.bus.async_listen(f"{DOMAIN}_remove_calendar_recurrences", event_listener)
-    hass.bus.async_listen(f"{DOMAIN}_respond_calendar_event", event_listener)
-
-    return ListenerSetupData(hass, client, event_listener, events)
-
-
-class Client:
-    """Test client with helper methods for calendar websocket."""
-
-    def __init__(self, client: ClientWebSocketResponse) -> None:
-        """Initialize Client."""
-        self.client = client
-        self.id = 0
-
-    async def cmd(
-        self, cmd: str, payload: dict[str, Any] | None = None
-    ) -> dict[str, Any]:
-        """Send a command and receive the json result."""
-        self.id += 1
-        await self.client.send_json(
-            {
-                "id": self.id,
-                "type": f"calendar/event/{cmd}",
-                **(payload if payload is not None else {}),
-            }
-        )
-        resp = await self.client.receive_json()
-        assert resp.get("id") == self.id
-        return resp
-
-    async def cmd_result(
-        self, cmd: str, payload: dict[str, Any] | None = None
-    ) -> dict[str, Any] | None:
-        """Send a command and parse the result."""
-        resp = await self.cmd(cmd, payload)
-        assert resp.get("success")
-        assert resp.get("type") == "result"
-        return resp.get("result")
-
-
-type ClientFixture = Callable[[], Awaitable[Client]]
-
-
-@pytest.fixture
-async def ws_client(
-    hass: HomeAssistant,
-    hass_ws_client: WebSocketGenerator,
-) -> ClientFixture:
-    """Fixture for creating the test websocket client."""
-
-    async def create_client() -> Client:
-        ws_client = await hass_ws_client(hass)
-        return Client(ws_client)
-
-    return create_client

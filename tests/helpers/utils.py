@@ -1,26 +1,15 @@
 """Utilities for MS365 testing."""
 
 import json
-import pathlib
+import os
 import re
 import shutil
 import time
 from datetime import datetime, timezone
+from pathlib import Path
 
-from homeassistant.const import CONF_NAME
-from homeassistant.core import HomeAssistant
-
-from custom_components.ms365_calendar.integration.const_integration import (
-    CONF_CALENDAR_LIST,
-    CONF_HOURS_BACKWARD_TO_GET,
-    CONF_HOURS_FORWARD_TO_GET,
-    CONF_MAX_RESULTS,
-    CONF_TRACK_NEW_CALENDAR,
-    DOMAIN,
-)
-
-from .const import ENTITY_NAME, TOKEN_PARAMS, UPDATE_CALENDAR_LIST
-from .mock_config_entry import MS365MockConfigEntry
+from ..const import DATA_LOCATION, ENTITY_NAME, TOKEN_LOCATION, TOKEN_PARAMS
+from ..integration.const import DOMAIN
 
 TOKEN_TIME = 5000
 
@@ -60,9 +49,7 @@ def build_token_file(scope):
     token = _build_token(scope)
     token["expires_at"] = time.time() + TOKEN_TIME
     token["scope"] = token["scope"].split()
-    filename = pathlib.Path(__file__).parent.joinpath(
-        "../data/storage/tokens", f"{DOMAIN}_{ENTITY_NAME}.token"
-    )
+    filename = os.path.join(TOKEN_LOCATION, f"{DOMAIN}_{ENTITY_NAME}.token")
 
     with open(filename, "w", encoding="UTF8") as f:
         json.dump(token, f, ensure_ascii=False, indent=1)
@@ -93,11 +80,7 @@ def mock_call(
 
 def load_json(filename):
     """Load a json file as string."""
-    return (
-        pathlib.Path(__file__)
-        .parent.joinpath("../data/", filename)
-        .read_text(encoding="utf8")
-    )
+    return Path(os.path.join(DATA_LOCATION, filename)).read_text(encoding="utf8")
 
 
 def check_entity_state(
@@ -110,9 +93,7 @@ def check_entity_state(
 ):
     """Check entity state."""
     state = hass.states.get(entity_name)
-    print("*************************** State")
-    print(state.state)
-    print(state.attributes["data"])
+
     assert state.state == entity_state
     if entity_attributes:
         # print("*************************** State Attributes")
@@ -129,46 +110,19 @@ def utcnow():
     return datetime.now(timezone.utc)
 
 
-def yaml_setup(infile):
-    """Setup a yaml file"""
-    fromfile = pathlib.Path(__file__).parent.joinpath("../data/yaml/", f"{infile}.yaml")
-    tofile = pathlib.Path(__file__).parent.joinpath(
-        "../data/storage/ms365_calendars_test.yaml"
-    )
-    shutil.copy(fromfile, tofile)
-
-
 def token_setup(infile):
-    """Setup a yaml file"""
-    fromfile = pathlib.Path(__file__).parent.joinpath(
-        "../data/token/", f"{infile}.token"
-    )
-    tofile = pathlib.Path(__file__).parent.joinpath(
-        "../data/storage/tokens/ms365_calendar_test.token"
-    )
+    """Setup a token file"""
+    fromfile = os.path.join(DATA_LOCATION, f"token/{infile}.token")
+    tofile = os.path.join(TOKEN_LOCATION, f"{DOMAIN}_test.token")
     shutil.copy(fromfile, tofile)
 
 
-async def update_options(
-    hass: HomeAssistant,
-    base_config_entry: MS365MockConfigEntry,
-) -> None:
-    """Test the options flow"""
-
-    result = await hass.config_entries.options.async_init(base_config_entry.entry_id)
-    result = await hass.config_entries.options.async_configure(
-        result["flow_id"],
-        user_input={
-            CONF_TRACK_NEW_CALENDAR: False,
-            CONF_CALENDAR_LIST: UPDATE_CALENDAR_LIST,
-        },
-    )
-    result = await hass.config_entries.options.async_configure(
-        result["flow_id"],
-        user_input={
-            CONF_NAME: "Calendar1_Changed",
-            CONF_HOURS_FORWARD_TO_GET: 48,
-            CONF_HOURS_BACKWARD_TO_GET: -48,
-            CONF_MAX_RESULTS: 5,
-        },
-    )
+def get_schema_default(schema, key_name):
+    """Iterate schema to find a key."""
+    for schema_key in schema:
+        if schema_key == key_name:
+            try:
+                return schema_key.default()
+            except TypeError:
+                return None
+    raise KeyError(f"{key_name} not found in schema")

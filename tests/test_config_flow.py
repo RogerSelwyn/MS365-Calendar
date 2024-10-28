@@ -4,37 +4,25 @@
 import json
 from unittest.mock import patch
 
-import pytest
 from homeassistant import config_entries
-from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from pytest_homeassistant_custom_component.typing import ClientSessionGenerator
 from requests_mock import Mocker
 
-from custom_components.ms365_calendar.const import (
+from .const import CLIENT_ID, ENTITY_NAME, TOKEN_URL_ASSERT
+from .helpers.mock_config_entry import MS365MockConfigEntry
+from .helpers.utils import build_token_url, mock_token
+from .integration.const import (
+    ALT_CONFIG_ENTRY,
     AUTH_CALLBACK_PATH_ALT,
     AUTH_CALLBACK_PATH_DEFAULT,
-)
-from custom_components.ms365_calendar.integration.const_integration import (
-    CONF_CALENDAR_LIST,
-    CONF_HOURS_BACKWARD_TO_GET,
-    CONF_HOURS_FORWARD_TO_GET,
-    CONF_MAX_RESULTS,
-    CONF_TRACK_NEW_CALENDAR,
+    BASE_CONFIG_ENTRY,
+    BASE_TOKEN_PERMS,
     DOMAIN,
+    RECONFIGURE_CONFIG_ENTRY,
 )
-
-from .helpers.const import (
-    CLIENT_ID,
-    CLIENT_SECRET,
-    ENTITY_NAME,
-    TOKEN_URL_ASSERT,
-    UPDATE_CALENDAR_LIST,
-)
-from .helpers.mock_config_entry import MS365MockConfigEntry
-from .helpers.mocks import MS365MOCKS
-from .helpers.utils import build_token_url, mock_token
+from .integration.helpers.mocks import MS365MOCKS
 
 
 async def test_default_flow(
@@ -42,7 +30,7 @@ async def test_default_flow(
     requests_mock: Mocker,
 ) -> None:
     """Test the default config_flow."""
-    mock_token(requests_mock, "Calendars.Read")
+    mock_token(requests_mock, BASE_TOKEN_PERMS)
     MS365MOCKS.standard_mocks(requests_mock)
 
     result = await hass.config_entries.flow.async_init(
@@ -53,16 +41,7 @@ async def test_default_flow(
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
-        user_input={
-            "entity_name": ENTITY_NAME,
-            "client_id": CLIENT_ID,
-            "client_secret": CLIENT_SECRET,
-            "alt_auth_method": False,
-            "enable_update": False,
-            "basic_calendar": False,
-            "groups": False,
-            "shared_mailbox": "",
-        },
+        user_input=BASE_CONFIG_ENTRY,
     )
 
     assert result["type"] is FlowResultType.FORM
@@ -90,7 +69,7 @@ async def test_alt_flow(
     requests_mock: Mocker,
 ) -> None:
     """Test the alternate config_flow."""
-    mock_token(requests_mock, "Calendars.Read")
+    mock_token(requests_mock, BASE_TOKEN_PERMS)
     MS365MOCKS.standard_mocks(requests_mock)
 
     result = await hass.config_entries.flow.async_init(
@@ -101,16 +80,7 @@ async def test_alt_flow(
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
-        user_input={
-            "entity_name": ENTITY_NAME,
-            "client_id": CLIENT_ID,
-            "client_secret": CLIENT_SECRET,
-            "alt_auth_method": True,
-            "enable_update": False,
-            "basic_calendar": False,
-            "groups": False,
-            "shared_mailbox": "",
-        },
+        user_input=ALT_CONFIG_ENTRY,
     )
 
     assert result["type"] is FlowResultType.FORM
@@ -138,7 +108,7 @@ async def test_missing_permissions(
     requests_mock: Mocker,
 ) -> None:
     """Test missing permissions."""
-    mock_token(requests_mock, "Calendars.Read")
+    mock_token(requests_mock, "")
 
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
@@ -148,16 +118,7 @@ async def test_missing_permissions(
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
-        user_input={
-            "entity_name": ENTITY_NAME,
-            "client_id": CLIENT_ID,
-            "client_secret": CLIENT_SECRET,
-            "alt_auth_method": False,
-            "enable_update": True,
-            "basic_calendar": False,
-            "groups": False,
-            "shared_mailbox": "",
-        },
+        user_input=BASE_CONFIG_ENTRY,
     )
 
     assert result["type"] is FlowResultType.FORM
@@ -181,7 +142,7 @@ async def test_missing_permissions(
     assert result["errors"]["url"] == "permissions"
     assert (
         result["description_placeholders"]["failed_permissions"]
-        == "\n\nMissing - Calendars.ReadWrite"
+        == f"\n\nMissing - {BASE_TOKEN_PERMS}"
     )
 
 
@@ -191,7 +152,7 @@ async def test_missing_permissions_alt_flow(
     requests_mock: Mocker,
 ) -> None:
     """Test missing permissions on the alternate flow."""
-    mock_token(requests_mock, "Calendars.Read")
+    mock_token(requests_mock, "")
 
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
@@ -201,19 +162,9 @@ async def test_missing_permissions_alt_flow(
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
-        user_input={
-            "entity_name": ENTITY_NAME,
-            "client_id": CLIENT_ID,
-            "client_secret": CLIENT_SECRET,
-            "alt_auth_method": True,
-            "enable_update": True,
-            "basic_calendar": False,
-            "groups": False,
-            "shared_mailbox": "",
-        },
+        user_input=ALT_CONFIG_ENTRY,
     )
 
-    print(result)
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "request_alt"
     assert result["description_placeholders"]["auth_url"].startswith(
@@ -235,7 +186,7 @@ async def test_missing_permissions_alt_flow(
     assert result["errors"]["url"] == "permissions"
     assert (
         result["description_placeholders"]["failed_permissions"]
-        == "\n\nMissing - Calendars.ReadWrite"
+        == f"\n\nMissing - {BASE_TOKEN_PERMS}"
     )
 
 
@@ -249,16 +200,7 @@ async def test_invalid_token_url(
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
-        user_input={
-            "entity_name": ENTITY_NAME,
-            "client_id": CLIENT_ID,
-            "client_secret": CLIENT_SECRET,
-            "alt_auth_method": False,
-            "enable_update": True,
-            "basic_calendar": False,
-            "groups": False,
-            "shared_mailbox": "",
-        },
+        user_input=BASE_CONFIG_ENTRY,
     )
 
     result = await hass.config_entries.flow.async_configure(
@@ -291,16 +233,7 @@ async def test_invalid_token(
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
-        user_input={
-            "entity_name": ENTITY_NAME,
-            "client_id": CLIENT_ID,
-            "client_secret": CLIENT_SECRET,
-            "alt_auth_method": False,
-            "enable_update": False,
-            "basic_calendar": False,
-            "groups": False,
-            "shared_mailbox": "",
-        },
+        user_input=BASE_CONFIG_ENTRY,
     )
 
     result = await hass.config_entries.flow.async_configure(
@@ -322,7 +255,7 @@ async def test_json_decode_error(
     requests_mock: Mocker,
 ) -> None:
     """Test error decoding the token."""
-    mock_token(requests_mock, "Calendars.Read")
+    mock_token(requests_mock, BASE_TOKEN_PERMS)
 
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
@@ -333,19 +266,8 @@ async def test_json_decode_error(
     ):
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"],
-            user_input={
-                "entity_name": ENTITY_NAME,
-                "client_id": CLIENT_ID,
-                "client_secret": CLIENT_SECRET,
-                "alt_auth_method": False,
-                "enable_update": False,
-                "basic_calendar": False,
-                "groups": False,
-                "shared_mailbox": "",
-            },
+            user_input=BASE_CONFIG_ENTRY,
         )
-
-    print(result)
 
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "user"
@@ -359,23 +281,14 @@ async def test_already_configured(
     requests_mock: Mocker,
 ) -> None:
     """Test already configured entity name."""
-    mock_token(requests_mock, "Calendars.Read")
+    mock_token(requests_mock, BASE_TOKEN_PERMS)
 
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
-        user_input={
-            "entity_name": ENTITY_NAME,
-            "client_id": CLIENT_ID,
-            "client_secret": CLIENT_SECRET,
-            "alt_auth_method": False,
-            "enable_update": False,
-            "basic_calendar": False,
-            "groups": False,
-            "shared_mailbox": "",
-        },
+        user_input=BASE_CONFIG_ENTRY,
     )
 
     result = await hass.config_entries.flow.async_configure(
@@ -391,70 +304,13 @@ async def test_already_configured(
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
-        user_input={
-            "entity_name": ENTITY_NAME,
-            "client_id": CLIENT_ID,
-            "client_secret": CLIENT_SECRET,
-            "alt_auth_method": False,
-            "enable_update": False,
-            "basic_calendar": False,
-            "groups": False,
-            "shared_mailbox": "",
-        },
+        user_input=BASE_CONFIG_ENTRY,
     )
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "user"
     assert "errors" in result
     assert "entity_name" in result["errors"]
     assert result["errors"]["entity_name"] == "already_configured"
-
-
-async def test_options_flow(
-    hass: HomeAssistant,
-    setup_base_integration,
-    base_config_entry: MS365MockConfigEntry,
-) -> None:
-    """Test the options flow"""
-
-    result = await hass.config_entries.options.async_init(base_config_entry.entry_id)
-
-    assert result["type"] is FlowResultType.FORM
-    assert result["step_id"] == "user"
-    schema = result["data_schema"].schema
-    assert _get_schema_default(schema, CONF_TRACK_NEW_CALENDAR) is True
-    assert _get_schema_default(schema, CONF_CALENDAR_LIST) == ["Calendar1", "Calendar2"]
-
-    result = await hass.config_entries.options.async_configure(
-        result["flow_id"],
-        user_input={
-            CONF_TRACK_NEW_CALENDAR: False,
-            CONF_CALENDAR_LIST: UPDATE_CALENDAR_LIST,
-        },
-    )
-    assert result["type"] is FlowResultType.FORM
-    assert result["step_id"] == "calendar_config"
-    assert result["last_step"] is True
-    schema = result["data_schema"].schema
-    assert _get_schema_default(schema, CONF_NAME) == "Calendar1"
-    assert _get_schema_default(schema, CONF_HOURS_FORWARD_TO_GET) == 24
-    assert _get_schema_default(schema, CONF_HOURS_BACKWARD_TO_GET) == 0
-    assert _get_schema_default(schema, CONF_MAX_RESULTS) is None
-
-    result = await hass.config_entries.options.async_configure(
-        result["flow_id"],
-        user_input={
-            CONF_NAME: "Calendar1_Changed",
-            CONF_HOURS_FORWARD_TO_GET: 48,
-            CONF_HOURS_BACKWARD_TO_GET: -48,
-            CONF_MAX_RESULTS: 5,
-        },
-    )
-    assert result.get("type") is FlowResultType.CREATE_ENTRY
-    assert "result" in result
-    assert result["result"] is True
-
-    assert result["data"][CONF_TRACK_NEW_CALENDAR] is False
-    assert result["data"][CONF_CALENDAR_LIST] == UPDATE_CALENDAR_LIST
 
 
 async def test_reconfigure_flow(
@@ -464,7 +320,7 @@ async def test_reconfigure_flow(
     base_config_entry: MS365MockConfigEntry,
 ) -> None:
     """Test the reconfigure flow."""
-    mock_token(requests_mock, "Calendars.Read")
+    mock_token(requests_mock, BASE_TOKEN_PERMS)
     result = await hass.config_entries.flow.async_init(
         DOMAIN,
         context={
@@ -477,15 +333,7 @@ async def test_reconfigure_flow(
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
-        user_input={
-            "client_id": CLIENT_ID,
-            "client_secret": CLIENT_SECRET,
-            "alt_auth_method": False,
-            "enable_update": False,
-            "basic_calendar": False,
-            "groups": False,
-            "shared_mailbox": "",
-        },
+        user_input=RECONFIGURE_CONFIG_ENTRY,
     )
 
     assert result["type"] is FlowResultType.FORM
@@ -505,38 +353,3 @@ async def test_reconfigure_flow(
     print(result)
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "reauth_successful"
-
-
-@pytest.mark.parametrize(
-    "base_config_entry",
-    [{"basic_calendar": True, "enable_update": True}],
-    indirect=True,
-)
-async def test_invalid_entry(
-    hass: HomeAssistant,
-    requests_mock: Mocker,
-    base_token,
-    base_config_entry: MS365MockConfigEntry,
-    caplog: pytest.LogCaptureFixture,
-) -> None:
-    """Test for invalid config mix."""
-    MS365MOCKS.standard_mocks(requests_mock)
-    base_config_entry.add_to_hass(hass)
-    await hass.config_entries.async_setup(base_config_entry.entry_id)
-    await hass.async_block_till_done()
-
-    assert (
-        "'enable_update' should not be true when 'basic_calendar' is true"
-        in caplog.text
-    )
-
-
-def _get_schema_default(schema, key_name):
-    """Iterate schema to find a key."""
-    for schema_key in schema:
-        if schema_key == key_name:
-            try:
-                return schema_key.default()
-            except TypeError:
-                return None
-    raise KeyError(f"{key_name} not found in schema")

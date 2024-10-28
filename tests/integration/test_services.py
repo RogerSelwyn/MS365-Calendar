@@ -16,9 +16,10 @@ from zoneinfo import ZoneInfo
 from custom_components.ms365_calendar.const import CONF_ENABLE_UPDATE
 from custom_components.ms365_calendar.integration.const_integration import DOMAIN
 
-from .conftest import ClientFixture, ListenerSetupData, MS365MockConfigEntry
-from .helpers.const import URL
-from .helpers.utils import mock_call
+from ..conftest import MS365MockConfigEntry
+from ..helpers.utils import mock_call
+from .const import URL
+from .fixtures import ClientFixture, ListenerSetupData
 
 START_BASE = datetime(2020, 1, 1, 0, 0, 0, tzinfo=ZoneInfo(key="UTC"))
 END_BASE = datetime(2020, 1, 1, 23, 59, 59, tzinfo=ZoneInfo(key="UTC"))

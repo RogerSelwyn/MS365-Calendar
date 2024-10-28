@@ -2,7 +2,7 @@
 
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.ms365_calendar.helpers.config_entry import MS365ConfigEntry
+from ..integration import MS365ConfigEntry
 
 
 class MS365MockConfigEntry(MockConfigEntry):

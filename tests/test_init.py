@@ -4,23 +4,14 @@
 from unittest.mock import patch
 
 import pytest
-from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from oauthlib.oauth2.rfc6749.errors import InvalidClientError
 from requests_mock import Mocker
 
-from custom_components.ms365_calendar.integration.const_integration import (
-    CONF_CALENDAR_LIST,
-    CONF_HOURS_BACKWARD_TO_GET,
-    CONF_HOURS_FORWARD_TO_GET,
-    CONF_TRACK_NEW_CALENDAR,
-)
-
-from .helpers.const import UPDATE_CALENDAR_LIST
 from .helpers.mock_config_entry import MS365MockConfigEntry
-from .helpers.mocks import MS365MOCKS
-from .helpers.utils import check_entity_state
+from .integration.const import FULL_INIT_ENTITY_NO
+from .integration.helpers.mocks import MS365MOCKS
 
 
 async def test_full_init(
@@ -36,42 +27,11 @@ async def test_full_init(
     base_config_entry.add_to_hass(hass)
     await hass.config_entries.async_setup(base_config_entry.entry_id)
     assert hasattr(base_config_entry.runtime_data, "options")
-    check_entity_state(hass, "calendar.test_calendar1", "on")
-    check_entity_state(hass, "calendar.test_calendar2", "off")
 
     entities = er.async_entries_for_config_entry(
         entity_registry, base_config_entry.entry_id
     )
-    assert len(entities) == 2
-
-
-async def test_reload(
-    hass: HomeAssistant,
-    setup_base_integration,
-    base_config_entry: MS365MockConfigEntry,
-) -> None:
-    """Test for reload."""
-
-    result = await hass.config_entries.options.async_init(base_config_entry.entry_id)
-    result = await hass.config_entries.options.async_configure(
-        result["flow_id"],
-        user_input={
-            CONF_TRACK_NEW_CALENDAR: True,
-            CONF_CALENDAR_LIST: UPDATE_CALENDAR_LIST,
-        },
-    )
-    with patch(
-        "homeassistant.config_entries.ConfigEntries.async_reload"
-    ) as mock_async_reload:
-        await hass.config_entries.options.async_configure(
-            result["flow_id"],
-            user_input={
-                CONF_NAME: "Calendar1",
-                CONF_HOURS_FORWARD_TO_GET: 24,
-                CONF_HOURS_BACKWARD_TO_GET: 0,
-            },
-        )
-    assert mock_async_reload.called
+    assert len(entities) == FULL_INIT_ENTITY_NO
 
 
 async def test_invalid_client_1(

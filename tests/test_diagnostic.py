@@ -3,11 +3,12 @@
 
 from homeassistant.core import HomeAssistant
 
-from custom_components.ms365_calendar.diagnostics import (
-    async_get_config_entry_diagnostics,
-)
-
 from .helpers.mock_config_entry import MS365MockConfigEntry
+from .integration import async_get_config_entry_diagnostics
+from .integration.const import (
+    DIAGNOSTIC_GRANTED_PERMISSIONS,
+    DIAGNOSTIC_REQUESTED_PERMISSIONS,
+)
 
 
 async def test_diagnostics(
@@ -21,15 +22,5 @@ async def test_diagnostics(
     assert "config_entry_data" in result
     assert result["config_entry_data"]["client_id"] == "**REDACTED**"
     assert result["config_entry_data"]["client_secret"] == "**REDACTED**"
-    assert result["config_granted_permissions"] == [
-        "Calendars.Read",
-        "User.Read",
-        "profile",
-        "openid",
-        "email",
-    ]
-    assert result["config_requested_permissions"] == [
-        "offline_access",
-        "User.Read",
-        "Calendars.Read",
-    ]
+    assert result["config_granted_permissions"] == DIAGNOSTIC_GRANTED_PERMISSIONS
+    assert result["config_requested_permissions"] == DIAGNOSTIC_REQUESTED_PERMISSIONS
