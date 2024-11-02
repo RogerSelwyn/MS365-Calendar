@@ -163,6 +163,7 @@ async def test_no_events(
 
 
 async def test_filter_events(
+    tmpdir,
     hass: HomeAssistant,
     requests_mock: Mocker,
     base_token,
@@ -170,7 +171,7 @@ async def test_filter_events(
 ) -> None:
     """Test filtering of events."""
     MS365MOCKS.standard_mocks(requests_mock)
-    yaml_setup("ms365_calendars_exclude")
+    yaml_setup(tmpdir, "ms365_calendars_exclude")
 
     base_config_entry.add_to_hass(hass)
 
@@ -181,6 +182,7 @@ async def test_filter_events(
 
 
 async def test_search_events(
+    tmpdir,
     hass: HomeAssistant,
     requests_mock: Mocker,
     base_token,
@@ -188,7 +190,7 @@ async def test_search_events(
 ) -> None:
     """Test searching for events."""
     MS365MOCKS.standard_mocks(requests_mock)
-    yaml_setup("ms365_calendars_search")
+    yaml_setup(tmpdir, "ms365_calendars_search")
 
     base_config_entry.add_to_hass(hass)
     with patch("O365.calendar.Calendar.get_events") as get_events:
@@ -200,6 +202,7 @@ async def test_search_events(
 
 
 async def test_sensitivity_exclude(
+    tmpdir,
     hass: HomeAssistant,
     requests_mock: Mocker,
     base_token,
@@ -208,7 +211,7 @@ async def test_sensitivity_exclude(
     """Test filtering on sensitivity."""
 
     MS365MOCKS.standard_mocks(requests_mock)
-    yaml_setup("ms365_calendars_sensitivity")
+    yaml_setup(tmpdir, "ms365_calendars_sensitivity")
 
     base_config_entry.add_to_hass(hass)
 

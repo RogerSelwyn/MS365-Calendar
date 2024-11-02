@@ -8,7 +8,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from ..const import DATA_LOCATION, ENTITY_NAME, TOKEN_LOCATION, TOKEN_PARAMS
+from ..const import ENTITY_NAME, TEST_DATA_LOCATION, TOKEN_LOCATION, TOKEN_PARAMS
 from ..integration.const import DOMAIN
 
 TOKEN_TIME = 5000
@@ -44,19 +44,25 @@ def build_token_url(result, token_url):
     return token_url + "?" + TOKEN_PARAMS.format(state)
 
 
-def build_token_file(scope):
+def build_token_file(tmpdir, scope):
     """Build a token file."""
     token = _build_token(scope)
     token["expires_at"] = time.time() + TOKEN_TIME
     token["scope"] = token["scope"].split()
-    filename = os.path.join(TOKEN_LOCATION, f"{DOMAIN}_{ENTITY_NAME}.token")
+    filename = tmpdir.join(TOKEN_LOCATION, f"{DOMAIN}_{ENTITY_NAME}.token")
 
     with open(filename, "w", encoding="UTF8") as f:
         json.dump(token, f, ensure_ascii=False, indent=1)
 
 
 def mock_call(
-    requests_mock, urlname, datafile, unique=None, start=None, end=None, method="get"
+    requests_mock,
+    urlname,
+    datafile,
+    unique=None,
+    start=None,
+    end=None,
+    method="get",
 ):
     """Mock a call"""
     data = load_json(f"O365/{datafile}.json")
@@ -80,7 +86,7 @@ def mock_call(
 
 def load_json(filename):
     """Load a json file as string."""
-    return Path(os.path.join(DATA_LOCATION, filename)).read_text(encoding="utf8")
+    return Path(os.path.join(TEST_DATA_LOCATION, filename)).read_text(encoding="utf8")
 
 
 def check_entity_state(
@@ -110,10 +116,10 @@ def utcnow():
     return datetime.now(timezone.utc)
 
 
-def token_setup(infile):
+def token_setup(tmpdir, infile):
     """Setup a token file"""
-    fromfile = os.path.join(DATA_LOCATION, f"token/{infile}.token")
-    tofile = os.path.join(TOKEN_LOCATION, f"{DOMAIN}_test.token")
+    fromfile = os.path.join(TEST_DATA_LOCATION, f"token/{infile}.token")
+    tofile = tmpdir.join(TOKEN_LOCATION, f"{DOMAIN}_test.token")
     shutil.copy(fromfile, tofile)
 
 

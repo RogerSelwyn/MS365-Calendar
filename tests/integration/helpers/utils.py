@@ -15,15 +15,15 @@ from custom_components.ms365_calendar.integration.const_integration import (
     DOMAIN,
 )
 
-from ...const import DATA_LOCATION, STORAGE_LOCATION
+from ...const import STORAGE_LOCATION, TEST_DATA_LOCATION
 from ...helpers.mock_config_entry import MS365MockConfigEntry
 from ..const import UPDATE_CALENDAR_LIST
 
 
-def yaml_setup(infile):
+def yaml_setup(tmpdir, infile):
     """Setup a yaml file"""
-    fromfile = os.path.join(DATA_LOCATION, f"yaml/{infile}.yaml")
-    tofile = os.path.join(STORAGE_LOCATION, f"{DOMAIN}s_test.yaml")
+    fromfile = os.path.join(TEST_DATA_LOCATION, f"yaml/{infile}.yaml")
+    tofile = tmpdir.join(STORAGE_LOCATION, f"{DOMAIN}s_test.yaml")
     shutil.copy(fromfile, tofile)
 
 
@@ -52,12 +52,12 @@ async def update_options(
     )
 
 
-def check_yaml_file_contents(filename):
+def check_yaml_file_contents(tmpdir, filename):
     """Check contents are what is expected."""
-    path = os.path.join(STORAGE_LOCATION, f"{DOMAIN}s_test.yaml")
+    path = tmpdir.join(STORAGE_LOCATION, f"{DOMAIN}s_test.yaml")
     with open(path, encoding="utf8") as file:
         created_yaml = file.read()
-    path = os.path.join(DATA_LOCATION, f"yaml/{filename}.yaml")
+    path = os.path.join(TEST_DATA_LOCATION, f"yaml/{filename}.yaml")
     with open(path, encoding="utf8") as file:
         compare_yaml = file.read()
     assert created_yaml == compare_yaml

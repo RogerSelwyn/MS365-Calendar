@@ -90,12 +90,13 @@ async def test_no_token(
 
 
 async def test_corrupt_token(
+    tmpdir,
     hass: HomeAssistant,
     caplog: pytest.LogCaptureFixture,
     base_config_entry: MS365MockConfigEntry,
 ) -> None:
     """Fixture for setting up the component."""
-    token_setup("corrupt")
+    token_setup(tmpdir, "corrupt")
     base_config_entry.add_to_hass(hass)
 
     await hass.config_entries.async_setup(base_config_entry.entry_id)
@@ -105,12 +106,13 @@ async def test_corrupt_token(
 
 
 async def test_missing_permissions(
+    tmpdir,
     hass: HomeAssistant,
     base_config_entry: MS365MockConfigEntry,
     caplog: pytest.LogCaptureFixture,
 ):
     """Test for missing permissions."""
-    build_token_file("")
+    build_token_file(tmpdir, "")
 
     base_config_entry.add_to_hass(hass)
     with patch(

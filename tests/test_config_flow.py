@@ -26,6 +26,7 @@ from .integration.helpers.mocks import MS365MOCKS
 
 
 async def test_default_flow(
+    tmpdir,
     hass: HomeAssistant,
     requests_mock: Mocker,
 ) -> None:
@@ -350,6 +351,6 @@ async def test_reconfigure_flow(
             "url": build_token_url(result, AUTH_CALLBACK_PATH_DEFAULT),
         },
     )
-    print(result)
+
     assert result["type"] is FlowResultType.ABORT
-    assert result["reason"] == "reauth_successful"
+    assert result["reason"] == "reconfigure_successful"

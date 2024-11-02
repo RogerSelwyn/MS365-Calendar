@@ -1,6 +1,5 @@
 """Constants for MS365 testing."""
 
-import os
 from pathlib import Path
 
 CLIENT_ID = "1234"
@@ -16,6 +15,7 @@ TOKEN_URL_ASSERT = (
     + "authorize?response_type=code&client_id="
 )
 
-DATA_LOCATION = Path(__file__).parent.joinpath("data")
-STORAGE_LOCATION = os.path.join(DATA_LOCATION, "storage")
-TOKEN_LOCATION = os.path.join(DATA_LOCATION, "storage/tokens")
+STORAGE_LOCATION = "storage"
+TOKEN_LOCATION = "storage/tokens"
+
+TEST_DATA_LOCATION = Path(__file__).parent.joinpath("data")

@@ -2,7 +2,6 @@
 """Global fixtures for integration."""
 
 import os
-import shutil
 import sys
 from copy import deepcopy
 from pathlib import Path
@@ -12,7 +11,7 @@ import pytest
 from homeassistant.core import HomeAssistant
 from requests_mock import Mocker
 
-from .const import STORAGE_LOCATION, TITLE, TOKEN_LOCATION
+from .const import TITLE, TOKEN_LOCATION
 from .helpers.mock_config_entry import MS365MockConfigEntry
 from .helpers.utils import build_token_file
 from .integration import permissions
@@ -31,18 +30,16 @@ pytest_plugins = [
 THIS_MODULE = sys.modules[__name__]
 
 
-@pytest.fixture(autouse=True, scope="session")
-def session_setup():
+@pytest.fixture
+def folder_setup(tmpdir):
     """Setup the testing session."""
-    Path(TOKEN_LOCATION).mkdir(parents=True, exist_ok=True)
-    yield
-    shutil.rmtree(STORAGE_LOCATION)
+    Path(tmpdir.join(TOKEN_LOCATION)).mkdir(parents=True, exist_ok=True)
 
 
 @pytest.fixture(autouse=True)
-def token_storage_path_setup():
+def token_storage_path_setup(tmpdir):
     """Setup the storage paths."""
-    tk_path = TOKEN_LOCATION
+    tk_path = tmpdir.join(TOKEN_LOCATION)
 
     with patch.object(
         permissions,
@@ -78,9 +75,9 @@ def skip_notifications_fixture():
 
 
 @pytest.fixture(name="ms365_tidy_token_storage", autouse=True)
-def ms365_tidy_token_storage_fixture():
+def ms365_tidy_token_storage_fixture(tmpdir, folder_setup):
     """Tidy up tokens before test."""
-    directory = TOKEN_LOCATION
+    directory = tmpdir.join(TOKEN_LOCATION)
     files_in_directory = os.listdir(directory)
     for file in files_in_directory:
         path_to_file = os.path.join(directory, file)
@@ -120,12 +117,12 @@ def update_config_entry(hass: HomeAssistant) -> MS365MockConfigEntry:
 
 
 @pytest.fixture
-def base_token(request):
+def base_token(request, tmpdir):
     """Setup a basic token."""
     perms = BASE_TOKEN_PERMS
     if hasattr(request, "param"):
         perms = request.param
-    build_token_file(perms)
+    build_token_file(tmpdir, perms)
 
 
 @pytest.fixture
@@ -152,12 +149,13 @@ async def setup_base_integration(
 
 @pytest.fixture
 async def setup_update_integration(
+    tmpdir,
     hass: HomeAssistant,
     requests_mock: Mocker,
     base_config_entry: MS365MockConfigEntry,
 ) -> None:
     """Fixture for setting up the component."""
-    build_token_file(UPDATE_TOKEN_PERMS)
+    build_token_file(tmpdir, UPDATE_TOKEN_PERMS)
     MS365MOCKS.standard_mocks(requests_mock)
     base_config_entry.add_to_hass(hass)
     data = deepcopy(BASE_CONFIG_ENTRY)
