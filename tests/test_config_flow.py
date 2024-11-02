@@ -13,7 +13,7 @@ from requests_mock import Mocker
 from .const import CLIENT_ID, ENTITY_NAME, TOKEN_URL_ASSERT
 from .helpers.mock_config_entry import MS365MockConfigEntry
 from .helpers.utils import build_token_url, mock_token
-from .integration.const import (
+from .integration.const_integration import (
     ALT_CONFIG_ENTRY,
     AUTH_CALLBACK_PATH_ALT,
     AUTH_CALLBACK_PATH_DEFAULT,
@@ -22,7 +22,7 @@ from .integration.const import (
     DOMAIN,
     RECONFIGURE_CONFIG_ENTRY,
 )
-from .integration.helpers.mocks import MS365MOCKS
+from .integration.helpers_integration.mocks import MS365MOCKS
 
 
 async def test_default_flow(

@@ -19,7 +19,7 @@ from pytest_homeassistant_custom_component.typing import (
 from custom_components.ms365_calendar.integration import filemgmt_integration
 
 from ..const import STORAGE_LOCATION
-from .const import DOMAIN
+from .const_integration import DOMAIN
 
 
 @pytest.fixture(autouse=True)

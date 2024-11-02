@@ -5,7 +5,7 @@ from homeassistant.core import HomeAssistant
 
 from .helpers.mock_config_entry import MS365MockConfigEntry
 from .integration import async_get_config_entry_diagnostics
-from .integration.const import (
+from .integration.const_integration import (
     DIAGNOSTIC_GRANTED_PERMISSIONS,
     DIAGNOSTIC_REQUESTED_PERMISSIONS,
 )

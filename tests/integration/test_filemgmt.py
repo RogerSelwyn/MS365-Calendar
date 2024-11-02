@@ -6,8 +6,8 @@ from homeassistant.core import HomeAssistant
 from requests_mock import Mocker
 
 from ..helpers.mock_config_entry import MS365MockConfigEntry
-from .helpers.mocks import MS365MOCKS
-from .helpers.utils import check_yaml_file_contents, yaml_setup
+from .helpers_integration.mocks import MS365MOCKS
+from .helpers_integration.utils_integration import check_yaml_file_contents, yaml_setup
 
 
 async def test_base_filemgmt(

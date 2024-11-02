@@ -15,13 +15,13 @@ from .const import TITLE, TOKEN_LOCATION
 from .helpers.mock_config_entry import MS365MockConfigEntry
 from .helpers.utils import build_token_file
 from .integration import permissions
-from .integration.const import (
+from .integration.const_integration import (
     BASE_CONFIG_ENTRY,
     BASE_TOKEN_PERMS,
     DOMAIN,
     UPDATE_TOKEN_PERMS,
 )
-from .integration.helpers.mocks import MS365MOCKS
+from .integration.helpers_integration.mocks import MS365MOCKS
 
 pytest_plugins = [
     "pytest_homeassistant_custom_component",

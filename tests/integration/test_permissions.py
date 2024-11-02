@@ -11,7 +11,7 @@ from requests_mock import Mocker
 
 from ..helpers.mock_config_entry import MS365MockConfigEntry
 from ..helpers.utils import build_token_file, token_setup
-from .helpers.mocks import MS365MOCKS
+from .helpers_integration.mocks import MS365MOCKS
 
 ### Note that permissions code also supports Presence/Send which are not present in the calendar integration
 

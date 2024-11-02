@@ -10,8 +10,8 @@ from oauthlib.oauth2.rfc6749.errors import InvalidClientError
 from requests_mock import Mocker
 
 from .helpers.mock_config_entry import MS365MockConfigEntry
-from .integration.const import FULL_INIT_ENTITY_NO
-from .integration.helpers.mocks import MS365MOCKS
+from .integration.const_integration import FULL_INIT_ENTITY_NO
+from .integration.helpers_integration.mocks import MS365MOCKS
 
 
 async def test_full_init(

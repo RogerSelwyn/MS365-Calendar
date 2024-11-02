@@ -3,7 +3,7 @@
 from datetime import timedelta
 
 from ...helpers.utils import mock_call, utcnow
-from ..const import URL
+from ..const_integration import URL
 
 
 class MS365Mocks:

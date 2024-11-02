@@ -14,7 +14,7 @@ from custom_components.ms365_calendar.integration.const_integration import (
 )
 
 from ..helpers.mock_config_entry import MS365MockConfigEntry
-from .const import UPDATE_CALENDAR_LIST
+from .const_integration import UPDATE_CALENDAR_LIST
 
 
 async def test_reload(

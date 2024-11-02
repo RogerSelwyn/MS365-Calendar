@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from ..const import ENTITY_NAME, TEST_DATA_LOCATION, TOKEN_LOCATION, TOKEN_PARAMS
-from ..integration.const import DOMAIN
+from ..integration.const_integration import DOMAIN
 
 TOKEN_TIME = 5000
 

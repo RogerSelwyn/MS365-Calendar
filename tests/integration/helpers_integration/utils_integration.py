@@ -17,7 +17,7 @@ from custom_components.ms365_calendar.integration.const_integration import (
 
 from ...const import STORAGE_LOCATION, TEST_DATA_LOCATION
 from ...helpers.mock_config_entry import MS365MockConfigEntry
-from ..const import UPDATE_CALENDAR_LIST
+from ..const_integration import UPDATE_CALENDAR_LIST
 
 
 def yaml_setup(tmpdir, infile):

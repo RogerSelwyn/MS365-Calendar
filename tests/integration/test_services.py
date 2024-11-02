@@ -18,7 +18,7 @@ from custom_components.ms365_calendar.integration.const_integration import DOMAI
 
 from ..conftest import MS365MockConfigEntry
 from ..helpers.utils import mock_call
-from .const import URL
+from .const_integration import URL
 from .fixtures import ClientFixture, ListenerSetupData
 
 START_BASE = datetime(2020, 1, 1, 0, 0, 0, tzinfo=ZoneInfo(key="UTC"))
