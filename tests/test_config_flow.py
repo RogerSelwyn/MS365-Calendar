@@ -26,7 +26,6 @@ from .integration.helpers_integration.mocks import MS365MOCKS
 
 
 async def test_default_flow(
-    tmpdir,
     hass: HomeAssistant,
     requests_mock: Mocker,
 ) -> None:

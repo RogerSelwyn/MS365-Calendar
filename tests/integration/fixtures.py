@@ -1,7 +1,6 @@
 # pylint: disable=redefined-outer-name, unused-argument
 """Fixtures specific to the integration."""
 
-import os
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Any
@@ -23,9 +22,9 @@ from .const_integration import DOMAIN
 
 
 @pytest.fixture(autouse=True)
-def yaml_storage_path_setup(tmpdir):
+def yaml_storage_path_setup(tmp_path):
     """Setup the storage paths."""
-    yml_path = tmpdir.join(STORAGE_LOCATION, f"{DOMAIN}s_test.yaml")
+    yml_path = tmp_path / STORAGE_LOCATION / f"{DOMAIN}s_test.yaml"
 
     with patch.object(
         filemgmt_integration,
@@ -33,18 +32,6 @@ def yaml_storage_path_setup(tmpdir):
         return_value=yml_path,
     ):
         yield
-
-
-@pytest.fixture(name="ms365_tidy_yaml_storage", autouse=True)
-def ms365_tidy_yaml_storage_fixture(tmpdir, folder_setup):
-    """Tidy up yaml before test."""
-
-    directory = tmpdir.join(STORAGE_LOCATION)
-    files_in_directory = os.listdir(directory)
-    filtered_files = [file for file in files_in_directory if file.endswith(".yaml")]
-    for file in filtered_files:
-        path_to_file = os.path.join(directory, file)
-        os.remove(path_to_file)
 
 
 @dataclass

@@ -1,6 +1,5 @@
 """Utilities for MS365 testing."""
 
-import os
 import shutil
 
 from homeassistant.const import CONF_NAME
@@ -20,10 +19,10 @@ from ...helpers.mock_config_entry import MS365MockConfigEntry
 from ..const_integration import UPDATE_CALENDAR_LIST
 
 
-def yaml_setup(tmpdir, infile):
+def yaml_setup(tmp_path, infile):
     """Setup a yaml file"""
-    fromfile = os.path.join(TEST_DATA_LOCATION, f"yaml/{infile}.yaml")
-    tofile = tmpdir.join(STORAGE_LOCATION, f"{DOMAIN}s_test.yaml")
+    fromfile = TEST_DATA_LOCATION / f"yaml/{infile}.yaml"
+    tofile = tmp_path / STORAGE_LOCATION / f"{DOMAIN}s_test.yaml"
     shutil.copy(fromfile, tofile)
 
 
@@ -52,12 +51,12 @@ async def update_options(
     )
 
 
-def check_yaml_file_contents(tmpdir, filename):
+def check_yaml_file_contents(tmp_path, filename):
     """Check contents are what is expected."""
-    path = tmpdir.join(STORAGE_LOCATION, f"{DOMAIN}s_test.yaml")
+    path = tmp_path / STORAGE_LOCATION / f"{DOMAIN}s_test.yaml"
     with open(path, encoding="utf8") as file:
         created_yaml = file.read()
-    path = os.path.join(TEST_DATA_LOCATION, f"yaml/{filename}.yaml")
+    path = TEST_DATA_LOCATION / f"yaml/{filename}.yaml"
     with open(path, encoding="utf8") as file:
         compare_yaml = file.read()
     assert created_yaml == compare_yaml

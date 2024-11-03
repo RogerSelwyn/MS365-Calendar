@@ -11,18 +11,18 @@ from .helpers_integration.utils_integration import check_yaml_file_contents, yam
 
 
 async def test_base_filemgmt(
-    tmpdir,
+    tmp_path,
     hass: HomeAssistant,
     setup_base_integration,
     base_config_entry: MS365MockConfigEntry,
 ) -> None:
     """Test basic file management."""
 
-    check_yaml_file_contents(tmpdir, "ms365_calendars_base")
+    check_yaml_file_contents(tmp_path, "ms365_calendars_base")
 
 
 async def test_empty_file(
-    tmpdir,
+    tmp_path,
     hass: HomeAssistant,
     requests_mock: Mocker,
     base_token,
@@ -30,18 +30,18 @@ async def test_empty_file(
 ) -> None:
     """Test for an empty yaml file."""
     MS365MOCKS.standard_mocks(requests_mock)
-    yaml_setup(tmpdir, "ms365_calendars_empty")
+    yaml_setup(tmp_path, "ms365_calendars_empty")
 
     base_config_entry.add_to_hass(hass)
 
     await hass.config_entries.async_setup(base_config_entry.entry_id)
     await hass.async_block_till_done()
 
-    check_yaml_file_contents(tmpdir, "ms365_calendars_base")
+    check_yaml_file_contents(tmp_path, "ms365_calendars_base")
 
 
 async def test_corrupt_file(
-    tmpdir,
+    tmp_path,
     hass: HomeAssistant,
     requests_mock: Mocker,
     base_token,
@@ -51,7 +51,7 @@ async def test_corrupt_file(
     """Test for corrupt yaml content."""
     # logging.disable(logging.WARNING)
     MS365MOCKS.standard_mocks(requests_mock)
-    yaml_setup(tmpdir, "ms365_calendars_corrupt")
+    yaml_setup(tmp_path, "ms365_calendars_corrupt")
 
     base_config_entry.add_to_hass(hass)
 

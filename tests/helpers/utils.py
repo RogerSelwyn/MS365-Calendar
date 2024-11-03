@@ -1,7 +1,6 @@
 """Utilities for MS365 testing."""
 
 import json
-import os
 import re
 import shutil
 import time
@@ -44,12 +43,12 @@ def build_token_url(result, token_url):
     return token_url + "?" + TOKEN_PARAMS.format(state)
 
 
-def build_token_file(tmpdir, scope):
+def build_token_file(tmp_path, scope):
     """Build a token file."""
     token = _build_token(scope)
     token["expires_at"] = time.time() + TOKEN_TIME
     token["scope"] = token["scope"].split()
-    filename = tmpdir.join(TOKEN_LOCATION, f"{DOMAIN}_{ENTITY_NAME}.token")
+    filename = tmp_path / TOKEN_LOCATION / f"{DOMAIN}_{ENTITY_NAME}.token"
 
     with open(filename, "w", encoding="UTF8") as f:
         json.dump(token, f, ensure_ascii=False, indent=1)
@@ -86,7 +85,8 @@ def mock_call(
 
 def load_json(filename):
     """Load a json file as string."""
-    return Path(os.path.join(TEST_DATA_LOCATION, filename)).read_text(encoding="utf8")
+    filepath = TEST_DATA_LOCATION / filename
+    return Path(filepath).read_text(encoding="utf8")
 
 
 def check_entity_state(
@@ -116,10 +116,10 @@ def utcnow():
     return datetime.now(timezone.utc)
 
 
-def token_setup(tmpdir, infile):
+def token_setup(tmp_path, infile):
     """Setup a token file"""
-    fromfile = os.path.join(TEST_DATA_LOCATION, f"token/{infile}.token")
-    tofile = tmpdir.join(TOKEN_LOCATION, f"{DOMAIN}_test.token")
+    fromfile = TEST_DATA_LOCATION / f"token/{infile}.token"
+    tofile = tmp_path / TOKEN_LOCATION / f"{DOMAIN}_test.token"
     shutil.copy(fromfile, tofile)
 
 
