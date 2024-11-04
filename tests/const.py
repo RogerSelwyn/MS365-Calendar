@@ -19,3 +19,6 @@ STORAGE_LOCATION = "storage"
 TOKEN_LOCATION = "storage/tokens"
 
 TEST_DATA_LOCATION = Path(__file__).parent.joinpath("data")
+TEST_DATA_INTEGRATION_LOCATION = Path(__file__).parent.joinpath(
+    "integration/data_integration"
+)

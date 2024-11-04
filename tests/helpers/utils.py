@@ -7,7 +7,13 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from ..const import ENTITY_NAME, TEST_DATA_LOCATION, TOKEN_LOCATION, TOKEN_PARAMS
+from ..const import (
+    ENTITY_NAME,
+    TEST_DATA_INTEGRATION_LOCATION,
+    TEST_DATA_LOCATION,
+    TOKEN_LOCATION,
+    TOKEN_PARAMS,
+)
 from ..integration.const_integration import DOMAIN
 
 TOKEN_TIME = 5000
@@ -85,7 +91,7 @@ def mock_call(
 
 def load_json(filename):
     """Load a json file as string."""
-    filepath = TEST_DATA_LOCATION / filename
+    filepath = TEST_DATA_INTEGRATION_LOCATION / filename
     return Path(filepath).read_text(encoding="utf8")
 
 

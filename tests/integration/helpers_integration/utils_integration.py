@@ -14,14 +14,14 @@ from custom_components.ms365_calendar.integration.const_integration import (
     DOMAIN,
 )
 
-from ...const import STORAGE_LOCATION, TEST_DATA_LOCATION
+from ...const import STORAGE_LOCATION, TEST_DATA_INTEGRATION_LOCATION
 from ...helpers.mock_config_entry import MS365MockConfigEntry
 from ..const_integration import UPDATE_CALENDAR_LIST
 
 
 def yaml_setup(tmp_path, infile):
     """Setup a yaml file"""
-    fromfile = TEST_DATA_LOCATION / f"yaml/{infile}.yaml"
+    fromfile = TEST_DATA_INTEGRATION_LOCATION / f"yaml/{infile}.yaml"
     tofile = tmp_path / STORAGE_LOCATION / f"{DOMAIN}s_test.yaml"
     shutil.copy(fromfile, tofile)
 
@@ -56,7 +56,7 @@ def check_yaml_file_contents(tmp_path, filename):
     path = tmp_path / STORAGE_LOCATION / f"{DOMAIN}s_test.yaml"
     with open(path, encoding="utf8") as file:
         created_yaml = file.read()
-    path = TEST_DATA_LOCATION / f"yaml/{filename}.yaml"
+    path = TEST_DATA_INTEGRATION_LOCATION / f"yaml/{filename}.yaml"
     with open(path, encoding="utf8") as file:
         compare_yaml = file.read()
     assert created_yaml == compare_yaml

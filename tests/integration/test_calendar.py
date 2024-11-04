@@ -15,9 +15,9 @@ from requests.exceptions import HTTPError
 from requests_mock import Mocker
 from zoneinfo import ZoneInfo
 
-from ..data.state import BASE_STATE_CAL1, BASE_STATE_CAL2
 from ..helpers.mock_config_entry import MS365MockConfigEntry
 from ..helpers.utils import check_entity_state, utcnow
+from .data_integration.state import BASE_STATE_CAL1, BASE_STATE_CAL2
 from .helpers_integration.mocks import MS365MOCKS
 from .helpers_integration.utils_integration import update_options, yaml_setup
 
