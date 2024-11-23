@@ -1,5 +1,50 @@
 # Changelog
 
+## v1.0.0 (2024/11/23)
+### 🐛 Fixes
+- [Fix issue around usage of shared permissions](https://github.com/RogerSelwyn/MS365-Calendar/commit/21d480286f1c6aefc679240e6fe704e9e26b7f6b) - @RogerSelwyn
+- [Further fix on shared permissions](https://github.com/RogerSelwyn/MS365-Calendar/commit/5eb75476b271a239ff156bf1956b962394d1ce2a) - @RogerSelwyn
+- [Fix issue with escalated permissions caused by previous change](https://github.com/RogerSelwyn/MS365-Calendar/commit/e983c75cd121830c6e17ee302c139d4f86ed0e80) - @RogerSelwyn
+
+### 🧰 Maintenance
+- [Changes from testing of ms365_calendar](https://github.com/RogerSelwyn/MS365-Calendar/commit/a2de7966d25326892315719e00f86ba33d5782ad) - @RogerSelwyn
+- [Add support for is_matching](https://github.com/RogerSelwyn/MS365-Calendar/commit/4d46d8db5d2fc4948bad5b0a1774cc05b9b14373) - @RogerSelwyn
+- [Adjust to use update_reload_and_abort](https://github.com/RogerSelwyn/MS365-Calendar/commit/3c8601c838aa92acd8a37f93d9e7d2b8d8138f47) - @RogerSelwyn
+- [Remove unnecessary check](https://github.com/RogerSelwyn/MS365-Calendar/commit/fc1c654aa1aaacd57d61cffc6cd10ac8e67b3388) - @RogerSelwyn
+- [Update for clarity of testing](https://github.com/RogerSelwyn/MS365-Calendar/commit/b0262be6294a9d67e4aeba8040ee49b2afe3f4d5) - @RogerSelwyn
+- [Tidy up permissions check on services](https://github.com/RogerSelwyn/MS365-Calendar/commit/1735fb4622767cdd569252a67e28910c5443c964) - @RogerSelwyn
+- [Remove unrequired check](https://github.com/RogerSelwyn/MS365-Calendar/commit/09c81e019be21bde1733445f682f4ca5187d9f7b) - @RogerSelwyn
+- [Remove redundant code](https://github.com/RogerSelwyn/MS365-Calendar/commit/eebb8b6c2306c4e08d74a82837e5fa25828221b9) - @RogerSelwyn
+- [Changes in support of recent HA core changes](https://github.com/RogerSelwyn/MS365-Calendar/commit/9c8d563692d6db318ca019f7b0a7c480c9a6fe37) - @RogerSelwyn
+
+### ⬆️ Dependencies
+- [Bump pytest to 8.3.3](https://github.com/RogerSelwyn/MS365-Calendar/commit/d60143ad6f2ad72d24ac604d79de1beae601d661) - @RogerSelwyn
+- [Bump python-o365 to 2.0.37](https://github.com/RogerSelwyn/MS365-Calendar/commit/1bf599d6a1e19f24455c28c620290000ca64573f) - @RogerSelwyn
+- [Bump python-o365 to 2.0.38](https://github.com/RogerSelwyn/MS365-Calendar/commit/a40555e0f2ba5bf7344261743bff0501fd776d1c) - @RogerSelwyn
+- [Auto update requirements.txt](https://github.com/RogerSelwyn/MS365-Calendar/commit/af99f16bef7d30adf32f19fa845bd04d5e082a7c) - @actions-user
+
+### 📚 Documentation
+- [Update docs](https://github.com/RogerSelwyn/MS365-Calendar/commit/81f7d5b15dbce649b206ebec04f916e41cfb7514) - @RogerSelwyn
+- [Update docs](https://github.com/RogerSelwyn/MS365-Calendar/commit/28b523adb59782906be6206f2c18dbf619160860) - @RogerSelwyn
+- [Update calendar_configuration.md](https://github.com/RogerSelwyn/MS365-Calendar/commit/f6faddf68eed89437d0ba28bab05fb35e262256b) - @RogerSelwyn
+
+### ✅ Test
+- [Remove tests](https://github.com/RogerSelwyn/MS365-Calendar/commit/2ea2505e32cd0f840a6b8a1a95f08faab208a847) - @RogerSelwyn
+- [Delete tests/data/test_permissions.py](https://github.com/RogerSelwyn/MS365-Calendar/commit/e0927aba0f191b7c41b146d79190f55213970f0b) - @RogerSelwyn
+- [Initial test inclusion](https://github.com/RogerSelwyn/MS365-Calendar/commit/3ed22b83a648062ea34b58d151fdb7cdfc1b4028) - @RogerSelwyn
+- [Create test.yaml](https://github.com/RogerSelwyn/MS365-Calendar/commit/33f65ced2bcadd7eb5978cb5cd2cb7d9bfdb7de3) - @RogerSelwyn
+- [Add recurrence rule testing](https://github.com/RogerSelwyn/MS365-Calendar/commit/bd672f0bb1113027aedb9976d431323cca359f90) - @RogerSelwyn
+- [Re-structure test to enable replication](https://github.com/RogerSelwyn/MS365-Calendar/commit/bd1fb1e7f181f4731e62f5dabfef3a3898b978a1) - @RogerSelwyn
+- [Convert to use tmpdir](https://github.com/RogerSelwyn/MS365-Calendar/commit/85740f1e4c901f107dcc0d533db6e572617475fd) - @RogerSelwyn
+- [Rename items to make location clearer](https://github.com/RogerSelwyn/MS365-Calendar/commit/1cd62756e4c130fa9edee8aea408b6730e0270f1) - @RogerSelwyn
+- [Change tmpdir to tmp_path](https://github.com/RogerSelwyn/MS365-Calendar/commit/120efd67ef6b00fdaaa795921370f8473bd2ba94) - @RogerSelwyn
+- [Organise test data](https://github.com/RogerSelwyn/MS365-Calendar/commit/10c8358337fa666711f2654b6ae5bf4a2bc703a3) - @RogerSelwyn
+- [Delete tests/data/storage/ms365_calendars_test.yaml](https://github.com/RogerSelwyn/MS365-Calendar/commit/15790e24c4c3f86598caaea31dd2366dcb937562) - @RogerSelwyn
+- [Delete tests/data/storage/tokens/ms365_calendar_test.token](https://github.com/RogerSelwyn/MS365-Calendar/commit/83923f8d43786344c1db240f041a0c1d01146a21) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.0.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/2b5c3c06c0b84f4b666c2a4a6d428b13d1e610fa) - @RogerSelwyn
+
 ## v0.1.4 (2024/10/07)
 ### ✨ Enhancements
 - [Add ability to exclude sensitivity types from calendar](https://github.com/RogerSelwyn/MS365-Calendar/commit/97d8bd0788a8f3c1b2b79e0c912e71f42c265f26) - @RogerSelwyn
