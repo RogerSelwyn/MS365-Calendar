@@ -205,7 +205,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
             ]:
                 ir.async_delete_issue(self.hass, DOMAIN, error)
             return self.async_update_reload_and_abort(
-                self._entry, data=self._user_input
+                self._entry, data_updates=self._user_input
             )
 
         return self.async_create_entry(title=self._entity_name, data=self._user_input)
@@ -271,7 +271,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
         user_input: Mapping[str, Any] | None = None,  # pylint: disable=unused-argument
     ) -> ConfigFlowResult:
         """Trigger a reconfiguration flow."""
-        self._entry = self.hass.config_entries.async_get_entry(self.context["entry_id"])
+        self._entry = self._get_reconfigure_entry()
         assert self._entry
         return await self._redo_configuration(self._entry.data)
 
