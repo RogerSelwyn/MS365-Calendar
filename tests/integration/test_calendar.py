@@ -232,7 +232,9 @@ async def test_all_day_event(
     base_config_entry: MS365MockConfigEntry,
 ) -> None:
     """Test all day event."""
-    check_entity_state(hass, "calendar.test_calendar1", "on", subject="Test all day")
+    check_entity_state(
+        hass, "calendar.test_calendar1", "on", attributes={"message": "Test all day"}
+    )
 
 
 @pytest.mark.parametrize(
@@ -245,7 +247,9 @@ async def test_started_event(
 ) -> None:
     """Test started event."""
 
-    check_entity_state(hass, "calendar.test_calendar1", "on", subject="Test started")
+    check_entity_state(
+        hass, "calendar.test_calendar1", "on", attributes={"message": "Test started"}
+    )
 
 
 @pytest.mark.parametrize(
@@ -261,7 +265,10 @@ async def test_not_started_event(
     """Test not started event."""
 
     check_entity_state(
-        hass, "calendar.test_calendar1", "off", subject="Test not started"
+        hass,
+        "calendar.test_calendar1",
+        "off",
+        attributes={"message": "Test not started"},
     )
 
 

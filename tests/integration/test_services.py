@@ -28,10 +28,10 @@ END_BASE = datetime(2020, 1, 1, 23, 59, 59, tzinfo=ZoneInfo(key="UTC"))
 async def test_update_service_setup(
     hass: HomeAssistant,
     setup_update_integration,
-    update_config_entry: MS365MockConfigEntry,
+    base_config_entry: MS365MockConfigEntry,
 ) -> None:
     """Test the reconfigure flow."""
-    assert update_config_entry.data[CONF_ENABLE_UPDATE]
+    assert base_config_entry.data[CONF_ENABLE_UPDATE]
     assert hass.services.has_service(DOMAIN, "create_calendar_event")
     assert hass.services.has_service(DOMAIN, "modify_calendar_event")
     assert hass.services.has_service(DOMAIN, "remove_calendar_event")

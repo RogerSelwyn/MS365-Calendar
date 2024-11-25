@@ -77,29 +77,15 @@ def skip_notifications_fixture():
 def base_config_entry(request, hass: HomeAssistant) -> MS365MockConfigEntry:
     """Create MS365 entry in Home Assistant."""
     data = deepcopy(BASE_CONFIG_ENTRY)
+    options = None
     if hasattr(request, "param"):
         for key, value in request.param.items():
-            data[key] = value
+            if key == "options":
+                options = value
+            else:
+                data[key] = value
     entry = MS365MockConfigEntry(
-        domain=DOMAIN,
-        title=TITLE,
-        unique_id=DOMAIN,
-        data=data,
-    )
-    entry.runtime_data = None
-    return entry
-
-
-@pytest.fixture
-def update_config_entry(hass: HomeAssistant) -> MS365MockConfigEntry:
-    """Create MS365 entry in Home Assistant."""
-    data = deepcopy(BASE_CONFIG_ENTRY)
-    data["enable_update"] = True
-    entry = MS365MockConfigEntry(
-        domain=DOMAIN,
-        title=TITLE,
-        unique_id=DOMAIN,
-        data=data,
+        domain=DOMAIN, title=TITLE, unique_id=DOMAIN, data=data, options=options
     )
     entry.runtime_data = None
     return entry

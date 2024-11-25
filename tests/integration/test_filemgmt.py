@@ -16,7 +16,7 @@ async def test_base_filemgmt(
     setup_base_integration,
     base_config_entry: MS365MockConfigEntry,
 ) -> None:
-    """Test basic file management."""
+    """Test base file management."""
 
     check_yaml_file_contents(tmp_path, "ms365_calendars_base")
 
