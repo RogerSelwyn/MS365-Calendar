@@ -18,6 +18,7 @@ from .integration.const_integration import (
     AUTH_CALLBACK_PATH_ALT,
     AUTH_CALLBACK_PATH_DEFAULT,
     BASE_CONFIG_ENTRY,
+    BASE_MISSING_PERMS,
     BASE_TOKEN_PERMS,
     DOMAIN,
     RECONFIGURE_CONFIG_ENTRY,
@@ -142,7 +143,7 @@ async def test_missing_permissions(
     assert result["errors"]["url"] == "permissions"
     assert (
         result["description_placeholders"]["failed_permissions"]
-        == f"\n\nMissing - {BASE_TOKEN_PERMS}"
+        == f"\n\nMissing - {BASE_MISSING_PERMS}"
     )
 
 
@@ -186,7 +187,7 @@ async def test_missing_permissions_alt_flow(
     assert result["errors"]["url"] == "permissions"
     assert (
         result["description_placeholders"]["failed_permissions"]
-        == f"\n\nMissing - {BASE_TOKEN_PERMS}"
+        == f"\n\nMissing - {BASE_MISSING_PERMS}"
     )
 
 

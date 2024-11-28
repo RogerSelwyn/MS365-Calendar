@@ -17,6 +17,7 @@ from .integration.const_integration import (
     BASE_CONFIG_ENTRY,
     BASE_TOKEN_PERMS,
     DOMAIN,
+    UPDATE_OPTIONS,
     UPDATE_TOKEN_PERMS,
 )
 from .integration.helpers_integration.mocks import MS365MOCKS
@@ -110,9 +111,8 @@ async def setup_base_integration(
 ) -> None:
     """Fixture for setting up the component."""
     method_name = "standard_mocks"
-    if hasattr(request, "param"):
-        if "method_name" in request.param:
-            method_name = request.param["method_name"]
+    if hasattr(request, "param") and "method_name" in request.param:
+        method_name = request.param["method_name"]
 
     mock_method = getattr(MS365MOCKS, method_name)
     mock_method(requests_mock)
@@ -134,7 +134,8 @@ async def setup_update_integration(
     MS365MOCKS.standard_mocks(requests_mock)
     base_config_entry.add_to_hass(hass)
     data = deepcopy(BASE_CONFIG_ENTRY)
-    data["enable_update"] = True
+    for key, value in UPDATE_OPTIONS.items():
+        data[key] = value
     hass.config_entries.async_update_entry(base_config_entry, data=data)
 
     await hass.config_entries.async_setup(base_config_entry.entry_id)

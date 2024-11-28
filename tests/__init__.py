@@ -1,1 +1,1 @@
-"""Tests for MS365 ToDo."""
+"""Tests for MS365."""
