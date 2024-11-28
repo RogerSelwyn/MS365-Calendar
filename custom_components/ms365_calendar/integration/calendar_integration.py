@@ -546,9 +546,8 @@ class MS365CalendarData:
 
     async def async_ms365_get_events(self, hass, start_date, end_date, limit=999):
         """Get the events."""
-        if not self.calendar:
-            if not await self._async_get_calendar(hass):
-                return []
+        if not self.calendar and not await self._async_get_calendar(hass):
+            return []
 
         events = await self._async_calendar_schedule_get_events(
             hass, self.calendar, start_date, end_date, limit
