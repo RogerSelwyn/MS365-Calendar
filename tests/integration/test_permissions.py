@@ -1,7 +1,6 @@
 # pylint: disable=unused-argument, line-too-long
 """Test permission handling."""
 
-# import logging
 from unittest.mock import patch
 
 import pytest
@@ -214,7 +213,6 @@ async def test_update_groups(
     entity_registry: er.EntityRegistry,
 ) -> None:
     """Test for group update permissions."""
-    # logging.disable(logging.WARNING)
     MS365MOCKS.standard_mocks(requests_mock)
     base_config_entry.add_to_hass(hass)
     await hass.config_entries.async_setup(base_config_entry.entry_id)

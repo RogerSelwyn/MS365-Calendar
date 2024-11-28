@@ -108,8 +108,8 @@ def check_entity_state(
     # print(state)
     assert state.state == entity_state
     if entity_attributes:
-        print("*************************** State Attributes")
-        print(state.attributes)
+        # print("*************************** State Attributes")
+        # print(state.attributes)
         if "data" in state.attributes:
             assert state.attributes["data"] == entity_attributes
         else:
@@ -119,7 +119,7 @@ def check_entity_state(
 
     if attributes is not None:
         for key, value in attributes.items():
-            assert state.attributes[key] == value
+            assert state.attributes.get(key, None) == value
 
 
 def utcnow():
