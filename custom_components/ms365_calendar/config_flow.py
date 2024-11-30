@@ -310,25 +310,15 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
         if self._check_existing():
             return self.async_abort(reason="already_configured")
         await async_integration_imports(self.hass, import_data)
-        result = self.async_create_entry(
+        return self.async_create_entry(
             title=self._entity_name, data=data, options=options
         )
-        self._disable_new()
-        return result
 
     def _check_existing(self):
         config_entries = self.hass.config_entries.async_entries(DOMAIN)
-        for config_entry in config_entries:
-            if config_entry.title == self._entity_name:
-                return True
-        return False
-
-    def _disable_new(self):
-        config_entries = self.hass.config_entries.async_entries(DOMAIN)
-        for config_entry in config_entries:
-            if config_entry.title == self._entity_name:
-                config_entry.disabled_by = "migration"
-                return
+        return any(
+            config_entry.title == self._entity_name for config_entry in config_entries
+        )
 
 
 def get_callback_url(hass, alt_config):
