@@ -38,6 +38,7 @@ from .filemgmt_integration import (
     build_yaml_filename,
     read_calendar_yaml_file,
     write_calendar_yaml_file,
+    write_yaml_file,
 )
 from .utils_integration import build_calendar_entity_id
 
@@ -64,6 +65,19 @@ def integration_reconfigure_schema(entry_data):
 def integration_validate_schema(user_input):  # pylint: disable=unused-argument
     """Validate the user input."""
     return {}
+
+
+async def async_integration_imports(hass, import_data):
+    """Do the integration  level import tasks."""
+    calendars = import_data["calendars"]
+    path = YAML_CALENDARS_FILENAME.format(
+        f"_{import_data["data"].get(CONF_ENTITY_NAME)}"
+    )
+    yaml_filepath = build_yaml_file_path(hass, path)
+
+    for calendar in calendars.values():
+        await hass.async_add_executor_job(write_yaml_file, yaml_filepath, calendar)
+    return
 
 
 class MS365OptionsFlowHandler(config_entries.OptionsFlow):

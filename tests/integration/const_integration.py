@@ -35,6 +35,24 @@ ALT_CONFIG_ENTRY["alt_auth_method"] = True
 RECONFIGURE_CONFIG_ENTRY = deepcopy(BASE_CONFIG_ENTRY)
 del RECONFIGURE_CONFIG_ENTRY["entity_name"]
 
+MIGRATION_CONFIG_ENTRY = {
+    "data": BASE_CONFIG_ENTRY,
+    "options": {},
+    "calendars": {
+        "calendar1": {
+            "cal_id": "calendar1",
+            "entities": [
+                {
+                    "device_id": "Calendar",
+                    "end_offset": 6,
+                    "name": "Calendar",
+                    "start_offset": 0,
+                    "track": False,
+                }
+            ],
+        },
+    },
+}
 
 DIAGNOSTIC_GRANTED_PERMISSIONS = [
     "Calendars.Read",

@@ -48,7 +48,8 @@ def load_yaml_file(path, item_id, item_schema):
     return items
 
 
-def _write_yaml_file(yaml_filepath, cal):
+def write_yaml_file(yaml_filepath, cal):
+    """Write to the calendar file."""
     with open(yaml_filepath, "a", encoding="UTF8") as out:
         out.write("\n")
         yaml.dump([cal], out, default_flow_style=False, encoding="UTF8")
@@ -83,7 +84,7 @@ async def async_update_calendar_file(
     cal = _get_calendar_info(calendar, track_new_devices)
     if cal[CONF_CAL_ID] in existing_calendars:
         return
-    await hass.async_add_executor_job(_write_yaml_file, yaml_filepath, cal)
+    await hass.async_add_executor_job(write_yaml_file, yaml_filepath, cal)
 
 
 def build_yaml_filename(conf: MS365ConfigEntry, filename):

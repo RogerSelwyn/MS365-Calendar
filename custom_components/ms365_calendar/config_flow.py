@@ -41,6 +41,7 @@ from .const import (
 from .helpers.config_entry import MS365ConfigEntry
 from .integration.config_flow_integration import (
     MS365OptionsFlowHandler,
+    async_integration_imports,
     integration_reconfigure_schema,
     integration_validate_schema,
 )
@@ -76,6 +77,8 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
         self._config_schema: dict[vol.Required, type[str | int]] | None = None
         self._reconfigure = False
         self._entry: MS365ConfigEntry | None = None
+        # self._o365_config = None
+        # self._ms365_config = None
 
     @staticmethod
     @callback
@@ -89,6 +92,8 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_user(self, user_input=None):
         """Handle the initial step."""
+        # self._o365_config = self.hass.data.get("o365", None)
+        # self._ms365_config = self.hass.config_entries.async_entries(DOMAIN)
         errors = integration_validate_schema(user_input) if user_input else {}
 
         if user_input and not errors:
@@ -296,6 +301,34 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
         self._config_schema |= integration_reconfigure_schema(entry_data)
 
         return await self.async_step_user()
+
+    async def async_step_import(self, import_data: dict[str, Any]) -> ConfigFlowResult:
+        """Import a config entry."""
+        data = import_data["data"]
+        options = import_data["options"]
+        self._entity_name = data[CONF_ENTITY_NAME]
+        if self._check_existing():
+            return self.async_abort(reason="already_configured")
+        await async_integration_imports(self.hass, import_data)
+        result = self.async_create_entry(
+            title=self._entity_name, data=data, options=options
+        )
+        self._disable_new()
+        return result
+
+    def _check_existing(self):
+        config_entries = self.hass.config_entries.async_entries(DOMAIN)
+        for config_entry in config_entries:
+            if config_entry.title == self._entity_name:
+                return True
+        return False
+
+    def _disable_new(self):
+        config_entries = self.hass.config_entries.async_entries(DOMAIN)
+        for config_entry in config_entries:
+            if config_entry.title == self._entity_name:
+                config_entry.disabled_by = "migration"
+                return
 
 
 def get_callback_url(hass, alt_config):
