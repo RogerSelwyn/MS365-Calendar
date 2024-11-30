@@ -1,5 +1,24 @@
 # Changelog
 
+## v1.0.1 (2024/11/30)
+### 🧰 Maintenance
+- [Sourcery recommendations](https://github.com/RogerSelwyn/MS365-Calendar/commit/bc84ae72a62a80ef8f5f8ba76a0d7a4de147f304) - @RogerSelwyn
+- [Add support for migration from o365 integration](https://github.com/RogerSelwyn/MS365-Calendar/commit/8858691b654f6be1f8f64f16290f8ee8a6999c59) - @RogerSelwyn
+
+### ⬆️ Dependencies
+- [Auto update requirements.txt](https://github.com/RogerSelwyn/MS365-Calendar/commit/af99f16bef7d30adf32f19fa845bd04d5e082a7c) - @actions-user
+
+### 📚 Documentation
+- [Update CHANGELOG.md](https://github.com/RogerSelwyn/MS365-Calendar/commit/df048c554142ad075bc86cc5ecaf9ebe75118288) - @RogerSelwyn
+
+### ✅ Test
+- [Update tests to common standard](https://github.com/RogerSelwyn/MS365-Calendar/commit/bcc907d96edb43ba2fba62a7b05513e36fa47356) - @RogerSelwyn
+- [Various tidy up on testing](https://github.com/RogerSelwyn/MS365-Calendar/commit/179211f48ce73b5f13eaa7796fbf5f594872f7f7) - @RogerSelwyn
+- [Testing improvements](https://github.com/RogerSelwyn/MS365-Calendar/commit/2f9cf5ca516748f6651fbf5306bbf5a02b8a058e) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.0.1](https://github.com/RogerSelwyn/MS365-Calendar/commit/fb4a07d985d94632a35e5727607a965303658b6d) - @RogerSelwyn
+
 ## v1.0.0 (2024/11/23)
 ### 🐛 Fixes
 - [Fix issue around usage of shared permissions](https://github.com/RogerSelwyn/MS365-Calendar/commit/21d480286f1c6aefc679240e6fe704e9e26b7f6b) - @RogerSelwyn
