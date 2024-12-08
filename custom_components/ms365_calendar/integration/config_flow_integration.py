@@ -94,6 +94,7 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
         self._yaml_filename = build_yaml_filename(entry, YAML_CALENDARS_FILENAME)
         self._yaml_filepath = None
         self._calendar_no = 0
+        self._user_input = None
 
     async def async_step_init(
         self,
@@ -121,7 +122,7 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
         errors = {}
 
         if user_input:
-            self.config_entry.options = user_input
+            self._user_input = user_input
             self._track_new_calendar = user_input[CONF_TRACK_NEW_CALENDAR]
             self._calendar_list_selected = user_input[CONF_CALENDAR_LIST]
 
@@ -176,7 +177,7 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
                         return await self.async_step_calendar_config()
 
         if self._calendar_no == len(self._calendar_list_selected):
-            return await self._async_tidy_up(self.config_entry.options)
+            return await self._async_tidy_up(self._user_input)
 
         calendar_item = self._get_calendar_item()
         last_step = self._calendar_no == len(self._calendar_list_selected)
