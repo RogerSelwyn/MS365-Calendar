@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.0.2 (2024/12/27)
+### 🐛 Fixes
+- [Fix issue in previous change](https://github.com/RogerSelwyn/MS365-Calendar/commit/d45aaff2485ef11fdba8e0668a59e8cd56337741) - @RogerSelwyn
+- [Fix date parsing](https://github.com/RogerSelwyn/MS365-Calendar/commit/9a805d07eb4d14bb4d2f1f1cbfd7f13a5e0841f1) - @RogerSelwyn
+
+### 🧰 Maintenance
+- [Use attributes from base class](https://github.com/RogerSelwyn/MS365-Calendar/commit/aa60ed0450457bc6b9bb699922a6dfe09b693354) - @RogerSelwyn
+
+### ⬆️ Dependencies
+- [Bump pytest-cov to 6.0.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/64e5c71737bdef4d963c2bb8f9720f41ee369e7d) - @RogerSelwyn
+- [Bump minimum HA Core to 2024.12](https://github.com/RogerSelwyn/MS365-Calendar/commit/6a863e0afa2599e547ac5e17cd193da0fca6e023) - @RogerSelwyn
+
+### 📚 Documentation
+- [Update CHANGELOG.md](https://github.com/RogerSelwyn/MS365-Calendar/commit/66dcfd61c9bb421ede21442eb75f3b45c4fc28d9) - @RogerSelwyn
+- [Update README.md](https://github.com/RogerSelwyn/MS365-Calendar/commit/1d794beb502de1e40e0ab8b76d43aedd553b1621) - @RogerSelwyn
+- [Update README.md](https://github.com/RogerSelwyn/MS365-Calendar/commit/fb76e192ea84a77bf27bdb4ce684cd20956ee86d) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.0.2](https://github.com/RogerSelwyn/MS365-Calendar/commit/366eded8717df3ad361452b132f494689b1d8124) - @RogerSelwyn
+
 ## v1.0.1 (2024/11/30)
 ### 🧰 Maintenance
 - [Sourcery recommendations](https://github.com/RogerSelwyn/MS365-Calendar/commit/bc84ae72a62a80ef8f5f8ba76a0d7a4de147f304) - @RogerSelwyn
