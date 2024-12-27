@@ -3,6 +3,7 @@
 import logging
 from datetime import datetime
 
+from dateutil import parser
 from homeassistant.util import slugify
 from O365.calendar import Attendee  # pylint: disable=no-name-in-module)
 
@@ -116,7 +117,7 @@ def _rrule_processing(event, rrule):
     if "COUNT" in rules:
         kwargs["occurrences"] = int(rules["COUNT"])
     if "UNTIL" in rules:
-        end = datetime.strptime(rules["UNTIL"], "%Y%m%dT%H%M%S")
+        end = parser.parse(rules["UNTIL"])
         end.replace(tzinfo=event.start.tzinfo)
         kwargs["end"] = end
     interval = int(rules["INTERVAL"]) if "INTERVAL" in rules else 1
