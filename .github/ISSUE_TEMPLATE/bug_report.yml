@@ -1,0 +1,84 @@
+name: Bug report
+description: Create a report to help us improve
+title: "[BUG]"
+labels: Bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please complete this form as fully and as accurately as possible. The more complete it is the quicker the problem will likely be solved.
+
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Describe the bug
+      description: >-
+        Describe the issue you are experiencing here, to communicate to the
+        maintainers. Tell us what you were trying to do and what happened.
+
+        Provide a clear and concise description of what the problem is.
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: To reproduce
+      description: >-
+        Steps to reproduce the behavior.
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Expected bahavior
+      description: >-
+        A clear and concise description of what you expected to happen.
+  - type: markdown
+    attributes:
+      value: |
+        ## Environment
+  - type: input
+    id: ms365version
+    validations:
+      required: true
+    attributes:
+      label: What version of the MS365 Calendar has the issue?
+      placeholder: version
+      description: >
+        Can be found in: HACS ⇒ Integrations ⇒ MS365 Calendar
+  - type: input
+    attributes:
+      label: What was the last working version of MS365 Calendar Integration?
+      placeholder: version
+      description: >
+        If known, otherwise leave blank.
+  - type: input
+    id: haversion
+    validations:
+      required: true
+    attributes:
+      label: What version of Home Assistant Core has the issue?
+      placeholder: core-
+      description: >
+        Can be found in: [Settings ⇒ System ⇒ Repairs ⇒ Three Dots in Upper Right ⇒ System information](https://my.home-assistant.io/redirect/system_health/).
+
+        [![Open your Home Assistant instance and show the system information.](https://my.home-assistant.io/badges/system_health.svg)](https://my.home-assistant.io/redirect/system_health/)
+
+  - type: textarea
+    attributes:
+      label: Configuration
+      description: >-
+        Assuming you have the diagnostics enabled in your install, you can download your configuration from the
+        Device dialogue by clicking on the three dots at bottom right of the Device Info card.
+      render: jsono
+
+  - type: textarea
+    attributes:
+      label: Anything in the logs that might be useful for us?
+      description: For example, error message, or stack traces. Also look for O365 errors.
+
+  - type: textarea
+    attributes:
+      label: Additional information
+      description: >
+        If you have any additional information for us, use the field below.
+      render: txt
