@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.0.3 (2024/12/30)
+### 🐛 Fixes
+- [Fix event update permissions for shared calendars](https://github.com/RogerSelwyn/MS365-Calendar/commit/c31eb0977e6b1fa15d7031edefdfdcb16a21a737) - @RogerSelwyn
+
+### 📚 Documentation
+- [Update CHANGELOG.md](https://github.com/RogerSelwyn/MS365-Calendar/commit/fbecf2f1d5b153021bd8ddc73b4d6788b3a41909) - @RogerSelwyn
+- [Update installation_and_configuration.md](https://github.com/RogerSelwyn/MS365-Calendar/commit/d0b5251863b61392db0f530de3b1b38c64a23d5e) - @RogerSelwyn
+- [Add bug reporting](https://github.com/RogerSelwyn/MS365-Calendar/commit/f8fb10e4223b77115e04654c0cf448d62a0c752a) - @RogerSelwyn
+- [Better feature request form](https://github.com/RogerSelwyn/MS365-Calendar/commit/de37bcdde73e6e401ec5b55400ede6419c7c968b) - @RogerSelwyn
+- [Spelling error](https://github.com/RogerSelwyn/MS365-Calendar/commit/5977a1766d2c0848cba3984ecc981a402837f1fa) - @RogerSelwyn
+- [Remove md](https://github.com/RogerSelwyn/MS365-Calendar/commit/b71b581fb6d0dd6694f76ea9682595cda43f66b0) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.0.3](https://github.com/RogerSelwyn/MS365-Calendar/commit/fbc01bc094ffe83b7368991c6e192d59346bdb66) - @RogerSelwyn
+
 ## v1.0.2 (2024/12/27)
 ### 🐛 Fixes
 - [Fix issue in previous change](https://github.com/RogerSelwyn/MS365-Calendar/commit/d45aaff2485ef11fdba8e0668a59e8cd56337741) - @RogerSelwyn
