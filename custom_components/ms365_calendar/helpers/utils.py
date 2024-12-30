@@ -1,5 +1,7 @@
 """Utilities processes."""
 
+from copy import deepcopy
+
 from bs4 import BeautifulSoup
 from homeassistant.helpers.entity import async_generate_entity_id
 
@@ -37,3 +39,10 @@ def build_entity_id(hass, entity_id_format, name):
         name,
         hass=hass,
     )
+
+
+def shared_permission_build(permission, shared):
+    """Build the shared permission."""
+    if shared:
+        return f"{deepcopy(permission)}.Shared"
+    return permission
