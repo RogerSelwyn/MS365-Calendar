@@ -14,6 +14,8 @@ During setup, the difference in configuration between each method is the value o
 ## Primary (default) authentication method
 This requires *alt_auth_method* to be set to *False* or be not present and the redirect URI in your Entra ID App Registration app set to `https://login.microsoftonline.com/common/oauth2/nativeclient`.
 
+Do not use Safari on MacOS for this process, you will not be returned the URL at step 3 that you need.
+
 When adding the integration, leave `Use alternate authentication` disabled.
 1. When prompted click the `Link MS365 account` link.
 1. Login on the Microsoft page; when prompted, authorize the app you created
@@ -22,7 +24,7 @@ When adding the integration, leave `Use alternate authentication` disabled.
 1. Click `Submit`.
 
 ## Alternate authentication method
-This requires the `Use alternate authentication` to be enabled and the redirect URI in your Entra ID App Registration set to `https://<your_home_assistant_url_or_local_ip>/api/ms365_calendar` (Nabu Casa users should use `https://<NabuCasaBaseAddress>/api/ms365_calendar` instead).
+This requires the `Use alternate authentication` to be enabled and the redirect URI in your Entra ID App Registration set to `https://<your_home_assistant_url_or_local_ip>/api/ms365` (Nabu Casa users should use `https://<NabuCasaBaseAddress>/api/ms365_calendar` instead).
 
 When adding the integration, enable `Use alternate authentication`.
 1. When prompted click the `Link MS365 account` link.
