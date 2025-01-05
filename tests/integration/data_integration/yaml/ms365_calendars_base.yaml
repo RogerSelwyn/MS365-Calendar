@@ -14,3 +14,11 @@
     name: Calendar2
     start_offset: 0
     track: true
+
+- cal_id: calendar3
+  entities:
+  - device_id: Calendar3
+    end_offset: 24
+    name: Calendar3
+    start_offset: 0
+    track: true

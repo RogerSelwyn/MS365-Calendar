@@ -17,6 +17,7 @@ from zoneinfo import ZoneInfo
 
 from ..helpers.mock_config_entry import MS365MockConfigEntry
 from ..helpers.utils import check_entity_state, utcnow
+from .const_integration import FULL_INIT_ENTITY_NO
 from .data_integration.state import BASE_STATE_CAL1, BASE_STATE_CAL2
 from .helpers_integration.mocks import MS365MOCKS
 from .helpers_integration.utils_integration import update_options, yaml_setup
@@ -36,7 +37,7 @@ async def test_get_data(
     entities = er.async_entries_for_config_entry(
         entity_registry, base_config_entry.entry_id
     )
-    assert len(entities) == 2
+    assert len(entities) == FULL_INIT_ENTITY_NO
 
     check_entity_state(
         hass, "calendar.test_calendar1", "on", _adjust_date(BASE_STATE_CAL1)

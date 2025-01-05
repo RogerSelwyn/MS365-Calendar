@@ -29,6 +29,15 @@ class MS365Mocks:
             "calendar2_calendar_view",
             "calendar2/calendar/calendarView",
         )
+        mock_call(requests_mock, URL.CALENDARS, "calendar3", "calendar3")
+        mock_call(
+            requests_mock,
+            URL.CALENDARS,
+            "calendar3_calendar_view",
+            "calendar3/calendarView",
+            start=utcnow().strftime("%Y-%m-%d"),
+            end=(utcnow() + timedelta(days=1)).strftime("%Y-%m-%d"),
+        )
 
     def shared_mocks(self, requests_mock):
         """Setup the standard mocks."""
@@ -49,6 +58,15 @@ class MS365Mocks:
             URL.GROUP_CALENDARS,
             "calendar2_calendar_view",
             "calendar2/calendar/calendarView",
+        )
+        mock_call(requests_mock, URL.SHARED_CALENDARS, "calendar3", "calendar3")
+        mock_call(
+            requests_mock,
+            URL.SHARED_CALENDARS,
+            "calendar3_calendar_view",
+            "calendar3/calendarView",
+            start=utcnow().strftime("%Y-%m-%d"),
+            end=(utcnow() + timedelta(days=1)).strftime("%Y-%m-%d"),
         )
 
     def no_events_mocks(self, requests_mock):

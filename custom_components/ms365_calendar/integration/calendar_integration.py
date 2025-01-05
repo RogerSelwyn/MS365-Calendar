@@ -106,9 +106,14 @@ async def async_integration_setup_entry(
         entry.data[CONF_ENABLE_UPDATE]
         and entry.runtime_data.permissions.validate_authorization(required_permssion)
     )
-    await async_scan_for_calendars(hass, entry)
+    calendars = await async_scan_for_calendars(hass, entry)
     await _async_setup_add_entities(
-        hass, entry.runtime_data.account, async_add_entities, entry, update_supported
+        hass,
+        entry.runtime_data.account,
+        async_add_entities,
+        entry,
+        update_supported,
+        calendars,
     )
 
     await _async_setup_register_services(update_supported)
@@ -117,7 +122,12 @@ async def async_integration_setup_entry(
 
 
 async def _async_setup_add_entities(
-    hass, account, async_add_entities, entry: MS365ConfigEntry, update_supported
+    hass,
+    account,
+    async_add_entities,
+    entry: MS365ConfigEntry,
+    update_supported,
+    calendar_edit_list,
 ):
     yaml_filename = build_yaml_filename(entry, YAML_CALENDARS_FILENAME)
     yaml_filepath = build_yaml_file_path(hass, yaml_filename)
@@ -129,10 +139,16 @@ async def _async_setup_add_entities(
         for entity in calendar.get(CONF_ENTITIES):
             if not entity[CONF_TRACK]:
                 continue
+            can_edit = True
+            for calendar_edit in calendar_edit_list:
+                if calendar_edit.calendar_id == cal_id:
+                    can_edit = calendar_edit.can_edit
+                    break
             entity_id = build_calendar_entity_id(
                 entity.get(CONF_DEVICE_ID), entry.data[CONF_ENTITY_NAME]
             )
 
+            update_calendar = update_supported and can_edit
             device_id = entity["device_id"]
             try:
                 cal = MS365CalendarEntity(
@@ -142,7 +158,7 @@ async def _async_setup_add_entities(
                     entity_id,
                     device_id,
                     entry,
-                    update_supported,
+                    update_calendar,
                 )
                 await cal.data.async_calendar_data_init(hass)
             except HTTPError:
@@ -211,6 +227,7 @@ class MS365CalendarEntity(CalendarEntity):
         self.data = self._init_data(calendar_id, entity)
         self._calendar_id = calendar_id
         self._device_id = device_id
+        self._update_supported = update_supported
         if update_supported:
             self._attr_supported_features = (
                 CalendarEntityFeature.CREATE_EVENT
@@ -490,6 +507,15 @@ class MS365CalendarEntity(CalendarEntity):
                 translation_placeholders={
                     "calendar": required_permssion,
                     "error_message": error_message,
+                },
+            )
+
+        if not self._update_supported:
+            raise ServiceValidationError(
+                translation_domain=DOMAIN,
+                translation_key="calendar_not_editable",
+                translation_placeholders={
+                    "name": self._name,
                 },
             )
 
@@ -774,6 +800,7 @@ async def async_scan_for_calendars(hass, entry: MS365ConfigEntry):
             hass,
             track,
         )
+    return calendars
 
 
 def _group_calendar_log(entity_id):

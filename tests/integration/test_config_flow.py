@@ -44,7 +44,11 @@ async def test_options_flow(
     assert result["step_id"] == "user"
     schema = result["data_schema"].schema
     assert get_schema_default(schema, CONF_TRACK_NEW_CALENDAR) is True
-    assert get_schema_default(schema, CONF_CALENDAR_LIST) == ["Calendar1", "Calendar2"]
+    assert get_schema_default(schema, CONF_CALENDAR_LIST) == [
+        "Calendar1",
+        "Calendar2",
+        "Calendar3",
+    ]
 
     result = await hass.config_entries.options.async_configure(
         result["flow_id"],

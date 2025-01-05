@@ -10,6 +10,7 @@ from requests_mock import Mocker
 
 from ..helpers.mock_config_entry import MS365MockConfigEntry
 from ..helpers.utils import build_token_file
+from .const_integration import FULL_INIT_ENTITY_NO
 from .helpers_integration.mocks import MS365MOCKS
 
 ### Note that permissions code also supports Presence/Send which are not present in the calendar integration
@@ -46,7 +47,7 @@ async def test_shared_permissions(
     entities = er.async_entries_for_config_entry(
         entity_registry, base_config_entry.entry_id
     )
-    assert len(entities) == 2
+    assert len(entities) == FULL_INIT_ENTITY_NO
 
 
 @pytest.mark.parametrize(
@@ -71,7 +72,7 @@ async def test_update_shared_permissions(
     entities = er.async_entries_for_config_entry(
         entity_registry, base_config_entry.entry_id
     )
-    assert len(entities) == 2
+    assert len(entities) == FULL_INIT_ENTITY_NO
 
 
 async def test_missing_permissions(
@@ -110,7 +111,7 @@ async def test_higher_permissions(
     entities = er.async_entries_for_config_entry(
         entity_registry, base_config_entry.entry_id
     )
-    assert len(entities) == 2
+    assert len(entities) == FULL_INIT_ENTITY_NO
 
 
 @pytest.mark.parametrize("base_token", ["Calendars.Read.Shared"], indirect=True)
@@ -130,7 +131,7 @@ async def test_shared_higher_permissions(
     entities = er.async_entries_for_config_entry(
         entity_registry, base_config_entry.entry_id
     )
-    assert len(entities) == 2
+    assert len(entities) == FULL_INIT_ENTITY_NO
 
 
 @pytest.mark.parametrize(
@@ -154,7 +155,7 @@ async def test_basic_permissions(
     entities = er.async_entries_for_config_entry(
         entity_registry, base_config_entry.entry_id
     )
-    assert len(entities) == 2
+    assert len(entities) == FULL_INIT_ENTITY_NO
 
 
 @pytest.mark.parametrize(
@@ -196,7 +197,7 @@ async def test_groups(
     entities = er.async_entries_for_config_entry(
         entity_registry, base_config_entry.entry_id
     )
-    assert len(entities) == 2
+    assert len(entities) == FULL_INIT_ENTITY_NO
 
 
 @pytest.mark.parametrize(
@@ -221,4 +222,4 @@ async def test_update_groups(
     entities = er.async_entries_for_config_entry(
         entity_registry, base_config_entry.entry_id
     )
-    assert len(entities) == 2
+    assert len(entities) == FULL_INIT_ENTITY_NO

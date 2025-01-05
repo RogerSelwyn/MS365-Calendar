@@ -704,3 +704,31 @@ async def test_respond_group_calendar(
         str(exc_info.value)
         == f"O365 Python does not have capability to update/respond to group calendar events: {calendar_name}"
     )
+
+
+async def test_create_event_not_editable(
+    hass: HomeAssistant,
+    setup_update_integration,
+) -> None:
+    """Test create event - not editable (e.g. Birthday)."""
+
+    calendar_name = "calendar.test_calendar3"
+    with (
+        pytest.raises(ServiceValidationError) as exc_info,
+    ):
+        await hass.services.async_call(
+            DOMAIN,
+            "create_calendar_event",
+            {
+                "entity_id": calendar_name,
+                "subject": "Department Party",
+                "body": "Meeting to provide technical review for 'Phoenix' design.",
+                "start": "2022-03-22T20:00:00.000Z",
+                "end": "2022-03-23T22:00:00.000Z",
+                "attendees": [{"email": "example@example.com", "type": "Required"}],
+                "is_all_day": True,
+            },
+            blocking=True,
+            return_response=False,
+        )
+    assert str(exc_info.value) == "Calendar 'Calendar3' is not editable"

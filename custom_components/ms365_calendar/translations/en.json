@@ -71,6 +71,9 @@
         }
     },
     "exceptions": {
+        "calendar_not_editable": {
+            "message": "Calendar '{name}' is not editable"
+        },
         "ms365_group_calendar_error": {
             "message": "O365 Python does not have capability to update/respond to group calendar events: {entity_id}"
         },
