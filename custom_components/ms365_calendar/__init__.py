@@ -4,7 +4,6 @@ import logging
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import issue_registry as ir
-from O365 import Account, FileSystemTokenBackend
 from oauthlib.oauth2.rfc6749.errors import InvalidClientError
 
 from .const import (
@@ -12,7 +11,6 @@ from .const import (
     CONF_CLIENT_SECRET,
     CONF_ENTITY_NAME,
     CONF_SHARED_MAILBOX,
-    CONST_UTC_TIMEZONE,
 )
 from .helpers.config_entry import MS365ConfigEntry, MS365Data
 from .integration import setup_integration
@@ -37,8 +35,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
     perms = Permissions(hass, entry.data)
     permissions, failed_permissions = await perms.async_check_authorizations()  # pylint: disable=unused-variable
     if permissions is True:
-        account, is_authenticated = await hass.async_add_executor_job(
-            _try_authentication, perms, credentials, main_resource
+        account, is_authenticated, auth_error = await hass.async_add_executor_job(  # pylint: disable=unused-variable
+            perms.try_authentication, credentials, main_resource
         )
     else:
         is_authenticated = False
@@ -80,24 +78,6 @@ async def async_reload_entry(hass: HomeAssistant, entry: MS365ConfigEntry) -> No
     """Handle options update - only reload if the options have changed."""
     if entry.runtime_data.options != entry.options:
         await hass.config_entries.async_reload(entry.entry_id)
-
-
-def _try_authentication(perms, credentials, main_resource):
-    _LOGGER.debug("Setup token")
-    token_backend = FileSystemTokenBackend(
-        token_path=perms.token_path,
-        token_filename=perms.token_filename,
-    )
-
-    _LOGGER.debug("Setup account")
-    account = Account(
-        credentials,
-        token_backend=token_backend,
-        timezone=CONST_UTC_TIMEZONE,
-        main_resource=main_resource,
-    )
-
-    return account, account.is_authenticated
 
 
 async def async_remove_entry(hass: HomeAssistant, entry: MS365ConfigEntry) -> None:
