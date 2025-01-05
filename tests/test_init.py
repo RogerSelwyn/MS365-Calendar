@@ -9,8 +9,9 @@ from homeassistant.helpers import entity_registry as er
 from oauthlib.oauth2.rfc6749.errors import InvalidClientError
 from requests_mock import Mocker
 
+from .const import ENTITY_NAME, TOKEN_LOCATION
 from .helpers.mock_config_entry import MS365MockConfigEntry
-from .integration.const_integration import FULL_INIT_ENTITY_NO
+from .integration.const_integration import DOMAIN, FULL_INIT_ENTITY_NO
 from .integration.helpers_integration.mocks import MS365MOCKS
 
 
@@ -72,3 +73,17 @@ async def test_invalid_client_2(
         await hass.config_entries.async_setup(base_config_entry.entry_id)
     await hass.async_block_till_done()
     assert "Token error for account" in caplog.text
+
+
+async def test_remove_entry(
+    tmp_path,
+    setup_base_integration,
+    hass: HomeAssistant,
+    base_config_entry: MS365MockConfigEntry,
+):
+    """Test removal of entry."""
+
+    assert await hass.config_entries.async_remove(base_config_entry.entry_id)
+    await hass.async_block_till_done()
+    filename = tmp_path / TOKEN_LOCATION / f"{DOMAIN}_{ENTITY_NAME}.token"
+    assert not filename.is_file()

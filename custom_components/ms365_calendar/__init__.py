@@ -15,6 +15,7 @@ from .const import (
     CONST_UTC_TIMEZONE,
 )
 from .helpers.config_entry import MS365ConfigEntry, MS365Data
+from .integration import setup_integration
 from .integration.const_integration import DOMAIN, PLATFORMS
 from .integration.permissions_integration import Permissions
 from .integration.setup_integration import async_do_setup
@@ -97,6 +98,15 @@ def _try_authentication(perms, credentials, main_resource):
     )
 
     return account, account.is_authenticated
+
+
+async def async_remove_entry(hass: HomeAssistant, entry: MS365ConfigEntry) -> None:
+    """Handle removal of an entry."""
+    perms = Permissions(hass, entry.data)
+    await hass.async_add_executor_job(perms.delete_token)
+    if not hasattr(setup_integration, "async_integration_remove_entry"):
+        return
+    await setup_integration.async_integration_remove_entry(hass, entry)
 
 
 async def _async_check_token(hass, account, entity_name):

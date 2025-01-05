@@ -165,3 +165,9 @@ class BasePermissions:
             return TOKEN_FILE_CORRUPTED
 
         return permissions
+
+    def delete_token(self):
+        """Delete the token."""
+        full_token_path = os.path.join(self.token_path, self.token_filename)
+        if os.path.exists(full_token_path):
+            os.remove(full_token_path)
