@@ -15,16 +15,17 @@ BASE_STATE_CAL1 = [
         "categories": [],
         "sensitivity": "Private",
         "show_as": "Busy",
+        "reminder": {"minutes": 0, "is_on": False},
         "attendees": [],
         "uid": "event2",
     },
     {
         "summary": "Test event 1 calendar1",
         "start": datetime.datetime(
-            2020, 1, 1, 0, 0, tzinfo=zoneinfo.ZoneInfo(key="UTC")
+            2025, 1, 5, 0, 0, tzinfo=zoneinfo.ZoneInfo(key="UTC")
         ),
         "end": datetime.datetime(
-            2020, 1, 1, 23, 59, 59, tzinfo=zoneinfo.ZoneInfo(key="UTC")
+            2025, 1, 6, 23, 59, 59, tzinfo=zoneinfo.ZoneInfo(key="UTC")
         ),
         "all_day": False,
         "description": "Test",
@@ -32,6 +33,7 @@ BASE_STATE_CAL1 = [
         "categories": [],
         "sensitivity": "Normal",
         "show_as": "Busy",
+        "reminder": {"minutes": 30, "is_on": True},
         "attendees": [],
         "uid": "event1",
     },
@@ -52,6 +54,7 @@ BASE_STATE_CAL2 = [
         "categories": [],
         "sensitivity": "Normal",
         "show_as": "Busy",
+        "reminder": {"minutes": 0, "is_on": False},
         "attendees": [],
         "uid": "event1",
     }

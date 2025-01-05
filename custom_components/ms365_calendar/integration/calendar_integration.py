@@ -637,6 +637,8 @@ class MS365CalendarData:
             "show_as",
             "attendees",
             "series_master_id",
+            "is_reminder_on",
+            "reminderMinutesBeforeStart",
         )
         query = query.on_attribute("start").greater_equal(start_date)
         query.chain("and").on_attribute("end").less_equal(end_date)

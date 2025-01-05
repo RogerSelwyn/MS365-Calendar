@@ -37,6 +37,10 @@ def format_event_data(event):
         "categories": event.categories,
         "sensitivity": event.sensitivity.name,
         "show_as": event.show_as.name,
+        "reminder": {
+            "minutes": event.remind_before_minutes,
+            "is_on": event.is_reminder_on,
+        },
         "attendees": [
             {"email": x.address, "type": x.attendee_type.value}
             for x in event.attendees._Attendees__attendees  # pylint: disable=protected-access
