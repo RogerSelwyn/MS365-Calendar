@@ -139,11 +139,14 @@ async def _async_setup_add_entities(
         for entity in calendar.get(CONF_ENTITIES):
             if not entity[CONF_TRACK]:
                 continue
-            can_edit = True
-            for calendar_edit in calendar_edit_list:
-                if calendar_edit.calendar_id == cal_id:
-                    can_edit = calendar_edit.can_edit
-                    break
+            can_edit = next(
+                (
+                    calendar_edit.can_edit
+                    for calendar_edit in calendar_edit_list
+                    if calendar_edit.calendar_id == cal_id
+                ),
+                True,
+            )
             entity_id = build_calendar_entity_id(
                 entity.get(CONF_DEVICE_ID), entry.data[CONF_ENTITY_NAME]
             )
