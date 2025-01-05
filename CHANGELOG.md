@@ -1,5 +1,22 @@
 # Changelog
 
+## v1.1.0 (2025/01/05)
+### 🧰 Maintenance
+- [Add test for shared email the same as logged in email](https://github.com/RogerSelwyn/MS365-Calendar/commit/e815b74c37a93650f4c3b7533ae6f2509d111352) - @RogerSelwyn
+- [Add deletion of token/yaml when entry removed](https://github.com/RogerSelwyn/MS365-Calendar/commit/e287b74c477fe2ae702a5bf1f24206e02f97d298) - @RogerSelwyn
+- [Add protection against trying to edit non-editable calendar](https://github.com/RogerSelwyn/MS365-Calendar/commit/42062b891eece5f9bda766dbf7d6edb7abbecd51) - @RogerSelwyn
+- [Remove sourcery.ai/hassfest errors](https://github.com/RogerSelwyn/MS365-Calendar/commit/86094e05d729a8fd99ae7273bc07a00ace4f0eff) - @RogerSelwyn
+- [Tidy up try_authentication](https://github.com/RogerSelwyn/MS365-Calendar/commit/4d0686fd75cc5caa4baf1968325adaca74bc6cf3) - @RogerSelwyn
+
+### 📚 Documentation
+- [Update CHANGELOG.md](https://github.com/RogerSelwyn/MS365-Calendar/commit/c816cf24ca466b8f5060372000753e36c554f77a) - @RogerSelwyn
+- [Update authentication.md](https://github.com/RogerSelwyn/MS365-Calendar/commit/87f6bc6b53f5941ac3160c1a4ef7f0d00d04a0fc) - @RogerSelwyn
+- [Update feature_request.yml](https://github.com/RogerSelwyn/MS365-Calendar/commit/9a4caa10d9bf9fd7c618449f0b1045b8fc578b8d) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.1.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/c0f81e672e5a4021eef200f260e91e76d039d370) - @RogerSelwyn
+
+
 ## v1.0.3 (2024/12/30)
 ### 🐛 Fixes
 - [Fix event update permissions for shared calendars](https://github.com/RogerSelwyn/MS365-Calendar/commit/c31eb0977e6b1fa15d7031edefdfdcb16a21a737) - @RogerSelwyn
