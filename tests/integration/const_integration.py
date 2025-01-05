@@ -26,6 +26,7 @@ BASE_CONFIG_ENTRY = {
 }
 BASE_TOKEN_PERMS = "Calendars.Read"
 BASE_MISSING_PERMS = BASE_TOKEN_PERMS
+SHARED_TOKEN_PERMS = "Calendars.Read.Shared"
 UPDATE_TOKEN_PERMS = "Calendars.ReadWrite"
 UPDATE_OPTIONS = {"enable_update": True}
 

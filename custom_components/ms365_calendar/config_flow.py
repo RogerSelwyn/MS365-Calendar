@@ -1,7 +1,6 @@
 """Configuration flow for the skyq platform."""
 
 import functools as ft
-import json
 import logging
 from collections.abc import Mapping
 from typing import Any, Self
@@ -19,7 +18,6 @@ from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.network import get_url
-from O365 import Account, FileSystemTokenBackend
 
 from .const import (
     AUTH_CALLBACK_NAME,
@@ -33,7 +31,7 @@ from .const import (
     CONF_FAILED_PERMISSIONS,
     CONF_SHARED_MAILBOX,
     CONF_URL,
-    CONST_UTC_TIMEZONE,
+    ERROR_INVALID_SHARED_MAILBOX,
     TOKEN_FILE_CORRUPTED,
     TOKEN_FILE_MISSING,
     TOKEN_FILE_PERMISSIONS,
@@ -48,10 +46,7 @@ from .integration.config_flow_integration import (
 from .integration.const_integration import DOMAIN
 from .integration.permissions_integration import Permissions
 from .integration.schema_integration import CONFIG_SCHEMA_INTEGRATION
-from .schema import (
-    CONFIG_SCHEMA,
-    REQUEST_AUTHORIZATION_DEFAULT_SCHEMA,
-)
+from .schema import CONFIG_SCHEMA, REQUEST_AUTHORIZATION_DEFAULT_SCHEMA
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -117,8 +112,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
                 is_authenticated,
                 auth_error,
             ) = await self.hass.async_add_executor_job(
-                self._try_authentication,
-                self._permissions,
+                self._permissions.try_authentication,
                 credentials,
                 main_resource,
             )
@@ -242,34 +236,38 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
             errors[CONF_URL] = "token_file_error"
             return errors
 
+        credentials = (
+            self._user_input.get(CONF_CLIENT_ID),
+            self._user_input.get(CONF_CLIENT_SECRET),
+        )
+
+        main_resource = self._user_input.get(CONF_SHARED_MAILBOX)
+        (
+            self._account,
+            is_authenticated,  # pylint: disable=unused-variable
+            auth_error,  # pylint: disable=unused-variable
+        ) = await self.hass.async_add_executor_job(
+            self._permissions.try_authentication,
+            credentials,
+            main_resource,
+        )
+        if (
+            hasattr(self._account, "current_username")
+            and self._account.current_username
+            and self._account.current_username == self._account.main_resource
+        ):
+            self._user_input[CONF_SHARED_MAILBOX] = None
+            _LOGGER.info(ERROR_INVALID_SHARED_MAILBOX, self._account.current_username)
+
         (
             permissions,
             self._failed_permissions,
         ) = await self._permissions.async_check_authorizations()
+
         if permissions is not True:
             errors[CONF_URL] = permissions
 
         return errors
-
-    def _try_authentication(self, perms, credentials, main_resource):
-        _LOGGER.debug("Setup token")
-        token_backend = FileSystemTokenBackend(
-            token_path=perms.token_path,
-            token_filename=perms.token_filename,
-        )
-        _LOGGER.debug("Setup account")
-        account = Account(
-            credentials,
-            token_backend=token_backend,
-            timezone=CONST_UTC_TIMEZONE,
-            main_resource=main_resource,
-        )
-        try:
-            return account, account.is_authenticated, False
-
-        except json.decoder.JSONDecodeError as err:
-            _LOGGER.error("Error authenticating - JSONDecodeError - %s", err)
-            return account, False, err
 
     async def async_step_reconfigure(
         self,

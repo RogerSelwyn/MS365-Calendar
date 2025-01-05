@@ -5,8 +5,11 @@ import logging
 import os
 from copy import deepcopy
 
+from O365 import Account, FileSystemTokenBackend
+
 from ..const import (
     CONF_ENTITY_NAME,
+    CONST_UTC_TIMEZONE,
     MS365_STORAGE_TOKEN,
     PERM_OFFLINE_ACCESS,
     TOKEN_FILE_CORRUPTED,
@@ -29,9 +32,14 @@ class BasePermissions:
         self._config = config
 
         self._requested_permissions = []
+        self._permissions = []
         self.token_filename = self.build_token_filename()
         self.token_path = build_config_file_path(self._hass, MS365_STORAGE_TOKEN)
-        self._permissions = []
+        _LOGGER.debug("Setup token")
+        self.token_backend = FileSystemTokenBackend(
+            token_path=self.token_path,
+            token_filename=self.token_filename,
+        )
 
     @property
     def requested_permissions(self):
@@ -41,6 +49,22 @@ class BasePermissions:
     def permissions(self):
         """Return the permission set."""
         return self._permissions
+
+    def try_authentication(self, credentials, main_resource):
+        """Try authenticating to O365."""
+        _LOGGER.debug("Setup account")
+        account = Account(
+            credentials,
+            token_backend=self.token_backend,
+            timezone=CONST_UTC_TIMEZONE,
+            main_resource=main_resource,
+        )
+        try:
+            return account, account.is_authenticated, False
+
+        except json.decoder.JSONDecodeError as err:
+            _LOGGER.error("Error authenticating - JSONDecodeError - %s", err)
+            return account, False, err
 
     async def async_check_authorizations(self):
         """Report on permissions status."""

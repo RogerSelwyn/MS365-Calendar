@@ -35,6 +35,10 @@ PERM_OFFLINE_ACCESS = "offline_access"
 PERM_USER_READ = "User.Read"
 PERM_SHARED = ".Shared"
 
+ERROR_INVALID_SHARED_MAILBOX = (
+    "Login email address '%s' should not be "
+    + "entered as shared email address, config attribute removed."
+)
 
 TOKEN_FILENAME = "{0}{1}.token"  # nosec
 TOKEN_FILE_CORRUPTED = "corrupted"

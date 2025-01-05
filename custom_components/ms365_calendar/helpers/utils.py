@@ -43,6 +43,4 @@ def build_entity_id(hass, entity_id_format, name):
 
 def shared_permission_build(permission, shared):
     """Build the shared permission."""
-    if shared:
-        return f"{deepcopy(permission)}.Shared"
-    return permission
+    return f"{deepcopy(permission)}.Shared" if shared else permission
