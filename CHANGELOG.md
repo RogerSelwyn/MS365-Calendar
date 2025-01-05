@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.2.0 (2025/01/05)
+### ✨ Enhancements
+- [Add reminder information on calendar data attribute](https://github.com/RogerSelwyn/MS365-Calendar/commit/9c0f73798744fa0c2368666bbd5a4ac1d09d71bd) - @RogerSelwyn
+
+### 📚 Documentation
+- [Update CHANGELOG.md](https://github.com/RogerSelwyn/MS365-Calendar/commit/760562d3493fb1c9aebd0d2b4f734be9356d1a7c) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.2.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/a39e6eb8fbae9506dbf1eb518050a16e89146654) - @RogerSelwyn
+  
 ## v1.1.0 (2025/01/05)
 ### 🧰 Maintenance
 - [Add test for shared email the same as logged in email](https://github.com/RogerSelwyn/MS365-Calendar/commit/e815b74c37a93650f4c3b7533ae6f2509d111352) - @RogerSelwyn
