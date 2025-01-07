@@ -28,14 +28,9 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import dt as dt_util
 from requests.exceptions import HTTPError, RetryError
 
-from ..const import (
-    CONF_ENABLE_UPDATE,
-    CONF_ENTITY_NAME,
-    CONF_SHARED_MAILBOX,
-    EVENT_HA_EVENT,
-)
+from ..const import CONF_ENABLE_UPDATE, CONF_ENTITY_NAME, EVENT_HA_EVENT
 from ..helpers.config_entry import MS365ConfigEntry
-from ..helpers.utils import clean_html, shared_permission_build
+from ..helpers.utils import clean_html
 from .const_integration import (
     ATTR_ALL_DAY,
     ATTR_COLOR,
@@ -99,12 +94,11 @@ async def async_integration_setup_entry(
 ) -> None:
     """Set up the MS365 platform."""
 
-    required_permssion = shared_permission_build(
-        PERM_CALENDARS_READWRITE, entry.data.get(CONF_SHARED_MAILBOX)
-    )
     update_supported = bool(
         entry.data[CONF_ENABLE_UPDATE]
-        and entry.runtime_data.permissions.validate_authorization(required_permssion)
+        and entry.runtime_data.permissions.validate_authorization(
+            PERM_CALENDARS_READWRITE
+        )
     )
     calendars = await async_scan_for_calendars(hass, entry)
     await _async_setup_add_entities(
@@ -376,7 +370,7 @@ class MS365CalendarEntity(CalendarEntity):
     async def async_create_calendar_event(self, subject, start, end, **kwargs):
         """Create the event."""
 
-        self._validate_permissions("create")
+        self._validate_permissions()
 
         calendar = self.data.calendar
 
@@ -398,7 +392,7 @@ class MS365CalendarEntity(CalendarEntity):
     ):
         """Modify the event."""
 
-        self._validate_permissions("modify")
+        self._validate_permissions()
 
         if self.data.group_calendar:
             _group_calendar_log(self.entity_id)
@@ -440,7 +434,7 @@ class MS365CalendarEntity(CalendarEntity):
         recurrence_range: str | None = None,
     ):
         """Remove the event."""
-        self._validate_permissions("delete")
+        self._validate_permissions()
 
         if self.data.group_calendar:
             _group_calendar_log(self.entity_id)
@@ -466,7 +460,7 @@ class MS365CalendarEntity(CalendarEntity):
         self, event_id, response, send_response=True, message=None
     ):
         """Respond to calendar event."""
-        self._validate_permissions("respond to")
+        self._validate_permissions()
 
         if self.data.group_calendar:
             _group_calendar_log(self.entity_id)
@@ -497,19 +491,16 @@ class MS365CalendarEntity(CalendarEntity):
                 ft.partial(event.decline_event, message, send_response=send_response)
             )
 
-    def _validate_permissions(self, error_message):
-        required_permssion = shared_permission_build(
-            PERM_CALENDARS_READWRITE, self._entry.data.get(CONF_SHARED_MAILBOX)
-        )
+    def _validate_permissions(self):
         if not self._entry.runtime_data.permissions.validate_authorization(
-            required_permssion
+            PERM_CALENDARS_READWRITE
         ):
             raise ServiceValidationError(
                 translation_domain=DOMAIN,
                 translation_key="not_authorised_to_event",
                 translation_placeholders={
-                    "calendar": required_permssion,
-                    "error_message": error_message,
+                    "calendar": self._name,
+                    "error_message": PERM_CALENDARS_READWRITE,
                 },
             )
 
