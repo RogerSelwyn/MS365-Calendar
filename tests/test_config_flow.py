@@ -4,6 +4,7 @@
 import json
 from unittest.mock import patch
 
+import pytest
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
@@ -12,7 +13,7 @@ from requests_mock import Mocker
 
 from .const import CLIENT_ID, ENTITY_NAME, TOKEN_URL_ASSERT
 from .helpers.mock_config_entry import MS365MockConfigEntry
-from .helpers.utils import build_token_url, mock_token
+from .helpers.utils import build_token_url, mock_call, mock_token
 from .integration.const_integration import (
     ALT_CONFIG_ENTRY,
     AUTH_CALLBACK_PATH_ALT,
@@ -22,6 +23,7 @@ from .integration.const_integration import (
     BASE_TOKEN_PERMS,
     DOMAIN,
     RECONFIGURE_CONFIG_ENTRY,
+    URL,
 )
 from .integration.helpers_integration.mocks import MS365MOCKS
 
@@ -59,6 +61,7 @@ async def test_default_flow(
             "url": build_token_url(result, AUTH_CALLBACK_PATH_DEFAULT),
         },
     )
+
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert "result" in result
     assert result["result"].state.value == "loaded"
@@ -125,7 +128,7 @@ async def test_missing_permissions(
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "request_default"
     assert result["description_placeholders"]["auth_url"].startswith(
-        f"https://login.microsoftonline.com/common/oauth2/v2.0/authorize?response_type=code&client_id={CLIENT_ID}"
+        f"{TOKEN_URL_ASSERT}{CLIENT_ID}"
     )
     assert result["description_placeholders"]["entity_name"] == ENTITY_NAME
     assert result["description_placeholders"]["failed_permissions"] is None
@@ -193,8 +196,10 @@ async def test_missing_permissions_alt_flow(
 
 async def test_invalid_token_url(
     hass: HomeAssistant,
+    requests_mock: Mocker,
 ) -> None:
     """Test invalid token url."""
+    mock_call(requests_mock, URL.OPENID, "openid")
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
@@ -221,11 +226,13 @@ async def test_invalid_token_url(
 async def test_invalid_token(
     hass: HomeAssistant,
     requests_mock: Mocker,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test invalid token."""
+    mock_call(requests_mock, URL.OPENID, "openid")
     requests_mock.post(
         "https://login.microsoftonline.com/common/oauth2/v2.0/token",
-        text="corrupted token",
+        text='{"corrupted": "token"}',
     )
 
     result = await hass.config_entries.flow.async_init(
@@ -249,6 +256,7 @@ async def test_invalid_token(
     assert "errors" in result
     assert "url" in result["errors"]
     assert result["errors"]["url"] == "token_file_error"
+    assert "Token file retrieval error" in caplog.text
 
 
 async def test_json_decode_error(
@@ -262,7 +270,7 @@ async def test_json_decode_error(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
     with patch(
-        "O365.utils.token.BaseTokenBackend.get_token",
+        "O365.utils.token.BaseTokenBackend.get_access_token",
         side_effect=json.decoder.JSONDecodeError("msg", "doc", 1),
     ):
         result = await hass.config_entries.flow.async_configure(
@@ -354,3 +362,28 @@ async def test_reconfigure_flow(
 
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "reconfigure_successful"
+
+
+async def test_reconfigure_legacy_token(
+    tmp_path,
+    hass: HomeAssistant,
+    setup_base_integration,
+    base_config_entry: MS365MockConfigEntry,
+    legacy_token,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test the reconfigure when legacy token exists."""
+
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN,
+        context={
+            "source": config_entries.SOURCE_RECONFIGURE,
+            "entry_id": base_config_entry.entry_id,
+        },
+    )
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        user_input=RECONFIGURE_CONFIG_ENTRY,
+    )
+    assert "Token no longer valid" in caplog.text

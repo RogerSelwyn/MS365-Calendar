@@ -10,7 +10,7 @@ BASE_STATE_CAL1 = [
         "start": datetime.date(2022, 10, 24),
         "end": datetime.date(2023, 10, 25),
         "all_day": True,
-        "description": "Test",
+        "description": "Plain Text",
         "location": "Test Location",
         "categories": [],
         "sensitivity": "Private",

@@ -1,15 +1,15 @@
 """Permissions processes for calendar."""
 
 import logging
+from copy import deepcopy
 
 from ..classes.permissions import BasePermissions
 from ..const import (
     CONF_ENABLE_UPDATE,
     CONF_ENTITY_NAME,
     CONF_SHARED_MAILBOX,
-    PERM_OFFLINE_ACCESS,
+    PERM_BASE_PERMISSIONS,
     PERM_SHARED,
-    PERM_USER_READ,
 )
 from .const_integration import (
     CONF_BASIC_CALENDAR,
@@ -38,7 +38,7 @@ class Permissions(BasePermissions):
     def requested_permissions(self):
         """Return the required scope."""
         if not self._requested_permissions:
-            self._requested_permissions = [PERM_OFFLINE_ACCESS, PERM_USER_READ]
+            self._requested_permissions = deepcopy(PERM_BASE_PERMISSIONS)
             self._build_calendar_permissions()
             self._build_group_permissions()
 

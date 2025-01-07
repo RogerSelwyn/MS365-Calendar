@@ -30,8 +30,8 @@ nav_order: 19
 * **Client secret expired for account: xxxxxxxx. Create new client id in Entra ID App Registration.**
   * The Client Secret on your Entra ID App Registration has expired. Create a new secret and reconfigure your MS365 configuration.
 
-* **Unable to fetch auth token. Error: (invalid_client) AADSTS7000215: Invalid client secret provided.**
-  * Ensure the configured secret is the client secret __value__, not the client secret ID
+* **Unable to fetch auth token. Error: invalid_client**
+  * Ensure the configured secret is the client secret __value__, not the client secret ID, and that the secret has not expired
 
 * **Token corrupt for account - please delete and re-authenticate.**
   * Reconfigure your MS365 configuration to authenticate again and generate a new token.

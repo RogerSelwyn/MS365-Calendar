@@ -1,6 +1,5 @@
 """Generic Permissions processes."""
 
-import json
 import logging
 import os
 from copy import deepcopy
@@ -11,11 +10,15 @@ from ..const import (
     CONF_ENTITY_NAME,
     CONST_UTC_TIMEZONE,
     MS365_STORAGE_TOKEN,
-    PERM_OFFLINE_ACCESS,
+    TOKEN_ERROR_CORRUPT,
+    TOKEN_ERROR_LEGACY,
+    TOKEN_ERROR_MISSING,
+    TOKEN_ERROR_PERMISSIONS,
     TOKEN_FILE_CORRUPTED,
-    TOKEN_FILE_MISSING,
+    TOKEN_FILE_OUTDATED,
     TOKEN_FILE_PERMISSIONS,
     TOKEN_FILENAME,
+    TOKEN_INVALID,
 )
 from ..helpers.filemgmt import build_config_file_path
 from ..integration.const_integration import DOMAIN
@@ -33,6 +36,7 @@ class BasePermissions:
 
         self._requested_permissions = []
         self._permissions = []
+        self.failed_permissions = []
         self.token_filename = self.build_token_filename()
         self.token_path = build_config_file_path(self._hass, MS365_STORAGE_TOKEN)
         _LOGGER.debug("Setup token")
@@ -50,47 +54,59 @@ class BasePermissions:
         """Return the permission set."""
         return self._permissions
 
-    def try_authentication(self, credentials, main_resource):
+    def try_authentication(self, credentials, main_resource, entity_name):
         """Try authenticating to O365."""
         _LOGGER.debug("Setup account")
-        account = Account(
-            credentials,
-            token_backend=self.token_backend,
-            timezone=CONST_UTC_TIMEZONE,
-            main_resource=main_resource,
-        )
         try:
-            return account, account.is_authenticated, False
+            account = Account(
+                credentials,
+                token_backend=self.token_backend,
+                timezone=CONST_UTC_TIMEZONE,
+                main_resource=main_resource,
+            )
 
-        except json.decoder.JSONDecodeError as err:
-            _LOGGER.error("Error authenticating - JSONDecodeError - %s", err)
-            return account, False, err
+            return False, account, account.is_authenticated
+        except ValueError as err:
+            if TOKEN_INVALID in str(err):
+                _LOGGER.warning(
+                    TOKEN_ERROR_LEGACY,
+                    DOMAIN,
+                    entity_name,
+                    err,
+                )
+                return TOKEN_FILE_OUTDATED, None, False
+
+            _LOGGER.warning(
+                TOKEN_ERROR_CORRUPT,
+                DOMAIN,
+                entity_name,
+                err,
+            )
+            return TOKEN_FILE_CORRUPTED, None, False
 
     async def async_check_authorizations(self):
         """Report on permissions status."""
-        self._permissions = await self._hass.async_add_executor_job(
+        error, self._permissions = await self._hass.async_add_executor_job(
             self._get_permissions
         )
 
-        if self._permissions in [TOKEN_FILE_CORRUPTED, TOKEN_FILE_MISSING]:
-            return self._permissions, None
-        failed_permissions = []
+        if error in [TOKEN_FILE_CORRUPTED]:
+            return error
+        self.failed_permissions = []
         for permission in self.requested_permissions:
-            if permission == PERM_OFFLINE_ACCESS:
-                continue
             if not self.validate_authorization(permission):
-                failed_permissions.append(permission)
+                self.failed_permissions.append(permission)
 
-        if failed_permissions:
+        if self.failed_permissions:
             _LOGGER.warning(
-                "Minimum required permissions: '%s'. Not available in token '%s' for account '%s'.",
-                ", ".join(failed_permissions),
+                TOKEN_ERROR_PERMISSIONS,
+                ", ".join(self.failed_permissions),
                 self.token_filename,
                 self._config[CONF_ENTITY_NAME],
             )
-            return TOKEN_FILE_PERMISSIONS, failed_permissions
+            return TOKEN_FILE_PERMISSIONS
 
-        return True, None
+        return False
 
     def validate_authorization(self, permission):
         """Validate higher permissions."""
@@ -111,7 +127,7 @@ class BasePermissions:
             sharedpermission = f"{deepcopy(permission)}.Shared"
             return self._check_higher_permissions(sharedpermission)
         # If Presence Resource then permissions can have a constraint of .All
-        # which includes base as well. e.g. Presencedar.Read is also enabled by Presence.Read.All
+        # which includes base as well. e.g. Presence.Read is also enabled by Presence.Read.All
         if not constraint and resource in ["Presence"]:
             allpermission = f"{deepcopy(permission)}.All"
             return self._check_higher_permissions(allpermission)
@@ -120,17 +136,14 @@ class BasePermissions:
 
     def _check_higher_permissions(self, permission):
         operation = permission.split(".")[1]
-        # If Operation is Send there are no alternatives
         # If Operation is ReadBasic then Read or ReadWrite will also work
         # If Operation is Read then ReadWrite will also work
-        if operation == "Send":
-            newops = ["Send"]
-        elif operation == "ReadBasic":
-            newops = ["ReadBasic", "Read", "ReadWrite"]
+        newops = [operation]
+        if operation == "ReadBasic":
+            newops = newops + ["Read", "ReadWrite"]
         elif operation == "Read":
-            newops = ["Read", "ReadWrite"]
-        else:
-            newops = []
+            newops = newops + ["ReadWrite"]
+
         for newop in newops:
             newperm = deepcopy(permission).replace(operation, newop)
             if newperm in self.permissions:
@@ -144,30 +157,29 @@ class BasePermissions:
 
     def _get_permissions(self):
         """Get the permissions from the token file."""
-        full_token_path = os.path.join(self.token_path, self.token_filename)
-        if not os.path.exists(full_token_path) or not os.path.isfile(full_token_path):
-            _LOGGER.warning("Could not locate token at %s", full_token_path)
-            return TOKEN_FILE_MISSING
-        try:
-            with open(full_token_path, "r", encoding="UTF-8") as file_handle:
-                raw = file_handle.read()
-                permissions = json.loads(raw)["scope"]
-        except json.decoder.JSONDecodeError as err:
+
+        scopes = self.token_backend.get_token_scopes()
+        if scopes is None:
             _LOGGER.warning(
-                (
-                    "Token corrupted for integration %s, unique identifier %s, "
-                    + "please re-configure and re-authenticate - %s"
-                ),
+                TOKEN_ERROR_CORRUPT,
                 DOMAIN,
                 self._config[CONF_ENTITY_NAME],
-                err,
+                "No permissions",
             )
-            return TOKEN_FILE_CORRUPTED
+            return TOKEN_FILE_CORRUPTED, None
 
-        return permissions
+        return False, scopes
 
     def delete_token(self):
         """Delete the token."""
         full_token_path = os.path.join(self.token_path, self.token_filename)
         if os.path.exists(full_token_path):
             os.remove(full_token_path)
+
+    def check_token_exists(self):
+        """Check if token file exists.."""
+        full_token_path = os.path.join(self.token_path, self.token_filename)
+        if not os.path.exists(full_token_path) or not os.path.isfile(full_token_path):
+            _LOGGER.warning(TOKEN_ERROR_MISSING, full_token_path)
+            return False
+        return True

@@ -1,4 +1,4 @@
 {
-    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('fake_user_id')/calendars('calendar1')/calendarView(subject,body,attendees,categories,sensitivity,start,seriesMasterId,isAllDay,end,showAs,location)",
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('fake-user-id')/calendars('calendar1')/calendarView(subject,body,attendees,categories,sensitivity,start,seriesMasterId,isAllDay,end,showAs,location)",
     "value": [ ]
 }

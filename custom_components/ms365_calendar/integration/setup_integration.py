@@ -8,7 +8,10 @@ from homeassistant.core import HomeAssistant
 
 from ..helpers.config_entry import MS365ConfigEntry
 from .const_integration import PLATFORMS, YAML_CALENDARS_FILENAME
-from .filemgmt_integration import build_yaml_file_path, build_yaml_filename
+from .filemgmt_integration import (
+    build_yaml_file_path,
+    build_yaml_filename,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
