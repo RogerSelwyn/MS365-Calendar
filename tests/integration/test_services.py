@@ -730,4 +730,4 @@ async def test_create_event_not_editable(
             blocking=True,
             return_response=False,
         )
-    assert str(exc_info.value) == "Calendar 'Calendar3' is not editable"
+    assert str(exc_info.value) == "Calendar - Calendar3 - is not editable"
