@@ -168,6 +168,9 @@ class BasePermissions:
             )
             return TOKEN_FILE_CORRUPTED, None
 
+        for idx, scope in enumerate(scopes):
+            scopes[idx] = scope.removeprefix("https://graph.microsoft.com/")
+
         return False, scopes
 
     def delete_token(self):

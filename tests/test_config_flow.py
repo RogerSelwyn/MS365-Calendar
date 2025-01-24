@@ -1,9 +1,6 @@
 # pylint: disable=line-too-long, unused-argument
 """Test the config flow."""
 
-import json
-from unittest.mock import patch
-
 import pytest
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
@@ -13,7 +10,7 @@ from requests_mock import Mocker
 
 from .const import CLIENT_ID, ENTITY_NAME, TOKEN_URL_ASSERT
 from .helpers.mock_config_entry import MS365MockConfigEntry
-from .helpers.utils import build_token_url, mock_call, mock_token
+from .helpers.utils import build_token_url, mock_call, mock_token, token_setup
 from .integration.const_integration import (
     ALT_CONFIG_ENTRY,
     AUTH_CALLBACK_PATH_ALT,
@@ -260,23 +257,21 @@ async def test_invalid_token(
 
 
 async def test_json_decode_error(
+    tmp_path,
     hass: HomeAssistant,
     requests_mock: Mocker,
 ) -> None:
     """Test error decoding the token."""
-    mock_token(requests_mock, BASE_TOKEN_PERMS)
+    token_setup(tmp_path, "corrupt2")
 
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
-    with patch(
-        "O365.utils.token.BaseTokenBackend.get_access_token",
-        side_effect=json.decoder.JSONDecodeError("msg", "doc", 1),
-    ):
-        result = await hass.config_entries.flow.async_configure(
-            result["flow_id"],
-            user_input=BASE_CONFIG_ENTRY,
-        )
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        user_input=BASE_CONFIG_ENTRY,
+    )
 
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "user"

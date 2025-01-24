@@ -69,10 +69,8 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
         self._account = None
         self._entity_name = None
         self._url = None
-        self._callback_url = None
         self._flow = None
         self._callback_view = None
-        self._alt_auth_method = None
         self._user_input = None
         self._config_schema: dict[vol.Required, type[str | int]] | None = None
         self._reconfigure = False
@@ -91,7 +89,6 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_user(self, user_input=None):
         """Handle the initial step."""
         errors = integration_validate_schema(user_input) if user_input else {}
-
         if user_input and not errors:
             self._user_input = user_input
 
@@ -105,7 +102,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
             )
 
             main_resource = user_input.get(CONF_SHARED_MAILBOX)
-            self._alt_auth_method = user_input.get(CONF_ALT_AUTH_METHOD)
+            alt_auth_method = self._user_input.get(CONF_ALT_AUTH_METHOD)
             self._permissions = Permissions(self.hass, user_input)
             (
                 auth_error,
@@ -119,16 +116,15 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
             )
             if not auth_error and (not is_authenticated or self._reconfigure):
                 scope = self._permissions.requested_permissions
-                self._callback_url = get_callback_url(self.hass, self._alt_auth_method)
                 self._url, self._flow = await self.hass.async_add_executor_job(
                     ft.partial(
-                        self._account.con.get_authorization_url,
+                        self._account.get_authorization_url,
                         requested_scopes=scope,
-                        redirect_uri=self._callback_url,
+                        redirect_uri=get_callback_url(self.hass, alt_auth_method),
                     )
                 )
 
-                if self._alt_auth_method:
+                if alt_auth_method:
                     return await self.async_step_request_alt()
 
                 return await self.async_step_request_default()
@@ -212,25 +208,37 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def _async_validate_response(self, user_input):
         errors = {}
-        url = (
-            self._callback_view.token_url
-            if self._alt_auth_method
-            else user_input[CONF_URL]
-        )
+        alt_auth_method = self._user_input.get(CONF_ALT_AUTH_METHOD)
+        url = self._callback_view.token_url if alt_auth_method else user_input[CONF_URL]
         if url[:5].lower() == "http:":
             url = f"https:{url[5:]}"
         if "code" not in url:
             errors[CONF_URL] = "invalid_url"
             return errors
 
-        await self.hass.async_add_executor_job(self._permissions.delete_token)
+        # await self.hass.async_add_executor_job(self._permissions.delete_token)
+        if self._account.username:
+            await self.hass.async_add_executor_job(
+                ft.partial(
+                    self._account.con.token_backend.remove_data,
+                    username=self._account.username,
+                )
+            )
+        credentials = (
+            self._user_input.get(CONF_CLIENT_ID),
+            self._user_input.get(CONF_CLIENT_SECRET),
+        )
+
+        main_resource = self._user_input.get(CONF_SHARED_MAILBOX)
+        # self._permissions = Permissions(self.hass, self._user_input)
+        # self._account = self._permissions.account_setup(credentials, main_resource)
 
         result = await self.hass.async_add_executor_job(
             ft.partial(
-                self._account.con.request_token,
+                self._account.request_token,
                 url,
                 flow=self._flow,
-                redirect_uri=self._callback_url,
+                redirect_uri=get_callback_url(self.hass, alt_auth_method),
             )
         )
 
@@ -239,12 +247,6 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
             errors[CONF_URL] = "token_file_error"
             return errors
 
-        credentials = (
-            self._user_input.get(CONF_CLIENT_ID),
-            self._user_input.get(CONF_CLIENT_SECRET),
-        )
-
-        main_resource = self._user_input.get(CONF_SHARED_MAILBOX)
         (
             auth_error,  # pylint: disable=unused-variable
             self._account,
@@ -255,9 +257,9 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
             main_resource,
             self._entity_name,
         )
-        if self._account.current_username == self._account.main_resource:
+        if self._account.username == self._account.main_resource:
             self._user_input[CONF_SHARED_MAILBOX] = None
-            _LOGGER.info(ERROR_INVALID_SHARED_MAILBOX, self._account.current_username)
+            _LOGGER.info(ERROR_INVALID_SHARED_MAILBOX, self._account.username)
 
         error = await self._permissions.async_check_authorizations()
         if error:

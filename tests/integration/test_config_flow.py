@@ -150,4 +150,4 @@ async def test_shared_email_invalid(
 
 def mock_account(email):
     """Mock the account."""
-    return MagicMock(is_authenticated=True, current_username=email, main_resource=email)
+    return MagicMock(is_authenticated=True, username=email, main_resource=email)
