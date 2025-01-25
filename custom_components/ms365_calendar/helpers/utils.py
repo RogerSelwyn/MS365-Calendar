@@ -1,7 +1,11 @@
 """Utilities processes."""
 
-from bs4 import BeautifulSoup
+import warnings
+
+from bs4 import BeautifulSoup, MarkupResemblesLocatorWarning
 from homeassistant.helpers.entity import async_generate_entity_id
+
+warnings.filterwarnings("ignore", category=MarkupResemblesLocatorWarning)
 
 
 def clean_html(html):
