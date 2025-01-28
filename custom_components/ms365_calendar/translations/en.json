@@ -63,15 +63,15 @@
     "issues": {
         "corrupted": {
             "title": "Re-authentication required - {domain} - {entity_name}",
-            "description": "The token file is corrupted. Please Reconfigure the integration and re-authenticate to re-create the token file."
+            "description": "The token file is corrupted. Please [Reconfigure]({url}) the integration and re-authenticate to re-create the token file."
         },
         "missing": {
             "title": "Re-authentication required - {domain} - {entity_name}",
-            "description": "The token file is missing. Please Reconfigure the integration and re-authenticate to re-create the token file."
+            "description": "The token file is missing. Please [Reconfigure]({url}) the integration and re-authenticate to re-create the token file."
         },
         "outdated": {
             "title": "Re-authentication required - {domain} - {entity_name}",
-            "description": "The token is outdated. Please delete the token, then Reconfigure the integration and re-authenticate to re-create the token file."
+            "description": "The token is outdated. Please delete the token, then [Reconfigure]({url}) the integration and re-authenticate to re-create the token file."
         }
     },
     "exceptions": {

@@ -64,7 +64,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
     CONNECTION_CLASS = CONN_CLASS_CLOUD_POLL
 
     def __init__(self):
-        """Initiliase the configuration flow."""
+        """Initialise the configuration flow."""
         self._permissions = []
         self._account = None
         self._entity_name = None
@@ -216,7 +216,6 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
             errors[CONF_URL] = "invalid_url"
             return errors
 
-        # await self.hass.async_add_executor_job(self._permissions.delete_token)
         if self._account.username:
             await self.hass.async_add_executor_job(
                 ft.partial(
@@ -230,8 +229,6 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
         )
 
         main_resource = self._user_input.get(CONF_SHARED_MAILBOX)
-        # self._permissions = Permissions(self.hass, self._user_input)
-        # self._account = self._permissions.account_setup(credentials, main_resource)
 
         result = await self.hass.async_add_executor_job(
             ft.partial(

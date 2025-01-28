@@ -4,6 +4,7 @@ import logging
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import issue_registry as ir
+from homeassistant.helpers.network import get_url
 from oauthlib.oauth2.rfc6749.errors import InvalidClientError
 
 from .const import (
@@ -61,6 +62,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
             entry.async_on_unload(entry.add_update_listener(async_reload_entry))
             return True
     else:
+        url = f"{get_url(hass)}/config/integrations/integration/{DOMAIN}"
         ir.async_create_issue(
             hass,
             DOMAIN,
@@ -70,6 +72,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
             translation_key=error,
             translation_placeholders={
                 "domain": DOMAIN,
+                "url": url,
                 CONF_ENTITY_NAME: entry.data.get(CONF_ENTITY_NAME),
             },
         )
