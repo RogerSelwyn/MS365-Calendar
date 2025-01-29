@@ -28,12 +28,12 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import dt as dt_util
 from requests.exceptions import HTTPError, RetryError
 
+from ..classes.config_entry import MS365ConfigEntry
 from ..const import (
     CONF_ENABLE_UPDATE,
     CONF_ENTITY_NAME,
     EVENT_HA_EVENT,
 )
-from ..helpers.config_entry import MS365ConfigEntry
 from ..helpers.utils import clean_html
 from .const_integration import (
     ATTR_ALL_DAY,

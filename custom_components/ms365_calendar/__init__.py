@@ -7,6 +7,8 @@ from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.network import get_url
 from oauthlib.oauth2.rfc6749.errors import InvalidClientError
 
+from .classes.account import MS365Account
+from .classes.config_entry import MS365ConfigEntry, MS365Data
 from .const import (
     CONF_CLIENT_ID,
     CONF_CLIENT_SECRET,
@@ -17,7 +19,6 @@ from .const import (
     TOKEN_EXPIRED,
     TOKEN_FILE_MISSING,
 )
-from .helpers.config_entry import MS365ConfigEntry, MS365Data
 from .integration import setup_integration
 from .integration.const_integration import DOMAIN, PLATFORMS
 from .integration.permissions_integration import Permissions
@@ -37,26 +38,31 @@ async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
 
     _LOGGER.debug("Permissions setup")
     perms = Permissions(hass, entry.data)
+    ms365account = MS365Account(perms)
     if perms.check_token_exists():
-        error, account, is_authenticated = await hass.async_add_executor_job(
-            perms.try_authentication, credentials, main_resource, entity_name
+        error = await hass.async_add_executor_job(
+            ms365account.try_authentication, credentials, main_resource, entity_name
         )
+
         if not error:
             error = await perms.async_check_authorizations()
     else:
-        is_authenticated = False
-        account = None
         error = TOKEN_FILE_MISSING
 
     if not error:
         _LOGGER.debug("Do setup")
-        check_token = await _async_check_token(hass, account, entity_name)
+        check_token = await _async_check_token(hass, ms365account.account, entity_name)
         if check_token:
             coordinator, sensors, platforms = await setup_integration.async_do_setup(
-                hass, entry, account
+                hass, entry, ms365account.account
             )
             entry.runtime_data = MS365Data(
-                perms, account, is_authenticated, coordinator, sensors, entry.options
+                perms,
+                ms365account.account,
+                ms365account.is_authenticated,
+                coordinator,
+                sensors,
+                entry.options,
             )
             await hass.config_entries.async_forward_entry_setups(entry, platforms)
             entry.async_on_unload(entry.add_update_listener(async_reload_entry))

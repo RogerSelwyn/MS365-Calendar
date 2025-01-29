@@ -19,6 +19,8 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.network import get_url
 
+from .classes.account import MS365Account
+from .classes.config_entry import MS365ConfigEntry
 from .const import (
     AUTH_CALLBACK_NAME,
     AUTH_CALLBACK_PATH_ALT,
@@ -38,7 +40,6 @@ from .const import (
     TOKEN_FILE_MISSING,
     TOKEN_FILE_PERMISSIONS,
 )
-from .helpers.config_entry import MS365ConfigEntry
 from .integration.config_flow_integration import (
     MS365OptionsFlowHandler,
     async_integration_imports,
@@ -66,7 +67,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
     def __init__(self):
         """Initialise the configuration flow."""
         self._permissions = []
-        self._account = None
+        self._ms365account = None
         self._entity_name = None
         self._url = None
         self._flow = None
@@ -104,21 +105,20 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
             main_resource = user_input.get(CONF_SHARED_MAILBOX)
             alt_auth_method = self._user_input.get(CONF_ALT_AUTH_METHOD)
             self._permissions = Permissions(self.hass, user_input)
-            (
-                auth_error,
-                self._account,
-                is_authenticated,
-            ) = await self.hass.async_add_executor_job(
-                self._permissions.try_authentication,
+            self._ms365account = MS365Account(self._permissions)
+            auth_error = await self.hass.async_add_executor_job(
+                self._ms365account.try_authentication,
                 credentials,
                 main_resource,
                 self._entity_name,
             )
-            if not auth_error and (not is_authenticated or self._reconfigure):
+            if not auth_error and (
+                not self._ms365account.is_authenticated or self._reconfigure
+            ):
                 scope = self._permissions.requested_permissions
                 self._url, self._flow = await self.hass.async_add_executor_job(
                     ft.partial(
-                        self._account.get_authorization_url,
+                        self._ms365account.account.get_authorization_url,
                         requested_scopes=scope,
                         redirect_uri=get_callback_url(self.hass, alt_auth_method),
                     )
@@ -216,11 +216,11 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
             errors[CONF_URL] = "invalid_url"
             return errors
 
-        if self._account.username:
+        if self._ms365account.account.username:
             await self.hass.async_add_executor_job(
                 ft.partial(
-                    self._account.con.token_backend.remove_data,
-                    username=self._account.username,
+                    self._ms365account.account.con.token_backend.remove_data,
+                    username=self._ms365account.account.username,
                 )
             )
         credentials = (
@@ -232,7 +232,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
 
         result = await self.hass.async_add_executor_job(
             ft.partial(
-                self._account.request_token,
+                self._ms365account.account.request_token,
                 url,
                 flow=self._flow,
                 redirect_uri=get_callback_url(self.hass, alt_auth_method),
@@ -245,18 +245,21 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
             return errors
 
         (
-            auth_error,  # pylint: disable=unused-variable
-            self._account,
-            is_authenticated,  # pylint: disable=unused-variable
+            auth_error  # pylint: disable=unused-variable  # noqa: F841
         ) = await self.hass.async_add_executor_job(
-            self._permissions.try_authentication,
+            self._ms365account.try_authentication,
             credentials,
             main_resource,
             self._entity_name,
         )
-        if self._account.username == self._account.main_resource:
+        if (
+            self._ms365account.account.username
+            == self._ms365account.account.main_resource
+        ):
             self._user_input[CONF_SHARED_MAILBOX] = None
-            _LOGGER.info(ERROR_INVALID_SHARED_MAILBOX, self._account.username)
+            _LOGGER.info(
+                ERROR_INVALID_SHARED_MAILBOX, self._ms365account.account.username
+            )
 
         error = await self._permissions.async_check_authorizations()
         if error:

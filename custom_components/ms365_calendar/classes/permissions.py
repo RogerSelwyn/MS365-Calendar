@@ -4,21 +4,17 @@ import logging
 import os
 from copy import deepcopy
 
-from O365 import Account, FileSystemTokenBackend
+from O365 import FileSystemTokenBackend
 
 from ..const import (
     CONF_ENTITY_NAME,
-    CONST_UTC_TIMEZONE,
     MS365_STORAGE_TOKEN,
     TOKEN_ERROR_CORRUPT,
-    TOKEN_ERROR_LEGACY,
     TOKEN_ERROR_MISSING,
     TOKEN_ERROR_PERMISSIONS,
     TOKEN_FILE_CORRUPTED,
-    TOKEN_FILE_OUTDATED,
     TOKEN_FILE_PERMISSIONS,
     TOKEN_FILENAME,
-    TOKEN_INVALID,
 )
 from ..helpers.filemgmt import build_config_file_path
 from ..integration.const_integration import DOMAIN
@@ -53,36 +49,6 @@ class BasePermissions:
     def permissions(self):
         """Return the permission set."""
         return self._permissions
-
-    def try_authentication(self, credentials, main_resource, entity_name):
-        """Try authenticating to O365."""
-        _LOGGER.debug("Setup account")
-        try:
-            account = Account(
-                credentials,
-                token_backend=self.token_backend,
-                timezone=CONST_UTC_TIMEZONE,
-                main_resource=main_resource,
-            )
-
-            return False, account, account.is_authenticated
-        except ValueError as err:
-            if TOKEN_INVALID in str(err):
-                _LOGGER.warning(
-                    TOKEN_ERROR_LEGACY,
-                    DOMAIN,
-                    entity_name,
-                    err,
-                )
-                return TOKEN_FILE_OUTDATED, None, False
-
-            _LOGGER.warning(
-                TOKEN_ERROR_CORRUPT,
-                DOMAIN,
-                entity_name,
-                err,
-            )
-            return TOKEN_FILE_CORRUPTED, None, False
 
     async def async_check_authorizations(self):
         """Report on permissions status."""
