@@ -107,7 +107,7 @@ async def async_integration_setup_entry(
     calendars = await async_scan_for_calendars(hass, entry)
     await _async_setup_add_entities(
         hass,
-        entry.runtime_data.account,
+        entry.runtime_data.ha_account.account,
         async_add_entities,
         entry,
         update_supported,
@@ -789,7 +789,9 @@ class MS365CalendarData:
 async def async_scan_for_calendars(hass, entry: MS365ConfigEntry):
     """Scan for new calendars."""
 
-    schedule = await hass.async_add_executor_job(entry.runtime_data.account.schedule)
+    schedule = await hass.async_add_executor_job(
+        entry.runtime_data.ha_account.account.schedule
+    )
     calendars = await hass.async_add_executor_job(schedule.list_calendars)
     track = entry.options.get(CONF_TRACK_NEW_CALENDAR, True)
     for calendar in calendars:

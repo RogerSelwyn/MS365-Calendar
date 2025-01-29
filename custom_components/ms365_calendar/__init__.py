@@ -38,10 +38,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
 
     _LOGGER.debug("Permissions setup")
     perms = Permissions(hass, entry.data)
-    ms365account = MS365Account(perms)
+    ha_account = MS365Account(perms)
     if perms.check_token_exists():
         error = await hass.async_add_executor_job(
-            ms365account.try_authentication, credentials, main_resource, entity_name
+            ha_account.try_authentication, credentials, main_resource, entity_name
         )
 
         if not error:
@@ -51,15 +51,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
 
     if not error:
         _LOGGER.debug("Do setup")
-        check_token = await _async_check_token(hass, ms365account.account, entity_name)
+        check_token = await _async_check_token(hass, ha_account.account, entity_name)
         if check_token:
             coordinator, sensors, platforms = await setup_integration.async_do_setup(
-                hass, entry, ms365account.account
+                hass, entry, ha_account.account
             )
             entry.runtime_data = MS365Data(
                 perms,
-                ms365account.account,
-                ms365account.is_authenticated,
+                ha_account,
                 coordinator,
                 sensors,
                 entry.options,
