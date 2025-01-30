@@ -13,7 +13,7 @@ from requests_mock import Mocker
 from .const import ENTITY_NAME, LEGACY_TOKEN, TOKEN_LOCATION
 from .helpers.mock_config_entry import MS365MockConfigEntry
 from .helpers.utils import build_token_file
-from .integration import permissions
+from .integration import api
 from .integration.const_integration import (
     BASE_CONFIG_ENTRY,
     BASE_TOKEN_PERMS,
@@ -44,7 +44,7 @@ def token_storage_path_setup(tmp_path):
     tk_path = tmp_path / TOKEN_LOCATION
 
     with patch.object(
-        permissions,
+        api,
         "build_config_file_path",
         return_value=tk_path,
     ):

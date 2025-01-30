@@ -27,9 +27,9 @@ _LOGGER = logging.getLogger(__name__)
 class Permissions(BasePermissions):
     """Class in support of building permission sets."""
 
-    def __init__(self, hass, config):
+    def __init__(self, hass, config, token_backend):
         """Initialise the class."""
-        super().__init__(hass, config)
+        super().__init__(hass, config, token_backend)
 
         self._shared = PERM_SHARED if config.get(CONF_SHARED_MAILBOX) else ""
         self._enable_update = self._config.get(CONF_ENABLE_UPDATE, False)

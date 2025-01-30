@@ -7,7 +7,7 @@ from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.network import get_url
 from oauthlib.oauth2.rfc6749.errors import InvalidClientError
 
-from .classes.account import MS365Account
+from .classes.api import MS365Account, MS365Token
 from .classes.config_entry import MS365ConfigEntry, MS365Data
 from .const import (
     CONF_CLIENT_ID,
@@ -37,9 +37,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
     main_resource = entry.data.get(CONF_SHARED_MAILBOX)
 
     _LOGGER.debug("Permissions setup")
-    perms = Permissions(hass, entry.data)
+    token_backend = MS365Token(hass, entry.data)
+    perms = Permissions(hass, entry.data, token_backend)
     ha_account = MS365Account(perms)
-    if perms.check_token_exists():
+    if token_backend.check_token_exists():
         error = await hass.async_add_executor_job(
             ha_account.try_authentication, credentials, main_resource, entity_name
         )
@@ -101,12 +102,11 @@ async def async_migrate_entry(
     if config_entry.version == 1:
         # Delete the token file ready for re-auth
         new_data = {**config_entry.data}
-
-        perms = Permissions(hass, config_entry.data)
-        await hass.async_add_executor_job(perms.delete_token)
+        token_backend = MS365Token(hass, config_entry.data)
+        await hass.async_add_executor_job(token_backend.delete_token)
         _LOGGER.warning(
             TOKEN_DELETED,
-            perms.token_filename,
+            token_backend.token_filename,
         )
         hass.config_entries.async_update_entry(
             config_entry, data=new_data, minor_version=0, version=2
@@ -134,8 +134,8 @@ async def async_reload_entry(hass: HomeAssistant, entry: MS365ConfigEntry) -> No
 
 async def async_remove_entry(hass: HomeAssistant, entry: MS365ConfigEntry) -> None:
     """Handle removal of an entry."""
-    perms = Permissions(hass, entry.data)
-    await hass.async_add_executor_job(perms.delete_token)
+    token_backend = MS365Token(hass, entry.data)
+    await hass.async_add_executor_job(token_backend.delete_token)
     if not hasattr(setup_integration, "async_integration_remove_entry"):
         return
     await setup_integration.async_integration_remove_entry(hass, entry)

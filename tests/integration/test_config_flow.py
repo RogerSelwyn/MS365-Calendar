@@ -130,7 +130,7 @@ async def test_shared_email_invalid(
     )
 
     with patch(
-        f"custom_components.{DOMAIN}.classes.account.Account",
+        f"custom_components.{DOMAIN}.classes.api.Account",
         return_value=mock_account(email),
     ):
         result = await hass.config_entries.flow.async_configure(

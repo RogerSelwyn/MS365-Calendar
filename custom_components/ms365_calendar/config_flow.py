@@ -19,7 +19,7 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.network import get_url
 
-from .classes.account import MS365Account
+from .classes.api import MS365Account, MS365Token
 from .classes.config_entry import MS365ConfigEntry
 from .const import (
     AUTH_CALLBACK_NAME,
@@ -104,7 +104,8 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
 
             main_resource = user_input.get(CONF_SHARED_MAILBOX)
             alt_auth_method = self._user_input.get(CONF_ALT_AUTH_METHOD)
-            self._permissions = Permissions(self.hass, user_input)
+            token_backend = MS365Token(self.hass, user_input)
+            self._permissions = Permissions(self.hass, user_input, token_backend)
             self._ms365account = MS365Account(self._permissions)
             auth_error = await self.hass.async_add_executor_job(
                 self._ms365account.try_authentication,
