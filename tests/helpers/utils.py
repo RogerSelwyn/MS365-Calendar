@@ -8,27 +8,92 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from ..const import (
+    CLIENT_ID,
     ENTITY_NAME,
     TEST_DATA_INTEGRATION_LOCATION,
     TEST_DATA_LOCATION,
     TOKEN_LOCATION,
     TOKEN_PARAMS,
 )
-from ..integration.const_integration import DOMAIN
+from ..integration.const_integration import DOMAIN, URL
 
 TOKEN_TIME = 5000
 
 
 def mock_token(requests_mock, scope):
     """Mock up the token response based on scope."""
-    token = json.dumps(_build_token(scope))
+    token = json.dumps(build_retrieved_token(scope))
     requests_mock.post(
         "https://login.microsoftonline.com/common/oauth2/v2.0/token",
         text=token,
     )
+    mock_call(requests_mock, URL.OPENID, "openid")
 
 
-def _build_token(scope):
+def _build_file_token(scope):
+    """Build a token"""
+    perms = f"{scope} User.Read email openid profile"
+    expire = int(time.time() + TOKEN_TIME)
+    token = {
+        "AccessToken": {
+            f"fake-user-id.fake-home-id-login.microsoftonline.com-accesstoken-{CLIENT_ID}-common-{perms.lower()}": {
+                "credential_type": "AccessToken",
+                "secret": "fakeaccesstoken",
+                "home_account_id": "fake-user-id.fake-home-id",
+                "environment": "login.microsoftonline.com",
+                "client_id": CLIENT_ID,
+                "target": perms,
+                "realm": "common",
+                "token_type": "Bearer",
+                "cached_at": f"{int(time.time())}",
+                "expires_on": f"{expire}",
+                "extended_expires_on": f"{expire}",
+            }
+        },
+        "Account": {
+            "fake-user-id.fake-home-id-login.microsoftonline.com-common": {
+                "home_account_id": "fake-user-id.fake-home-id",
+                "environment": "login.microsoftonline.com",
+                "realm": "common",
+                "local_account_id": "fake-user-id",
+                "username": "john@nomail.com",
+                "authority_type": "MSSTS",
+                "account_source": "authorization_code",
+            }
+        },
+        "IdToken": {
+            f"fake-user-id.fake-home-id-login.microsoftonline.com-idtoken-{CLIENT_ID}-common-": {
+                "credential_type": "IdToken",
+                "secret": "fakeidtoken",
+                "home_account_id": "fake-user-id.fake-home-id",
+                "environment": "login.microsoftonline.com",
+                "realm": "common",
+                "client_id": CLIENT_ID,
+            }
+        },
+        "RefreshToken": {
+            f"fake-user-id.fake-home-id-login.microsoftonline.com-refreshtoken-{CLIENT_ID}--{perms.lower()}": {
+                "credential_type": "RefreshToken",
+                "secret": "1.farkerh.fakerefreshtoken",
+                "home_account_id": "fake-user-id.fake-home-id",
+                "environment": "login.microsoftonline.com",
+                "client_id": CLIENT_ID,
+                "target": perms,
+                "last_modification_time": f"{int(time.time())}",
+            }
+        },
+        "AppMetadata": {
+            f"appmetadata-login.microsoftonline.com-{CLIENT_ID}": {
+                "client_id": CLIENT_ID,
+                "environment": "login.microsoftonline.com",
+            }
+        },
+    }
+    print(token)
+    return token
+
+
+def build_retrieved_token(scope):
     """Build a token"""
     return {
         "token_type": "Bearer",
@@ -49,11 +114,8 @@ def build_token_url(result, token_url):
 
 def build_token_file(tmp_path, scope):
     """Build a token file."""
-    token = _build_token(scope)
-    token["expires_at"] = time.time() + TOKEN_TIME
-    token["scope"] = token["scope"].split()
+    token = _build_file_token(scope)
     filename = tmp_path / TOKEN_LOCATION / f"{DOMAIN}_{ENTITY_NAME}.token"
-
     with open(filename, "w", encoding="UTF8") as f:
         json.dump(token, f, ensure_ascii=False, indent=1)
 
@@ -103,7 +165,7 @@ def check_entity_state(
 ):
     """Check entity state."""
     state = hass.states.get(entity_name)
-    print(state)
+    # print(state)
     assert state.state == entity_state
     if entity_attributes:
         print("*************************** State Attributes")

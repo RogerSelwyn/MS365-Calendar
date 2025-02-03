@@ -1,5 +1,5 @@
 {
-    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('fake_user_id')/calendars",
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('fake-user-id')/calendars",
     "@odata.etag": "W/\"qIkRKy24jUSQwhcjI6uJIQAIopRuag==\"",
     "id": "event1",
     "categories": [],

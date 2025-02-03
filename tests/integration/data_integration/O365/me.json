@@ -13,5 +13,5 @@
     "preferredLanguage": "en-GB",
     "surname": "Doe",
     "userPrincipalName": "john@nomail.com",
-    "id": "fake_user_id"
+    "id": "fake-user-id"
 }

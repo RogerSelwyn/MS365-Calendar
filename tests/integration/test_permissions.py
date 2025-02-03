@@ -10,7 +10,7 @@ from requests_mock import Mocker
 
 from ..helpers.mock_config_entry import MS365MockConfigEntry
 from ..helpers.utils import build_token_file
-from .const_integration import FULL_INIT_ENTITY_NO
+from .const_integration import DOMAIN, FULL_INIT_ENTITY_NO
 from .helpers_integration.mocks import MS365MOCKS
 
 ### Note that permissions code also supports Presence/Send which are not present in the calendar integration
@@ -73,6 +73,10 @@ async def test_update_shared_permissions(
         entity_registry, base_config_entry.entry_id
     )
     assert len(entities) == FULL_INIT_ENTITY_NO
+    assert hass.services.has_service(DOMAIN, "create_calendar_event")
+    assert hass.services.has_service(DOMAIN, "modify_calendar_event")
+    assert hass.services.has_service(DOMAIN, "remove_calendar_event")
+    assert hass.services.has_service(DOMAIN, "respond_calendar_event")
 
 
 async def test_missing_permissions(

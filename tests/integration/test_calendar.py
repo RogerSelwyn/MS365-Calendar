@@ -17,7 +17,7 @@ from zoneinfo import ZoneInfo
 
 from ..helpers.mock_config_entry import MS365MockConfigEntry
 from ..helpers.utils import check_entity_state, utcnow
-from .const_integration import FULL_INIT_ENTITY_NO
+from .const_integration import DOMAIN, FULL_INIT_ENTITY_NO
 from .data_integration.state import BASE_STATE_CAL1, BASE_STATE_CAL2
 from .helpers_integration.mocks import MS365MOCKS
 from .helpers_integration.utils_integration import update_options, yaml_setup
@@ -70,7 +70,7 @@ async def test_perms_error(
     """Test permissions error."""
 
     with patch(
-        "custom_components.ms365_calendar.integration.calendar_integration.MS365CalendarData.async_calendar_data_init",
+        f"custom_components.{DOMAIN}.integration.calendar_integration.MS365CalendarData.async_calendar_data_init",
         side_effect=HTTPError(),
     ):
         await update_options(hass, base_config_entry)
@@ -86,7 +86,7 @@ async def test_fetch_error(
 ) -> None:
     """Test error fetching data."""
     with patch(
-        "custom_components.ms365_calendar.integration.calendar_integration.MS365CalendarData.async_update",
+        f"custom_components.{DOMAIN}.integration.calendar_integration.MS365CalendarData.async_update",
         side_effect=HTTPError(),
     ):
         freezer.tick(timedelta(minutes=1))
@@ -95,7 +95,7 @@ async def test_fetch_error(
     assert "Error getting calendar events for day" in caplog.text
 
     with patch(
-        "custom_components.ms365_calendar.integration.calendar_integration.MS365CalendarData.async_update",
+        f"custom_components.{DOMAIN}.integration.calendar_integration.MS365CalendarData.async_update",
         side_effect=HTTPError(),
     ):
         freezer.tick(timedelta(minutes=1))
@@ -116,7 +116,7 @@ async def test_fetch_error2(
 
     base_config_entry.add_to_hass(hass)
     with patch(
-        "custom_components.ms365_calendar.integration.calendar_integration.MS365CalendarData.async_update_data",
+        f"custom_components.{DOMAIN}.integration.calendar_integration.MS365CalendarData.async_update_data",
         side_effect=HTTPError(),
     ):
         await hass.config_entries.async_setup(base_config_entry.entry_id)

@@ -6,8 +6,8 @@ from homeassistant.components.diagnostics import async_redact_data
 from homeassistant.const import CONF_CLIENT_ID, CONF_CLIENT_SECRET
 from homeassistant.core import HomeAssistant
 
+from .classes.config_entry import MS365ConfigEntry
 from .const import CONF_SHARED_MAILBOX
-from .helpers.config_entry import MS365ConfigEntry
 
 TO_REDACT = {CONF_CLIENT_ID, CONF_CLIENT_SECRET, CONF_SHARED_MAILBOX}
 

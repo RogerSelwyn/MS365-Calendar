@@ -4,6 +4,7 @@
 from copy import deepcopy
 from enum import Enum
 
+from custom_components.ms365_calendar.config_flow import MS365ConfigFlow  # noqa: F401
 from custom_components.ms365_calendar.const import (  # noqa: F401
     AUTH_CALLBACK_PATH_ALT,
     AUTH_CALLBACK_PATH_DEFAULT,
@@ -55,15 +56,15 @@ MIGRATION_CONFIG_ENTRY = {
     },
 }
 
+
 DIAGNOSTIC_GRANTED_PERMISSIONS = [
     "Calendars.Read",
     "User.Read",
-    "profile",
-    "openid",
     "email",
+    "openid",
+    "profile",
 ]
 DIAGNOSTIC_REQUESTED_PERMISSIONS = [
-    "offline_access",
     "User.Read",
     "Calendars.Read",
 ]
@@ -76,6 +77,9 @@ UPDATE_CALENDAR_LIST = ["Calendar1"]
 class URL(Enum):
     """List of URLs"""
 
+    OPENID = (
+        "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration"
+    )
     ME = "https://graph.microsoft.com/v1.0/me"
     CALENDARS = "https://graph.microsoft.com/v1.0/me/calendars"
     GROUP_CALENDARS = "https://graph.microsoft.com/v1.0/groups"

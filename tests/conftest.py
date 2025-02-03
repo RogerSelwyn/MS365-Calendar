@@ -1,6 +1,7 @@
 # pylint: disable=protected-access,redefined-outer-name, unused-argument, line-too-long, unused-import
 """Global fixtures for integration."""
 
+import json
 import sys
 from copy import deepcopy
 from unittest.mock import patch
@@ -9,16 +10,17 @@ import pytest
 from homeassistant.core import HomeAssistant
 from requests_mock import Mocker
 
-from .const import TITLE, TOKEN_LOCATION
+from .const import ENTITY_NAME, LEGACY_TOKEN, TOKEN_LOCATION
 from .helpers.mock_config_entry import MS365MockConfigEntry
 from .helpers.utils import build_token_file
-from .integration import permissions
+from .integration import api
 from .integration.const_integration import (
     BASE_CONFIG_ENTRY,
     BASE_TOKEN_PERMS,
     DOMAIN,
     UPDATE_OPTIONS,
     UPDATE_TOKEN_PERMS,
+    MS365ConfigFlow,
 )
 from .integration.helpers_integration.mocks import MS365MOCKS
 
@@ -42,7 +44,7 @@ def token_storage_path_setup(tmp_path):
     tk_path = tmp_path / TOKEN_LOCATION
 
     with patch.object(
-        permissions,
+        api,
         "build_config_file_path",
         return_value=tk_path,
     ):
@@ -86,7 +88,37 @@ def base_config_entry(request, hass: HomeAssistant) -> MS365MockConfigEntry:
             else:
                 data[key] = value
     entry = MS365MockConfigEntry(
-        domain=DOMAIN, title=TITLE, unique_id=DOMAIN, data=data, options=options
+        domain=DOMAIN,
+        title=ENTITY_NAME,
+        unique_id=DOMAIN,
+        data=data,
+        options=options,
+        version=MS365ConfigFlow.VERSION,
+        minor_version=MS365ConfigFlow.MINOR_VERSION,
+    )
+    entry.runtime_data = None
+    return entry
+
+
+@pytest.fixture
+def v1_config_entry(request, hass: HomeAssistant) -> MS365MockConfigEntry:
+    """Create MS365 entry in Home Assistant."""
+    data = deepcopy(BASE_CONFIG_ENTRY)
+    options = None
+    if hasattr(request, "param"):
+        for key, value in request.param.items():
+            if key == "options":
+                options = value
+            else:
+                data[key] = value
+    entry = MS365MockConfigEntry(
+        domain=DOMAIN,
+        title=ENTITY_NAME,
+        unique_id=DOMAIN,
+        data=data,
+        options=options,
+        version=1,
+        minor_version=1,
     )
     entry.runtime_data = None
     return entry
@@ -99,6 +131,15 @@ def base_token(request, tmp_path):
     if hasattr(request, "param"):
         perms = request.param
     build_token_file(tmp_path, perms)
+
+
+@pytest.fixture
+def legacy_token(tmp_path):
+    """Setup a legacy token."""
+    token = LEGACY_TOKEN
+    filename = tmp_path / TOKEN_LOCATION / f"{DOMAIN}_{ENTITY_NAME}.token"
+    with open(filename, "w", encoding="UTF8") as f:
+        json.dump(token, f, ensure_ascii=False, indent=1)
 
 
 @pytest.fixture

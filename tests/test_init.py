@@ -6,6 +6,7 @@ from unittest.mock import patch
 import pytest
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers import issue_registry as ir
 from oauthlib.oauth2.rfc6749.errors import InvalidClientError
 from requests_mock import Mocker
 
@@ -47,7 +48,7 @@ async def test_invalid_client_1(
     base_config_entry.add_to_hass(hass)
 
     with patch(
-        "O365.Account.get_current_user",
+        "O365.Account.get_current_user_data",
         side_effect=InvalidClientError(description="client secret expired"),
     ):
         await hass.config_entries.async_setup(base_config_entry.entry_id)
@@ -67,12 +68,31 @@ async def test_invalid_client_2(
     base_config_entry.add_to_hass(hass)
 
     with patch(
-        "O365.Account.get_current_user",
+        "O365.Account.get_current_user_data",
         side_effect=InvalidClientError(description="token error"),
     ):
         await hass.config_entries.async_setup(base_config_entry.entry_id)
     await hass.async_block_till_done()
     assert "Token error for account" in caplog.text
+
+
+async def test_legacy_token(
+    tmp_path,
+    hass: HomeAssistant,
+    base_config_entry: MS365MockConfigEntry,
+    requests_mock: Mocker,
+    legacy_token,
+    caplog: pytest.LogCaptureFixture,
+    issue_registry: ir.IssueRegistry,
+):
+    """Test with legacy token."""
+
+    MS365MOCKS.standard_mocks(requests_mock)
+
+    base_config_entry.add_to_hass(hass)
+    await hass.config_entries.async_setup(base_config_entry.entry_id)
+    assert f"Token no longer valid for integration '{DOMAIN}'" in caplog.text
+    assert len(issue_registry.issues) == 1
 
 
 async def test_remove_entry(

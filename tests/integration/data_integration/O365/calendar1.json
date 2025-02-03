@@ -1,5 +1,5 @@
 {
-    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('fake_user_id')/calendars/$entity",
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('fake-user-id')/calendars/$entity",
     "id": "calendar1",
     "name": "Calendar",
     "color": "auto",

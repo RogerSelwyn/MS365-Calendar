@@ -4,8 +4,8 @@ from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from ..const import ATTR_DATA
-from ..helpers.config_entry import MS365ConfigEntry
 from ..integration.const_integration import DOMAIN
+from .config_entry import MS365ConfigEntry
 
 
 class MS365Entity(CoordinatorEntity):

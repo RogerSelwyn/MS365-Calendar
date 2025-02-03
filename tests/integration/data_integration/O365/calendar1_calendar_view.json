@@ -1,5 +1,5 @@
 {
-    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('fake_user_id')/calendars('calendar1')/calendarView(subject,body,attendees,categories,sensitivity,start,seriesMasterId,isAllDay,end,showAs,location)",
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('fake-user-id')/calendars('calendar1')/calendarView(subject,body,attendees,categories,sensitivity,start,seriesMasterId,isAllDay,end,showAs,location)",
     "value": [
         {
             "@odata.etag": "W/\"qIkRKy24jUSQwhcjI6uJIQAIopRuag==\"",
@@ -56,8 +56,8 @@
             "seriesMasterId": "master2",
             "showAs": "busy",
             "body": {
-                "contentType": "html",
-                "content": "<html>\r\n<head>\r\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\r\n<meta name=\"Generator\" content=\"Microsoft Word 15 (filtered medium)\">\r\n<style>\r\n<!--\r\n@font-face\r\n\t{font-family:\"Cambria Math\"}\r\n@font-face\r\n\t{font-family:Aptos}\r\np.MsoNormal, li.MsoNormal, div.MsoNormal\r\n\t{margin:0cm;\r\n\tfont-size:12.0pt;\r\n\tfont-family:\"Aptos\",sans-serif}\r\nspan.EmailStyle19\r\n\t{font-family:\"Aptos\",sans-serif;\r\n\tcolor:windowtext}\r\n.MsoChpDefault\r\n\t{font-size:10.0pt}\r\n@page WordSection1\r\n\t{margin:72.0pt 72.0pt 72.0pt 72.0pt}\r\ndiv.WordSection1\r\n\t{}\r\n-->\r\n</style>\r\n</head>\r\n<body lang=\"EN-GB\" link=\"#467886\" vlink=\"#96607D\" style=\"word-wrap:break-word\">\r\n<div class=\"WordSection1\">\r\n<div>\r\n<p class=\"MsoNormal\"><span style=\"font-size:11.0pt\">&nbsp;Test</span></p>\r\n</div>\r\n</div>\r\n</body>\r\n</html>\r\n"
+                "contentType": "text",
+                "content": "Plain Text"
             },
             "start": {
                 "dateTime": "2022-10-24T00:00:00.0000000",
