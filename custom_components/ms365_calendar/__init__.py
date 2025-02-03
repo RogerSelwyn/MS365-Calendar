@@ -41,12 +41,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
     perms = Permissions(hass, entry.data, token_backend)
     ha_account = MS365Account(perms)
     if token_backend.check_token_exists():
-        error = await hass.async_add_executor_job(
-            ha_account.try_authentication, credentials, main_resource, entity_name
+        error = (
+            await hass.async_add_executor_job(
+                ha_account.try_authentication, credentials, main_resource, entity_name
+            )
+            or await perms.async_check_authorizations()
         )
-
-        if not error:
-            error = await perms.async_check_authorizations()
     else:
         error = TOKEN_FILE_MISSING
 
