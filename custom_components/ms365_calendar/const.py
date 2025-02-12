@@ -31,16 +31,44 @@ EVENT_HA_EVENT = "ha_event"
 MS365_STORAGE = "ms365_storage"
 MS365_STORAGE_TOKEN = ".MS365-token-cache"
 
-PERM_OFFLINE_ACCESS = "offline_access"
 PERM_USER_READ = "User.Read"
 PERM_SHARED = ".Shared"
+PERM_BASE_PERMISSIONS = [PERM_USER_READ]
 
+ERROR_IMPORTED_DUPLICATE = "Entry already imported for '%s' - '%s'"
 ERROR_INVALID_SHARED_MAILBOX = (
     "Login email address '%s' should not be "
     + "entered as shared email address, config attribute removed."
+)
+TOKEN_DELETED = (
+    "Token %s has been deleted as part of upgrade"
+    + " - please re-configure to re-authenticate"
+)
+TOKEN_ERROR = "Token error for account: %s. Error - %s"
+TOKEN_ERROR_CORRUPT = (
+    "Token file corrupted for integration '%s', unique identifier '%s', "
+    + "please delete token, re-configure and re-authenticate - %s"
+)
+TOKEN_ERROR_FILE = (
+    "Token file retrieval error, check log for errors from O365. "
+    + "Ensure token has not expired and you are using secret value not secret id."
+)
+TOKEN_ERROR_LEGACY = (
+    "Token no longer valid for integration '%s', unique identifier '%s', "
+    + "please delete token, re-configure and re-authenticate - %s"
+)
+TOKEN_ERROR_MISSING = "Could not locate token at %s"
+TOKEN_ERROR_PERMISSIONS = (
+    "Minimum required permissions: '%s'. Not available in token '%s' for account '%s'."
+)
+TOKEN_EXPIRED = (
+    "Client Secret expired for account: %s. "
+    + "Create new Client Secret in Entra ID App Registration."
 )
 
 TOKEN_FILENAME = "{0}{1}.token"  # nosec
 TOKEN_FILE_CORRUPTED = "corrupted"
 TOKEN_FILE_MISSING = "missing"
+TOKEN_FILE_OUTDATED = "outdated"
 TOKEN_FILE_PERMISSIONS = "permissions"
+TOKEN_INVALID = "The token you are trying to load is not valid anymore"

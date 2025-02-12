@@ -1,9 +1,11 @@
 """Utilities processes."""
 
-from copy import deepcopy
+import warnings
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, MarkupResemblesLocatorWarning
 from homeassistant.helpers.entity import async_generate_entity_id
+
+warnings.filterwarnings("ignore", category=MarkupResemblesLocatorWarning)
 
 
 def clean_html(html):
@@ -39,8 +41,3 @@ def build_entity_id(hass, entity_id_format, name):
         name,
         hass=hass,
     )
-
-
-def shared_permission_build(permission, shared):
-    """Build the shared permission."""
-    return f"{deepcopy(permission)}.Shared" if shared else permission

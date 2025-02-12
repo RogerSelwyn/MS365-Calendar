@@ -5,12 +5,12 @@
         },
         "error": {
             "already_configured": "This account name has already been used. Use re-configure.",
-            "error_authenticating": "Error authenticating, JSONDecodeError, check log for errors",
+            "error_authenticating": "Error authenticating, token invalid, check log for errors",
             "invalid_url": "Error, the originating url does not seem to be a valid microsoft redirect",
             "permissions": "Minimum permissions not granted for account: {entity_name}",
             "corrupted": "Token file is corrupted after successful authentication, check log for file system errors",
             "missing": "Token file is missing after successful authentication, check log for file system errors",
-            "token_file_error": "Token file retrieval error, check log for errors from O365"
+            "token_file_error": "Token file retrieval error, check log for errors from O365. Ensure token has not expired and you are using secret value not secret id."
         },
         "step": {
             "user": {
@@ -63,11 +63,15 @@
     "issues": {
         "corrupted": {
             "title": "Re-authentication required - {domain} - {entity_name}",
-            "description": "The token file is corrupted. Please Reconfigure the integration and re-authenticate to re-create the token file."
+            "description": "The token file is corrupted. Please [Reconfigure]({url}) the integration and re-authenticate to re-create the token file."
         },
         "missing": {
             "title": "Re-authentication required - {domain} - {entity_name}",
-            "description": "The token file is missing. Please Reconfigure the integration and re-authenticate to re-create the token file."
+            "description": "The token file is missing. Please [Reconfigure]({url}) the integration and re-authenticate to re-create the token file."
+        },
+        "outdated": {
+            "title": "Re-authentication required - {domain} - {entity_name}",
+            "description": "The token is outdated. Please delete the token, then [Reconfigure]({url}) the integration and re-authenticate to re-create the token file."
         }
     },
     "exceptions": {

@@ -6,10 +6,10 @@ import yaml
 from homeassistant.const import CONF_NAME
 from voluptuous.error import Error as VoluptuousError
 
+from ..classes.config_entry import MS365ConfigEntry
 from ..const import (
     CONF_ENTITY_NAME,
 )
-from ..helpers.config_entry import MS365ConfigEntry
 from ..helpers.filemgmt import build_config_file_path
 from .const_integration import (
     CONF_CAL_ID,

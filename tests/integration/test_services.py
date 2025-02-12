@@ -14,11 +14,10 @@ from voluptuous.error import MultipleInvalid
 from zoneinfo import ZoneInfo
 
 from custom_components.ms365_calendar.const import CONF_ENABLE_UPDATE
-from custom_components.ms365_calendar.integration.const_integration import DOMAIN
 
 from ..conftest import MS365MockConfigEntry
 from ..helpers.utils import mock_call
-from .const_integration import URL
+from .const_integration import DOMAIN, URL
 from .fixtures import ClientFixture, ListenerSetupData
 
 START_BASE = datetime(2020, 1, 1, 0, 0, 0, tzinfo=ZoneInfo(key="UTC"))
@@ -94,7 +93,7 @@ async def test_get_events_ha_error(
     calendar_name = "calendar.test_calendar1"
 
     with patch(
-        "custom_components.ms365_calendar.integration.calendar_integration.CalendarEvent",
+        f"custom_components.{DOMAIN}.integration.calendar_integration.CalendarEvent",
         side_effect=HomeAssistantError(),
     ):
         await hass.services.async_call(
@@ -246,7 +245,7 @@ async def test_create_event_no_perms(
     failed_perm = "calendar.failed_perm"
     with (
         patch(
-            "custom_components.ms365_calendar.integration.calendar_integration.PERM_CALENDARS_READWRITE",
+            f"custom_components.{DOMAIN}.integration.calendar_integration.PERM_CALENDARS_READWRITE",
             failed_perm,
         ),
         pytest.raises(ServiceValidationError) as exc_info,
@@ -267,7 +266,7 @@ async def test_create_event_no_perms(
 
     assert (
         str(exc_info.value)
-        == f"Not authorisied to {failed_perm} calendar event - requires permission: create"
+        == f"Not authorisied to Calendar1 calendar event - requires permission: {failed_perm}"
     )
 
 
@@ -319,7 +318,7 @@ async def test_update_event_no_perms(
     failed_perm = "calendar.failed_perm"
     with (
         patch(
-            "custom_components.ms365_calendar.integration.calendar_integration.PERM_CALENDARS_READWRITE",
+            f"custom_components.{DOMAIN}.integration.calendar_integration.PERM_CALENDARS_READWRITE",
             failed_perm,
         ),
         pytest.raises(ServiceValidationError) as exc_info,
@@ -341,7 +340,7 @@ async def test_update_event_no_perms(
 
     assert (
         str(exc_info.value)
-        == f"Not authorisied to {failed_perm} calendar event - requires permission: modify"
+        == f"Not authorisied to Calendar1 calendar event - requires permission: {failed_perm}"
     )
 
 
@@ -532,7 +531,7 @@ async def test_delete_event_no_perms(
     failed_perm = "calendar.failed_perm"
     with (
         patch(
-            "custom_components.ms365_calendar.integration.calendar_integration.PERM_CALENDARS_READWRITE",
+            f"custom_components.{DOMAIN}.integration.calendar_integration.PERM_CALENDARS_READWRITE",
             failed_perm,
         ),
         pytest.raises(ServiceValidationError) as exc_info,
@@ -550,7 +549,7 @@ async def test_delete_event_no_perms(
 
     assert (
         str(exc_info.value)
-        == f"Not authorisied to {failed_perm} calendar event - requires permission: delete"
+        == f"Not authorisied to Calendar1 calendar event - requires permission: {failed_perm}"
     )
 
 

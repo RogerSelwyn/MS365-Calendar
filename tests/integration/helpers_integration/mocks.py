@@ -11,6 +11,7 @@ class MS365Mocks:
 
     def standard_mocks(self, requests_mock):
         """Setup the standard mocks."""
+        mock_call(requests_mock, URL.OPENID, "openid")
         mock_call(requests_mock, URL.ME, "me")
         mock_call(requests_mock, URL.CALENDARS, "calendars")
         mock_call(requests_mock, URL.CALENDARS, "calendar1", "calendar1")
@@ -41,6 +42,7 @@ class MS365Mocks:
 
     def shared_mocks(self, requests_mock):
         """Setup the standard mocks."""
+        mock_call(requests_mock, URL.OPENID, "openid")
         mock_call(requests_mock, URL.ME, "me")
         mock_call(requests_mock, URL.SHARED_CALENDARS, "calendars")
         mock_call(requests_mock, URL.SHARED_CALENDARS, "calendar1", "calendar1")
@@ -122,6 +124,7 @@ MS365MOCKS = MS365Mocks()
 
 
 def _generic_mocks(requests_mock):
+    mock_call(requests_mock, URL.OPENID, "openid")
     mock_call(requests_mock, URL.ME, "me")
     mock_call(requests_mock, URL.CALENDARS, "calendars_one")
     mock_call(requests_mock, URL.CALENDARS, "calendar1", "calendar1")
