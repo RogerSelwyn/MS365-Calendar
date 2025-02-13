@@ -25,11 +25,13 @@ nav_order: 4
 ### HACS
 
 1. Launch HACS
-1. Navigate to the Integrations section
-1. Add this repository as a Custom Repository (Integration) via the menu at top right.
 1. Search for "Microsoft 365 Calendar"
-1. Select "Install this repository"
+1. Select "Download"
 1. Restart Home Assistant
+1. Go to the Home Assistant Devices configuration page
+1. Click "Add Integration"
+1. Search for "Microsoft 365 Calendar"
+1. Click on the result, and follow the prompts.
 
 
 ### Configuration variables
