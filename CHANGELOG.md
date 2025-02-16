@@ -1,5 +1,44 @@
 # Changelog
 
+## v1.3.0 (2025/02/16)
+### 🐛 Fixes
+- [Correct hassfest failure](https://github.com/RogerSelwyn/MS365-Calendar/commit/2ddcae54b4c1a82712862e2455be30ce924db407) - @RogerSelwyn
+- [Handle expired token/invalid grant](https://github.com/RogerSelwyn/MS365-Calendar/commit/c3953ea362393af052071a0690fa8696c50cd468) - @RogerSelwyn
+
+### 🧰 Maintenance
+- [Tidy up code](https://github.com/RogerSelwyn/MS365-Calendar/commit/1651c6c04c145716a595c48d3d0d42d76bd3dac4) - @RogerSelwyn
+- [Update in support of python-o365 MSAL](https://github.com/RogerSelwyn/MS365-Calendar/commit/6e24048b8f7d9f89c66d351e6fcd9a6e560df755) - @RogerSelwyn
+- [Correct integration name](https://github.com/RogerSelwyn/MS365-Calendar/commit/f5f74a829efac1e2c816488a478defa532afd64d) - @RogerSelwyn
+- [Correct integration name](https://github.com/RogerSelwyn/MS365-Calendar/commit/a5f91068eb5ae7f232fb062d2264269a0ad80b2e) - @RogerSelwyn
+- [Updated with latest msal changes](https://github.com/RogerSelwyn/MS365-Calendar/commit/99c409ba012f21c97604ac117e8c8a2acd08e30c) - @RogerSelwyn
+- [Update inline with fix in Mail](https://github.com/RogerSelwyn/MS365-Calendar/commit/77cd705ab4eba6630b41157922e397fa5ec36e2d) - @RogerSelwyn
+- [Add link to re-configure in Issue text](https://github.com/RogerSelwyn/MS365-Calendar/commit/98ec2e7ddce6339aa33586e3863f6a16c9216a5b) - @RogerSelwyn
+- [Break account out from permissions](https://github.com/RogerSelwyn/MS365-Calendar/commit/eec01b7e2b5c9f840b0c60e31a2d9d9022b28289) - @RogerSelwyn
+- [Tidy up runtime_data](https://github.com/RogerSelwyn/MS365-Calendar/commit/185b6d50caaaa3549af0fa6760470a01eb1a8359) - @RogerSelwyn
+- [Break out token_backend from permissions](https://github.com/RogerSelwyn/MS365-Calendar/commit/8df906a1584dec66df3a749821c0db14585be51a) - @RogerSelwyn
+- [Sourcery update](https://github.com/RogerSelwyn/MS365-Calendar/commit/a4c67520cbb1b3533fbab01180a9a224c81312af) - @RogerSelwyn
+- [build(deps): Bump ruff from 0.8.0 to 0.8.6](https://github.com/RogerSelwyn/MS365-Calendar/commit/04222e2d26d13eeb97fb25daed23a5da639b24d5) - @dependabot[bot]
+- [Revert "maint: Tidy up code"](https://github.com/RogerSelwyn/MS365-Calendar/commit/27c5a432122e4ddc95f33ab84d729a273a6680cc) - @RogerSelwyn
+- [build(deps): Bump ruff from 0.8.6 to 0.9.4](https://github.com/RogerSelwyn/MS365-Calendar/commit/215df0330e81782aeba1e652573b021351dfb53f) - @dependabot[bot]
+- [build(deps): Bump ruff from 0.9.4 to 0.9.6](https://github.com/RogerSelwyn/MS365-Calendar/commit/3ffeae29df30793ac39b58a96716611d7385a5f0) - @dependabot[bot]
+- 
+### ⬆️ Dependencies
+- [Bump python-o365 to 2.1.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/dbb724c172fddaebbe44207897edcf87f8d56e19) - @RogerSelwyn
+- [Bump python-o365 to 2.1.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/8dc71d098cfb89c0fbab8045b5a89d1afb3efdbe) - @RogerSelwyn
+
+### 📚 Documentation
+- [Update CHANGELOG.md](https://github.com/RogerSelwyn/MS365-Calendar/commit/d07effb5544e1dec63d3d1b237ca94053edefd85) - @RogerSelwyn
+- [Update README.md](https://github.com/RogerSelwyn/MS365-Calendar/commit/27d7d80bd02d5235c77503c50270573f7caf5b35) - @RogerSelwyn
+- [Update installation_and_configuration.md](https://github.com/RogerSelwyn/MS365-Calendar/commit/8159d3d95c485ed86e13d7bd699ca6bf3d7ff3a5) - @RogerSelwyn
+
+### ✅ Test
+- [Correct test data](https://github.com/RogerSelwyn/MS365-Calendar/commit/2bbe285f6e558b49e561e15434e952334d116007) - @RogerSelwyn
+- [Remove unrequired dependencies](https://github.com/RogerSelwyn/MS365-Calendar/commit/a9a441b4e45ca2c9787dd1c45d60d559e892cd67) - @RogerSelwyn
+- [Sourcery recommendation](https://github.com/RogerSelwyn/MS365-Calendar/commit/a2a25ef46a737935e2878a34f46020db39b77f7b) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.3.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/34d8ccf0541de9d7104731c330a6eebee5da219f) - @RogerSelwyn
+
 ## v1.2.0 (2025/01/05)
 ### ✨ Enhancements
 - [Add reminder information on calendar data attribute](https://github.com/RogerSelwyn/MS365-Calendar/commit/9c0f73798744fa0c2368666bbd5a4ac1d09d71bd) - @RogerSelwyn
