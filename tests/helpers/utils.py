@@ -34,7 +34,7 @@ def _build_file_token(scope):
     """Build a token"""
     perms = f"{scope} User.Read email openid profile"
     expire = int(time.time() + TOKEN_TIME)
-    token = {
+    return {
         "AccessToken": {
             f"fake-user-id.fake-home-id-login.microsoftonline.com-accesstoken-{CLIENT_ID}-common-{perms.lower()}": {
                 "credential_type": "AccessToken",
@@ -89,7 +89,6 @@ def _build_file_token(scope):
             }
         },
     }
-    return token
 
 
 def build_retrieved_token(scope):
