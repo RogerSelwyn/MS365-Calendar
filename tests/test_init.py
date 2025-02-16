@@ -107,3 +107,46 @@ async def test_remove_entry(
     await hass.async_block_till_done()
     filename = tmp_path / TOKEN_LOCATION / f"{DOMAIN}_{ENTITY_NAME}.token"
     assert not filename.is_file()
+
+
+async def test_expired_token(
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    base_token,
+    base_config_entry: MS365MockConfigEntry,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test an invalid client."""
+    MS365MOCKS.standard_mocks(requests_mock)
+    base_config_entry.add_to_hass(hass)
+
+    with patch(
+        "O365.Account.get_current_user_data",
+        side_effect=RuntimeError("Refresh token operation failed: invalid_grant"),
+    ):
+        await hass.config_entries.async_setup(base_config_entry.entry_id)
+    await hass.async_block_till_done()
+    assert (
+        "Token has expired for account: 'test'. Please re-configure and re-authenticate."
+        in caplog.text
+    )
+
+
+async def test_other_runtime_error(
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    base_token,
+    base_config_entry: MS365MockConfigEntry,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test an invalid client."""
+    MS365MOCKS.standard_mocks(requests_mock)
+    base_config_entry.add_to_hass(hass)
+    error = "Random error"
+    with patch(
+        "O365.Account.get_current_user_data",
+        side_effect=RuntimeError(error),
+    ):
+        await hass.config_entries.async_setup(base_config_entry.entry_id)
+    await hass.async_block_till_done()
+    assert error in caplog.text

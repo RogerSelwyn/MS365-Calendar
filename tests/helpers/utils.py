@@ -89,7 +89,6 @@ def _build_file_token(scope):
             }
         },
     }
-    print(token)
     return token
 
 
@@ -168,8 +167,8 @@ def check_entity_state(
     # print(state)
     assert state.state == entity_state
     if entity_attributes:
-        print("*************************** State Attributes")
-        print(state.attributes)
+        # print("*************************** State Attributes")
+        # print(state.attributes)
         if "data" in state.attributes:
             assert state.attributes["data"] == entity_attributes
         else:

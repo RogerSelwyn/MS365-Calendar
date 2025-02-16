@@ -65,6 +65,10 @@
             "title": "Re-authentication required - {domain} - {entity_name}",
             "description": "The token file is corrupted. Please [Reconfigure]({url}) the integration and re-authenticate to re-create the token file."
         },
+        "expired": {
+            "title": "Re-authentication required - {domain} - {entity_name}",
+            "description": "The token has expired. Please [Reconfigure]({url}) the integration and re-authenticate to re-create the token file."
+        },
         "missing": {
             "title": "Re-authentication required - {domain} - {entity_name}",
             "description": "The token file is missing. Please [Reconfigure]({url}) the integration and re-authenticate to re-create the token file."

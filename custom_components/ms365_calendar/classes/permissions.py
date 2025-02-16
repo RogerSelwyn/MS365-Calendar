@@ -93,9 +93,9 @@ class BasePermissions:
         # If Operation is Read then ReadWrite will also work
         newops = [operation]
         if operation == "ReadBasic":
-            newops = newops + ["Read", "ReadWrite"]
+            newops += ["Read", "ReadWrite"]
         elif operation == "Read":
-            newops = newops + ["ReadWrite"]
+            newops += ["ReadWrite"]
 
         for newop in newops:
             newperm = deepcopy(permission).replace(operation, newop)

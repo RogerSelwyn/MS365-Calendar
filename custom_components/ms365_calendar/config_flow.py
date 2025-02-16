@@ -37,6 +37,7 @@ from .const import (
     ERROR_INVALID_SHARED_MAILBOX,
     TOKEN_ERROR_FILE,
     TOKEN_FILE_CORRUPTED,
+    TOKEN_FILE_EXPIRED,
     TOKEN_FILE_MISSING,
     TOKEN_FILE_PERMISSIONS,
 )
@@ -199,6 +200,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
                 TOKEN_FILE_CORRUPTED,
                 TOKEN_FILE_MISSING,
                 TOKEN_FILE_PERMISSIONS,
+                TOKEN_FILE_EXPIRED,
             ]:
                 ir.async_delete_issue(self.hass, DOMAIN, error)
             return self.async_update_reload_and_abort(

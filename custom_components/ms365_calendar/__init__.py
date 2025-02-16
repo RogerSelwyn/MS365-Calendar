@@ -14,9 +14,11 @@ from .const import (
     CONF_CLIENT_SECRET,
     CONF_ENTITY_NAME,
     CONF_SHARED_MAILBOX,
+    SECRET_EXPIRED,
     TOKEN_DELETED,
     TOKEN_ERROR,
     TOKEN_EXPIRED,
+    TOKEN_FILE_EXPIRED,
     TOKEN_FILE_MISSING,
 )
 from .integration import setup_integration
@@ -67,22 +69,24 @@ async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
             await hass.config_entries.async_forward_entry_setups(entry, platforms)
             entry.async_on_unload(entry.add_update_listener(async_reload_entry))
             return True
-    else:
-        url = f"{get_url(hass)}/config/integrations/integration/{DOMAIN}"
-        ir.async_create_issue(
-            hass,
-            DOMAIN,
-            error,
-            is_fixable=False,
-            severity=ir.IssueSeverity.ERROR,
-            translation_key=error,
-            translation_placeholders={
-                "domain": DOMAIN,
-                "url": url,
-                CONF_ENTITY_NAME: entry.data.get(CONF_ENTITY_NAME),
-            },
-        )
-        return False
+        else:
+            error = TOKEN_FILE_EXPIRED
+
+    url = f"{get_url(hass)}/config/integrations/integration/{DOMAIN}"
+    ir.async_create_issue(
+        hass,
+        DOMAIN,
+        error,
+        is_fixable=False,
+        severity=ir.IssueSeverity.ERROR,
+        translation_key=error,
+        translation_placeholders={
+            "domain": DOMAIN,
+            "url": url,
+            CONF_ENTITY_NAME: entry.data.get(CONF_ENTITY_NAME),
+        },
+    )
+    return False
 
 
 async def async_migrate_entry(
@@ -147,7 +151,12 @@ async def _async_check_token(hass, account, entity_name):
         return True
     except InvalidClientError as err:
         if "client secret" in err.description and "expired" in err.description:
-            _LOGGER.warning(TOKEN_EXPIRED, entity_name)
+            _LOGGER.warning(SECRET_EXPIRED, entity_name)
         else:
             _LOGGER.warning(TOKEN_ERROR, entity_name, err.description)
         return False
+    except RuntimeError as err:
+        if "Refresh token operation failed: invalid_grant" in err.args:
+            _LOGGER.warning(TOKEN_EXPIRED, entity_name)
+            return False
+        raise err

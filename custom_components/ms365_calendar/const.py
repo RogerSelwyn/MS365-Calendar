@@ -40,6 +40,10 @@ ERROR_INVALID_SHARED_MAILBOX = (
     "Login email address '%s' should not be "
     + "entered as shared email address, config attribute removed."
 )
+SECRET_EXPIRED = (
+    "Client Secret expired for account: %s. "
+    + "Create new Client Secret in Entra ID App Registration."
+)
 TOKEN_DELETED = (
     "Token %s has been deleted as part of upgrade"
     + " - please re-configure to re-authenticate"
@@ -62,12 +66,13 @@ TOKEN_ERROR_PERMISSIONS = (
     "Minimum required permissions: '%s'. Not available in token '%s' for account '%s'."
 )
 TOKEN_EXPIRED = (
-    "Client Secret expired for account: %s. "
-    + "Create new Client Secret in Entra ID App Registration."
+    "Token has expired for account: '%s'. " + "Please re-configure and re-authenticate."
 )
+
 
 TOKEN_FILENAME = "{0}{1}.token"  # nosec
 TOKEN_FILE_CORRUPTED = "corrupted"
+TOKEN_FILE_EXPIRED = "expired"
 TOKEN_FILE_MISSING = "missing"
 TOKEN_FILE_OUTDATED = "outdated"
 TOKEN_FILE_PERMISSIONS = "permissions"
