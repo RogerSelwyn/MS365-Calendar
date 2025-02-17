@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.3.1 (2025/02/17)
+### 🐛 Fixes
+- [Fix permissions repair text](https://github.com/RogerSelwyn/MS365-Calendar/commit/0b25c4dc93501e698abb2788e73bcfbf3d7cbd51) - @RogerSelwyn
+
+### ⬆️ Dependencies
+- [Reduce constraint on O365 dependency](https://github.com/RogerSelwyn/MS365-Calendar/commit/6774b1eb9779ade71d07f316f583d872d2fc0382) - @RogerSelwyn
+- [Auto update requirements.txt](https://github.com/RogerSelwyn/MS365-Calendar/commit/e28c12d067aeb5fc4fd4f0c3cc602780b1736069) - @actions-user
+
+### 🔖 Release
+- [Release v1.3.1](https://github.com/RogerSelwyn/MS365-Calendar/commit/93177e2f6e1eb4e8ea7486f2addfaa4763327723) - @RogerSelwyn
+
 ## v1.3.0 (2025/02/16)
 ### 🐛 Fixes
 - [Correct hassfest failure](https://github.com/RogerSelwyn/MS365-Calendar/commit/2ddcae54b4c1a82712862e2455be30ce924db407) - @RogerSelwyn
