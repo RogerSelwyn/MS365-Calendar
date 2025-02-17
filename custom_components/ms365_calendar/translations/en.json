@@ -76,6 +76,10 @@
         "outdated": {
             "title": "Re-authentication required - {domain} - {entity_name}",
             "description": "The token is outdated. Please delete the token, then [Reconfigure]({url}) the integration and re-authenticate to re-create the token file."
+        },
+        "permissions": {
+            "title": "Re-authentication required - {domain} - {entity_name}",
+            "description": "Permissions missing. Please [Reconfigure]({url}) the integration and re-authenticate to re-create the token file."
         }
     },
     "exceptions": {
