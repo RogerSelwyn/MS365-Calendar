@@ -24,7 +24,16 @@
                     "groups": "Enable support for group calendars",
                     "shared_mailbox": "Email address or ID of 'shared' mailbox"
                 },
-                "description": "Enter previously created Entra ID App Registration credentials"
+                "description": "Enter previously created Entra ID App Registration credentials",
+                "sections": {
+                    "api_options": {
+                        "name": "Advanced API options",
+                        "description": "Advanced options for country specific needs. Only use if you know you need it since your data will be sent to that country.",
+                        "data": {
+                            "country": "Country"
+                        }
+                    }
+                }
             },
             "request_default": {
                 "title": "Authorization Required - {entity_name}",

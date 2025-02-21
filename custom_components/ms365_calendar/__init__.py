@@ -41,7 +41,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
     _LOGGER.debug("Permissions setup")
     token_backend = MS365Token(hass, entry.data)
     perms = Permissions(hass, entry.data, token_backend)
-    ha_account = MS365Account(perms)
+    ha_account = MS365Account(perms, entry.data)
     if token_backend.check_token_exists():
         error = (
             await hass.async_add_executor_job(

@@ -12,7 +12,7 @@ The alternate method is more complex to set up, since the Entra ID App Registrat
 During setup, the difference in configuration between each method is the value of the redirect URI on your Entra ID App Registration. The authentication steps for each method are shown below.
 
 ## Primary (default) authentication method
-This requires *alt_auth_method* to be set to *False* or be not present and the redirect URI in your Entra ID App Registration app set to `https://login.microsoftonline.com/common/oauth2/nativeclient`.
+This requires *alt_auth_method* to be set to *False* or be not present and the redirect URI in your Entra ID App Registration app set to `https://login.microsoftonline.com/common/oauth2/nativeclient` (`https://login.partner.microsoftonline.cn/common/oauth2/nativeclient` for China).
 
 Do not use Safari on MacOS for this process, you will not be returned the URL at step 3 that you need.
 
