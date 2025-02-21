@@ -37,6 +37,8 @@ UPDATE_OPTIONS = {"enable_update": True}
 
 ALT_CONFIG_ENTRY = deepcopy(BASE_CONFIG_ENTRY)
 ALT_CONFIG_ENTRY["alt_auth_method"] = True
+COUNTRY_CONFIG_ENTRY = deepcopy(BASE_CONFIG_ENTRY)
+COUNTRY_CONFIG_ENTRY["api_options"]["country"] = "China"
 
 RECONFIGURE_CONFIG_ENTRY = deepcopy(BASE_CONFIG_ENTRY)
 del RECONFIGURE_CONFIG_ENTRY["entity_name"]
@@ -90,3 +92,11 @@ class URL(Enum):
     SHARED_CALENDARS = (
         "https://graph.microsoft.com/v1.0/users/jane.doe@nomail.com/calendars"
     )
+
+
+class CHINAURL(Enum):
+    """List of URLs"""
+
+    DISCOVERY = "https://login.microsoftonline.com/common/discovery/instance"
+    OPENID = "https://login.partner.microsoftonline.cn/common/v2.0/.well-known/openid-configuration"
+    ME = "https://microsoftgraph.chinacloudapi.cn/v1.0/me"

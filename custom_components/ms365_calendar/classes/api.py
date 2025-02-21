@@ -42,11 +42,11 @@ class MS365Protocol(MSGraphProtocol):
     """Protocol class"""
 
     def __init__(self, country: CountryOptions):
-        super().__init__()
         if country != CountryOptions.DEFAULT:
-            # Override after super().__init__ to ensure our values are used
+            # Override before super().__init__ to ensure our values are used
             self._protocol_url = COUNTRY_URLS[country][PROTOCOL_URL]
             self._oauth_scope_prefix = COUNTRY_URLS[country][OAUTH_SCOPE_PREFIX]
+        super().__init__()
 
 
 class MS365Connection(Connection):
