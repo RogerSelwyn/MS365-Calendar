@@ -43,7 +43,7 @@ class MS365Protocol(MSGraphProtocol):
 
     def __init__(self, country: CountryOptions):
         super().__init__()
-        if country == CountryOptions.CHINA:
+        if country != CountryOptions.DEFAULT:
             # Override after super().__init__ to ensure our values are used
             self._protocol_url = COUNTRY_URLS[country][PROTOCOL_URL]
             self._oauth_scope_prefix = COUNTRY_URLS[country][OAUTH_SCOPE_PREFIX]
@@ -55,7 +55,7 @@ class MS365Connection(Connection):
     def __init__(self, credentials, country=None, **kwargs):
         """Override init to set China cloud specific values."""
         super().__init__(credentials, **kwargs)
-        if country == CountryOptions.CHINA:
+        if country != CountryOptions.DEFAULT:
             # Override after super().__init__ to ensure our values are used
             self._msal_authority = COUNTRY_URLS[country][MSAL_AUTHORITY]
             self.oauth_redirect_url = COUNTRY_URLS[country][OAUTH_REDIRECT_URL]
