@@ -74,7 +74,8 @@ body:
   - type: textarea
     attributes:
       label: Anything in the logs that might be useful for us?
-      description: For example, error message, or stack traces. Also look for O365 errors.
+      description: Look in the `Full log`, click three dots at top of system log and select `Show full logs`.  For example, error message, or stack traces. Also look for O365 errors.
+
 
   - type: textarea
     attributes:
