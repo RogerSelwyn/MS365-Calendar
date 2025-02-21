@@ -28,9 +28,12 @@
                 "sections": {
                     "api_options": {
                         "name": "Advanced API options",
-                        "description": "Advanced options for country specific needs. Only use if you know you need it since your data will be sent to that country.",
+                        "description": "Advanced options for country specific needs",
                         "data": {
                             "country": "Country"
+                        },
+                        "data_description": {
+                            "country": "Only use if you know you need it since your data will be sent to the selected country."
                         }
                     }
                 }

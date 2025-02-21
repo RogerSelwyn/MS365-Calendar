@@ -7,7 +7,9 @@ from enum import Enum
 from custom_components.ms365_calendar.config_flow import MS365ConfigFlow  # noqa: F401
 from custom_components.ms365_calendar.const import (  # noqa: F401
     AUTH_CALLBACK_PATH_ALT,
-    AUTH_CALLBACK_PATH_DEFAULT,
+    COUNTRY_URLS,
+    OAUTH_REDIRECT_URL,
+    CountryOptions,
 )
 from custom_components.ms365_calendar.integration.const_integration import (
     DOMAIN,  # noqa: F401
@@ -15,6 +17,7 @@ from custom_components.ms365_calendar.integration.const_integration import (
 
 from ..const import CLIENT_ID, CLIENT_SECRET, ENTITY_NAME
 
+AUTH_CALLBACK_PATH_DEFAULT = COUNTRY_URLS[CountryOptions.DEFAULT][OAUTH_REDIRECT_URL]
 BASE_CONFIG_ENTRY = {
     "entity_name": ENTITY_NAME,
     "client_id": CLIENT_ID,
@@ -24,6 +27,7 @@ BASE_CONFIG_ENTRY = {
     "basic_calendar": False,
     "groups": False,
     "shared_mailbox": "",
+    "api_options": {"country": "Default"},
 }
 BASE_TOKEN_PERMS = "Calendars.Read"
 BASE_MISSING_PERMS = BASE_TOKEN_PERMS
