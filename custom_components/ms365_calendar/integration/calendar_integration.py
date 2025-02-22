@@ -285,11 +285,18 @@ class MS365CalendarEntity(CalendarEntity):
 
     async def async_get_events(self, hass, start_date, end_date):
         """Get events."""
-        return await self.data.async_get_events(hass, start_date, end_date)
+        _LOGGER.debug("Start get_events for %s", self.name)
+
+        events = await self.data.async_get_events(hass, start_date, end_date)
+
+        _LOGGER.debug("End get_events for %s", self.name)
+        return events
 
     async def async_update(self):
         """Do the update."""
         # Get today's event for HA Core.
+        _LOGGER.debug("Start update for %s", self.name)
+
         try:
             await self.data.async_update(self.hass, self._max_results)
             event = deepcopy(self.data.event)
@@ -318,6 +325,7 @@ class MS365CalendarEntity(CalendarEntity):
         if results is not None:
             self._data_attribute = [format_event_data(x) for x in results]
         self._event = event
+        _LOGGER.debug("End update for %s", self.name)
 
     async def async_create_event(self, **kwargs: Any) -> None:
         """Add a new event to calendar."""
