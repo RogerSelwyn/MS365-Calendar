@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.4.0 (2025/02/22)
+### ✨ Enhancements
+- [Add support for 21Vianet (China)](https://github.com/RogerSelwyn/MS365-Calendar/pull/78) - @RogerSelwyn
+
+### 🧰 Maintenance
+- [Add extra debug logging](https://github.com/RogerSelwyn/MS365-Calendar/commit/1345390c504b8d5196768beaaf097180535cece8) - @RogerSelwyn
+
+### 📚 Documentation
+- [Update bug_report.yml](https://github.com/RogerSelwyn/MS365-Calendar/commit/78c4c77b20c47f7331d89453ff535af20529ee2f) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.4.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/3c0525e9bc13d98dc9ba8c8fa0b1f700b5001d99) - @RogerSelwyn
+
 ## v1.3.1 (2025/02/17)
 ### 🐛 Fixes
 - [Fix permissions repair text](https://github.com/RogerSelwyn/MS365-Calendar/commit/0b25c4dc93501e698abb2788e73bcfbf3d7cbd51) - @RogerSelwyn
