@@ -25,11 +25,11 @@ from .const import (
     AUTH_CALLBACK_NAME,
     AUTH_CALLBACK_PATH_ALT,
     CONF_ALT_AUTH_METHOD,
+    CONF_API_COUNTRY,
     CONF_API_OPTIONS,
     CONF_AUTH_URL,
     CONF_CLIENT_ID,
     CONF_CLIENT_SECRET,
-    CONF_COUNTRY,
     CONF_ENTITY_NAME,
     CONF_FAILED_PERMISSIONS,
     CONF_SHARED_MAILBOX,
@@ -311,7 +311,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
                 vol.Schema(
                     {
                         vol.Required(
-                            CONF_COUNTRY,
+                            CONF_API_COUNTRY,
                             default=country,
                         ): vol.In(CountryOptions)
                     }
@@ -348,12 +348,7 @@ def get_callback_url(hass, alt_config, user_input):
     if alt_config:
         return f"{get_url(hass, prefer_external=True)}{AUTH_CALLBACK_PATH_ALT}"
 
-    api_options = user_input.get(CONF_API_OPTIONS)
-    if not api_options or not isinstance(api_options, dict):
-        raise ValueError("Invalid user_input: expected CONF_API_OPTIONS to be a dictionary")
-    country = api_options.get(CONF_COUNTRY)
-    if not country:
-        raise ValueError("Invalid user_input: missing CONF_COUNTRY value in CONF_API_OPTIONS")
+    country = user_input[CONF_API_OPTIONS][CONF_API_COUNTRY]
     return COUNTRY_URLS[country][OAUTH_REDIRECT_URL]
 
 

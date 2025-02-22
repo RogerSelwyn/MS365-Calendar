@@ -47,6 +47,14 @@ Key | Type | Required | Description
 `groups` | `boolean` | `False` | If True (**default is False**), will enable support for group calendars. No discovery is performed. You will need to know how to get the group ID from the MS Graph API. *Not for use on shared mailboxes*
 `shared_mailbox` | `string` | `False` | Email address or ID of shared mailbox (This should not be the same email address as the loggin in user).
 
+#### Advanced API Options
+
+These options will only be relevant for users in very specific circumstances.
+
+Key | Type | Required | Description
+-- | -- | -- | --
+`country` | `string` | `True` | Selection of an alternate country specific API. Currently only 21Vianet from China.
+
 ### Options variables
 
 Key | Type | Required | Description

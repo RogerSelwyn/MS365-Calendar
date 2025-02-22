@@ -11,11 +11,11 @@ AUTH_CALLBACK_PATH_ALT = "/api/ms365"
 
 CONF_ENTITY_NAME = "entity_name"
 CONF_ALT_AUTH_METHOD = "alt_auth_method"
+CONF_API_COUNTRY = "country"
 CONF_API_OPTIONS = "api_options"
 CONF_AUTH_URL = "auth_url"
 CONF_CLIENT_ID = "client_id"
 CONF_CLIENT_SECRET = "client_secret"  # nosec
-CONF_COUNTRY = "country"
 CONF_ENABLE_UPDATE = "enable_update"
 CONF_ENTITY_KEY = "entity_key"
 CONF_ENTITY_TYPE = "entity_type"

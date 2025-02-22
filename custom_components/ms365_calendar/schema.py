@@ -6,10 +6,10 @@ from homeassistant.data_entry_flow import section
 
 from .const import (
     CONF_ALT_AUTH_METHOD,
+    CONF_API_COUNTRY,
     CONF_API_OPTIONS,
     CONF_CLIENT_ID,
     CONF_CLIENT_SECRET,
-    CONF_COUNTRY,
     CONF_ENTITY_NAME,
     CONF_URL,
     CountryOptions,
@@ -23,7 +23,7 @@ CONFIG_SCHEMA = {
     vol.Required(CONF_API_OPTIONS): section(
         vol.Schema(
             {
-                vol.Required(CONF_COUNTRY, default=CountryOptions.DEFAULT): vol.In(
+                vol.Required(CONF_API_COUNTRY, default=CountryOptions.DEFAULT): vol.In(
                     CountryOptions
                 )
             }
