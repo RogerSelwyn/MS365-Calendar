@@ -30,10 +30,10 @@
                         "name": "Advanced API options",
                         "description": "Advanced options for country specific needs",
                         "data": {
-                            "country": "Country"
+                            "country": "API Country"
                         },
                         "data_description": {
-                            "country": "Only use if you know you need it since your data will be sent to the selected country."
+                            "country": "Only use if you know you need it since your credentials will be sent to the selected api/country."
                         }
                     }
                 }
