@@ -38,7 +38,7 @@ UPDATE_OPTIONS = {"enable_update": True}
 ALT_CONFIG_ENTRY = deepcopy(BASE_CONFIG_ENTRY)
 ALT_CONFIG_ENTRY["alt_auth_method"] = True
 COUNTRY_CONFIG_ENTRY = deepcopy(BASE_CONFIG_ENTRY)
-COUNTRY_CONFIG_ENTRY["api_options"]["country"] = "China"
+COUNTRY_CONFIG_ENTRY["api_options"]["country"] = "21Vianet (China)"
 
 RECONFIGURE_CONFIG_ENTRY = deepcopy(BASE_CONFIG_ENTRY)
 del RECONFIGURE_CONFIG_ENTRY["entity_name"]
@@ -94,7 +94,7 @@ class URL(Enum):
     )
 
 
-class CHINAURL(Enum):
+class CN21VURL(Enum):
     """List of URLs"""
 
     DISCOVERY = "https://login.microsoftonline.com/common/discovery/instance"

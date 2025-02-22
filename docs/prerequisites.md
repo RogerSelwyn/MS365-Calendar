@@ -21,7 +21,7 @@ To allow authentication, you first need to register your application at Entra ID
    * `Accounts in this organizational directory only (xxxxx only - Single tenant)` 
    * `Personal Microsoft accounts only`
 
-3. Click Add a Redirect URI. Click Add a platform. Select Web. Set redirect URI to `https://login.microsoftonline.com/common/oauth2/nativeclient` (`https://login.partner.microsoftonline.cn/common/oauth2/nativeclient` for China). Leave the other fields blank and click Configure.
+3. Click Add a Redirect URI. Click Add a platform. Select Web. Set redirect URI to `https://login.microsoftonline.com/common/oauth2/nativeclient` (`https://login.partner.microsoftonline.cn/common/oauth2/nativeclient` for 21Vianet). Leave the other fields blank and click Configure.
 
    An alternate method of authentication is available which requires internet access to your HA instance if preferred. The alternate method is simpler to use when authenticating, but is more complex to set up correctly. See [Authentication](./authentication.md) section for more details.
 

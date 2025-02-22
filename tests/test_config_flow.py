@@ -110,9 +110,9 @@ async def test_non_default_country(
     hass_client: ClientSessionGenerator,
     requests_mock: Mocker,
 ) -> None:
-    """Test the China config_flow."""
+    """Test the 21Vianet config_flow."""
     mock_token(requests_mock, BASE_TOKEN_PERMS)
-    MS365MOCKS.china_mocks(requests_mock)
+    MS365MOCKS.cn21v_mocks(requests_mock)
 
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}

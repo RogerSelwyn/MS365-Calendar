@@ -84,7 +84,7 @@ class CountryOptions(StrEnum):
     """Teams sensors enablement."""
 
     DEFAULT = "Default"
-    CHINA = "China"
+    CN21V = "21Vianet (China)"
 
 
 MSAL_AUTHORITY = "msal_authority"
@@ -94,7 +94,7 @@ PERMISSION_PREFIX = "permission_prefix"
 PROTOCOL_URL = "protocol_url"
 
 COUNTRY_URLS = {
-    CountryOptions.CHINA: {
+    CountryOptions.CN21V: {
         MSAL_AUTHORITY: "https://login.partner.microsoftonline.cn/common",
         OAUTH_REDIRECT_URL: "https://login.partner.microsoftonline.cn/common/oauth2/nativeclient",
         OAUTH_SCOPE_PREFIX: "https://microsoftgraph.chinacloudapi.cn/",

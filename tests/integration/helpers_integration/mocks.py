@@ -3,7 +3,7 @@
 from datetime import timedelta
 
 from ...helpers.utils import mock_call, utcnow
-from ..const_integration import CHINAURL, URL
+from ..const_integration import CN21VURL, URL
 
 
 class MS365Mocks:
@@ -40,11 +40,11 @@ class MS365Mocks:
             end=(utcnow() + timedelta(days=1)).strftime("%Y-%m-%d"),
         )
 
-    def china_mocks(self, requests_mock):
+    def cn21v_mocks(self, requests_mock):
         """Setup the standard mocks."""
-        mock_call(requests_mock, CHINAURL.DISCOVERY, "discovery")
-        mock_call(requests_mock, CHINAURL.OPENID, "openid")
-        mock_call(requests_mock, CHINAURL.ME, "me")
+        mock_call(requests_mock, CN21VURL.DISCOVERY, "discovery")
+        mock_call(requests_mock, CN21VURL.OPENID, "openid")
+        mock_call(requests_mock, CN21VURL.ME, "me")
 
     def shared_mocks(self, requests_mock):
         """Setup the standard mocks."""
