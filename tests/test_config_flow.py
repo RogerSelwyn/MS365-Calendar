@@ -18,6 +18,7 @@ from .integration.const_integration import (
     BASE_CONFIG_ENTRY,
     BASE_MISSING_PERMS,
     BASE_TOKEN_PERMS,
+    COUNTRY_CONFIG_ENTRY,
     DOMAIN,
     RECONFIGURE_CONFIG_ENTRY,
     URL,
@@ -97,6 +98,46 @@ async def test_alt_flow(
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         user_input={},
+    )
+
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert "result" in result
+    assert result["result"].state.value == "loaded"
+
+
+async def test_non_default_country(
+    hass: HomeAssistant,
+    hass_client: ClientSessionGenerator,
+    requests_mock: Mocker,
+) -> None:
+    """Test the 21Vianet config_flow."""
+    mock_token(requests_mock, BASE_TOKEN_PERMS)
+    MS365MOCKS.cn21v_mocks(requests_mock)
+
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    assert result.get("type") is FlowResultType.FORM
+    assert result["step_id"] == "user"
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        user_input=COUNTRY_CONFIG_ENTRY,
+    )
+
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "request_default"
+    assert result["description_placeholders"]["auth_url"].startswith(
+        f"{TOKEN_URL_ASSERT}{CLIENT_ID}"
+    )
+    assert result["description_placeholders"]["entity_name"] == ENTITY_NAME
+    assert result["description_placeholders"]["failed_permissions"] is None
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        user_input={
+            "url": build_token_url(result, AUTH_CALLBACK_PATH_DEFAULT),
+        },
     )
 
     assert result["type"] is FlowResultType.CREATE_ENTRY

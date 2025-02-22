@@ -5,11 +5,14 @@ from copy import deepcopy
 
 from ..const import (
     CONF_ENTITY_NAME,
+    COUNTRY_URLS,
+    PERMISSION_PREFIX,
     TOKEN_ERROR_CORRUPT,
     TOKEN_ERROR_PERMISSIONS,
     TOKEN_FILE_CORRUPTED,
     TOKEN_FILE_PERMISSIONS,
 )
+from ..helpers.utils import get_country
 from ..integration.const_integration import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -22,6 +25,7 @@ class BasePermissions:
         """Initialise the class."""
         self._hass = hass
         self._config = config
+        self._country = get_country(config)
 
         self._requested_permissions = []
         self._permissions = []
@@ -117,7 +121,8 @@ class BasePermissions:
             )
             return TOKEN_FILE_CORRUPTED, None
 
+        prefix = COUNTRY_URLS[self._country][PERMISSION_PREFIX]
         for idx, scope in enumerate(scopes):
-            scopes[idx] = scope.removeprefix("https://graph.microsoft.com/")
+            scopes[idx] = scope.removeprefix(prefix)
 
         return False, scopes

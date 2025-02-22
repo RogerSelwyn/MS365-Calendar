@@ -5,6 +5,8 @@ import warnings
 from bs4 import BeautifulSoup, MarkupResemblesLocatorWarning
 from homeassistant.helpers.entity import async_generate_entity_id
 
+from ..const import CONF_API_COUNTRY, CONF_API_OPTIONS, CountryOptions
+
 warnings.filterwarnings("ignore", category=MarkupResemblesLocatorWarning)
 
 
@@ -41,3 +43,11 @@ def build_entity_id(hass, entity_id_format, name):
         name,
         hass=hass,
     )
+
+
+def get_country(entry_data):
+    """Get the country from entry_data"""
+    country = CountryOptions.DEFAULT
+    if entry_data.get(CONF_API_OPTIONS):
+        country = entry_data[CONF_API_OPTIONS][CONF_API_COUNTRY]
+    return country

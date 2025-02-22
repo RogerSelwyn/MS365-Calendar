@@ -15,7 +15,7 @@ from homeassistant.config_entries import (
     ConfigFlowResult,
 )
 from homeassistant.core import callback
-from homeassistant.data_entry_flow import FlowResult
+from homeassistant.data_entry_flow import FlowResult, section
 from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.network import get_url
 
@@ -24,8 +24,9 @@ from .classes.config_entry import MS365ConfigEntry
 from .const import (
     AUTH_CALLBACK_NAME,
     AUTH_CALLBACK_PATH_ALT,
-    AUTH_CALLBACK_PATH_DEFAULT,
     CONF_ALT_AUTH_METHOD,
+    CONF_API_COUNTRY,
+    CONF_API_OPTIONS,
     CONF_AUTH_URL,
     CONF_CLIENT_ID,
     CONF_CLIENT_SECRET,
@@ -33,14 +34,18 @@ from .const import (
     CONF_FAILED_PERMISSIONS,
     CONF_SHARED_MAILBOX,
     CONF_URL,
+    COUNTRY_URLS,
     ERROR_IMPORTED_DUPLICATE,
     ERROR_INVALID_SHARED_MAILBOX,
+    OAUTH_REDIRECT_URL,
     TOKEN_ERROR_FILE,
     TOKEN_FILE_CORRUPTED,
     TOKEN_FILE_EXPIRED,
     TOKEN_FILE_MISSING,
     TOKEN_FILE_PERMISSIONS,
+    CountryOptions,
 )
+from .helpers.utils import get_country
 from .integration.config_flow_integration import (
     MS365OptionsFlowHandler,
     async_integration_imports,
@@ -107,7 +112,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
             alt_auth_method = self._user_input.get(CONF_ALT_AUTH_METHOD)
             token_backend = MS365Token(self.hass, user_input)
             self._permissions = Permissions(self.hass, user_input, token_backend)
-            self._ms365account = MS365Account(self._permissions)
+            self._ms365account = MS365Account(self._permissions, user_input)
             auth_error = await self.hass.async_add_executor_job(
                 self._ms365account.try_authentication,
                 credentials,
@@ -122,7 +127,9 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
                     ft.partial(
                         self._ms365account.account.get_authorization_url,
                         requested_scopes=scope,
-                        redirect_uri=get_callback_url(self.hass, alt_auth_method),
+                        redirect_uri=get_callback_url(
+                            self.hass, alt_auth_method, user_input
+                        ),
                     )
                 )
 
@@ -238,7 +245,9 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
                 self._ms365account.account.request_token,
                 url,
                 flow=self._flow,
-                redirect_uri=get_callback_url(self.hass, alt_auth_method),
+                redirect_uri=get_callback_url(
+                    self.hass, alt_auth_method, self._user_input
+                ),
             )
         )
 
@@ -286,6 +295,8 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
 
         self._reconfigure = True
         self._entity_name = entry_data[CONF_ENTITY_NAME]
+        country = get_country(entry_data)
+
         self._config_schema = {
             vol.Required(CONF_CLIENT_ID, default=entry_data[CONF_CLIENT_ID]): vol.All(
                 cv.string, vol.Strip
@@ -296,6 +307,17 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
             vol.Optional(
                 CONF_ALT_AUTH_METHOD, default=entry_data[CONF_ALT_AUTH_METHOD]
             ): cv.boolean,
+            vol.Required(CONF_API_OPTIONS): section(
+                vol.Schema(
+                    {
+                        vol.Required(
+                            CONF_API_COUNTRY,
+                            default=country,
+                        ): vol.In(CountryOptions)
+                    }
+                ),
+                {"collapsed": True},
+            ),
         }
         self._config_schema |= integration_reconfigure_schema(entry_data)
 
@@ -321,12 +343,13 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
         )
 
 
-def get_callback_url(hass, alt_config):
+def get_callback_url(hass, alt_config, user_input):
     """Get the callback URL."""
     if alt_config:
         return f"{get_url(hass, prefer_external=True)}{AUTH_CALLBACK_PATH_ALT}"
 
-    return AUTH_CALLBACK_PATH_DEFAULT
+    country = user_input[CONF_API_OPTIONS][CONF_API_COUNTRY]
+    return COUNTRY_URLS[country][OAUTH_REDIRECT_URL]
 
 
 class MS365AuthCallbackView(HomeAssistantView):

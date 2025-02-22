@@ -1,17 +1,18 @@
 """Constants."""
 
+from enum import StrEnum
+
 ATTR_DATA = "data"
 ATTR_ERROR = "error"
 ATTR_STATE = "state"
 
 AUTH_CALLBACK_NAME = "api:ms365"
 AUTH_CALLBACK_PATH_ALT = "/api/ms365"
-AUTH_CALLBACK_PATH_DEFAULT = (
-    "https://login.microsoftonline.com/common/oauth2/nativeclient"
-)
 
 CONF_ENTITY_NAME = "entity_name"
 CONF_ALT_AUTH_METHOD = "alt_auth_method"
+CONF_API_COUNTRY = "country"
+CONF_API_OPTIONS = "api_options"
 CONF_AUTH_URL = "auth_url"
 CONF_CLIENT_ID = "client_id"
 CONF_CLIENT_SECRET = "client_secret"  # nosec
@@ -77,3 +78,31 @@ TOKEN_FILE_MISSING = "missing"
 TOKEN_FILE_OUTDATED = "outdated"
 TOKEN_FILE_PERMISSIONS = "permissions"
 TOKEN_INVALID = "The token you are trying to load is not valid anymore"
+
+
+class CountryOptions(StrEnum):
+    """Teams sensors enablement."""
+
+    DEFAULT = "Default"
+    CN21V = "21Vianet (China)"
+
+
+MSAL_AUTHORITY = "msal_authority"
+OAUTH_REDIRECT_URL = "auth_redirect_url"
+OAUTH_SCOPE_PREFIX = "oauth_scope_prefix"
+PERMISSION_PREFIX = "permission_prefix"
+PROTOCOL_URL = "protocol_url"
+
+COUNTRY_URLS = {
+    CountryOptions.CN21V: {
+        MSAL_AUTHORITY: "https://login.partner.microsoftonline.cn/common",
+        OAUTH_REDIRECT_URL: "https://login.partner.microsoftonline.cn/common/oauth2/nativeclient",
+        OAUTH_SCOPE_PREFIX: "https://microsoftgraph.chinacloudapi.cn/",
+        PERMISSION_PREFIX: "https://microsoftgraph.chinacloudapi.cn/",
+        PROTOCOL_URL: "https://microsoftgraph.chinacloudapi.cn/",
+    },
+    CountryOptions.DEFAULT: {
+        OAUTH_REDIRECT_URL: "https://login.microsoftonline.com/common/oauth2/nativeclient",
+        PERMISSION_PREFIX: "https://graph.microsoft.com/",
+    },
+}
