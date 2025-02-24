@@ -46,7 +46,9 @@ class MS365Protocol(MSGraphProtocol):
             # Override before super().__init__ to ensure our values are used
             self._protocol_url = COUNTRY_URLS[country][PROTOCOL_URL]
             self._oauth_scope_prefix = COUNTRY_URLS[country][OAUTH_SCOPE_PREFIX]
-        super().__init__()
+        super().__init__(
+            timezone=CONST_UTC_TIMEZONE,
+        )
 
 
 class MS365Connection(Connection):
