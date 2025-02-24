@@ -5,9 +5,11 @@
 - [Ensure timezone is set on protocol](https://github.com/RogerSelwyn/MS365-Calendar/commit/d2b937378a6fcd9f18fc17346a746687a2b1c6a5) - @RogerSelwyn
 
 ### 🧰 Maintenance
-- [Update description of api option/country](https://github.com/RogerSelwyn/MS365-Calendar/commit/03edc56e3fc6da403c0080c37b4f6a06ed3d7f8e) - @RogerSelwyn
 - [Reduce calls to retrieve events](https://github.com/RogerSelwyn/MS365-Calendar/commit/304bee40754254dae679758da84973b96b2c324c) - @RogerSelwyn
 - [Simplify range filter](https://github.com/RogerSelwyn/MS365-Calendar/commit/9ece18745e14e1c01a5265b12e3bca8a95eaba3e) - @RogerSelwyn
+
+### 📚 Documentation
+- [Update description of api option/country](https://github.com/RogerSelwyn/MS365-Calendar/commit/03edc56e3fc6da403c0080c37b4f6a06ed3d7f8e) - @RogerSelwyn
 
 ### 🔖 Release
 - [Release v1.4.1](https://github.com/RogerSelwyn/MS365-Calendar/commit/d8354add8b5939b73e95aee3b561ad808a086093) - @RogerSelwyn
