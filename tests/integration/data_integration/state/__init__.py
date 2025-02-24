@@ -6,26 +6,12 @@ import zoneinfo
 
 BASE_STATE_CAL1 = [
     {
-        "summary": "Test event 2 calendar1",
-        "start": datetime.date(2022, 10, 24),
-        "end": datetime.date(2023, 10, 25),
-        "all_day": True,
-        "description": "Plain Text",
-        "location": "Test Location",
-        "categories": [],
-        "sensitivity": "Private",
-        "show_as": "Busy",
-        "reminder": {"minutes": 0, "is_on": False},
-        "attendees": [],
-        "uid": "event2",
-    },
-    {
         "summary": "Test event 1 calendar1",
         "start": datetime.datetime(
             2020, 1, 1, 0, 0, tzinfo=zoneinfo.ZoneInfo(key="UTC")
         ),
         "end": datetime.datetime(
-            2020, 1, 1, 23, 59, 59, tzinfo=zoneinfo.ZoneInfo(key="UTC")
+            2020, 1, 2, 23, 59, 59, tzinfo=zoneinfo.ZoneInfo(key="UTC")
         ),
         "all_day": False,
         "description": "Test",
@@ -36,6 +22,20 @@ BASE_STATE_CAL1 = [
         "reminder": {"minutes": 30, "is_on": True},
         "attendees": [],
         "uid": "event1",
+    },
+    {
+        "summary": "Test event 2 calendar1",
+        "start": datetime.date(2020, 1, 1),
+        "end": datetime.date(2020, 1, 2),
+        "all_day": True,
+        "description": "Plain Text",
+        "location": "Test Location",
+        "categories": [],
+        "sensitivity": "Private",
+        "show_as": "Busy",
+        "reminder": {"minutes": 0, "is_on": False},
+        "attendees": [],
+        "uid": "event2",
     },
 ]
 

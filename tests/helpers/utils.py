@@ -1,3 +1,4 @@
+# pylint: disable=line-too-long
 """Utilities for MS365 testing."""
 
 import json
@@ -163,11 +164,12 @@ def check_entity_state(
 ):
     """Check entity state."""
     state = hass.states.get(entity_name)
-    # print(state)
+    print("*************************** State")
+    print(state)
     assert state.state == entity_state
     if entity_attributes:
-        # print("*************************** State Attributes")
-        # print(state.attributes)
+        print("--- State Attributes")
+        print(state.attributes)
         if "data" in state.attributes:
             assert state.attributes["data"] == entity_attributes
         else:

@@ -3,7 +3,7 @@
 
 import logging
 from copy import deepcopy
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from unittest.mock import patch
 
 import pytest
@@ -23,7 +23,9 @@ from .helpers_integration.mocks import MS365MOCKS
 from .helpers_integration.utils_integration import update_options, yaml_setup
 
 START_BASE = datetime(2020, 1, 1, 0, 0, 0, tzinfo=ZoneInfo(key="UTC"))
-END_BASE = datetime(2020, 1, 1, 23, 59, 59, tzinfo=ZoneInfo(key="UTC"))
+END_BASE = datetime(2020, 1, 2, 23, 59, 59, tzinfo=ZoneInfo(key="UTC"))
+START_ALL_DAY_BASE = date(2020, 1, 1)
+END_ALL_DAY_BASE = date(2020, 1, 2)
 
 
 async def test_get_data(
@@ -42,7 +44,9 @@ async def test_get_data(
     check_entity_state(
         hass, "calendar.test_calendar1", "on", _adjust_date(BASE_STATE_CAL1)
     )
-    check_entity_state(hass, "calendar.test_calendar2", "off", BASE_STATE_CAL2)
+    check_entity_state(
+        hass, "calendar.test_calendar2", "off", _adjust_date(BASE_STATE_CAL2, 1)
+    )
 
 
 async def test_one_not_tracked(
@@ -86,43 +90,22 @@ async def test_fetch_error(
 ) -> None:
     """Test error fetching data."""
     with patch(
-        f"custom_components.{DOMAIN}.integration.calendar_integration.MS365CalendarData.async_update",
+        f"custom_components.{DOMAIN}.integration.calendar_integration.MS365CalendarData.async_update_data",
         side_effect=HTTPError(),
     ):
         freezer.tick(timedelta(minutes=1))
         async_fire_time_changed(hass)
         await hass.async_block_till_done()
-    assert "Error getting calendar events for day" in caplog.text
+    assert "Error getting calendar events for data" in caplog.text
 
-    with patch(
-        f"custom_components.{DOMAIN}.integration.calendar_integration.MS365CalendarData.async_update",
-        side_effect=HTTPError(),
-    ):
-        freezer.tick(timedelta(minutes=1))
-        async_fire_time_changed(hass)
-        await hass.async_block_till_done()
-    assert "Repeat error - Error getting calendar events for day" in caplog.text
-
-
-async def test_fetch_error2(
-    hass: HomeAssistant,
-    requests_mock: Mocker,
-    base_token,
-    caplog: pytest.LogCaptureFixture,
-    base_config_entry: MS365MockConfigEntry,
-) -> None:
-    """Test error fetching data."""
-    MS365MOCKS.standard_mocks(requests_mock)
-
-    base_config_entry.add_to_hass(hass)
     with patch(
         f"custom_components.{DOMAIN}.integration.calendar_integration.MS365CalendarData.async_update_data",
         side_effect=HTTPError(),
     ):
-        await hass.config_entries.async_setup(base_config_entry.entry_id)
+        freezer.tick(timedelta(minutes=1))
+        async_fire_time_changed(hass)
         await hass.async_block_till_done()
-
-    assert "Error getting calendar events for data" in caplog.text
+    assert "Repeat error - Error getting calendar events for data" in caplog.text
 
 
 async def test_get_calendar_error(
@@ -179,7 +162,7 @@ async def test_filter_events(
     await hass.config_entries.async_setup(base_config_entry.entry_id)
     await hass.async_block_till_done()
 
-    check_entity_state(hass, "calendar.test_calendar1", "off", data_length=1)
+    check_entity_state(hass, "calendar.test_calendar1", "on", data_length=1)
 
 
 async def test_search_events(
@@ -273,15 +256,24 @@ async def test_not_started_event(
     )
 
 
-def _adjust_date(data):
+def _adjust_date(data, adddays=0):
     new_data = deepcopy(data)
-    start = utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
-    end = (utcnow() + timedelta(days=1)).replace(
+    start = (utcnow() + timedelta(days=adddays)).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
+    end = (utcnow() + timedelta(days=1 + adddays)).replace(
         hour=23, minute=59, second=59, microsecond=0
     )
+    start_all_day = start.date()
+    end_all_day = end.date()
     for item in new_data:
         if item["start"] == START_BASE:
             item["start"] = start
         if item["end"] == END_BASE:
             item["end"] = end
+        if item["start"] == START_ALL_DAY_BASE:
+            item["start"] = start_all_day
+        if item["end"] == END_ALL_DAY_BASE:
+            item["end"] = end_all_day
+
     return new_data

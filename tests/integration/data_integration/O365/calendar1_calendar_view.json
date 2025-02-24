@@ -60,11 +60,11 @@
                 "content": "Plain Text"
             },
             "start": {
-                "dateTime": "2022-10-24T00:00:00.0000000",
+                "dateTime": "2020-01-01T00:00:00.0000000",
                 "timeZone": "UTC"
             },
             "end": {
-                "dateTime": "2023-10-25T00:00:00.0000000",
+                "dateTime": "2020-01-02T00:00:00.0000000",
                 "timeZone": "UTC"
             },
             "recurrence": {

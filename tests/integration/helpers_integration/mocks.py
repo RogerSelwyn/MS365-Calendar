@@ -29,6 +29,8 @@ class MS365Mocks:
             URL.GROUP_CALENDARS,
             "calendar2_calendar_view",
             "calendar2/calendar/calendarView",
+            start=(utcnow() + timedelta(days=1)).strftime("%Y-%m-%d"),
+            end=(utcnow() + timedelta(days=2)).strftime("%Y-%m-%d"),
         )
         mock_call(requests_mock, URL.CALENDARS, "calendar3", "calendar3")
         mock_call(

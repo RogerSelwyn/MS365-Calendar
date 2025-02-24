@@ -297,35 +297,54 @@ class MS365CalendarEntity(CalendarEntity):
         # Get today's event for HA Core.
         _LOGGER.debug("Start update for %s", self.name)
 
-        try:
-            await self.data.async_update(self.hass, self._max_results)
-            event = deepcopy(self.data.event)
-        except (HTTPError, RetryError, ConnectionError) as err:
-            self._log_error("Error getting calendar events for day", err)
-            return
+        range_start = dt_util.utcnow() + timedelta(hours=self._start_offset)
+        range_end = dt_util.utcnow() + timedelta(hours=self._end_offset)
+        await self._async_get_events_and_store(range_start, range_end)
+
+        self._build_extra_attributes(range_start, range_end)
+
+        self._get_current_event()
+
+        _LOGGER.debug("End update for %s", self.name)
+
+    def _get_current_event(
+        self,
+    ):
+        self.data.get_current_event()
+        event = deepcopy(self.data.event)
 
         if event:
             event.summary, offset = extract_offset(event.summary, DEFAULT_OFFSET)
             start = MS365CalendarData.to_datetime(event.start)
             self._offset_reached = is_offset_reached(start, offset)
 
+        self._event = event
+
+    async def _async_get_events_and_store(self, range_start, range_end):
         # Get events for extra attributes.
         try:
-            results = await self.data.async_update_data(
+            start_of_day_utc = dt_util.as_utc(dt_util.start_of_local_day())
+            start = min(start_of_day_utc, range_start)
+            end = max(
+                start_of_day_utc + timedelta(days=1),
+                range_end,
+            )
+            await self.data.async_update_data(
                 self.hass,
-                dt_util.utcnow() + timedelta(hours=self._start_offset),
-                dt_util.utcnow() + timedelta(hours=self._end_offset),
+                start,
+                end,
                 self._max_results,
             )
         except (HTTPError, RetryError, ConnectionError) as err:
             self._log_error("Error getting calendar events for data", err)
             return
-        self._error = False
 
-        if results is not None:
-            self._data_attribute = [format_event_data(x) for x in results]
-        self._event = event
-        _LOGGER.debug("End update for %s", self.name)
+    def _build_extra_attributes(self, range_start, range_end):
+        if self.data.stored_results is not None:
+            self._data_attribute = []
+            for event in self.data.stored_results:
+                if not (event.end <= range_start or event.start >= range_end):
+                    self._data_attribute.append(format_event_data(event))
 
     async def async_create_event(self, **kwargs: Any) -> None:
         """Add a new event to calendar."""
@@ -558,6 +577,7 @@ class MS365CalendarData:
         self.event = None
         self._entity_id = entity_id
         self._error = False
+        self.stored_results = []
 
     async def async_calendar_data_init(self, hass):
         """Async init of calendar data."""
@@ -695,18 +715,15 @@ class MS365CalendarData:
 
     async def async_update_data(self, hass, start_date, end_date, limit=999):
         """Do the update for extra attributes."""
-        return await self.async_ms365_get_events(hass, start_date, end_date, limit)
 
-    async def async_update(self, hass, limit):
-        """Do the update."""
-        start_of_day_utc = dt_util.as_utc(dt_util.start_of_local_day())
-        results = await self.async_ms365_get_events(
-            hass,
-            start_of_day_utc,
-            start_of_day_utc + timedelta(days=1),
-            limit,
+        self.stored_results = await self.async_ms365_get_events(
+            hass, start_date, end_date, limit
         )
-        if not results:
+        return
+
+    def get_current_event(self):
+        """Get the current event."""
+        if not self.stored_results:
             _LOGGER.debug(
                 "No current event found for %s",
                 self._entity_id,
@@ -714,12 +731,12 @@ class MS365CalendarData:
             self.event = None
             return
 
-        vevent = self._get_root_event(results)
+        vevent = self._get_root_event(self.stored_results)
 
         if vevent is None:
             _LOGGER.debug(
                 "No matching event found in the %d results for %s",
-                len(results),
+                len(self.stored_results),
                 self._entity_id,
             )
             self.event = None
