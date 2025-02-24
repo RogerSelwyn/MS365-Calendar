@@ -343,7 +343,7 @@ class MS365CalendarEntity(CalendarEntity):
         if self.data.stored_results is not None:
             self._data_attribute = []
             for event in self.data.stored_results:
-                if not (event.end <= range_start or event.start >= range_end):
+                if event.end > range_start and event.start < range_end:
                     self._data_attribute.append(format_event_data(event))
 
     async def async_create_event(self, **kwargs: Any) -> None:
