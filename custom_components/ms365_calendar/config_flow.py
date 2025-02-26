@@ -269,7 +269,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
             == self._ms365account.account.main_resource
         ):
             self._user_input[CONF_SHARED_MAILBOX] = None
-            _LOGGER.info(
+            _LOGGER.warning(
                 ERROR_INVALID_SHARED_MAILBOX, self._ms365account.account.username
             )
 
