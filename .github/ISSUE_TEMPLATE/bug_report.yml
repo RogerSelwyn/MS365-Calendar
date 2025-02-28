@@ -70,7 +70,7 @@ body:
       description: >-
         Many integrations provide the ability to [download diagnostic data](https://www.home-assistant.io/docs/configuration/troubleshooting/#debug-logs-and-diagnostics).
 
-        **It would really help if you could download the diagnostics data for the device you are having issues with,
+        **It would really help if you could download the diagnostics data for the integration instance you are having issues with,
         and <ins>drag-and-drop that file into the textbox below.</ins>**
 
         It generally allows pinpointing defects and thus resolving issues faster.
