@@ -58,6 +58,7 @@ CONF_TRACK_NEW_CALENDAR = "track_new_calendar"
 
 CONST_GROUP = "group:"
 
+DATA_STORE = "store"
 DAYS = {
     "MO": "monday",
     "TU": "tuesday",
@@ -76,6 +77,7 @@ EVENT_MODIFY_CALENDAR_RECURRENCES = "modify_calendar_recurrences"
 EVENT_REMOVE_CALENDAR_EVENT = "remove_calendar_event"
 EVENT_REMOVE_CALENDAR_RECURRENCES = "remove_calendar_recurrences"
 EVENT_RESPOND_CALENDAR_EVENT = "respond_calendar_event"
+EVENT_SYNC = "event_sync"
 
 INDEXES = {
     "+1": "first",
@@ -84,6 +86,7 @@ INDEXES = {
     "+4": "fourth",
     "-1": "last",
 }
+ITEMS = "items"
 
 PERM_CALENDARS_READ = "Calendars.Read"
 PERM_CALENDARS_READBASIC = "Calendars.ReadBasic"

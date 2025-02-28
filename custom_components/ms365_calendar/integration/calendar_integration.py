@@ -6,7 +6,7 @@ import re
 from copy import deepcopy
 from datetime import datetime, timedelta
 from operator import attrgetter
-from typing import Any
+from typing import Any, cast
 
 from homeassistant.components.calendar import (
     EVENT_DESCRIPTION,
@@ -23,10 +23,13 @@ from homeassistant.components.calendar import (
 from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
-from homeassistant.helpers import entity_platform
+from homeassistant.helpers import entity_platform, CoordinatorEntity
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import dt as dt_util
 from requests.exceptions import HTTPError, RetryError
+
+from coordinator_integration import O365CalendarEventSyncManager, O365CalendarService, O365CalendarSyncCoordinator
+from store_integration import CalendarStore, ScopedCalendarStore
 
 from ..classes.config_entry import MS365ConfigEntry
 from ..const import (
@@ -56,6 +59,7 @@ from .const_integration import (
     CONST_GROUP,
     DEFAULT_OFFSET,
     DOMAIN,
+    DATA_STORE,
     EVENT_CREATE_CALENDAR_EVENT,
     EVENT_MODIFY_CALENDAR_EVENT,
     EVENT_MODIFY_CALENDAR_RECURRENCES,
@@ -151,9 +155,31 @@ async def _async_setup_add_entities(
 
             update_calendar = update_supported and can_edit
             device_id = entity["device_id"]
+            store = hass.data[DOMAIN][entity_id][DATA_STORE]
             try:
-                cal = MS365CalendarEntity(
+                api = O365CalendarService(
+                    hass,
                     account,
+                    cal_id,
+                    entity.get(CONF_SENSITIVITY_EXCLUDE)
+                )
+                await api.async_calendar_init()
+
+                sync = O365CalendarEventSyncManager(
+                    api,
+                    store=ScopedCalendarStore(
+                        store, f"{cal_id}_{entry.data[CONF_ENTITY_NAME]}_{device_id}"
+                    ),
+                )
+                coordinator = O365CalendarSyncCoordinator(
+                    hass,
+                    entry,
+                    sync,
+                    f"{entity.get(CONF_NAME)}",
+                )
+                cal = MS365CalendarEntity(
+                    api,
+                    coordinator,
                     cal_id,
                     entity,
                     entity_id,
@@ -161,7 +187,6 @@ async def _async_setup_add_entities(
                     entry,
                     update_calendar,
                 )
-                await cal.data.async_calendar_data_init(hass)
             except HTTPError:
                 _LOGGER.warning(
                     "No permission for calendar, please remove - Name: %s; Device: %s;",
@@ -200,14 +225,17 @@ async def _async_setup_register_services(update_supported):
         )
 
 
-class MS365CalendarEntity(CalendarEntity):
+class MS365CalendarEntity(
+    CoordinatorEntity[O365CalendarSyncCoordinator],
+    CalendarEntity):
     """MS365 Calendar Event Processing."""
 
     _unrecorded_attributes = frozenset((ATTR_DATA, ATTR_COLOR, ATTR_HEX_COLOR))
 
     def __init__(
         self,
-        account,
+        api,
+        coordinator,
         calendar_id,
         entity,
         entity_id,
@@ -216,8 +244,9 @@ class MS365CalendarEntity(CalendarEntity):
         update_supported,
     ):
         """Initialise the MS365 Calendar Event."""
-        self._entry = entry
-        self._account = account
+        super().__init__(coordinator)
+        self.api = api
+        self._entry = entry 
         self._start_offset = entity.get(CONF_HOURS_BACKWARD_TO_GET)
         self._end_offset = entity.get(CONF_HOURS_FORWARD_TO_GET)
         self._event = {}
@@ -225,7 +254,6 @@ class MS365CalendarEntity(CalendarEntity):
         self.entity_id = entity_id
         self._offset_reached = False
         self._data_attribute = []
-        self.data = self._init_data(calendar_id, entity)
         self._calendar_id = calendar_id
         self._device_id = device_id
         self._update_supported = update_supported
@@ -237,19 +265,8 @@ class MS365CalendarEntity(CalendarEntity):
             )
         self._max_results = entity.get(CONF_MAX_RESULTS)
         self._error = None
-
-    def _init_data(self, calendar_id, entity):
-        search = entity.get(CONF_SEARCH)
-        exclude = entity.get(CONF_EXCLUDE)
-        sensitivity_exclude = entity.get(CONF_SENSITIVITY_EXCLUDE)
-        return MS365CalendarData(
-            self._account,
-            self.entity_id,
-            calendar_id,
-            search,
-            exclude,
-            sensitivity_exclude,
-        )
+        self.search = entity.get(CONF_SEARCH)
+        self.exclude = entity.get(CONF_EXCLUDE)
 
     @property
     def extra_state_attributes(self):
@@ -257,13 +274,13 @@ class MS365CalendarEntity(CalendarEntity):
         attributes = {
             ATTR_DATA: self._data_attribute,
         }
-        if hasattr(self.data.calendar, ATTR_COLOR):
-            attributes[ATTR_COLOR] = self.data.calendar.color
-        if hasattr(self.data.calendar, ATTR_HEX_COLOR) and self.data.calendar.hex_color:
-            attributes[ATTR_HEX_COLOR] = self.data.calendar.hex_color
+        if hasattr(self.api.calendar, ATTR_COLOR):
+            attributes[ATTR_COLOR] = self.api.calendar.color
+        if hasattr(self.api.calendar, ATTR_HEX_COLOR) and self.api.calendar.hex_color:
+            attributes[ATTR_HEX_COLOR] = self.api.calendar.hex_color
         if self._event:
             attributes[ATTR_ALL_DAY] = (
-                self._event.all_day if self.data.event is not None else False
+                self._event.all_day if self.api.event is not None else False
             )
             attributes[ATTR_OFFSET] = self._offset_reached
         return attributes
@@ -282,14 +299,82 @@ class MS365CalendarEntity(CalendarEntity):
     def unique_id(self):
         """Entity unique id."""
         return f"{self._calendar_id}_{self._entry.data[CONF_ENTITY_NAME]}_{self._device_id}"
+    
+    async def async_added_to_hass(self) -> None:
+        """When entity is added to hass."""
+        await super().async_added_to_hass()
+
+        # We do not ask for an update with async_add_entities()
+        # because it will update disabled entities. This is started as a
+        # task to let if sync in the background without blocking startup
+        self.coordinator.config_entry.async_create_background_task(
+            self.hass,
+            self.coordinator.async_request_refresh(),
+            "m365.calendar-refresh",
+        )
 
     async def async_get_events(self, hass, start_date, end_date):
         """Get events."""
         _LOGGER.debug("Start get_events for %s", self.name)
 
-        events = await self.data.async_get_events(hass, start_date, end_date)
+        results = await self.coordinator.async_get_events(start_date, end_date)
+        results = self._filter_events(results)
+        results = self._sort_events(results)
+        events = self._create_calendar_event_entities(events)
 
         _LOGGER.debug("End get_events for %s", self.name)
+        return events
+    
+    def _create_calendar_event_entities(self, results):
+        event_list = []
+        for vevent in results:
+            try:
+                event_list.append(self._create_calendar_event_entity(vevent))
+            except HomeAssistantError as err:
+                _LOGGER.warning(
+                    "Invalid event found - Error: %s, Event: %s", err, vevent
+                )
+
+        return event_list
+    
+    def _create_calendar_event_entity(self, event):
+        event = CalendarEvent(
+            get_hass_date(vevent.start, vevent.is_all_day),
+            get_hass_date(get_end_date(vevent), vevent.is_all_day),
+            vevent.subject,
+            clean_html(vevent.body),
+            vevent.location["displayName"],
+            uid=vevent.object_id,
+        )
+        if vevent.series_master_id:
+            event.recurrence_id = vevent.series_master_id
+    
+    def _filter_events(self, events):
+        lst_events = list(events)
+        if not events or not self._exclude:
+            return lst_events
+
+        rtn_events = []
+        for event in lst_events:
+            include = True
+            for exclude in self._exclude:
+                if re.search(exclude, event.subject):
+                    include = False
+            if include:
+                rtn_events.append(event)
+
+        return rtn_events
+
+    def _sort_events(self, events):
+        for event in events:
+            event.start_sort = event.start
+            if event.is_all_day:
+                event.start_sort = dt_util.as_utc(
+                    dt_util.start_of_local_day(event.start)
+                )
+
+        events.sort(key=attrgetter("start_sort"))
+
         return events
 
     async def async_update(self):
@@ -299,8 +384,6 @@ class MS365CalendarEntity(CalendarEntity):
 
         range_start = dt_util.utcnow() + timedelta(hours=self._start_offset)
         range_end = dt_util.utcnow() + timedelta(hours=self._end_offset)
-        await self._async_get_events_and_store(range_start, range_end)
-
         self._build_extra_attributes(range_start, range_end)
 
         self._get_current_event()
@@ -310,8 +393,25 @@ class MS365CalendarEntity(CalendarEntity):
     def _get_current_event(
         self,
     ):
-        self.data.get_current_event()
-        event = deepcopy(self.data.event)
+        vevent = self.coordinator.get_current_event()
+        if vevent is None:
+            _LOGGER.debug(
+                "No matching event found in the %d results for %s",
+                len(self.stored_results),
+                self._entity_id,
+            )
+            event = None
+            return
+        try:
+            event = self._create_calendar_event_entity(vevent)
+            self._error = False
+        except HomeAssistantError as err:
+            if not self._error:
+                _LOGGER.warning(
+                    "Invalid event found - Error: %s, Event: %s", err, vevent
+                )
+                self._error = True
+        event = deepcopy(event)
 
         if event:
             event.summary, offset = extract_offset(event.summary, DEFAULT_OFFSET)
@@ -340,9 +440,9 @@ class MS365CalendarEntity(CalendarEntity):
             return
 
     def _build_extra_attributes(self, range_start, range_end):
-        if self.data.stored_results is not None:
+        if self.coordinator.data is not None:
             self._data_attribute = []
-            for event in self.data.stored_results:
+            for event in self.coordinator.data:
                 if event.end > range_start and event.start < range_end:
                     self._data_attribute.append(format_event_data(event))
 
@@ -354,14 +454,13 @@ class MS365CalendarEntity(CalendarEntity):
         subject = kwargs[EVENT_SUMMARY]
         body = kwargs.get(EVENT_DESCRIPTION)
         rrule = kwargs.get(EVENT_RRULE)
-        await self.async_create_calendar_event(
-            subject,
-            start,
-            end,
-            body=body,
-            is_all_day=is_all_day,
-            rrule=rrule,
-        )
+        try:
+            await cast(
+                O365CalendarSyncCoordinator, self.coordinator
+            ).sync.store_service.async_add_event(subject, start, end, body=body, is_all_day=is_all_day, rrule=rrule)
+        except HTTPError as err:
+            raise HomeAssistantError(f"Error while creating event: {err!s}") from err
+        await self.coordinator.async_refresh()
 
     async def async_update_event(
         self,
@@ -425,7 +524,7 @@ class MS365CalendarEntity(CalendarEntity):
 
         self._validate_permissions()
 
-        if self.data.group_calendar:
+        if self.api.group_calendar:
             _group_calendar_log(self.entity_id)
 
         if recurrence_range:
@@ -452,9 +551,7 @@ class MS365CalendarEntity(CalendarEntity):
     async def _async_update_calendar_event(
         self, event_id, ha_event, subject, start, end, **kwargs
     ):
-        event = await self.data.async_get_event(self.hass, event_id)
-        event = add_call_data_to_event(event, subject, start, end, **kwargs)
-        await self.hass.async_add_executor_job(event.save)
+        await self.api.async_patch_event(event_id, subject, start, end, **kwargs)
         self._raise_event(ha_event, event_id)
         self.async_schedule_update_ha_state(True)
 
@@ -467,7 +564,7 @@ class MS365CalendarEntity(CalendarEntity):
         """Remove the event."""
         self._validate_permissions()
 
-        if self.data.group_calendar:
+        if self.api.group_calendar:
             _group_calendar_log(self.entity_id)
 
         if recurrence_range:
@@ -480,10 +577,12 @@ class MS365CalendarEntity(CalendarEntity):
             )
 
     async def _async_delete_calendar_event(self, event_id, ha_event):
-        event = await self.data.async_get_event(self.hass, event_id)
-        await self.hass.async_add_executor_job(
-            event.delete,
+        await cast(
+            O365CalendarSyncCoordinator, self.coordinator
+        ).sync.store_service.async_delete_event(
+            event_id
         )
+        await self.coordinator.async_refresh()
         self._raise_event(ha_event, event_id)
         self.async_schedule_update_ha_state(True)
 
@@ -493,7 +592,7 @@ class MS365CalendarEntity(CalendarEntity):
         """Respond to calendar event."""
         self._validate_permissions()
 
-        if self.data.group_calendar:
+        if self.api.group_calendar:
             _group_calendar_log(self.entity_id)
 
         await self._async_send_response(event_id, response, send_response, message)
@@ -551,266 +650,6 @@ class MS365CalendarEntity(CalendarEntity):
             {ATTR_EVENT_ID: event_id, EVENT_HA_EVENT: True},
         )
         _LOGGER.debug("%s - %s", event_type, event_id)
-
-
-class MS365CalendarData:
-    """MS365 Calendar Data."""
-
-    def __init__(
-        self,
-        account,
-        entity_id,
-        calendar_id,
-        search=None,
-        exclude=None,
-        sensitivity_exclude=None,
-    ):
-        """Initialise the MS365 Calendar Data."""
-        self._account = account
-        self.group_calendar = calendar_id.startswith(CONST_GROUP)
-        self.calendar_id = calendar_id
-        self._schedule = None
-        self.calendar = None
-        self._search = search
-        self._exclude = exclude
-        self._sensitivity_exclude = sensitivity_exclude
-        self.event = None
-        self._entity_id = entity_id
-        self._error = False
-        self.stored_results = []
-
-    async def async_calendar_data_init(self, hass):
-        """Async init of calendar data."""
-        if self.group_calendar:
-            self._schedule = None
-            self.calendar = await hass.async_add_executor_job(
-                ft.partial(self._account.schedule, resource=self.calendar_id)
-            )
-        else:
-            self._schedule = await hass.async_add_executor_job(self._account.schedule)
-            self.calendar = None
-
-    async def _async_get_calendar(self, hass):
-        try:
-            self.calendar = await hass.async_add_executor_job(
-                ft.partial(self._schedule.get_calendar, calendar_id=self.calendar_id)
-            )
-            return True
-        except (HTTPError, RetryError, ConnectionError) as err:
-            _LOGGER.warning("Error getting calendar - %s", err)
-            return False
-
-    async def async_ms365_get_events(self, hass, start_date, end_date, limit=999):
-        """Get the events."""
-        if not self.calendar and not await self._async_get_calendar(hass):
-            return []
-
-        events = await self._async_calendar_schedule_get_events(
-            hass, self.calendar, start_date, end_date, limit
-        )
-
-        events = self._filter_events(events)
-        events = self._sort_events(events)
-
-        return events
-
-    def _filter_events(self, events):
-        lst_events = list(events)
-        if not events or not self._exclude:
-            return lst_events
-
-        rtn_events = []
-        for event in lst_events:
-            include = True
-            for exclude in self._exclude:
-                if re.search(exclude, event.subject):
-                    include = False
-            if include:
-                rtn_events.append(event)
-
-        return rtn_events
-
-    def _sort_events(self, events):
-        for event in events:
-            event.start_sort = event.start
-            if event.is_all_day:
-                event.start_sort = dt_util.as_utc(
-                    dt_util.start_of_local_day(event.start)
-                )
-
-        events.sort(key=attrgetter("start_sort"))
-
-        return events
-
-    async def _async_calendar_schedule_get_events(
-        self, hass, calendar_schedule, start_date, end_date, limit
-    ):
-        """Get the events for the calendar."""
-        query = await hass.async_add_executor_job(calendar_schedule.new_query)
-        query = query.select(
-            "subject",
-            "body",
-            "start",
-            "end",
-            "is_all_day",
-            "location",
-            "categories",
-            "sensitivity",
-            "show_as",
-            "attendees",
-            "series_master_id",
-            "is_reminder_on",
-            "reminderMinutesBeforeStart",
-        )
-        query = query.on_attribute("start").greater_equal(start_date)
-        query.chain("and").on_attribute("end").less_equal(end_date)
-        if self._search is not None:
-            query.chain("and").on_attribute("subject").contains(self._search)
-        # As at March 2023 not contains is not supported by Graph API
-        # if self._exclude is not None:
-        #     query.chain("and").on_attribute("subject").negate().contains(self._exclude)
-        if self._sensitivity_exclude is not None:
-            for item in self._sensitivity_exclude:
-                query.chain("and").on_attribute("sensitivity").unequal(item.value)
-
-        return await hass.async_add_executor_job(
-            ft.partial(
-                calendar_schedule.get_events,
-                limit=limit,
-                query=query,
-                include_recurring=True,
-            )
-        )
-
-    async def async_get_events(self, hass, start_date, end_date):
-        """Get the via async."""
-        results = await self.async_ms365_get_events(hass, start_date, end_date)
-        if not results:
-            return []
-
-        event_list = []
-        for vevent in results:
-            try:
-                event = CalendarEvent(
-                    get_hass_date(vevent.start, vevent.is_all_day),
-                    get_hass_date(get_end_date(vevent), vevent.is_all_day),
-                    vevent.subject,
-                    clean_html(vevent.body),
-                    vevent.location["displayName"],
-                    uid=vevent.object_id,
-                )
-                if vevent.series_master_id:
-                    event.recurrence_id = vevent.series_master_id
-                event_list.append(event)
-            except HomeAssistantError as err:
-                _LOGGER.warning(
-                    "Invalid event found - Error: %s, Event: %s", err, vevent
-                )
-
-        return event_list
-
-    async def async_get_event(self, hass, event_id):
-        """Get a single event by event_id."""
-        return await hass.async_add_executor_job(self.calendar.get_event, event_id)
-
-    async def async_update_data(self, hass, start_date, end_date, limit=999):
-        """Do the update for extra attributes."""
-
-        self.stored_results = await self.async_ms365_get_events(
-            hass, start_date, end_date, limit
-        )
-        return
-
-    def get_current_event(self):
-        """Get the current event."""
-        if not self.stored_results:
-            _LOGGER.debug(
-                "No current event found for %s",
-                self._entity_id,
-            )
-            self.event = None
-            return
-
-        vevent = self._get_root_event(self.stored_results)
-
-        if vevent is None:
-            _LOGGER.debug(
-                "No matching event found in the %d results for %s",
-                len(self.stored_results),
-                self._entity_id,
-            )
-            self.event = None
-            return
-
-        try:
-            self.event = CalendarEvent(
-                get_hass_date(vevent.start, vevent.is_all_day),
-                get_hass_date(get_end_date(vevent), vevent.is_all_day),
-                vevent.subject,
-                clean_html(vevent.body),
-                vevent.location["displayName"],
-            )
-            self._error = False
-        except HomeAssistantError as err:
-            if not self._error:
-                _LOGGER.warning(
-                    "Invalid event found - Error: %s, Event: %s", err, vevent
-                )
-                self._error = True
-
-    def _get_root_event(self, results):
-        started_event = None
-        not_started_event = None
-        all_day_event = None
-        for event in results:
-            if event.is_all_day:
-                if not all_day_event and not self.is_finished(event):
-                    all_day_event = event
-                continue
-            if self.is_started(event) and not self.is_finished(event):
-                if not started_event:
-                    started_event = event
-                continue
-            if (
-                not self.is_finished(event)
-                and not event.is_all_day
-                and not not_started_event
-            ):
-                not_started_event = event
-
-        vevent = None
-        if started_event:
-            vevent = started_event
-        elif all_day_event:
-            vevent = all_day_event
-        elif not_started_event:
-            vevent = not_started_event
-
-        return vevent
-
-    @staticmethod
-    def is_started(vevent):
-        """Is it over."""
-        return dt_util.utcnow() >= MS365CalendarData.to_datetime(get_start_date(vevent))
-
-    @staticmethod
-    def is_finished(vevent):
-        """Is it over."""
-        return dt_util.utcnow() >= MS365CalendarData.to_datetime(get_end_date(vevent))
-
-    @staticmethod
-    def to_datetime(obj):
-        """To datetime."""
-        if not isinstance(obj, datetime):
-            date_obj = dt_util.start_of_local_day(
-                dt_util.dt.datetime.combine(obj, dt_util.dt.time.min)
-            )
-        else:
-            date_obj = obj
-
-        return dt_util.as_utc(date_obj)
-
-
 async def async_scan_for_calendars(hass, entry: MS365ConfigEntry):
     """Scan for new calendars."""
 
