@@ -156,7 +156,7 @@ async def _async_check_token(hass, account, entity_name):
             _LOGGER.warning(TOKEN_ERROR, entity_name, err.description)
         return False
     except RuntimeError as err:
-        if "Refresh token operation failed: invalid_grant" in err.args:
+        if "Refresh token operation failed: invalid_grant" in str(err):
             _LOGGER.warning(TOKEN_EXPIRED, entity_name)
             return False
         raise err
