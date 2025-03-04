@@ -1,16 +1,12 @@
 import functools as ft
 import logging
-from typing import Any, TypeVar
-from datetime import datetime, timedelta
+from typing import Any, cast
+from datetime import datetime, time, timedelta, timezone
 import asyncio
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_EMAIL, CONF_ENABLED, CONF_NAME, CONF_UNIQUE_ID
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers import entity_registry
-from homeassistant.helpers.entity import async_generate_entity_id
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 from requests.exceptions import HTTPError
@@ -18,9 +14,7 @@ from requests.exceptions import HTTPError, RetryError
 from collections.abc import Generator, Iterable, Iterator
 
 from ical.iter import (
-    LazySortableItem,
     MergedIterable,
-    RecurIterable,
     SortableItem,
     SortableItemTimeline,
     SortableItemValue,
@@ -28,10 +22,12 @@ from ical.iter import (
 )
 import itertools
 from ical.timespan import Timespan
-from custom_components.o365.store import CalendarStore, InMemoryCalendarStore, ScopedCalendarStore
-from O365.calendar import Calendar, Event  # pylint: disable=no-name-in-module)
+from .store_integration import CalendarStore, InMemoryCalendarStore, ScopedCalendarStore
+from O365.calendar import Event  # pylint: disable=no-name-in-module)
 from .utils_integration import (
     add_call_data_to_event,
+    get_start_date,
+    get_end_date
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -42,15 +38,15 @@ MAX_UPCOMING_EVENTS = 20
 SYNC_EVENT_MIN_TIME = timedelta(days=-90)
 SYNC_EVENT_MAX_TIME = timedelta(days=180)
 
-from ..const import (
+from .const_integration import (
     CONST_GROUP,
     EVENT_SYNC,
     ITEMS,
 )
 
-class O365CalendarService:
-    """Calendar service interface to O365.
-    The `O365CalendarService` is the primary API service for this library. It supports
+class M365CalendarService:
+    """Calendar service interface to M365.
+    The `M365CalendarService` is the primary API service for this library. It supports
     operations like listing events.
     """
 
@@ -59,25 +55,28 @@ class O365CalendarService:
         hass: HomeAssistant,
         account,
         calendar_id,
-        sensitivity_exclude
+        sensitivity_exclude,
+        search,
     ) -> None:
-        """Init the O365 Calendar service."""
+        """Init the M365 Calendar service."""
         self.hass = hass
         self.calendar_id = calendar_id
         self._account = account
         self.group_calendar = calendar_id.startswith(CONST_GROUP)
         self._sensitivity_exclude = sensitivity_exclude
+        self._limit = 999
+        self._search = search
 
-    async def async_calendar_int(self, hass):
+    async def async_calendar_init(self):
         if self.group_calendar:
             self._schedule = None
-            self.calendar = await hass.async_add_executor_job(
+            self.calendar = await self.hass.async_add_executor_job(
                 ft.partial(self._account.schedule, resource=self.calendar_id)
             )
         else:
-            self._schedule = await hass.async_add_executor_job(self._account.schedule)
+            self._schedule = await self.hass.async_add_executor_job(self._account.schedule)
             try:
-                self.calendar = await hass.async_add_executor_job(
+                self.calendar = await self.hass.async_add_executor_job(
                     ft.partial(self._schedule.get_calendar, calendar_id=self.calendar_id)
                 )
                 return True
@@ -86,11 +85,11 @@ class O365CalendarService:
                 return False
 
     async def async_get_event(self, event_id: str) -> Event:
-        return await self.hass.async_add_executor_job(self._calendar.get_event, event_id)
+        return await self.hass.async_add_executor_job(self.calendar.get_event, event_id)
 
     async def async_list_events(self, start_date, end_date):
         """Get the events for the calendar."""
-        query = await self.hass.async_add_executor_job(self._calendar.new_query)
+        query = await self.hass.async_add_executor_job(self.calendar.new_query)
         query = query.select(
             "subject",
             "body",
@@ -119,7 +118,7 @@ class O365CalendarService:
         try:
             return await self.hass.async_add_executor_job(
                 ft.partial(
-                    self._calendar.get_events,
+                    self.calendar.get_events,
                     limit=self._limit,
                     query=query,
                     include_recurring=True,
@@ -130,7 +129,7 @@ class O365CalendarService:
             return None
 
     async def async_create_event(self, subject, start, end, **kwargs) -> Event:        
-        event = self._calendar.new_event()
+        event = self.calendar.new_event()
         event = add_call_data_to_event(event, subject, start, end, **kwargs)
         await self.hass.async_add_executor_job(event.save)
         return event
@@ -146,7 +145,7 @@ class O365CalendarService:
         event = await self.async_get_event(event_id)
         await self.hass.async_add_executor_job(event.delete)
 
-class O365Timeline(SortableItemTimeline[Event]):
+class M365Timeline(SortableItemTimeline[Event]):
     """A set of events on a calendar.
     A timeline is created by the local sync API and not instantiated directly.
     """
@@ -154,32 +153,19 @@ class O365Timeline(SortableItemTimeline[Event]):
     def __init__(self, iterable: Iterable[SortableItem[Timespan, Event]]) -> None:
         super().__init__(iterable)
 
-def timespan_of(event: Event, tzinfo: datetime.tzinfo | None = None) -> Timespan:
+def timespan_of(event: Event, tzinfo: datetime.tzinfo) -> Timespan:
         """Return a timespan representing the event start and end."""
         if tzinfo is None:
             tzinfo = datetime.timezone.utc
         return Timespan.of(
-            event.start.normalize(tzinfo),
-            event.end.normalize(tzinfo),
+            normalize(event.start, tzinfo),
+            normalize(event.end, tzinfo),
         )
 
-def _truncate_timeline(timeline: O365Timeline, max_events: int) -> O365Timeline:
-    """Truncate the timeline to a maximum number of events.
-    This is used to avoid repeated expansion of recurring events during
-    state machine updates.
-    """
-    upcoming = timeline.active_after(dt_util.now())
-    truncated = list(itertools.islice(upcoming, max_events))
-    return O365Timeline(
-        [
-            SortableItemValue(timespan_of(event, dt_util.get_default_time_zone()), event)
-            for event in truncated
-        ]
-    )
 
 def calendar_timeline(
-    events: list[Event], tzinfo: datetime.tzinfo = datetime.timezone.utc
-) -> O365Timeline:
+    events: list[Event], tzinfo: datetime.tzinfo
+) -> M365Timeline:
     """Create a timeline for events on a calendar, including recurrence."""
     normal_events: list[Event] = []
     for event in events:
@@ -188,14 +174,24 @@ def calendar_timeline(
     def sortable_items() -> Generator[SortableItem[Timespan, Event], None, None]:
         nonlocal normal_events
         for event in normal_events:
-            yield SortableItemValue(event.timespan_of(tzinfo), event)
+            _LOGGER
+            yield SortableItemValue(timespan_of(event, tzinfo), event)
 
     iters: list[Iterable[SortableItem[Timespan, Event]]] = []
     iters.append(SortedItemIterable(sortable_items, tzinfo))
 
-    return O365Timeline(MergedIterable(iters))
+    return M365Timeline(MergedIterable(iters))
 
-class O365CalendarEventStoreService:
+def normalize(date, tzinfo: datetime.tzinfo) -> datetime:
+        """Convert date or datetime to a value that can be used for comparison."""
+        value = date
+        if not isinstance(value, datetime):
+            value = datetime.combine(value, time.min)
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=(tzinfo if tzinfo else datetime.timezone.utc))
+        return value
+
+class M365CalendarEventStoreService:
     """Performs event lookups from the local store.
     A CalendarEventStoreService should not be instantiated directly, and
     instead created from a `gcal_sync.sync.CalendarEventSyncManager`.
@@ -205,7 +201,7 @@ class O365CalendarEventStoreService:
         self,
         store: CalendarStore,
         calendar_id: str,
-        api: O365CalendarService,
+        api: M365CalendarService,
     ) -> None:
         """Initialize CalendarEventStoreService."""
         self._store = store
@@ -217,7 +213,7 @@ class O365CalendarEventStoreService:
     ) :
         """Return the set of events matching the criteria."""
 
-        timeline = await self.async_get_timeline()
+        timeline = await self.async_get_timeline(dt_util.get_default_time_zone())
 
         events=list(
             timeline.overlapping(
@@ -228,17 +224,18 @@ class O365CalendarEventStoreService:
         return events
 
     async def async_get_timeline(
-        self, tzinfo: datetime.tzinfo | None = None
-    ) -> O365Timeline:
+        self, tzinfo: datetime.tzinfo
+    ) -> M365Timeline:
         """Get the timeline of events."""
         if tzinfo is None:
             tzinfo = datetime.timezone.utc
         events_data = await self._lookup_events_data()
         _LOGGER.debug("Created timeline of %d events", len(events_data))
 
-        def _build_timeline() -> O365Timeline:
+        def _build_timeline() -> M365Timeline:
             """Build the timeline of events, which can take some time to parse."""
-            event_objects = [Event(**data) for data in events_data.values()]
+            _LOGGER.debug(f"Building timeline of with events {events_data}")
+            event_objects = [cast(Event, data) for data in events_data.values()]
             return calendar_timeline(event_objects, tzinfo)
 
         loop = asyncio.get_event_loop()
@@ -268,12 +265,12 @@ class O365CalendarEventStoreService:
         store_data.setdefault(ITEMS, {})
         return store_data.get(ITEMS, {})  # type: ignore[no-any-return]
 
-class O365CalendarEventSyncManager:
+class M365CalendarEventSyncManager:
     """Manages synchronizing events from API to local store."""
 
     def __init__(
         self,
-        api: O365CalendarService,
+        api: M365CalendarService,
         calendar_id: str | None = None,
         store: CalendarStore | None = None,
     ) -> None:
@@ -289,12 +286,12 @@ class O365CalendarEventSyncManager:
         )
 
     @property
-    def store_service(self) -> O365CalendarEventStoreService:
+    def store_service(self) -> M365CalendarEventStoreService:
         """Return the local API for fetching events."""
-        return O365CalendarEventStoreService(self._store, self._calendar_id, self._api)
+        return M365CalendarEventStoreService(self._store, self._calendar_id, self._api)
 
     @property
-    def api(self) -> O365CalendarService:
+    def api(self) -> M365CalendarService:
         """Return the cloud API."""
         return self._api
 
@@ -308,10 +305,10 @@ class O365CalendarEventSyncManager:
 
     def _items_func(self, events) -> dict[str, Any]:
         items = {}
-        for item in events.items:
-            if not item.id:
+        for item in events:
+            if not item.object_id:
                 continue
-            items[item.id] = item
+            items[item.object_id] = item
         return items
 
     async def run(self) -> None:
@@ -322,7 +319,7 @@ class O365CalendarEventSyncManager:
         store_data[ITEMS].update(self._items_func(new_data))
         await self._store.async_save(store_data)
 
-class O365CalendarSyncCoordinator(DataUpdateCoordinator):
+class M365CalendarSyncCoordinator(DataUpdateCoordinator):
     """Coordinator for calendar RPC calls that use an efficient sync."""
 
     config_entry: ConfigEntry
@@ -331,7 +328,7 @@ class O365CalendarSyncCoordinator(DataUpdateCoordinator):
         self,
         hass: HomeAssistant,
         config_entry: ConfigEntry,
-        sync: O365CalendarEventSyncManager,
+        sync: M365CalendarEventSyncManager,
         name: str,
     ) -> None:
         """Create the CalendarSyncUpdateCoordinator."""
@@ -343,9 +340,9 @@ class O365CalendarSyncCoordinator(DataUpdateCoordinator):
             update_interval=MIN_TIME_BETWEEN_UPDATES,
         )
         self.sync = sync
-        self._upcoming_timeline: O365Timeline | None = None
+        self._upcoming_timeline: M365Timeline | None = None
 
-    async def _async_update_data(self) -> O365Timeline:
+    async def _async_update_data(self) -> M365Timeline:
         """Fetch data from API endpoint."""
         try:
             await self.sync.run()
@@ -355,7 +352,7 @@ class O365CalendarSyncCoordinator(DataUpdateCoordinator):
         timeline = await self.sync.store_service.async_get_timeline(
             dt_util.get_default_time_zone()
         )
-        self._upcoming_timeline = _truncate_timeline(timeline, MAX_UPCOMING_EVENTS)
+        self._upcoming_timeline = timeline
         return timeline
 
     async def async_get_events(
@@ -369,7 +366,7 @@ class O365CalendarSyncCoordinator(DataUpdateCoordinator):
 
         """If the request is for outside of the sync'ed data, manually request it now, will not cache it though"""
         if start_date < dt_util.now() + SYNC_EVENT_MIN_TIME or end_date > dt_util.now() + SYNC_EVENT_MAX_TIME:
-            events = self.sync.store_service.async_list_events(start_date, end_date)
+            events = await self.sync.store_service.async_list_events(start_date, end_date)
             return events
         return self.data.overlapping(
             start_date,
@@ -377,10 +374,23 @@ class O365CalendarSyncCoordinator(DataUpdateCoordinator):
         )
     
     def get_current_event(self):
+        if not self.data:
+            _LOGGER.debug(
+                "No current event found for %s",
+                self.sync._calendar_id,
+            )
+            self.event = None
+            return
+        today = datetime.now(timezone.utc)
+        events = self.data.overlapping(
+            today,
+            today + timedelta(days=1),
+        )
+        
         started_event = None
         not_started_event = None
         all_day_event = None
-        for event in self.data:
+        for event in events:
             if event.is_all_day:
                 if not all_day_event and not self.is_finished(event):
                     all_day_event = event
@@ -405,6 +415,28 @@ class O365CalendarSyncCoordinator(DataUpdateCoordinator):
             vevent = not_started_event
 
         return vevent
+    
+    @staticmethod
+    def is_started(vevent):
+        """Is it over."""
+        return dt_util.utcnow() >= M365CalendarSyncCoordinator.to_datetime(get_start_date(vevent))
+
+    @staticmethod
+    def is_finished(vevent):
+        """Is it over."""
+        return dt_util.utcnow() >= M365CalendarSyncCoordinator.to_datetime(get_end_date(vevent))
+    
+    @staticmethod
+    def to_datetime(obj):
+        """To datetime."""
+        if not isinstance(obj, datetime):
+            date_obj = dt_util.start_of_local_day(
+                dt_util.dt.datetime.combine(obj, dt_util.dt.time.min)
+            )
+        else:
+            date_obj = obj
+
+        return dt_util.as_utc(date_obj)
 
     @property
     def upcoming(self) -> Iterable[Event] | None:

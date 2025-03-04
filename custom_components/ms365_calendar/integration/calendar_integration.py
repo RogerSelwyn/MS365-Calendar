@@ -23,13 +23,14 @@ from homeassistant.components.calendar import (
 from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
-from homeassistant.helpers import entity_platform, CoordinatorEntity
+from homeassistant.helpers import entity_platform
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import dt as dt_util
 from requests.exceptions import HTTPError, RetryError
 
-from coordinator_integration import O365CalendarEventSyncManager, O365CalendarService, O365CalendarSyncCoordinator
-from store_integration import CalendarStore, ScopedCalendarStore
+from .coordinator_integration import M365CalendarEventSyncManager, M365CalendarService, M365CalendarSyncCoordinator
+from .store_integration import LocalCalendarStore, ScopedCalendarStore, InMemoryCalendarStore
 
 from ..classes.config_entry import MS365ConfigEntry
 from ..const import (
@@ -155,23 +156,26 @@ async def _async_setup_add_entities(
 
             update_calendar = update_supported and can_edit
             device_id = entity["device_id"]
-            store = hass.data[DOMAIN][entity_id][DATA_STORE]
+            #store_key = f"{entity.get(CONF_NAME)}-{entry.entry_id}"
+            store = InMemoryCalendarStore()
             try:
-                api = O365CalendarService(
+                api = M365CalendarService(
                     hass,
                     account,
                     cal_id,
-                    entity.get(CONF_SENSITIVITY_EXCLUDE)
+                    entity.get(CONF_SENSITIVITY_EXCLUDE),
+                    entity.get(CONF_SEARCH)
                 )
                 await api.async_calendar_init()
-
-                sync = O365CalendarEventSyncManager(
+                unique_id = f"{entity.get(CONF_NAME)}"
+                sync = M365CalendarEventSyncManager(
                     api,
+                    cal_id,
                     store=ScopedCalendarStore(
-                        store, f"{cal_id}_{entry.data[CONF_ENTITY_NAME]}_{device_id}"
+                        store, unique_id
                     ),
                 )
-                coordinator = O365CalendarSyncCoordinator(
+                coordinator = M365CalendarSyncCoordinator(
                     hass,
                     entry,
                     sync,
@@ -226,7 +230,7 @@ async def _async_setup_register_services(update_supported):
 
 
 class MS365CalendarEntity(
-    CoordinatorEntity[O365CalendarSyncCoordinator],
+    CoordinatorEntity[M365CalendarSyncCoordinator],
     CalendarEntity):
     """MS365 Calendar Event Processing."""
 
@@ -249,7 +253,7 @@ class MS365CalendarEntity(
         self._entry = entry 
         self._start_offset = entity.get(CONF_HOURS_BACKWARD_TO_GET)
         self._end_offset = entity.get(CONF_HOURS_FORWARD_TO_GET)
-        self._event = {}
+        self._event = None
         self._name = f"{entity.get(CONF_NAME)}"
         self.entity_id = entity_id
         self._offset_reached = False
@@ -265,7 +269,6 @@ class MS365CalendarEntity(
             )
         self._max_results = entity.get(CONF_MAX_RESULTS)
         self._error = None
-        self.search = entity.get(CONF_SEARCH)
         self.exclude = entity.get(CONF_EXCLUDE)
 
     @property
@@ -280,7 +283,7 @@ class MS365CalendarEntity(
             attributes[ATTR_HEX_COLOR] = self.api.calendar.hex_color
         if self._event:
             attributes[ATTR_ALL_DAY] = (
-                self._event.all_day if self.api.event is not None else False
+                self._event.all_day if self._event is not None else False
             )
             attributes[ATTR_OFFSET] = self._offset_reached
         return attributes
@@ -320,7 +323,7 @@ class MS365CalendarEntity(
         results = await self.coordinator.async_get_events(start_date, end_date)
         results = self._filter_events(results)
         results = self._sort_events(results)
-        events = self._create_calendar_event_entities(events)
+        events = self._create_calendar_event_entities(results)
 
         _LOGGER.debug("End get_events for %s", self.name)
         return events
@@ -337,7 +340,7 @@ class MS365CalendarEntity(
 
         return event_list
     
-    def _create_calendar_event_entity(self, event):
+    def _create_calendar_event_entity(self, vevent):
         event = CalendarEvent(
             get_hass_date(vevent.start, vevent.is_all_day),
             get_hass_date(get_end_date(vevent), vevent.is_all_day),
@@ -348,16 +351,17 @@ class MS365CalendarEntity(
         )
         if vevent.series_master_id:
             event.recurrence_id = vevent.series_master_id
+        return event
     
     def _filter_events(self, events):
         lst_events = list(events)
-        if not events or not self._exclude:
+        if not events or not self.exclude:
             return lst_events
 
         rtn_events = []
         for event in lst_events:
             include = True
-            for exclude in self._exclude:
+            for exclude in self.exclude:
                 if re.search(exclude, event.subject):
                     include = False
             if include:
@@ -385,20 +389,17 @@ class MS365CalendarEntity(
         range_start = dt_util.utcnow() + timedelta(hours=self._start_offset)
         range_end = dt_util.utcnow() + timedelta(hours=self._end_offset)
         self._build_extra_attributes(range_start, range_end)
-
+        await self.coordinator.async_refresh()
         self._get_current_event()
 
         _LOGGER.debug("End update for %s", self.name)
 
-    def _get_current_event(
-        self,
-    ):
+    def _get_current_event(self,):
         vevent = self.coordinator.get_current_event()
         if vevent is None:
             _LOGGER.debug(
-                "No matching event found in the %d results for %s",
-                len(self.stored_results),
-                self._entity_id,
+                "No matching event found in the calendar results for %s",
+                self.entity_id,
             )
             event = None
             return
@@ -415,7 +416,7 @@ class MS365CalendarEntity(
 
         if event:
             event.summary, offset = extract_offset(event.summary, DEFAULT_OFFSET)
-            start = MS365CalendarData.to_datetime(event.start)
+            start = M365CalendarSyncCoordinator.to_datetime(event.start)
             self._offset_reached = is_offset_reached(start, offset)
 
         self._event = event
@@ -456,7 +457,7 @@ class MS365CalendarEntity(
         rrule = kwargs.get(EVENT_RRULE)
         try:
             await cast(
-                O365CalendarSyncCoordinator, self.coordinator
+                M365CalendarSyncCoordinator, self.coordinator
             ).sync.store_service.async_add_event(subject, start, end, body=body, is_all_day=is_all_day, rrule=rrule)
         except HTTPError as err:
             raise HomeAssistantError(f"Error while creating event: {err!s}") from err
@@ -578,7 +579,7 @@ class MS365CalendarEntity(
 
     async def _async_delete_calendar_event(self, event_id, ha_event):
         await cast(
-            O365CalendarSyncCoordinator, self.coordinator
+            M365CalendarSyncCoordinator, self.coordinator
         ).sync.store_service.async_delete_event(
             event_id
         )

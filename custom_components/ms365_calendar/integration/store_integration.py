@@ -9,7 +9,7 @@ from abc import ABC
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
 
-from .const import DOMAIN
+from .const_integration import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
