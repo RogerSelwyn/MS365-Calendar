@@ -1,5 +1,26 @@
 # Changelog
 
+## v1.4.3 (2025/03/14)
+### 🐛 Fixes
+- [Fix issue with token refresh - pin MSAL to 1.13.1](https://github.com/RogerSelwyn/MS365-Calendar/commit/1731f31a677b3cb6c0d3f5bc2f330a6870ac6f5f) - @RogerSelwyn
+
+### 🧰 Maintenance
+- [Make further hint not to put email address in shared mailbox field](https://github.com/RogerSelwyn/MS365-Calendar/commit/730b50521c26ba81402f835f7367d7b1c0a92504) - @RogerSelwyn
+- [Sourcery recommendations](https://github.com/RogerSelwyn/MS365-Calendar/commit/1c62e421ce37ba4e0f60e7e6b4dea40c81a35127) - @RogerSelwyn
+- [Workflow ordering](https://github.com/RogerSelwyn/MS365-Calendar/commit/ffedb8a2742c1d8677f4463c7b4e6a0bed872f34) - @RogerSelwyn
+- [Update bug_report.yml](https://github.com/RogerSelwyn/MS365-Calendar/commit/9b9328ec363d76b1c921d1061794f45f57b26b7c) - @RogerSelwyn
+- [Update bug_report.yml](https://github.com/RogerSelwyn/MS365-Calendar/commit/d5fdf92e9db3b08892bbadc889848458e5cb5534) - @RogerSelwyn
+- [Set max parallel updates](https://github.com/RogerSelwyn/MS365-Calendar/commit/601397fef5284c8cb12ef0564aac627a37d4c267) - @RogerSelwyn
+
+### ⬆️ Dependencies
+- [Auto update requirements.txt](https://github.com/RogerSelwyn/MS365-Calendar/commit/6f229baaf95ee8b075445d010d128927e65ccd60) - @actions-user
+
+### 🔖 Release
+- [Release v1.4.3](https://github.com/RogerSelwyn/MS365-Calendar/commit/2190fb748601435338a5a82858aa49e172010297) - @RogerSelwyn
+
+
+
+
 ## v1.4.1 (2025/02/24)
 ### 🐛 Fixes
 - [Ensure timezone is set on protocol](https://github.com/RogerSelwyn/MS365-Calendar/commit/d2b937378a6fcd9f18fc17346a746687a2b1c6a5) - @RogerSelwyn
