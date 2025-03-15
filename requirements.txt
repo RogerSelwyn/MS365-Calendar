@@ -1,3 +1,4 @@
 O365>=2.1.0
 BeautifulSoup4>=4.10.0
 ical==8.3.0
+msal==1.31.1
