@@ -27,7 +27,7 @@ from homeassistant.helpers import entity_platform
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
-from requests.exceptions import HTTPError, RetryError
+from requests.exceptions import HTTPError
 
 from ..classes.config_entry import MS365ConfigEntry
 from ..const import CONF_ENABLE_UPDATE, CONF_ENTITY_NAME, EVENT_HA_EVENT
@@ -160,16 +160,14 @@ async def _async_setup_add_entities(
                     account,
                     cal_id,
                     entity.get(CONF_SENSITIVITY_EXCLUDE),
-                    entity.get(CONF_SEARCH)
+                    entity.get(CONF_SEARCH),
                 )
                 await api.async_calendar_init()
                 unique_id = f"{entity.get(CONF_NAME)}"
                 sync = M365CalendarEventSyncManager(
                     api,
                     cal_id,
-                    store=ScopedCalendarStore(
-                        store, unique_id
-                    ),
+                    store=ScopedCalendarStore(store, unique_id),
                 )
                 coordinator = M365CalendarSyncCoordinator(
                     hass,
@@ -226,8 +224,8 @@ async def _async_setup_register_services(update_supported):
 
 
 class MS365CalendarEntity(
-    CoordinatorEntity[M365CalendarSyncCoordinator],
-    CalendarEntity):
+    CoordinatorEntity[M365CalendarSyncCoordinator], CalendarEntity
+):
     """MS365 Calendar Event Processing."""
 
     _unrecorded_attributes = frozenset((ATTR_DATA, ATTR_COLOR, ATTR_HEX_COLOR))
@@ -384,13 +382,13 @@ class MS365CalendarEntity(
 
         range_start = dt_util.utcnow() + timedelta(hours=self._start_offset)
         range_end = dt_util.utcnow() + timedelta(hours=self._end_offset)
-        self._build_extra_attributes(range_start, range_end)
         await self.coordinator.async_refresh()
+        self._build_extra_attributes(range_start, range_end)
         self._get_current_event()
 
         _LOGGER.debug("End update for %s", self.name)
 
-    def _get_current_event(self,):
+    def _get_current_event(self):
         vevent = self.coordinator.get_current_event()
         if vevent is None:
             _LOGGER.debug(
@@ -416,25 +414,6 @@ class MS365CalendarEntity(
             self._offset_reached = is_offset_reached(start, offset)
 
         self._event = event
-
-    async def _async_get_events_and_store(self, range_start, range_end):
-        # Get events for extra attributes.
-        try:
-            start_of_day_utc = dt_util.as_utc(dt_util.start_of_local_day())
-            start = min(start_of_day_utc, range_start)
-            end = max(
-                start_of_day_utc + timedelta(days=1),
-                range_end,
-            )
-            await self.data.async_update_data(
-                self.hass,
-                start,
-                end,
-                self._max_results,
-            )
-        except (HTTPError, RetryError, ConnectionError) as err:
-            self._log_error("Error getting calendar events for data", err)
-            return
 
     def _build_extra_attributes(self, range_start, range_end):
         if self.coordinator.data is not None:
@@ -578,9 +557,7 @@ class MS365CalendarEntity(
     async def _async_delete_calendar_event(self, event_id, ha_event):
         await cast(
             M365CalendarSyncCoordinator, self.coordinator
-        ).sync.store_service.async_delete_event(
-            event_id
-        )
+        ).sync.store_service.async_delete_event(event_id)
         await self.coordinator.async_refresh()
         self._raise_event(ha_event, event_id)
         self.async_schedule_update_ha_state(True)
@@ -649,6 +626,8 @@ class MS365CalendarEntity(
             {ATTR_EVENT_ID: event_id, EVENT_HA_EVENT: True},
         )
         _LOGGER.debug("%s - %s", event_type, event_id)
+
+
 async def async_scan_for_calendars(hass, entry: MS365ConfigEntry):
     """Scan for new calendars."""
 
