@@ -570,31 +570,10 @@ class MS365CalendarEntity(
         if self.api.group_calendar:
             _group_calendar_log(self.entity_id)
 
-        await self._async_send_response(event_id, response, send_response, message)
+        await self.api.async_send_response(event_id, response, send_response, message)
+        await self.coordinator.async_refresh()
         self._raise_event(EVENT_RESPOND_CALENDAR_EVENT, event_id)
         self.async_schedule_update_ha_state(True)
-
-    async def _async_send_response(self, event_id, response, send_response, message):
-        # event = await self.data.async_get_event(self.hass, event_id)
-        if response == EventResponse.Accept:
-            await self.hass.async_add_executor_job(
-                ft.partial(event.accept_event, message, send_response=send_response)
-            )
-
-        elif response == EventResponse.Tentative:
-            await self.hass.async_add_executor_job(
-                ft.partial(
-                    event.accept_event,
-                    message,
-                    tentatively=True,
-                    send_response=send_response,
-                )
-            )
-
-        elif response == EventResponse.Decline:
-            await self.hass.async_add_executor_job(
-                ft.partial(event.decline_event, message, send_response=send_response)
-            )
 
     def _validate_permissions(self):
         if not self._entry.runtime_data.permissions.validate_authorization(

@@ -23,7 +23,7 @@ from ical.timespan import Timespan
 from O365.calendar import Event  # pylint: disable=no-name-in-module)
 from requests.exceptions import HTTPError, RetryError
 
-from .const_integration import CONST_GROUP, EVENT_SYNC, ITEMS
+from .const_integration import CONST_GROUP, EVENT_SYNC, ITEMS, EventResponse
 from .store_integration import CalendarStore, InMemoryCalendarStore, ScopedCalendarStore
 from .utils_integration import add_call_data_to_event, get_end_date, get_start_date
 
@@ -148,6 +148,28 @@ class M365CalendarService:
         """Delete an event on the specified calendar."""
         event = await self.async_get_event(event_id)
         await self.hass.async_add_executor_job(event.delete)
+
+    async def async_send_response(self, event_id, response, send_response, message):
+        event = await self.async_get_event(event_id)
+        if response == EventResponse.Accept:
+            await self.hass.async_add_executor_job(
+                ft.partial(event.accept_event, message, send_response=send_response)
+            )
+
+        elif response == EventResponse.Tentative:
+            await self.hass.async_add_executor_job(
+                ft.partial(
+                    event.accept_event,
+                    message,
+                    tentatively=True,
+                    send_response=send_response,
+                )
+            )
+
+        elif response == EventResponse.Decline:
+            await self.hass.async_add_executor_job(
+                ft.partial(event.decline_event, message, send_response=send_response)
+            )
 
 
 class M365Timeline(SortableItemTimeline[Event]):
