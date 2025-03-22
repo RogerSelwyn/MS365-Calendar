@@ -1,18 +1,15 @@
+import asyncio
 import functools as ft
 import logging
-from typing import Any, cast
+from collections.abc import Generator, Iterable
 from datetime import datetime, time, timedelta, timezone
-import asyncio
+from typing import Any, cast
 
-from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
-from requests.exceptions import HTTPError
-from requests.exceptions import HTTPError, RetryError
-from collections.abc import Generator, Iterable, Iterator
-
 from ical.iter import (
     MergedIterable,
     SortableItem,
@@ -20,15 +17,12 @@ from ical.iter import (
     SortableItemValue,
     SortedItemIterable,
 )
-import itertools
 from ical.timespan import Timespan
-from .store_integration import CalendarStore, InMemoryCalendarStore, ScopedCalendarStore
 from O365.calendar import Event  # pylint: disable=no-name-in-module)
-from .utils_integration import (
-    add_call_data_to_event,
-    get_start_date,
-    get_end_date
-)
+from requests.exceptions import HTTPError, RetryError
+
+from .store_integration import CalendarStore, InMemoryCalendarStore, ScopedCalendarStore
+from .utils_integration import add_call_data_to_event, get_end_date, get_start_date
 
 _LOGGER = logging.getLogger(__name__)
 MIN_TIME_BETWEEN_UPDATES = timedelta(minutes=7)
@@ -38,11 +32,8 @@ MAX_UPCOMING_EVENTS = 20
 SYNC_EVENT_MIN_TIME = timedelta(days=-60)
 SYNC_EVENT_MAX_TIME = timedelta(days=90)
 
-from .const_integration import (
-    CONST_GROUP,
-    EVENT_SYNC,
-    ITEMS,
-)
+from .const_integration import CONST_GROUP, EVENT_SYNC, ITEMS
+
 
 class M365CalendarService:
     """Calendar service interface to M365.

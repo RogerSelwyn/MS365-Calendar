@@ -24,20 +24,13 @@ from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import entity_platform
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
 from requests.exceptions import HTTPError, RetryError
 
-from .coordinator_integration import M365CalendarEventSyncManager, M365CalendarService, M365CalendarSyncCoordinator
-from .store_integration import LocalCalendarStore, ScopedCalendarStore, InMemoryCalendarStore
-
 from ..classes.config_entry import MS365ConfigEntry
-from ..const import (
-    CONF_ENABLE_UPDATE,
-    CONF_ENTITY_NAME,
-    EVENT_HA_EVENT,
-)
+from ..const import CONF_ENABLE_UPDATE, CONF_ENTITY_NAME, EVENT_HA_EVENT
 from ..helpers.utils import clean_html
 from .const_integration import (
     ATTR_ALL_DAY,
@@ -58,9 +51,9 @@ from .const_integration import (
     CONF_TRACK,
     CONF_TRACK_NEW_CALENDAR,
     CONST_GROUP,
+    DATA_STORE,
     DEFAULT_OFFSET,
     DOMAIN,
-    DATA_STORE,
     EVENT_CREATE_CALENDAR_EVENT,
     EVENT_MODIFY_CALENDAR_EVENT,
     EVENT_MODIFY_CALENDAR_RECURRENCES,
@@ -70,6 +63,11 @@ from .const_integration import (
     PERM_CALENDARS_READWRITE,
     YAML_CALENDARS_FILENAME,
     EventResponse,
+)
+from .coordinator_integration import (
+    M365CalendarEventSyncManager,
+    M365CalendarService,
+    M365CalendarSyncCoordinator,
 )
 from .filemgmt_integration import (
     async_update_calendar_file,
@@ -84,6 +82,7 @@ from .schema_integration import (
     CALENDAR_SERVICE_RESPOND_SCHEMA,
     YAML_CALENDAR_DEVICE_SCHEMA,
 )
+from .store_integration import LocalCalendarStore, ScopedCalendarStore
 from .utils_integration import (
     add_call_data_to_event,
     build_calendar_entity_id,

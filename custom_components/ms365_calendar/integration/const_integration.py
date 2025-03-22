@@ -58,7 +58,6 @@ CONF_TRACK_NEW_CALENDAR = "track_new_calendar"
 
 CONST_GROUP = "group:"
 
-DATA_STORE = "store"
 DAYS = {
     "MO": "monday",
     "TU": "tuesday",
