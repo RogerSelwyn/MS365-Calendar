@@ -50,8 +50,6 @@ from .const_integration import (
     CONF_SENSITIVITY_EXCLUDE,
     CONF_TRACK,
     CONF_TRACK_NEW_CALENDAR,
-    CONST_GROUP,
-    DATA_STORE,
     DEFAULT_OFFSET,
     DOMAIN,
     EVENT_CREATE_CALENDAR_EVENT,
@@ -89,7 +87,6 @@ from .utils_integration import (
     format_event_data,
     get_end_date,
     get_hass_date,
-    get_start_date,
 )
 
 _LOGGER = logging.getLogger(__name__)
