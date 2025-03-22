@@ -1,6 +1,5 @@
 """Main calendar processing."""
 
-import functools as ft
 import logging
 import re
 from copy import deepcopy
@@ -60,7 +59,6 @@ from .const_integration import (
     EVENT_RESPOND_CALENDAR_EVENT,
     PERM_CALENDARS_READWRITE,
     YAML_CALENDARS_FILENAME,
-    EventResponse,
 )
 from .coordinator_integration import (
     M365CalendarEventSyncManager,

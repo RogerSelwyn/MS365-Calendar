@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-import logging
-from typing import Any
-from abc import ABC
 import json
+import logging
+from abc import ABC
 from datetime import datetime
+from typing import Any
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
@@ -19,6 +19,7 @@ STORAGE_KEY_FORMAT = "{domain}.{entry_id}"
 STORAGE_VERSION = 1
 # Buffer writes every few minutes (plus guaranteed to be written at shutdown)
 STORAGE_SAVE_DELAY_SECONDS = 120
+
 
 class CalendarStore(ABC):
     """Interface for external calendar storage.
@@ -41,6 +42,7 @@ class InMemoryCalendarStore(CalendarStore):
 
     async def async_load(self) -> dict[str, Any] | None:
         """Load data."""
+
         return self._data
 
     async def async_save(self, data: dict[str, Any]) -> None:
@@ -70,16 +72,24 @@ class ScopedCalendarStore(CalendarStore):
             store_data = {}
         store_data[self._key] = data
         return await self._store.async_save(store_data)
-    
+
+
 class JSONEncoder(json.JSONEncoder):
+    """Encoder for serialising an event"""
+
     def default(self, o):
         attributes = {}
 
         if not hasattr(o, "__dict__"):
             return
         for k, v in vars(o).items():
-            key = k
-            if key not in ["con", "protocol", "main_resource", "untrack"] and not key.startswith("_"):
+            key = _beautify_key(k)
+            if key not in [
+                "con",
+                "protocol",
+                "main_resource",
+                "untrack",
+            ] and not key.startswith("_"):
                 if isinstance(v, datetime):
                     val = str(v)
                 else:
@@ -87,6 +97,14 @@ class JSONEncoder(json.JSONEncoder):
                 attributes[key] = val
 
         return attributes
+
+
+def _beautify_key(key):
+    index = key.find("__")
+    if index <= 0:
+        return key
+    return key[index + 2 :]
+
 
 class LocalCalendarStore(CalendarStore):
     """Storage for local persistence of calendar and event data."""
@@ -98,7 +116,7 @@ class LocalCalendarStore(CalendarStore):
             STORAGE_VERSION,
             STORAGE_KEY_FORMAT.format(domain=DOMAIN, entry_id=entry_id),
             private=True,
-            encoder=JSONEncoder
+            encoder=JSONEncoder,
         )
         self._data: dict[str, Any] | None = None
 
