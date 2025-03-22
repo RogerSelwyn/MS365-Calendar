@@ -155,14 +155,14 @@ class M365Timeline(SortableItemTimeline[Event]):
     A timeline is created by the local sync API and not instantiated directly.
     """
 
-    def __init__(self, iterable: Iterable[SortableItem[Timespan, Event]]) -> None:
-        super().__init__(iterable)
+    # def __init__(self, iterable: Iterable[SortableItem[Timespan, Event]]) -> None:
+    #     super().__init__(iterable)
 
 
 def timespan_of(event: Event, tzinfo: datetime.tzinfo) -> Timespan:
     """Return a timespan representing the event start and end."""
     if tzinfo is None:
-        tzinfo = datetime.timezone.utc
+        tzinfo = dt_util.UTC
     return Timespan.of(
         normalize(event.start, tzinfo),
         normalize(event.end, tzinfo),
@@ -192,7 +192,7 @@ def normalize(date, tzinfo: datetime.tzinfo) -> datetime:
     if not isinstance(value, datetime):
         value = datetime.combine(value, time.min)
     if value.tzinfo is None:
-        value = value.replace(tzinfo=(tzinfo if tzinfo else datetime.timezone.utc))
+        value = value.replace(tzinfo=(tzinfo if tzinfo else dt_util.UTC))
     return value
 
 
@@ -229,7 +229,7 @@ class M365CalendarEventStoreService:
     async def async_get_timeline(self, tzinfo: datetime.tzinfo) -> M365Timeline:
         """Get the timeline of events."""
         if tzinfo is None:
-            tzinfo = datetime.timezone.utc
+            tzinfo = dt_util.UTC
         events_data = await self._lookup_events_data()
         _LOGGER.debug("Created timeline of %d events", len(events_data))
 
@@ -247,7 +247,7 @@ class M365CalendarEventStoreService:
         You should sync the event store after adding an event.
         """
         _LOGGER.debug("Adding event: %s", subject)
-        await self._api.async_create_event(subject, start, end, **kwargs)
+        return await self._api.async_create_event(subject, start, end, **kwargs)
 
     async def async_delete_event(self, event_id) -> None:
         """Delete the event from the calendar.

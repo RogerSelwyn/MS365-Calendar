@@ -82,7 +82,6 @@ from .schema_integration import (
 )
 from .store_integration import LocalCalendarStore, ScopedCalendarStore
 from .utils_integration import (
-    add_call_data_to_event,
     build_calendar_entity_id,
     format_event_data,
     get_end_date,
@@ -430,15 +429,14 @@ class MS365CalendarEntity(
         subject = kwargs[EVENT_SUMMARY]
         body = kwargs.get(EVENT_DESCRIPTION)
         rrule = kwargs.get(EVENT_RRULE)
-        try:
-            await cast(
-                M365CalendarSyncCoordinator, self.coordinator
-            ).sync.store_service.async_add_event(
-                subject, start, end, body=body, is_all_day=is_all_day, rrule=rrule
-            )
-        except HTTPError as err:
-            raise HomeAssistantError(f"Error while creating event: {err!s}") from err
-        await self.coordinator.async_refresh()
+        await self.async_create_calendar_event(
+            subject,
+            start,
+            end,
+            body=body,
+            is_all_day=is_all_day,
+            rrule=rrule,
+        )
 
     async def async_update_event(
         self,
@@ -480,13 +478,14 @@ class MS365CalendarEntity(
 
         self._validate_permissions()
 
-        calendar = self.data.calendar
-
-        event = calendar.new_event()
-        event = add_call_data_to_event(event, subject, start, end, **kwargs)
-        await self.hass.async_add_executor_job(event.save)
+        try:
+            event = await cast(
+                M365CalendarSyncCoordinator, self.coordinator
+            ).sync.store_service.async_add_event(subject, start, end, **kwargs)
+        except HTTPError as err:
+            raise HomeAssistantError(f"Error while creating event: {err!s}") from err
         self._raise_event(EVENT_CREATE_CALENDAR_EVENT, event.object_id)
-        self.async_schedule_update_ha_state(True)
+        await self.coordinator.async_refresh()
 
     async def async_modify_calendar_event(
         self,
@@ -576,7 +575,7 @@ class MS365CalendarEntity(
         self.async_schedule_update_ha_state(True)
 
     async def _async_send_response(self, event_id, response, send_response, message):
-        event = await self.data.async_get_event(self.hass, event_id)
+        # event = await self.data.async_get_event(self.hass, event_id)
         if response == EventResponse.Accept:
             await self.hass.async_add_executor_job(
                 ft.partial(event.accept_event, message, send_response=send_response)
