@@ -156,8 +156,8 @@ async def _async_setup_add_entities(
 
             update_calendar = update_supported and can_edit
             device_id = entity["device_id"]
-            #store_key = f"{entity.get(CONF_NAME)}-{entry.entry_id}"
-            store = InMemoryCalendarStore()
+            store_key = f"{entity.get(CONF_NAME)}-{entry.entry_id}"
+            store = LocalCalendarStore(hass, store_key)
             try:
                 api = M365CalendarService(
                     hass,

@@ -5,6 +5,8 @@ from __future__ import annotations
 import logging
 from typing import Any
 from abc import ABC
+import json
+from datetime import datetime
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
@@ -68,7 +70,23 @@ class ScopedCalendarStore(CalendarStore):
             store_data = {}
         store_data[self._key] = data
         return await self._store.async_save(store_data)
+    
+class JSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        attributes = {}
 
+        if not hasattr(o, "__dict__"):
+            return
+        for k, v in vars(o).items():
+            key = k
+            if key not in ["con", "protocol", "main_resource", "untrack"] and not key.startswith("_"):
+                if isinstance(v, datetime):
+                    val = str(v)
+                else:
+                    val = v
+                attributes[key] = val
+
+        return attributes
 
 class LocalCalendarStore(CalendarStore):
     """Storage for local persistence of calendar and event data."""
@@ -80,6 +98,7 @@ class LocalCalendarStore(CalendarStore):
             STORAGE_VERSION,
             STORAGE_KEY_FORMAT.format(domain=DOMAIN, entry_id=entry_id),
             private=True,
+            encoder=JSONEncoder
         )
         self._data: dict[str, Any] | None = None
 

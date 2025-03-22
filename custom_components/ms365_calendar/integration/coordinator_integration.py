@@ -31,12 +31,12 @@ from .utils_integration import (
 )
 
 _LOGGER = logging.getLogger(__name__)
-MIN_TIME_BETWEEN_UPDATES = timedelta(minutes=15)
+MIN_TIME_BETWEEN_UPDATES = timedelta(minutes=7)
 # Maximum number of upcoming events to consider for state changes between
 # coordinator updates.
 MAX_UPCOMING_EVENTS = 20
-SYNC_EVENT_MIN_TIME = timedelta(days=-90)
-SYNC_EVENT_MAX_TIME = timedelta(days=180)
+SYNC_EVENT_MIN_TIME = timedelta(days=-60)
+SYNC_EVENT_MAX_TIME = timedelta(days=90)
 
 from .const_integration import (
     CONST_GROUP,
@@ -313,10 +313,11 @@ class M365CalendarEventSyncManager:
 
     async def run(self) -> None:
         """Run the event sync manager."""
+        _LOGGER.debug("Syncing Calendar Events: %s", self._calendar_id)
         store_data = await self._store.async_load() or {}
         new_data = await self._api.async_list_events(start_date= dt_util.now() + SYNC_EVENT_MIN_TIME, end_date= dt_util.now() + SYNC_EVENT_MAX_TIME)
         store_data.setdefault(ITEMS, {})
-        store_data[ITEMS].update(self._items_func(new_data))
+        store_data[ITEMS] = self._items_func(new_data)
         await self._store.async_save(store_data)
 
 class M365CalendarSyncCoordinator(DataUpdateCoordinator):
