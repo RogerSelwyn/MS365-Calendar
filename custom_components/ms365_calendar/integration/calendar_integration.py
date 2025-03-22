@@ -246,7 +246,7 @@ class MS365CalendarEntity(
         """Initialise the MS365 Calendar Event."""
         super().__init__(coordinator)
         self.api = api
-        self._entry = entry 
+        self._entry = entry
         self._start_offset = entity.get(CONF_HOURS_BACKWARD_TO_GET)
         self._end_offset = entity.get(CONF_HOURS_FORWARD_TO_GET)
         self._event = None
@@ -298,7 +298,7 @@ class MS365CalendarEntity(
     def unique_id(self):
         """Entity unique id."""
         return f"{self._calendar_id}_{self._entry.data[CONF_ENTITY_NAME]}_{self._device_id}"
-    
+
     async def async_added_to_hass(self) -> None:
         """When entity is added to hass."""
         await super().async_added_to_hass()
@@ -323,7 +323,7 @@ class MS365CalendarEntity(
 
         _LOGGER.debug("End get_events for %s", self.name)
         return events
-    
+
     def _create_calendar_event_entities(self, results):
         event_list = []
         for vevent in results:
@@ -335,7 +335,7 @@ class MS365CalendarEntity(
                 )
 
         return event_list
-    
+
     def _create_calendar_event_entity(self, vevent):
         event = CalendarEvent(
             get_hass_date(vevent.start, vevent.is_all_day),
@@ -348,7 +348,7 @@ class MS365CalendarEntity(
         if vevent.series_master_id:
             event.recurrence_id = vevent.series_master_id
         return event
-    
+
     def _filter_events(self, events):
         lst_events = list(events)
         if not events or not self.exclude:
@@ -454,7 +454,9 @@ class MS365CalendarEntity(
         try:
             await cast(
                 M365CalendarSyncCoordinator, self.coordinator
-            ).sync.store_service.async_add_event(subject, start, end, body=body, is_all_day=is_all_day, rrule=rrule)
+            ).sync.store_service.async_add_event(
+                subject, start, end, body=body, is_all_day=is_all_day, rrule=rrule
+            )
         except HTTPError as err:
             raise HomeAssistantError(f"Error while creating event: {err!s}") from err
         await self.coordinator.async_refresh()
