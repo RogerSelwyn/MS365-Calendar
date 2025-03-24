@@ -132,7 +132,6 @@ def mock_call(
     data = load_json(f"O365/{datafile}.json")
     if start:
         data = data.replace("2020-01-01", start).replace("2020-01-02", end)
-
     url = urlname.value
     if unique:
         url = f"{url}/{unique}"
@@ -166,10 +165,11 @@ def check_entity_state(
     state = hass.states.get(entity_name)
     print("*************************** State")
     print(state)
+    print("--- State Attributes")
+    print(state.attributes)
     assert state.state == entity_state
     if entity_attributes:
-        print("--- State Attributes")
-        print(state.attributes)
+
         if "data" in state.attributes:
             assert state.attributes["data"] == entity_attributes
         else:

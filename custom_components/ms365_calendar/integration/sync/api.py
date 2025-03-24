@@ -42,6 +42,7 @@ class MS365CalendarService:
         self._sensitivity_exclude = sensitivity_exclude
         self._limit = 999
         self._search = search
+        self._error = False
 
     async def async_calendar_init(self):
         """Async init of calendar data."""
@@ -113,7 +114,7 @@ class MS365CalendarService:
                 )
             )
         except (HTTPError, RetryError, ConnectionError) as err:
-            _LOGGER.warning("Error getting calendar events - %s", err)
+            self._log_error("Error getting calendar events for data", err)
             return None
 
     async def async_create_event(self, subject, start, end, **kwargs) -> Event:
@@ -160,6 +161,13 @@ class MS365CalendarService:
                 ft.partial(event.decline_event, message, send_response=send_response)
             )
 
+    def _log_error(self, error, err):
+        if not self._error:
+            _LOGGER.warning("%s - %s", error, err)
+            self._error = True
+        else:
+            _LOGGER.debug("Repeat error - %s - %s", error, err)
+
 
 class MS365CalendarEventStoreService:
     """Performs event lookups from the local store.
@@ -195,8 +203,8 @@ class MS365CalendarEventStoreService:
 
     async def async_get_timeline(self, tzinfo: datetime.tzinfo) -> MS365Timeline:
         """Get the timeline of events."""
-        if tzinfo is None:
-            tzinfo = dt_util.UTC
+        # if tzinfo is None:
+        #     tzinfo = dt_util.UTC
         events_data = await self._lookup_events_data()
         # _LOGGER.debug("Created timeline of %s events", len(events_data))
 

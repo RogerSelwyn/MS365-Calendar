@@ -1,6 +1,7 @@
 """Library for handling local event sync."""
 
 import logging
+import re
 from datetime import timedelta
 from typing import Any
 
@@ -23,6 +24,7 @@ class MS365CalendarEventSyncManager:
         api: MS365CalendarService,
         calendar_id: str | None = None,
         store: CalendarStore | None = None,
+        exclude: list | None = None,
     ) -> None:
         """Initialize CalendarEventSyncManager."""
         self._api = api
@@ -30,20 +32,39 @@ class MS365CalendarEventSyncManager:
         self._store = ScopedCalendarStore(
             ScopedCalendarStore(store, EVENT_SYNC), self.calendar_id
         )
+        self._exclude = exclude
 
     @property
     def store_service(self) -> MS365CalendarEventStoreService:
         """Return the local API for fetching events."""
         return MS365CalendarEventStoreService(self._store, self.calendar_id, self._api)
 
-    @property
-    def api(self) -> MS365CalendarService:
-        """Return the cloud API."""
-        return self._api
+    # @property
+    # def api(self) -> MS365CalendarService:
+    #     """Return the cloud API."""
+    #     return self._api
 
     async def async_list_events(self, start_date, end_date):
         """Return the set of events matching the criteria."""
-        return await self._api.async_list_events(start_date, end_date)
+        events = await self._api.async_list_events(start_date, end_date)
+
+        filtered_events = self._filter_events(list(events))
+        return filtered_events
+
+    def _filter_events(self, events):
+        if not events or not self._exclude:
+            return events
+
+        rtn_events = []
+        for event in events:
+            include = True
+            for exclude in self._exclude:
+                if re.search(exclude, event.subject):
+                    include = False
+            if include:
+                rtn_events.append(event)
+
+        return rtn_events
 
     async def run(self) -> None:
         """Run the event sync manager."""
@@ -61,7 +82,7 @@ class MS365CalendarEventSyncManager:
 def _items_func(events) -> dict[str, Any]:
     items = {}
     for item in events:
-        if not item.object_id:
-            continue
+        # if not item.object_id:
+        #     continue
         items[item.object_id] = item
     return items

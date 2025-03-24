@@ -86,11 +86,14 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
         # will not cache it though
         if end_date < sync_start_time or start_date > sync_end_time:
             events = await self.sync.async_list_events(start_date, end_date)
-            return events
-        return self.data.overlapping(
-            start_date,
-            end_date,
-        )
+
+        else:
+            events = self.data.overlapping(
+                start_date,
+                end_date,
+            )
+
+        return events
 
     def get_current_event(self):
         """Get the current event."""

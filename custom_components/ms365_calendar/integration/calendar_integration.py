@@ -2,7 +2,6 @@
 
 import asyncio
 import logging
-import re
 from copy import deepcopy
 from datetime import datetime, timedelta
 from operator import attrgetter
@@ -88,6 +87,7 @@ from .utils_integration import (
     get_hass_date,
 )
 
+DELAY_BETWEEN_LOAD = 2
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -135,6 +135,7 @@ async def _async_setup_add_entities(
 
     local_store = LocalCalendarStore(hass, entry.entry_id)
 
+    cal_no = 0
     for cal_id, calendar in calendars.items():
         for entity in calendar.get(CONF_ENTITIES):
             if not entity[CONF_TRACK]:
@@ -167,6 +168,7 @@ async def _async_setup_add_entities(
                     api,
                     cal_id,
                     store=ScopedCalendarStore(local_store, unique_id),
+                    exclude=entity.get(CONF_EXCLUDE),
                 )
                 coordinator = MS365CalendarSyncCoordinator(
                     hass,
@@ -193,7 +195,9 @@ async def _async_setup_add_entities(
                 continue
 
             async_add_entities([cal], False)
-            await asyncio.sleep(2)
+            cal_no += 1
+            if cal_no < len(calendars.items()):
+                await asyncio.sleep(DELAY_BETWEEN_LOAD)
     return
 
 
@@ -316,8 +320,6 @@ class MS365CalendarEntity(
         _LOGGER.debug("Start get_events for %s", self.name)
 
         results = await self.coordinator.async_get_events(start_date, end_date)
-        results = self._filter_events(results)
-        results = self._sort_events(results)
         events = self._create_calendar_event_entities(results)
 
         _LOGGER.debug("End get_events for %s", self.name)
@@ -347,22 +349,6 @@ class MS365CalendarEntity(
         if vevent.series_master_id:
             event.recurrence_id = vevent.series_master_id
         return event
-
-    def _filter_events(self, events):
-        lst_events = list(events)
-        if not events or not self.exclude:
-            return lst_events
-
-        rtn_events = []
-        for event in lst_events:
-            include = True
-            for exclude in self.exclude:
-                if re.search(exclude, event.subject):
-                    include = False
-            if include:
-                rtn_events.append(event)
-
-        return rtn_events
 
     def _sort_events(self, events):
         for event in events:
@@ -423,9 +409,14 @@ class MS365CalendarEntity(
     def _build_extra_attributes(self, range_start, range_end):
         if self.coordinator.data is not None:
             self._data_attribute = []
+            data_events = []
             for event in self.coordinator.data:
-                if event.end > range_start and event.start < range_end:
-                    self._data_attribute.append(format_event_data(event))
+                if event.end >= range_start and event.start <= range_end:
+                    data_events.append(event)
+
+            data_events = self._sort_events(data_events)
+            for event in data_events:
+                self._data_attribute.append(format_event_data(event))
 
     async def async_create_event(self, **kwargs: Any) -> None:
         """Add a new event to calendar."""

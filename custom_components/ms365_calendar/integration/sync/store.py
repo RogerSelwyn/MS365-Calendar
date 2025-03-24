@@ -27,19 +27,19 @@ class CalendarStore(ABC):
         """Save data."""
 
 
-class InMemoryCalendarStore(CalendarStore):
-    """An in memory implementation of CalendarStore."""
+# class InMemoryCalendarStore(CalendarStore):
+#     """An in memory implementation of CalendarStore."""
 
-    def __init__(self) -> None:
-        self._data: dict[str, Any] | None = None
+#     def __init__(self) -> None:
+#         self._data: dict[str, Any] | None = None
 
-    async def async_load(self) -> dict[str, Any] | None:
-        """Load data."""
-        return self._data
+#     async def async_load(self) -> dict[str, Any] | None:
+#         """Load data."""
+#         return self._data
 
-    async def async_save(self, data: dict[str, Any]) -> None:
-        """Save data."""
-        self._data = data
+#     async def async_save(self, data: dict[str, Any]) -> None:
+#         """Save data."""
+#         self._data = data
 
 
 class ScopedCalendarStore(CalendarStore):

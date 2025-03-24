@@ -1,9 +1,9 @@
 """A Timeline is a set of events on a calendar."""
 
 from collections.abc import Generator, Iterable
-from datetime import datetime, time
+from datetime import datetime  # time
 
-from homeassistant.util import dt as dt_util
+# from homeassistant.util import dt as dt_util
 from ical.iter import (
     MergedIterable,
     SortableItem,
@@ -24,13 +24,17 @@ class MS365Timeline(SortableItemTimeline[Event]):
     #     super().__init__(iterable)
 
 
-def timespan_of(event: Event, tzinfo: datetime.tzinfo) -> Timespan:
+def timespan_of(event: Event) -> Timespan:
     """Return a timespan representing the event start and end."""
-    if tzinfo is None:
-        tzinfo = dt_util.UTC
+    # if tzinfo is None:
+    #     tzinfo = dt_util.UTC
+    # return Timespan.of(
+    #     normalize(event.start, tzinfo),
+    #     normalize(event.end, tzinfo),
+    # )
     return Timespan.of(
-        normalize(event.start, tzinfo),
-        normalize(event.end, tzinfo),
+        event.start,
+        event.end,
     )
 
 
@@ -43,7 +47,7 @@ def calendar_timeline(events: list[Event], tzinfo: datetime.tzinfo) -> MS365Time
     def sortable_items() -> Generator[SortableItem[Timespan, Event], None, None]:
         nonlocal normal_events
         for event in normal_events:
-            yield SortableItemValue(timespan_of(event, tzinfo), event)
+            yield SortableItemValue(timespan_of(event), event)
 
     iters: list[Iterable[SortableItem[Timespan, Event]]] = []
     iters.append(SortedItemIterable(sortable_items, tzinfo))
@@ -51,11 +55,11 @@ def calendar_timeline(events: list[Event], tzinfo: datetime.tzinfo) -> MS365Time
     return MS365Timeline(MergedIterable(iters))
 
 
-def normalize(date, tzinfo: datetime.tzinfo) -> datetime:
-    """Convert date or datetime to a value that can be used for comparison."""
-    value = date
-    if not isinstance(value, datetime):
-        value = datetime.combine(value, time.min)
-    if value.tzinfo is None:
-        value = value.replace(tzinfo=(tzinfo if tzinfo else dt_util.UTC))
-    return value
+# def normalize(date, tzinfo: datetime.tzinfo) -> datetime:
+#     """Convert date or datetime to a value that can be used for comparison."""
+#     value = date
+#     if not isinstance(value, datetime):
+#         value = datetime.combine(value, time.min)
+#     if value.tzinfo is None:
+#         value = value.replace(tzinfo=(tzinfo if tzinfo else dt_util.UTC))
+#     return value
