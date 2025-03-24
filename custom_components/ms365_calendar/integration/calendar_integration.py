@@ -131,6 +131,8 @@ async def _async_setup_add_entities(
         load_yaml_file, yaml_filepath, CONF_CAL_ID, YAML_CALENDAR_DEVICE_SCHEMA
     )
 
+    store_key = f"M365-Calendar-Storage"
+    store = LocalCalendarStore(hass, store_key)
     for cal_id, calendar in calendars.items():
         for entity in calendar.get(CONF_ENTITIES):
             if not entity[CONF_TRACK]:
@@ -149,8 +151,6 @@ async def _async_setup_add_entities(
 
             update_calendar = update_supported and can_edit
             device_id = entity["device_id"]
-            store_key = f"{entity.get(CONF_NAME)}-{entry.entry_id}"
-            store = LocalCalendarStore(hass, store_key)
             try:
                 api = M365CalendarService(
                     hass,

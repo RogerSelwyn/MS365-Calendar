@@ -282,6 +282,7 @@ class M365CalendarEventStoreService:
 
     async def _lookup_events_data(self) -> dict[str, Any]:
         """Loookup the raw events storage dictionary."""
+        _LOGGER.debug("Loading data from store")
         store_data = await self._store.async_load() or {}
         store_data.setdefault(ITEMS, {})
         return store_data.get(ITEMS, {})  # type: ignore[no-any-return]
@@ -333,6 +334,8 @@ class M365CalendarEventSyncManager:
         )
         store_data.setdefault(ITEMS, {})
         store_data[ITEMS] = _items_func(new_data)
+        
+        _LOGGER.debug("Saving data to store")
         await self._store.async_save(store_data)
 
 
@@ -376,6 +379,9 @@ class M365CalendarSyncCoordinator(DataUpdateCoordinator):
         except Exception as err:
             raise UpdateFailed(f"Error communicating with API: {err}") from err
 
+        _LOGGER.debug("Updating Data from API Endpoint %s",
+                        self.sync.calendar_id,
+                    )
         timeline = await self.sync.store_service.async_get_timeline(
             dt_util.get_default_time_zone()
         )
@@ -390,14 +396,23 @@ class M365CalendarSyncCoordinator(DataUpdateCoordinator):
             raise HomeAssistantError(
                 "Unable to get events: Sync from server has not completed"
             )
-
+        
+        sync_start_time = dt_util.now() + SYNC_EVENT_MIN_TIME
+        sync_end_time = dt_util.now() + SYNC_EVENT_MAX_TIME
+        
         # If the request is for outside of the sync'ed data, manually request it now,
         # will not cache it though
         if (
-            start_date < dt_util.now() + SYNC_EVENT_MIN_TIME
-            or end_date > dt_util.now() + SYNC_EVENT_MAX_TIME
+            start_date < sync_start_time
+            or end_date > sync_end_time
         ):
-            events = await self.sync.store_service.async_list_events(
+            _LOGGER.debug("Requesting data outside of sync STart/End - start: %s, end: %s, syncStart: %s, syncEnd: %s",
+                        start_date,
+                        end_date,
+                        sync_start_time,
+                        sync_end_time,
+                    )
+            events = await self.sync.async_list_events(
                 start_date, end_date
             )
             return events
