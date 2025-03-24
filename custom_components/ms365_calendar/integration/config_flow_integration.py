@@ -31,6 +31,8 @@ from .const_integration import (
     CONF_SENSITIVITY_EXCLUDE,
     CONF_TRACK,
     CONF_TRACK_NEW_CALENDAR,
+    CONF_UPDATE_INTERVAL,
+    DEFAULT_UPDATE_INTERVAL,
     YAML_CALENDARS_FILENAME,
 )
 from .filemgmt_integration import (
@@ -141,6 +143,12 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
             },
             data_schema=vol.Schema(
                 {
+                    vol.Required(
+                        CONF_UPDATE_INTERVAL,
+                        default=self.config_entry.options.get(
+                            CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL
+                        ),
+                    ): vol.All(vol.Coerce(int), vol.Range(min=15, max=600)),
                     vol.Optional(
                         CONF_CALENDAR_LIST, default=self._calendar_list_selected
                     ): cv.multi_select(self._calendar_list),

@@ -12,6 +12,7 @@ from .filemgmt_integration import (
     build_yaml_file_path,
     build_yaml_filename,
 )
+from .store_integration import LocalCalendarStore
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -28,3 +29,5 @@ async def async_integration_remove_entry(hass: HomeAssistant, entry: MS365Config
     yaml_filepath = build_yaml_file_path(hass, yaml_filename)
     if os.path.exists(yaml_filepath):
         await hass.async_add_executor_job(os.remove, yaml_filepath)
+    store = LocalCalendarStore(hass, entry.entry_id)
+    await store.async_remove()

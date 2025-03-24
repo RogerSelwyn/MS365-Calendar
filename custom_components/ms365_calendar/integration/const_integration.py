@@ -55,6 +55,7 @@ CONF_SEARCH = "search"
 CONF_SENSITIVITY_EXCLUDE = "sensitivity_exclude"
 CONF_TRACK = "track"
 CONF_TRACK_NEW_CALENDAR = "track_new_calendar"
+CONF_UPDATE_INTERVAL = "update_interval"
 
 CONST_GROUP = "group:"
 
@@ -69,6 +70,9 @@ DAYS = {
 }
 
 DEFAULT_OFFSET = "!!"
+DEFAULT_UPDATE_INTERVAL = 300
+DEFAULT_SYNC_EVENT_MIN_TIME = -60
+DEFAULT_SYNC_EVENT_MAX_TIME = 90
 
 EVENT_CREATE_CALENDAR_EVENT = "create_calendar_event"
 EVENT_MODIFY_CALENDAR_EVENT = "modify_calendar_event"

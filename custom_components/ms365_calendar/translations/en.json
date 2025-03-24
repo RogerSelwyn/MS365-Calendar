@@ -59,6 +59,7 @@
         "step": {
             "user": {
                 "data": {
+                    "update_interval": "Update interval in seconds",
                     "track_new_calendar": "Enable new calendars",
                     "calendar_list": "Enabled calendars"
                 },
