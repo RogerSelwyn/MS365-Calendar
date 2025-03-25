@@ -316,10 +316,7 @@ async def test_create_event_no_perms(
             return_response=False,
         )
 
-    assert (
-        str(exc_info.value)
-        == f"Not authorisied to Calendar1 calendar event - requires permission: {failed_perm}"
-    )
+    assert str(exc_info.value) == f"Not authorised requires permission: {failed_perm}"
 
 
 async def test_update_event(
@@ -390,10 +387,7 @@ async def test_update_event_no_perms(
             return_response=False,
         )
 
-    assert (
-        str(exc_info.value)
-        == f"Not authorisied to Calendar1 calendar event - requires permission: {failed_perm}"
-    )
+    assert str(exc_info.value) == f"Not authorised requires permission: {failed_perm}"
 
 
 async def test_update_group_calendar(
@@ -599,10 +593,7 @@ async def test_delete_event_no_perms(
             return_response=False,
         )
 
-    assert (
-        str(exc_info.value)
-        == f"Not authorisied to Calendar1 calendar event - requires permission: {failed_perm}"
-    )
+    assert str(exc_info.value) == f"Not authorised requires permission: {failed_perm}"
 
 
 async def test_delete_group_calendar(

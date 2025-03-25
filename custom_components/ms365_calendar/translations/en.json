@@ -105,11 +105,8 @@
         "ms365_group_calendar_error": {
             "message": "O365 Python does not have capability to update/respond to group calendar events: {entity_id}"
         },
-        "not_authorised_to_event": {
-            "message": "Not authorisied to {calendar} calendar event - requires permission: {error_message}"
-        },
         "not_authorised": {
-            "message": "Not authorisied requires permission: {required_permission}"
+            "message": "Not authorised requires permission: {required_permission}"
         }
     },
     "services": {

@@ -24,10 +24,10 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import entity_platform
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
 
 from ..classes.config_entry import MS365ConfigEntry
+from ..classes.entity import MS365Entity
 from ..const import CONF_ENABLE_UPDATE, CONF_ENTITY_NAME, EVENT_HA_EVENT
 from ..helpers.utils import clean_html
 from .const_integration import (
@@ -96,20 +96,24 @@ async def async_integration_setup_entry(
         for coordinator in entry.runtime_data.coordinator:
             entity = key[CONF_ENTITY]
             device_id = entity[CONF_DEVICE_ID]
-            entity_id = key[CONF_ENTITY_ID]
-            can_edit = key[CONF_CAN_EDIT]
-            update_supported = config_update_supported and can_edit
             if device_id != coordinator.name:
                 continue
+
+            entity_id = key[CONF_ENTITY_ID]
+            calendar_id = coordinator.sync.calendar_id
+            can_edit = key[CONF_CAN_EDIT]
+            update_supported = config_update_supported and can_edit
+            name = f"{entity.get(CONF_NAME)}"
+            unique_id = f"{calendar_id}_{entry.data[CONF_ENTITY_NAME]}_{device_id}"
             cal = MS365CalendarEntity(
                 coordinator.sync.api,
                 coordinator,
-                coordinator.sync.calendar_id,
                 entity,
                 entity_id,
-                device_id,
                 entry,
                 update_supported,
+                name,
+                unique_id,
             )
             async_add_entities([cal], False)
             cal_no += 1
@@ -148,9 +152,7 @@ async def _async_setup_register_services(config_update_supported):
         )
 
 
-class MS365CalendarEntity(
-    CoordinatorEntity[MS365CalendarSyncCoordinator], CalendarEntity
-):
+class MS365CalendarEntity(MS365Entity, CalendarEntity):
     """MS365 Calendar Event Processing."""
 
     _attr_should_poll = False
@@ -160,26 +162,23 @@ class MS365CalendarEntity(
         self,
         api,
         coordinator,
-        calendar_id,
         entity,
         entity_id,
-        device_id,
         entry: MS365ConfigEntry,
         update_supported,
+        name,
+        unique_id,
     ):
         """Initialise the MS365 Calendar Event."""
-        super().__init__(coordinator)
+        super().__init__(coordinator, entry, name, entity_id, unique_id)
         self.api = api
-        self._entry = entry
         self._start_offset = entity.get(CONF_HOURS_BACKWARD_TO_GET)
         self._end_offset = entity.get(CONF_HOURS_FORWARD_TO_GET)
         self._event = None
-        self._name = f"{entity.get(CONF_NAME)}"
         self.entity_id = entity_id
         self._offset_reached = False
         self._data_attribute = []
-        self._calendar_id = calendar_id
-        self._device_id = device_id
+
         self._update_supported = update_supported
         if self._update_supported:
             self._attr_supported_features = (
@@ -213,23 +212,10 @@ class MS365CalendarEntity(
         """Event property."""
         return self._event
 
-    @property
-    def name(self):
-        """Name property."""
-        return self._name
-
-    @property
-    def unique_id(self):
-        """Entity unique id."""
-        return f"{self._calendar_id}_{self._entry.data[CONF_ENTITY_NAME]}_{self._device_id}"
-
     async def async_added_to_hass(self) -> None:
         """When entity is added to hass."""
         await super().async_added_to_hass()
 
-        # We do not ask for an update with async_add_entities()
-        # because it will update disabled entities. This is started as a
-        # task to let if sync in the background without blocking startup
         self.coordinator.config_entry.async_create_background_task(
             self.hass,
             self.coordinator.async_request_refresh(),
@@ -287,14 +273,12 @@ class MS365CalendarEntity(
         self._update_status()
         self.async_write_ha_state()
 
-    # async def async_update(self):
     def _update_status(self):
         """Do the update."""
         _LOGGER.debug("Start update for %s", self.name)
 
         range_start = dt_util.utcnow() + timedelta(hours=self._start_offset)
         range_end = dt_util.utcnow() + timedelta(hours=self._end_offset)
-        # await self.coordinator.async_refresh()
         self._build_extra_attributes(range_start, range_end)
         self._get_current_event()
 
@@ -384,7 +368,7 @@ class MS365CalendarEntity(
     async def async_create_calendar_event(self, subject, start, end, **kwargs):
         """Create the event."""
 
-        self._validate_permissions()
+        self._validate_calendar_permissions()
 
         event = await cast(
             MS365CalendarSyncCoordinator, self.coordinator
@@ -405,7 +389,7 @@ class MS365CalendarEntity(
     ):
         """Modify the event."""
 
-        self._validate_permissions()
+        self._validate_calendar_permissions()
 
         if self.api.group_calendar:
             _group_calendar_log(self.entity_id)
@@ -438,7 +422,7 @@ class MS365CalendarEntity(
         recurrence_range: str | None = None,
     ):
         """Remove the event."""
-        self._validate_permissions()
+        self._validate_calendar_permissions()
 
         if self.api.group_calendar:
             _group_calendar_log(self.entity_id)
@@ -464,7 +448,7 @@ class MS365CalendarEntity(
         self, event_id, response, send_response=True, message=None
     ):
         """Respond to calendar event."""
-        self._validate_permissions()
+        self._validate_calendar_permissions()
 
         if self.api.group_calendar:
             _group_calendar_log(self.entity_id)
@@ -474,18 +458,9 @@ class MS365CalendarEntity(
         self._raise_event(EVENT_RESPOND_CALENDAR_EVENT, event_id)
         self.async_schedule_update_ha_state(True)
 
-    def _validate_permissions(self):
-        if not self._entry.runtime_data.permissions.validate_authorization(
-            PERM_CALENDARS_READWRITE
-        ):
-            raise ServiceValidationError(
-                translation_domain=DOMAIN,
-                translation_key="not_authorised_to_event",
-                translation_placeholders={
-                    "calendar": self._name,
-                    "error_message": PERM_CALENDARS_READWRITE,
-                },
-            )
+    def _validate_calendar_permissions(self):
+        self._validate_permissions(PERM_CALENDARS_READWRITE, PERM_CALENDARS_READWRITE)
+
         if not self._update_supported:
             raise ServiceValidationError(
                 translation_domain=DOMAIN,
