@@ -6,7 +6,6 @@ from datetime import datetime
 from typing import Any, cast
 
 from homeassistant.core import HomeAssistant
-from homeassistant.util import dt as dt_util
 from O365.calendar import Event  # pylint: disable=no-name-in-module)
 from requests.exceptions import HTTPError, RetryError
 
@@ -188,18 +187,18 @@ class MS365CalendarEventStoreService:
         self._calendar_id = calendar_id
         self._api = api
 
-    async def async_list_events(self, start_date, end_date):
-        """Return the set of events matching the criteria."""
+    # async def async_list_events(self, start_date, end_date):
+    #     """Return the set of events matching the criteria."""
 
-        timeline = await self.async_get_timeline(dt_util.get_default_time_zone())
+    #     timeline = await self.async_get_timeline(dt_util.get_default_time_zone())
 
-        events = list(
-            timeline.overlapping(
-                start_date,
-                end_date,
-            )
-        )
-        return events
+    #     events = list(
+    #         timeline.overlapping(
+    #             start_date,
+    #             end_date,
+    #         )
+    #     )
+    #     return events
 
     async def async_get_timeline(self, tzinfo: datetime.tzinfo) -> MS365Timeline:
         """Get the timeline of events."""

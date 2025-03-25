@@ -1,7 +1,7 @@
 # pylint: disable=unused-argument,line-too-long,wrong-import-order
 """Test service usage."""
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest.mock import patch
 
 import pytest
@@ -9,6 +9,7 @@ from homeassistant.components.calendar import CREATE_EVENT_SERVICE, SERVICE_GET_
 from homeassistant.components.calendar import DOMAIN as CALENDAR_DOMAIN
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
+from homeassistant.util import dt as dt_util
 from requests_mock import Mocker
 from voluptuous.error import MultipleInvalid
 from zoneinfo import ZoneInfo
@@ -37,11 +38,35 @@ async def test_update_service_setup(
     assert hass.services.has_service(DOMAIN, "respond_calendar_event")
 
 
-async def test_get_events(
+async def test_get_events_inside_range(
     hass: HomeAssistant,
     setup_base_integration,
 ) -> None:
-    """Test get events - HA Service."""
+    """Test get events inside range - HA Service."""
+    calendar_name = "calendar.test_calendar1"
+    start_date = dt_util.now() + timedelta(days=-1)
+    end_date = dt_util.now() + timedelta(days=1)
+    result = await hass.services.async_call(
+        CALENDAR_DOMAIN,
+        SERVICE_GET_EVENTS,
+        {
+            "entity_id": calendar_name,
+            "start_date_time": start_date.strftime("%Y-%m-%dT00:00:00.000Z"),
+            "end_date_time": end_date.strftime("%Y-%m-%dT00:00:00.000Z"),
+        },
+        blocking=True,
+        return_response=True,
+    )
+    assert calendar_name in result
+    assert "events" in result[calendar_name]
+    assert len(result[calendar_name]["events"]) == 2
+
+
+async def test_get_events_outside_range(
+    hass: HomeAssistant,
+    setup_base_integration,
+) -> None:
+    """Test get events outside range - HA Service."""
     calendar_name = "calendar.test_calendar1"
     result = await hass.services.async_call(
         CALENDAR_DOMAIN,
@@ -57,6 +82,33 @@ async def test_get_events(
     assert calendar_name in result
     assert "events" in result[calendar_name]
     assert len(result[calendar_name]["events"]) == 2
+
+async def test_get_events_too_quick(
+    hass: HomeAssistant,
+    setup_base_integration,
+    caplog: pytest.LogCaptureFixture,
+    base_config_entry: MS365MockConfigEntry,
+) -> None:
+    """Test error fetching data."""
+    coordinator = base_config_entry.runtime_data.coordinator[0]
+    coordinator.data = None
+    calendar_name = "calendar.test_calendar1"
+    with pytest.raises(HomeAssistantError) as exc_info:
+        await hass.services.async_call(
+            CALENDAR_DOMAIN,
+            SERVICE_GET_EVENTS,
+            {
+                "entity_id": calendar_name,
+                "start_date_time": "2022-03-22T20:00:00.000Z",
+                "end_date_time": "2022-03-22T22:00:00.000Z",
+            },
+            blocking=True,
+            return_response=True,
+        )
+    assert (
+        str(exc_info.value)
+        == "Unable to get events: Sync from server has not completed"
+    )
 
 
 @pytest.mark.parametrize(

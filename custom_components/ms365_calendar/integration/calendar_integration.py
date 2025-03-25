@@ -26,7 +26,6 @@ from homeassistant.helpers import entity_platform
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
-from requests.exceptions import HTTPError
 
 from ..classes.config_entry import MS365ConfigEntry
 from ..const import CONF_ENABLE_UPDATE, CONF_ENTITY_NAME, EVENT_HA_EVENT
@@ -387,12 +386,10 @@ class MS365CalendarEntity(
 
         self._validate_permissions()
 
-        try:
-            event = await cast(
-                MS365CalendarSyncCoordinator, self.coordinator
-            ).sync.store_service.async_add_event(subject, start, end, **kwargs)
-        except HTTPError as err:
-            raise HomeAssistantError(f"Error while creating event: {err!s}") from err
+        event = await cast(
+            MS365CalendarSyncCoordinator, self.coordinator
+        ).sync.store_service.async_add_event(subject, start, end, **kwargs)
+
         self._raise_event(EVENT_CREATE_CALENDAR_EVENT, event.object_id)
         await self.coordinator.async_refresh()
 
@@ -426,13 +423,6 @@ class MS365CalendarEntity(
             await self._async_update_calendar_event(
                 event_id, EVENT_MODIFY_CALENDAR_EVENT, subject, start, end, **kwargs
             )
-
-    def _log_error(self, error, err):
-        if not self._error:
-            _LOGGER.warning("%s - %s", error, err)
-            self._error = True
-        else:
-            _LOGGER.debug("Repeat error - %s - %s", error, err)
 
     async def _async_update_calendar_event(
         self, event_id, ha_event, subject, start, end, **kwargs

@@ -165,9 +165,9 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
 
         return dt_util.as_utc(date_obj)
 
-    @property
-    def upcoming(self) -> Iterable[Event] | None:
-        """Return upcoming events if any."""
-        if self._upcoming_timeline:
-            return self._upcoming_timeline.active_after(dt_util.now())
-        return None
+    # @property
+    # def upcoming(self) -> Iterable[Event] | None:
+    #     """Return upcoming events if any."""
+    #     if self._upcoming_timeline:
+    #         return self._upcoming_timeline.active_after(dt_util.now())
+    #     return None
