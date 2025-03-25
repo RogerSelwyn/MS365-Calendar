@@ -242,16 +242,16 @@ class MS365CalendarEntity(
         _LOGGER.debug("Start get_events for %s", self.name)
 
         results = await self.coordinator.async_get_events(start_date, end_date)
-        events = self._create_calendar_event_entities(results)
+        events = self._build_calendar_events(results)
 
         _LOGGER.debug("End get_events for %s", self.name)
         return events
 
-    def _create_calendar_event_entities(self, results):
+    def _build_calendar_events(self, results):
         event_list = []
         for vevent in results:
             try:
-                event_list.append(self._create_calendar_event_entity(vevent))
+                event_list.append(self._build_calendar_event(vevent))
             except HomeAssistantError as err:
                 _LOGGER.warning(
                     "Invalid event found - Error: %s, Event: %s", err, vevent
@@ -259,7 +259,7 @@ class MS365CalendarEntity(
 
         return event_list
 
-    def _create_calendar_event_entity(self, vevent):
+    def _build_calendar_event(self, vevent):
         event = CalendarEvent(
             get_hass_date(vevent.start, vevent.is_all_day),
             get_hass_date(get_end_date(vevent), vevent.is_all_day),
@@ -303,30 +303,20 @@ class MS365CalendarEntity(
 
     def _get_current_event(self):
         vevent = self.coordinator.get_current_event()
-        if vevent is None:
+        if not vevent:
             _LOGGER.debug(
                 "No matching event found in the calendar results for %s",
                 self.entity_id,
             )
-            event = None
+            self._event = None
             return
-        try:
-            event = self._create_calendar_event_entity(vevent)
-            self._error = False
-        except HomeAssistantError as err:
-            if not self._error:
-                _LOGGER.warning(
-                    "Invalid event found - Error: %s, Event: %s", err, vevent
-                )
-                self._error = True
-        event = deepcopy(event)
 
-        if event:
-            event.summary, offset = extract_offset(event.summary, DEFAULT_OFFSET)
-            start = MS365CalendarSyncCoordinator.to_datetime(event.start)
-            self._offset_reached = is_offset_reached(start, offset)
-
-        self._event = event
+        self._event = deepcopy(self._build_calendar_event(vevent))
+        self._event.summary, offset = extract_offset(
+            self._event.summary, DEFAULT_OFFSET
+        )
+        start = MS365CalendarSyncCoordinator.to_datetime(self._event.start)
+        self._offset_reached = is_offset_reached(start, offset)
 
     def _build_extra_attributes(self, range_start, range_end):
         if self.coordinator.data is not None:
