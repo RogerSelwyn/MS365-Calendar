@@ -202,10 +202,8 @@ class MS365CalendarEventStoreService:
 
     async def async_get_timeline(self, tzinfo: datetime.tzinfo) -> MS365Timeline:
         """Get the timeline of events."""
-        # if tzinfo is None:
-        #     tzinfo = dt_util.UTC
         events_data = await self._lookup_events_data()
-        # _LOGGER.debug("Created timeline of %s events", len(events_data))
+        _LOGGER.debug("Created timeline of %s events", len(events_data))
 
         return await self._async_build_timeline(events_data, tzinfo)
 
@@ -218,6 +216,7 @@ class MS365CalendarEventStoreService:
         """Add the specified event to the calendar.
         You should sync the event store after adding an event.
         """
+        # TODO: Should be adding to the event store I believe
         _LOGGER.debug("Adding event: %s", subject)
         return await self._api.async_create_event(subject, start, end, **kwargs)
 
@@ -226,13 +225,12 @@ class MS365CalendarEventStoreService:
         This method is used to delete an existing event. For a recurring event
         either the whole event or instances of an event may be deleted.
         """
-
+        # TODO: Should be delete from the event store I believe
         _LOGGER.debug("Deleting event: %s", event_id)
         await self._api.async_delete_event(event_id)
 
     async def _lookup_events_data(self) -> dict[str, Any]:
         """Lookup the raw events storage dictionary."""
-        # _LOGGER.debug("Lookup events data - %s", self._calendar_id)
         store_data = await self._store.async_load() or {}
         store_data.setdefault(ITEMS, {})
         return store_data.get(ITEMS, {})  # type: ignore[no-any-return]
