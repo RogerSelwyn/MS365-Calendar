@@ -46,6 +46,7 @@ CONF_CAL_ID = "cal_id"
 CONF_CALENDAR_LIST = "calendar_list"
 CONF_DEVICE_ID = "device_id"
 CONF_ENTITIES = "entities"
+CONF_ENTITY = "entity"
 CONF_EXCLUDE = "exclude"
 CONF_GROUPS = "groups"
 CONF_HOURS_BACKWARD_TO_GET = "start_offset"
@@ -55,7 +56,9 @@ CONF_SEARCH = "search"
 CONF_SENSITIVITY_EXCLUDE = "sensitivity_exclude"
 CONF_TRACK = "track"
 CONF_TRACK_NEW_CALENDAR = "track_new_calendar"
+CONF_UPDATE_CALENDAR = "update_calendar"
 CONF_UPDATE_INTERVAL = "update_interval"
+
 
 CONST_GROUP = "group:"
 

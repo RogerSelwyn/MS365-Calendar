@@ -39,10 +39,10 @@ class MS365CalendarEventSyncManager:
         """Return the local API for fetching events."""
         return MS365CalendarEventStoreService(self._store, self.calendar_id, self._api)
 
-    # @property
-    # def api(self) -> MS365CalendarService:
-    #     """Return the cloud API."""
-    #     return self._api
+    @property
+    def api(self) -> MS365CalendarService:
+        """Return the cloud API."""
+        return self._api
 
     async def async_list_events(self, start_date, end_date):
         """Return the set of events matching the criteria."""

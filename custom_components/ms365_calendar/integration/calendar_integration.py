@@ -19,7 +19,7 @@ from homeassistant.components.calendar import (
     extract_offset,
     is_offset_reached,
 )
-from homeassistant.const import CONF_NAME
+from homeassistant.const import CONF_ENTITY_ID, CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import entity_platform
@@ -29,7 +29,7 @@ from homeassistant.util import dt as dt_util
 from requests.exceptions import HTTPError
 
 from ..classes.config_entry import MS365ConfigEntry
-from ..const import CONF_ENABLE_UPDATE, CONF_ENTITY_NAME, EVENT_HA_EVENT
+from ..const import CONF_ENTITY_NAME, EVENT_HA_EVENT
 from ..helpers.utils import clean_html
 from .const_integration import (
     ATTR_ALL_DAY,
@@ -38,17 +38,14 @@ from .const_integration import (
     ATTR_EVENT_ID,
     ATTR_HEX_COLOR,
     ATTR_OFFSET,
-    CONF_CAL_ID,
     CONF_DEVICE_ID,
-    CONF_ENTITIES,
+    CONF_ENTITY,
     CONF_EXCLUDE,
     CONF_HOURS_BACKWARD_TO_GET,
     CONF_HOURS_FORWARD_TO_GET,
     CONF_MAX_RESULTS,
-    CONF_SEARCH,
-    CONF_SENSITIVITY_EXCLUDE,
-    CONF_TRACK,
     CONF_TRACK_NEW_CALENDAR,
+    CONF_UPDATE_CALENDAR,
     DEFAULT_OFFSET,
     DOMAIN,
     EVENT_CREATE_CALENDAR_EVENT,
@@ -58,30 +55,20 @@ from .const_integration import (
     EVENT_REMOVE_CALENDAR_RECURRENCES,
     EVENT_RESPOND_CALENDAR_EVENT,
     PERM_CALENDARS_READWRITE,
-    YAML_CALENDARS_FILENAME,
 )
 from .coordinator_integration import (
     MS365CalendarSyncCoordinator,
 )
 from .filemgmt_integration import (
     async_update_calendar_file,
-    build_yaml_file_path,
-    build_yaml_filename,
-    load_yaml_file,
 )
 from .schema_integration import (
     CALENDAR_SERVICE_CREATE_SCHEMA,
     CALENDAR_SERVICE_MODIFY_SCHEMA,
     CALENDAR_SERVICE_REMOVE_SCHEMA,
     CALENDAR_SERVICE_RESPOND_SCHEMA,
-    YAML_CALENDAR_DEVICE_SCHEMA,
 )
-from .store_integration import LocalCalendarStore
-from .sync.api import MS365CalendarService
-from .sync.store import ScopedCalendarStore
-from .sync.sync import MS365CalendarEventSyncManager
 from .utils_integration import (
-    build_calendar_entity_id,
     format_event_data,
     get_end_date,
     get_hass_date,
@@ -92,113 +79,43 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def async_integration_setup_entry(
-    hass: HomeAssistant,
+    hass: HomeAssistant,  # pylint: disable=unused-argument
     entry: MS365ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the MS365 platform."""
 
-    update_supported = bool(
-        entry.data[CONF_ENABLE_UPDATE]
-        and entry.runtime_data.permissions.validate_authorization(
-            PERM_CALENDARS_READWRITE
-        )
-    )
-    calendars = await async_scan_for_calendars(hass, entry)
-    await _async_setup_add_entities(
-        hass,
-        entry.runtime_data.ha_account.account,
-        async_add_entities,
-        entry,
-        update_supported,
-        calendars,
-    )
+    cal_no = 0
+    update_supported = False
+    for key in entry.runtime_data.sensors:
+        for coordinator in entry.runtime_data.coordinator:
+            entity = key[CONF_ENTITY]
+            device_id = entity[CONF_DEVICE_ID]
+            entity_id = key[CONF_ENTITY_ID]
+            update_calendar = key[CONF_UPDATE_CALENDAR]
+            if device_id != coordinator.name:
+                continue
+            if update_calendar:
+                update_supported = True
+            cal = MS365CalendarEntity(
+                coordinator.sync.api,
+                coordinator,
+                coordinator.sync.calendar_id,
+                entity,
+                entity_id,
+                device_id,
+                entry,
+                update_calendar,
+            )
+            async_add_entities([cal], False)
+            cal_no += 1
+            if cal_no < len(entry.runtime_data.sensors):
+                await asyncio.sleep(DELAY_BETWEEN_LOAD)
+            break
 
     await _async_setup_register_services(update_supported)
 
     return True
-
-
-async def _async_setup_add_entities(
-    hass,
-    account,
-    async_add_entities,
-    entry: MS365ConfigEntry,
-    update_supported,
-    calendar_edit_list,
-):
-    yaml_filename = build_yaml_filename(entry, YAML_CALENDARS_FILENAME)
-    yaml_filepath = build_yaml_file_path(hass, yaml_filename)
-    calendars = await hass.async_add_executor_job(
-        load_yaml_file, yaml_filepath, CONF_CAL_ID, YAML_CALENDAR_DEVICE_SCHEMA
-    )
-
-    local_store = LocalCalendarStore(hass, entry.entry_id)
-
-    cal_no = 0
-    for cal_id, calendar in calendars.items():
-        for entity in calendar.get(CONF_ENTITIES):
-            if not entity[CONF_TRACK]:
-                continue
-            can_edit = next(
-                (
-                    calendar_edit.can_edit
-                    for calendar_edit in calendar_edit_list
-                    if calendar_edit.calendar_id == cal_id
-                ),
-                True,
-            )
-            entity_id = build_calendar_entity_id(
-                entity.get(CONF_DEVICE_ID), entry.data[CONF_ENTITY_NAME]
-            )
-
-            update_calendar = update_supported and can_edit
-            device_id = entity["device_id"]
-            try:
-                api = MS365CalendarService(
-                    hass,
-                    account,
-                    cal_id,
-                    entity.get(CONF_SENSITIVITY_EXCLUDE),
-                    entity.get(CONF_SEARCH),
-                )
-                await api.async_calendar_init()
-                unique_id = f"{entity.get(CONF_NAME)}"
-                sync_manager = MS365CalendarEventSyncManager(
-                    api,
-                    cal_id,
-                    store=ScopedCalendarStore(local_store, unique_id),
-                    exclude=entity.get(CONF_EXCLUDE),
-                )
-                coordinator = MS365CalendarSyncCoordinator(
-                    hass,
-                    entry,
-                    sync_manager,
-                    unique_id,
-                )
-                cal = MS365CalendarEntity(
-                    api,
-                    coordinator,
-                    cal_id,
-                    entity,
-                    entity_id,
-                    device_id,
-                    entry,
-                    update_calendar,
-                )
-            except HTTPError:
-                _LOGGER.warning(
-                    "No permission for calendar, please remove - Name: %s; Device: %s;",
-                    entity[CONF_NAME],
-                    entity[CONF_DEVICE_ID],
-                )
-                continue
-
-            async_add_entities([cal], False)
-            cal_no += 1
-            if cal_no < len(calendars.items()):
-                await asyncio.sleep(DELAY_BETWEEN_LOAD)
-    return
 
 
 async def _async_setup_register_services(update_supported):
@@ -603,12 +520,10 @@ class MS365CalendarEntity(
         _LOGGER.debug("%s - %s", event_type, event_id)
 
 
-async def async_scan_for_calendars(hass, entry: MS365ConfigEntry):
+async def async_scan_for_calendars(hass, entry: MS365ConfigEntry, account):
     """Scan for new calendars."""
 
-    schedule = await hass.async_add_executor_job(
-        entry.runtime_data.ha_account.account.schedule
-    )
+    schedule = await hass.async_add_executor_job(account.schedule)
     calendars = await hass.async_add_executor_job(schedule.list_calendars)
     track = entry.options.get(CONF_TRACK_NEW_CALENDAR, True)
     for calendar in calendars:
