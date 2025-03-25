@@ -29,7 +29,7 @@ from homeassistant.util import dt as dt_util
 from requests.exceptions import HTTPError
 
 from ..classes.config_entry import MS365ConfigEntry
-from ..const import CONF_ENTITY_NAME, EVENT_HA_EVENT
+from ..const import CONF_ENABLE_UPDATE, CONF_ENTITY_NAME, EVENT_HA_EVENT
 from ..helpers.utils import clean_html
 from .const_integration import (
     ATTR_ALL_DAY,
@@ -38,6 +38,7 @@ from .const_integration import (
     ATTR_EVENT_ID,
     ATTR_HEX_COLOR,
     ATTR_OFFSET,
+    CONF_CAN_EDIT,
     CONF_DEVICE_ID,
     CONF_ENTITY,
     CONF_EXCLUDE,
@@ -45,7 +46,6 @@ from .const_integration import (
     CONF_HOURS_FORWARD_TO_GET,
     CONF_MAX_RESULTS,
     CONF_TRACK_NEW_CALENDAR,
-    CONF_UPDATE_CALENDAR,
     DEFAULT_OFFSET,
     DOMAIN,
     EVENT_CREATE_CALENDAR_EVENT,
@@ -85,18 +85,23 @@ async def async_integration_setup_entry(
 ) -> None:
     """Set up the MS365 platform."""
 
+    config_update_supported = bool(
+        entry.data[CONF_ENABLE_UPDATE]
+        and entry.runtime_data.permissions.validate_authorization(
+            PERM_CALENDARS_READWRITE
+        )
+    )
+
     cal_no = 0
-    update_supported = False
     for key in entry.runtime_data.sensors:
         for coordinator in entry.runtime_data.coordinator:
             entity = key[CONF_ENTITY]
             device_id = entity[CONF_DEVICE_ID]
             entity_id = key[CONF_ENTITY_ID]
-            update_calendar = key[CONF_UPDATE_CALENDAR]
+            can_edit = key[CONF_CAN_EDIT]
+            update_supported = config_update_supported and can_edit
             if device_id != coordinator.name:
                 continue
-            if update_calendar:
-                update_supported = True
             cal = MS365CalendarEntity(
                 coordinator.sync.api,
                 coordinator,
@@ -105,7 +110,7 @@ async def async_integration_setup_entry(
                 entity_id,
                 device_id,
                 entry,
-                update_calendar,
+                update_supported,
             )
             async_add_entities([cal], False)
             cal_no += 1
@@ -113,15 +118,15 @@ async def async_integration_setup_entry(
                 await asyncio.sleep(DELAY_BETWEEN_LOAD)
             break
 
-    await _async_setup_register_services(update_supported)
+    await _async_setup_register_services(config_update_supported)
 
     return True
 
 
-async def _async_setup_register_services(update_supported):
+async def _async_setup_register_services(config_update_supported):
     platform = entity_platform.async_get_current_platform()
 
-    if update_supported:
+    if config_update_supported:
         platform.async_register_entity_service(
             "create_calendar_event",
             CALENDAR_SERVICE_CREATE_SCHEMA,

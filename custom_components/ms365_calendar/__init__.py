@@ -57,7 +57,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
         check_token = await _async_check_token(hass, ha_account.account, entity_name)
         if check_token:
             coordinator, sensors, platforms = await setup_integration.async_do_setup(
-                hass, entry, ha_account.account, perms
+                hass, entry, ha_account.account
             )
             entry.runtime_data = MS365Data(
                 perms,

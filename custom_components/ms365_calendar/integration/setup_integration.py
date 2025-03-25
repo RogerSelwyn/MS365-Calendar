@@ -9,10 +9,11 @@ from homeassistant.core import HomeAssistant
 from requests.exceptions import HTTPError
 
 from ..classes.config_entry import MS365ConfigEntry
-from ..const import CONF_ENABLE_UPDATE, CONF_ENTITY_NAME
+from ..const import CONF_ENTITY_NAME
 from .calendar_integration import async_scan_for_calendars
 from .const_integration import (
     CONF_CAL_ID,
+    CONF_CAN_EDIT,
     CONF_DEVICE_ID,
     CONF_ENTITIES,
     CONF_ENTITY,
@@ -20,8 +21,6 @@ from .const_integration import (
     CONF_SEARCH,
     CONF_SENSITIVITY_EXCLUDE,
     CONF_TRACK,
-    CONF_UPDATE_CALENDAR,
-    PERM_CALENDARS_READWRITE,
     PLATFORMS,
     YAML_CALENDARS_FILENAME,
 )
@@ -45,19 +44,15 @@ from .utils_integration import build_calendar_entity_id
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_do_setup(hass: HomeAssistant, entry: ConfigEntry, account, permissions):  # pylint: disable=unused-argument
+async def async_do_setup(hass: HomeAssistant, entry: ConfigEntry, account):
     """Run the setup after we have everything configured."""
-    update_supported = bool(
-        entry.data[CONF_ENABLE_UPDATE]
-        and permissions.validate_authorization(PERM_CALENDARS_READWRITE)
-    )
-    calendars = await async_scan_for_calendars(hass, entry, account)
+
+    scanned_calendars = await async_scan_for_calendars(hass, entry, account)
     coordinators, keys = await _async_setup_coordinators(
         hass,
         account,
         entry,
-        update_supported,
-        calendars,
+        scanned_calendars,
     )
 
     return coordinators, keys, PLATFORMS
@@ -77,8 +72,7 @@ async def _async_setup_coordinators(
     hass,
     account,
     entry: MS365ConfigEntry,
-    update_supported,
-    calendar_edit_list,
+    scanned_calendars,
 ):
     yaml_filename = build_yaml_filename(entry, YAML_CALENDARS_FILENAME)
     yaml_filepath = build_yaml_file_path(hass, yaml_filename)
@@ -96,9 +90,9 @@ async def _async_setup_coordinators(
                 continue
             can_edit = next(
                 (
-                    calendar_edit.can_edit
-                    for calendar_edit in calendar_edit_list
-                    if calendar_edit.calendar_id == cal_id
+                    scanned_calendar.can_edit
+                    for scanned_calendar in scanned_calendars
+                    if scanned_calendar.calendar_id == cal_id
                 ),
                 True,
             )
@@ -106,12 +100,11 @@ async def _async_setup_coordinators(
                 entity.get(CONF_DEVICE_ID), entry.data[CONF_ENTITY_NAME]
             )
 
-            update_calendar = update_supported and can_edit
             keys.append(
                 {
                     CONF_ENTITY: entity,
                     CONF_ENTITY_ID: entity_id,
-                    CONF_UPDATE_CALENDAR: update_calendar,
+                    CONF_CAN_EDIT: can_edit,
                 }
             )
             try:
