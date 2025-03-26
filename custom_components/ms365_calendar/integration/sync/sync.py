@@ -75,14 +75,12 @@ class MS365CalendarEventSyncManager:
             end_date=dt_util.now() + SYNC_EVENT_MAX_TIME,
         )
         store_data.setdefault(ITEMS, {})
-        store_data[ITEMS] = _items_func(new_data)
+        store_data[ITEMS].update(_items_func(new_data))
         await self._store.async_save(store_data)
 
 
 def _items_func(events) -> dict[str, Any]:
     items = {}
     for item in events:
-        # if not item.object_id:
-        #     continue
         items[item.object_id] = item
     return items

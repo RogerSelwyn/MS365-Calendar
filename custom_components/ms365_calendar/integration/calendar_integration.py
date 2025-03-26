@@ -73,7 +73,7 @@ from .utils_integration import (
     get_hass_date,
 )
 
-DELAY_BETWEEN_LOAD = 2
+DELAY_BETWEEN_LOAD = 0.5
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -407,13 +407,13 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
             await self._async_update_calendar_event(
                 event_id, EVENT_MODIFY_CALENDAR_EVENT, subject, start, end, **kwargs
             )
+        await self.coordinator.async_refresh()
 
     async def _async_update_calendar_event(
         self, event_id, ha_event, subject, start, end, **kwargs
     ):
         await self.api.async_patch_event(event_id, subject, start, end, **kwargs)
         self._raise_event(ha_event, event_id)
-        self.async_schedule_update_ha_state(True)
 
     async def async_remove_calendar_event(
         self,
@@ -440,9 +440,8 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
         await cast(
             MS365CalendarSyncCoordinator, self.coordinator
         ).sync.store_service.async_delete_event(event_id)
-        await self.coordinator.async_refresh()
         self._raise_event(ha_event, event_id)
-        self.async_schedule_update_ha_state(True)
+        await self.coordinator.async_refresh()
 
     async def async_respond_calendar_event(
         self, event_id, response, send_response=True, message=None
@@ -454,9 +453,8 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
             _group_calendar_log(self.entity_id)
 
         await self.api.async_send_response(event_id, response, send_response, message)
-        await self.coordinator.async_refresh()
         self._raise_event(EVENT_RESPOND_CALENDAR_EVENT, event_id)
-        self.async_schedule_update_ha_state(True)
+        await self.coordinator.async_refresh()
 
     def _validate_calendar_permissions(self):
         self._validate_permissions(PERM_CALENDARS_READWRITE, PERM_CALENDARS_READWRITE)

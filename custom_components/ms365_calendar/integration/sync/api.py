@@ -225,7 +225,7 @@ class MS365CalendarEventStoreService:
         This method is used to delete an existing event. For a recurring event
         either the whole event or instances of an event may be deleted.
         """
-        # TODO: Should be delete from the event store I believe
+        # TODO: Should be deleting from the event store I believe
         _LOGGER.debug("Deleting event: %s", event_id)
         await self._api.async_delete_event(event_id)
 
