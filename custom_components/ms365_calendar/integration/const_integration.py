@@ -44,8 +44,10 @@ CALENDAR_ENTITY_ID_FORMAT = "calendar.{}"
 CONF_BASIC_CALENDAR = "basic_calendar"
 CONF_CAL_ID = "cal_id"
 CONF_CALENDAR_LIST = "calendar_list"
+CONF_CAN_EDIT = "can_edit"
 CONF_DEVICE_ID = "device_id"
 CONF_ENTITIES = "entities"
+CONF_ENTITY = "entity"
 CONF_EXCLUDE = "exclude"
 CONF_GROUPS = "groups"
 CONF_HOURS_BACKWARD_TO_GET = "start_offset"
@@ -55,6 +57,8 @@ CONF_SEARCH = "search"
 CONF_SENSITIVITY_EXCLUDE = "sensitivity_exclude"
 CONF_TRACK = "track"
 CONF_TRACK_NEW_CALENDAR = "track_new_calendar"
+CONF_UPDATE_INTERVAL = "update_interval"
+
 
 CONST_GROUP = "group:"
 
@@ -69,6 +73,9 @@ DAYS = {
 }
 
 DEFAULT_OFFSET = "!!"
+DEFAULT_UPDATE_INTERVAL = 300
+DEFAULT_SYNC_EVENT_MIN_TIME = -60
+DEFAULT_SYNC_EVENT_MAX_TIME = 90
 
 EVENT_CREATE_CALENDAR_EVENT = "create_calendar_event"
 EVENT_MODIFY_CALENDAR_EVENT = "modify_calendar_event"
@@ -76,6 +83,7 @@ EVENT_MODIFY_CALENDAR_RECURRENCES = "modify_calendar_recurrences"
 EVENT_REMOVE_CALENDAR_EVENT = "remove_calendar_event"
 EVENT_REMOVE_CALENDAR_RECURRENCES = "remove_calendar_recurrences"
 EVENT_RESPOND_CALENDAR_EVENT = "respond_calendar_event"
+EVENT_SYNC = "event_sync"
 
 INDEXES = {
     "+1": "first",
@@ -84,6 +92,7 @@ INDEXES = {
     "+4": "fourth",
     "-1": "last",
 }
+ITEMS = "items"
 
 PERM_CALENDARS_READ = "Calendars.Read"
 PERM_CALENDARS_READBASIC = "Calendars.ReadBasic"

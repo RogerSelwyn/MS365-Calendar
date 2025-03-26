@@ -47,6 +47,9 @@ class MS365Mocks:
         mock_call(requests_mock, CN21VURL.DISCOVERY, "discovery")
         mock_call(requests_mock, CN21VURL.OPENID, "openid")
         mock_call(requests_mock, CN21VURL.ME, "me")
+        mock_call(requests_mock, CN21VURL.CALENDARS, "calendars")
+        mock_call(requests_mock, CN21VURL.CALENDARS, "calendar1", "calendar1")
+        mock_call(requests_mock, CN21VURL.CALENDARS, "calendar3", "calendar3")
 
     def shared_mocks(self, requests_mock):
         """Setup the standard mocks."""

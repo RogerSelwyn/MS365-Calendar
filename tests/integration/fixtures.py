@@ -34,6 +34,17 @@ def yaml_storage_path_setup(tmp_path):
         yield
 
 
+@pytest.fixture(autouse=True)
+def patch_delay(tmp_path):
+    """Patch the delay."""
+
+    with patch(
+        "custom_components.ms365_calendar.integration.calendar_integration.DELAY_BETWEEN_LOAD",
+        0,
+    ):
+        yield
+
+
 @dataclass
 class ListenerSetupData:
     """A collection of data set up by the listener_setup fixture."""
