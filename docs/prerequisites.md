@@ -11,13 +11,13 @@ Since the middle of 2024, Microsoft has mandated that any new app registrations 
 ## Getting the client ID and client secret
 To allow authentication, you first need to register your application at Entra ID App Registrations:
 
-1. Login at [Azure Portal (App Registrations)](https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationsListBlade). Personal accounts may receive an authentication notification that can be ignored.
+1. Login at [Entra ID Portal (App Registrations)](https://entra.microsoft.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade). Personal accounts may receive an authentication notification that can be ignored.
 
 2. Create a new App Registration. Give it a name (e.g., `Home Assistant MS365`). 
 
    - In Supported account types, choose one of the following as needed by your setup:
-      * `Accounts in any organizational directory (Any Azure AD directory - Multitenant) and personal Microsoft accounts (e.g. Skype, Xbox)`.   
-      * `Accounts in any organizational directory (Any Azure AD directory - Multitenant)` 
+      * `Accounts in any organizational directory (Any Microsoft Entra ID tenant - Multitenant) and personal Microsoft accounts (e.g. Skype, Xbox)`.   
+      * `Accounts in any organizational directory (Any Microsoft Entra ID tenant - Multitenant)` 
 
       **Do not use the following:** 
       * `Accounts in this organizational directory only (xxxxx only - Single tenant)` 
