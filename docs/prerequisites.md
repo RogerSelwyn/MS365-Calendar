@@ -31,6 +31,6 @@ To allow authentication, you first need to register your application at Entra ID
 
 4. From the Overview page, copy the Application (client) ID.
 
-5. Click `Certificates & secrets` in the Manage section on the left side or `Add a certificate or secret` in the main section. Click `New client secret`. Give it a Description (e.g., Home Assistant MS365 Calendar) and Set the expiration as desired (this appears to be limited to 2 years) and Click `Add`. Copy the **Value** of the client secret now (NOT the Secret ID), it will be hidden later on.  If you lose track of the secret, return here to generate a new one.
+5. Click `Certificates & secrets` in the Manage section on the left side or `Add a certificate or secret` in the main section. Click `New client secret`. Give it a Description (e.g., 'Home Assistant MS365') and Set the expiration as desired (this appears to be limited to 2 years) and Click `Add`. Copy the **Value** of the client secret now (NOT the Secret ID), it will be hidden later on.  If you lose track of the secret, return here to generate a new one.
 
 6. Click `API permissions` in the Manage section on the left side. Click `Add a permission`, then `Microsoft Graph`, then `Delegated permissions`, add the permissions as detailed on the [permissions page](./permissions.md), and Cliick `Add permissions`.
