@@ -6,7 +6,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .classes.config_entry import MS365ConfigEntry
 from .integration.calendar_integration import async_integration_setup_entry
 
-PARALLEL_UPDATES = 8
+PARALLEL_UPDATES = 1
 
 
 async def async_setup_entry(

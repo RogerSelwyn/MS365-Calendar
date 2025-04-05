@@ -27,6 +27,10 @@ _LOGGER = logging.getLogger(__name__)
 
 def format_event_data(event):
     """Format the event data."""
+    # if hasattr(event.attendees, "attendees"):
+    #     attendees = event.attendees.attendees
+    # else:
+    attendees = event.attendees._Attendees__attendees  # pylint: disable=protected-access
     return {
         "summary": event.subject,
         "start": get_hass_date(event.start, event.is_all_day),
@@ -42,8 +46,7 @@ def format_event_data(event):
             "is_on": event.is_reminder_on,
         },
         "attendees": [
-            {"email": x.address, "type": x.attendee_type.value}
-            for x in event.attendees._Attendees__attendees  # pylint: disable=protected-access
+            {"email": x.address, "type": x.attendee_type.value} for x in attendees
         ],
         "uid": event.object_id,
     }
