@@ -72,7 +72,6 @@ class MS365CalendarEventSyncManager:
 
     async def run(self, sync_event_min_time, sync_event_max_time) -> None:
         """Run the event sync manager."""
-        _LOGGER.debug("Syncing Calendar Events: %s", self.calendar_id)
         # store_data = await self._store.async_load() or {}
         start_date = dt_util.now() + sync_event_min_time
         end_date = dt_util.now() + sync_event_max_time
