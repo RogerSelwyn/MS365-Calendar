@@ -2,17 +2,21 @@
 
 import logging
 import re
-from datetime import timedelta
-from typing import Any
 
+# from typing import Any
+# from dateutil import parser
 from homeassistant.util import dt as dt_util
 
+# from O365.calendar import (  # pylint: disable=no-name-in-module
+#     EventSensitivity,
+#     EventShowAs,
+#     ImportanceLevel,
+# )
+# from pytest import Item
 from ..const_integration import EVENT_SYNC, ITEMS
 from .api import MS365CalendarEventStoreService, MS365CalendarService
 from .store import CalendarStore, ScopedCalendarStore
 
-SYNC_EVENT_MIN_TIME = timedelta(days=-60)
-SYNC_EVENT_MAX_TIME = timedelta(days=90)
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -66,21 +70,55 @@ class MS365CalendarEventSyncManager:
 
         return rtn_events
 
-    async def run(self) -> None:
+    async def run(self, sync_event_min_time, sync_event_max_time) -> None:
         """Run the event sync manager."""
-        # _LOGGER.debug("Syncing Calendar Events: %s", self.calendar_id)
-        store_data = await self._store.async_load() or {}
+        _LOGGER.debug("Syncing Calendar Events: %s", self.calendar_id)
+        # store_data = await self._store.async_load() or {}
+        start_date = dt_util.now() + sync_event_min_time
+        end_date = dt_util.now() + sync_event_max_time
         new_data = await self.async_list_events(
-            start_date=dt_util.now() + SYNC_EVENT_MIN_TIME,
-            end_date=dt_util.now() + SYNC_EVENT_MAX_TIME,
+            start_date=start_date,
+            end_date=end_date,
         )
-        store_data.setdefault(ITEMS, {})
-        store_data[ITEMS].update(_items_func(new_data))
+
+        # store_data[ITEMS].update(_add_update_func(store_data, new_data))
+        store_data = {}
+        items = {}
+        for item in new_data:
+            items[item.object_id] = item
+        store_data[ITEMS] = items
         await self._store.async_save(store_data)
 
 
-def _items_func(events) -> dict[str, Any]:
-    items = {}
-    for item in events:
-        items[item.object_id] = item
-    return items
+# def _add_update_func(store_data, new_data) -> dict[str, Any]:
+#     items = {}
+#     for item in new_data:
+#         items[item.object_id] = item
+#     for key, value in store_data[ITEMS].items():
+#         if key not in items and isinstance(value, dict):
+#             items[key] = DictObj(value)
+#     return items
+
+
+# class DictObj:
+#     """To convert from dict to object."""
+
+#     def __init__(self, in_dict: dict):
+#         assert isinstance(in_dict, dict)
+#         for key, val in in_dict.items():
+#             if isinstance(val, (list, tuple)):
+#                 setattr(
+#                     self, key, [DictObj(x) if isinstance(x, dict) else x for x in val]
+#                 )
+#             elif key in ["start", "end"]:
+#                 setattr(self, key, parser.parse(val))
+#             elif key in ["location"]:
+#                 setattr(self, key, val)
+#             elif key in ["sensitivity"]:
+#                 setattr(self, key, EventSensitivity(val))
+#             elif key in ["show_as"]:
+#                 setattr(self, key, EventShowAs(val))
+#             elif key in ["importance"]:
+#                 setattr(self, key, ImportanceLevel(val))
+#             else:
+#                 setattr(self, key, DictObj(val) if isinstance(val, dict) else val)

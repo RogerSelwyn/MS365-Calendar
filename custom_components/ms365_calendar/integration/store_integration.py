@@ -16,7 +16,7 @@ from .sync.store import CalendarStore
 STORAGE_KEY_FORMAT = "{domain}.Storage-{entry_id}"
 STORAGE_VERSION = 1
 # Buffer writes every few minutes (plus guaranteed to be written at shutdown)
-STORAGE_SAVE_DELAY_SECONDS = 120
+STORAGE_SAVE_DELAY_SECONDS = 10
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -39,6 +39,13 @@ class JSONEncoder(json.JSONEncoder):
             ] and not key.startswith("_"):
                 if isinstance(v, datetime):
                     val = str(v)
+                elif key in [
+                    "sensitivity",
+                    "importance",
+                    "show_as",
+                    "event_type",
+                ] and not isinstance(v, str):
+                    val = v.value
                 else:
                     val = v
                 attributes[key] = val

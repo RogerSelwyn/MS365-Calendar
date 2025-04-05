@@ -44,15 +44,15 @@ async def test_get_events_inside_range(
 ) -> None:
     """Test get events inside range - HA Service."""
     calendar_name = "calendar.test_calendar1"
-    start_date = dt_util.now() + timedelta(days=-1)
-    end_date = dt_util.now() + timedelta(days=1)
+    start_date = dt_util.utcnow() + timedelta(hours=1)
+    end_date = dt_util.utcnow() + timedelta(hours=23)
     result = await hass.services.async_call(
         CALENDAR_DOMAIN,
         SERVICE_GET_EVENTS,
         {
             "entity_id": calendar_name,
-            "start_date_time": start_date.strftime("%Y-%m-%dT00:00:00.000Z"),
-            "end_date_time": end_date.strftime("%Y-%m-%dT00:00:00.000Z"),
+            "start_date_time": start_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "end_date_time": end_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
         },
         blocking=True,
         return_response=True,

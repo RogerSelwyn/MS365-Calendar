@@ -59,11 +59,25 @@
         "step": {
             "user": {
                 "data": {
-                    "update_interval": "Update interval in seconds",
                     "track_new_calendar": "Enable new calendars",
                     "calendar_list": "Enabled calendars"
                 },
-                "description": "Setup options for {entity_name}"
+                "description": "Setup options for {entity_name}",
+                "sections": {
+                    "advanced_options": {
+                        "name": "Advanced options",
+                        "description": "Advanced syncronisation configuration",
+                        "data": {
+                            "update_interval": "Update interval in seconds",
+                            "days_backward": "Number of days backwards",
+                            "days_forward": "Number of days forward"
+                        },
+                        "data_description": {
+                            "days_backward": "Days backward to sync to store",
+                            "days_forward": "Days forward to sync to store"
+                        }
+                    }
+                }
             },
             "calendar_config": {
                 "data": {

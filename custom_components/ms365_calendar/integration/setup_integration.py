@@ -125,10 +125,7 @@ async def _async_setup_coordinators(
                 )
                 coordinators.append(
                     MS365CalendarSyncCoordinator(
-                        hass,
-                        entry,
-                        sync_manager,
-                        unique_id,
+                        hass, entry, sync_manager, unique_id, entity
                     )
                 )
             except HTTPError:

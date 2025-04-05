@@ -41,10 +41,13 @@ ATTR_TYPE = "type"
 
 CALENDAR_ENTITY_ID_FORMAT = "calendar.{}"
 
+CONF_ADVANCED_OPTIONS = "advanced_options"
 CONF_BASIC_CALENDAR = "basic_calendar"
 CONF_CAL_ID = "cal_id"
 CONF_CALENDAR_LIST = "calendar_list"
 CONF_CAN_EDIT = "can_edit"
+CONF_DAYS_BACKWARD = "days_backward"
+CONF_DAYS_FORWARD = "days_forward"
 CONF_DEVICE_ID = "device_id"
 CONF_ENTITIES = "entities"
 CONF_ENTITY = "entity"
@@ -72,10 +75,10 @@ DAYS = {
     "SU": "sunday",
 }
 
+DEFAULT_DAYS_BACKWARD = 0
+DEFAULT_DAYS_FORWARD = 1
 DEFAULT_OFFSET = "!!"
-DEFAULT_UPDATE_INTERVAL = 300
-DEFAULT_SYNC_EVENT_MIN_TIME = -60
-DEFAULT_SYNC_EVENT_MAX_TIME = 90
+DEFAULT_UPDATE_INTERVAL = 30
 
 EVENT_CREATE_CALENDAR_EVENT = "create_calendar_event"
 EVENT_MODIFY_CALENDAR_EVENT = "modify_calendar_event"

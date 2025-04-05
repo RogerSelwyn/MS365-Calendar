@@ -12,9 +12,14 @@ from homeassistant.util import dt as dt_util
 from O365.calendar import Event  # pylint: disable=no-name-in-module)
 
 from .const_integration import (
+    CONF_ADVANCED_OPTIONS,
+    CONF_DAYS_BACKWARD,
+    CONF_DAYS_FORWARD,
+    CONF_HOURS_BACKWARD_TO_GET,
+    CONF_HOURS_FORWARD_TO_GET,
     CONF_UPDATE_INTERVAL,
-    DEFAULT_SYNC_EVENT_MAX_TIME,
-    DEFAULT_SYNC_EVENT_MIN_TIME,
+    DEFAULT_DAYS_BACKWARD,
+    DEFAULT_DAYS_FORWARD,
     DEFAULT_UPDATE_INTERVAL,
 )
 from .sync.sync import MS365CalendarEventSyncManager
@@ -38,9 +43,10 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
         entry: ConfigEntry,
         sync: MS365CalendarEventSyncManager,
         name: str,
+        entity,
     ) -> None:
         """Create the CalendarSyncUpdateCoordinator."""
-        update_interval = entry.options.get(
+        update_interval = entry.options.get(CONF_ADVANCED_OPTIONS, {}).get(
             CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL
         )
         super().__init__(
@@ -50,17 +56,37 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
             name=name,
             update_interval=timedelta(seconds=update_interval),
         )
+        days_backward = entry.options.get(CONF_ADVANCED_OPTIONS, {}).get(
+            CONF_DAYS_BACKWARD, DEFAULT_DAYS_BACKWARD
+        )
+        days_forward = entry.options.get(CONF_ADVANCED_OPTIONS, {}).get(
+            CONF_DAYS_FORWARD, DEFAULT_DAYS_FORWARD
+        )
         self.sync = sync
         self._upcoming_timeline: MS365Timeline | None = None
         self.event = None
-        self._sync_event_min_time = timedelta(days=DEFAULT_SYNC_EVENT_MIN_TIME)
-        self._sync_event_max_time = timedelta(days=DEFAULT_SYNC_EVENT_MAX_TIME)
+        self._start_offset = entity.get(CONF_HOURS_BACKWARD_TO_GET)
+        self._end_offset = entity.get(CONF_HOURS_FORWARD_TO_GET)
+        self._sync_event_min_time = timedelta(
+            days=(
+                self._start_offset / 24
+                if self._start_offset / 24 < days_backward
+                else days_backward
+            )
+        )
+        self._sync_event_max_time = timedelta(
+            days=(
+                self._end_offset / 24
+                if self._end_offset / 24 > days_forward
+                else days_forward
+            )
+        )
 
     async def _async_update_data(self) -> MS365Timeline:
         """Fetch data from API endpoint."""
         _LOGGER.debug("Started fetching %s data", self.name)
         try:
-            await self.sync.run()
+            await self.sync.run(self._sync_event_min_time, self._sync_event_max_time)
         except Exception as err:
             raise UpdateFailed(f"Error communicating with API: {err}") from err
 
@@ -84,7 +110,7 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
         sync_end_time = dt_util.now() + self._sync_event_max_time
         # If the request is for outside of the sync'ed data, manually request it now,
         # will not cache it though
-        if end_date < sync_start_time or start_date > sync_end_time:
+        if start_date < sync_start_time or end_date > sync_end_time:
             events = await self.sync.async_list_events(start_date, end_date)
 
         else:
