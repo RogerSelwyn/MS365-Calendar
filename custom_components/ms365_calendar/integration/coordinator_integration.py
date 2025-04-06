@@ -68,18 +68,10 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
         self._start_offset = entity.get(CONF_HOURS_BACKWARD_TO_GET)
         self._end_offset = entity.get(CONF_HOURS_FORWARD_TO_GET)
         self._sync_event_min_time = timedelta(
-            days=(
-                self._start_offset / 24
-                if self._start_offset / 24 < days_backward
-                else days_backward
-            )
+            days=(min(self._start_offset / 24, days_backward))
         )
         self._sync_event_max_time = timedelta(
-            days=(
-                self._end_offset / 24
-                if self._end_offset / 24 > days_forward
-                else days_forward
-            )
+            days=(max(self._end_offset / 24, days_forward))
         )
 
     async def _async_update_data(self) -> MS365Timeline:
@@ -111,9 +103,17 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
         # If the request is for outside of the sync'ed data, manually request it now,
         # will not cache it though
         if start_date < sync_start_time or end_date > sync_end_time:
+            _LOGGER.debug(
+                "Fetch events from api - %s - %s - %s", self.name, start_date, end_date
+            )
             events = await self.sync.async_list_events(start_date, end_date)
-
         else:
+            _LOGGER.debug(
+                "Fetch events from cache - %s - %s - %s",
+                self.name,
+                start_date,
+                end_date,
+            )
             events = self.data.overlapping(
                 start_date,
                 end_date,
