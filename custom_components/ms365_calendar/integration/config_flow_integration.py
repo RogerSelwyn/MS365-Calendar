@@ -5,7 +5,7 @@ from copy import deepcopy
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant import (
-    config_entries,  # exceptions
+    config_entries,
 )
 from homeassistant.const import CONF_NAME
 from homeassistant.data_entry_flow import FlowResult, section

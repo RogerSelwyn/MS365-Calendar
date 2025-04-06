@@ -71,7 +71,6 @@ class LocalCalendarStore(CalendarStore):
 
     async def async_load(self) -> dict[str, Any] | None:
         """Load data."""
-        # _LOGGER.debug("Load data")
         if self._data is None:
             _LOGGER.debug("Load from store")
             self._data = await self._store.async_load() or {}
@@ -86,7 +85,6 @@ class LocalCalendarStore(CalendarStore):
 
             return data
 
-        # _LOGGER.debug("Save data")
         self._store.async_delay_save(provide_data, STORAGE_SAVE_DELAY_SECONDS)
 
     async def async_remove(self) -> None:

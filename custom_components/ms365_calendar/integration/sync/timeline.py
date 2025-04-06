@@ -3,7 +3,6 @@
 from collections.abc import Generator, Iterable
 from datetime import datetime  # time
 
-# from homeassistant.util import dt as dt_util
 from ical.iter import (
     MergedIterable,
     SortableItem,

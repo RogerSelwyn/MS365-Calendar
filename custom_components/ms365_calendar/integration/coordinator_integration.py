@@ -84,7 +84,6 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
         except Exception as err:
             raise UpdateFailed(f"Error communicating with API: {err}") from err
 
-        # _LOGGER.debug("Updating Data from API Endpoint %s", self.sync.calendar_id)
         timeline = await self.sync.store_service.async_get_timeline(
             dt_util.get_default_time_zone()
         )
@@ -100,7 +99,7 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
                 "Unable to get events: Sync from server has not completed"
             )
 
-        # If the request is for outside of the sync'ed data, manually request it now,
+        # If the request is for outside of the synced data, manually request it now,
         # will not cache it though
         if start_date < self._last_sync_min or end_date > self._last_sync_max:
             _LOGGER.debug(
@@ -190,10 +189,3 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
             date_obj = obj
 
         return dt_util.as_utc(date_obj)
-
-    # @property
-    # def upcoming(self) -> Iterable[Event] | None:
-    #     """Return upcoming events if any."""
-    #     if self._upcoming_timeline:
-    #         return self._upcoming_timeline.active_after(dt_util.now())
-    #     return None
