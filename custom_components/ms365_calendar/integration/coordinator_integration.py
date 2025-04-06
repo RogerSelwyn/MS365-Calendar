@@ -65,20 +65,22 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
         self.sync = sync
         self._upcoming_timeline: MS365Timeline | None = None
         self.event = None
-        self._start_offset = entity.get(CONF_HOURS_BACKWARD_TO_GET)
-        self._end_offset = entity.get(CONF_HOURS_FORWARD_TO_GET)
         self._sync_event_min_time = timedelta(
-            days=(min(self._start_offset / 24, days_backward))
+            days=(min(entity.get(CONF_HOURS_BACKWARD_TO_GET) / 24, days_backward))
         )
         self._sync_event_max_time = timedelta(
-            days=(max(self._end_offset / 24, days_forward))
+            days=(max(entity.get(CONF_HOURS_FORWARD_TO_GET) / 24, days_forward))
         )
+        self._last_sync_min = None
+        self._last_sync_max = None
 
     async def _async_update_data(self) -> MS365Timeline:
         """Fetch data from API endpoint."""
         _LOGGER.debug("Started fetching %s data", self.name)
         try:
-            await self.sync.run(self._sync_event_min_time, self._sync_event_max_time)
+            self._last_sync_min = dt_util.now() + self._sync_event_min_time
+            self._last_sync_max = dt_util.now() + self._sync_event_max_time
+            await self.sync.run(self._last_sync_min, self._last_sync_max)
         except Exception as err:
             raise UpdateFailed(f"Error communicating with API: {err}") from err
 
@@ -98,11 +100,9 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
                 "Unable to get events: Sync from server has not completed"
             )
 
-        sync_start_time = dt_util.now() + self._sync_event_min_time
-        sync_end_time = dt_util.now() + self._sync_event_max_time
         # If the request is for outside of the sync'ed data, manually request it now,
         # will not cache it though
-        if start_date < sync_start_time or end_date > sync_end_time:
+        if start_date < self._last_sync_min or end_date > self._last_sync_max:
             _LOGGER.debug(
                 "Fetch events from api - %s - %s - %s", self.name, start_date, end_date
             )

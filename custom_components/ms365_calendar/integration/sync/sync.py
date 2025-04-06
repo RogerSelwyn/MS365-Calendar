@@ -3,16 +3,6 @@
 import logging
 import re
 
-# from typing import Any
-# from dateutil import parser
-from homeassistant.util import dt as dt_util
-
-# from O365.calendar import (  # pylint: disable=no-name-in-module
-#     EventSensitivity,
-#     EventShowAs,
-#     ImportanceLevel,
-# )
-# from pytest import Item
 from ..const_integration import EVENT_SYNC, ITEMS
 from .api import MS365CalendarEventStoreService, MS365CalendarService
 from .store import CalendarStore, ScopedCalendarStore
@@ -70,11 +60,9 @@ class MS365CalendarEventSyncManager:
 
         return rtn_events
 
-    async def run(self, sync_event_min_time, sync_event_max_time) -> None:
+    async def run(self, start_date, end_date) -> None:
         """Run the event sync manager."""
         # store_data = await self._store.async_load() or {}
-        start_date = dt_util.now() + sync_event_min_time
-        end_date = dt_util.now() + sync_event_max_time
         new_data = await self.async_list_events(
             start_date=start_date,
             end_date=end_date,
