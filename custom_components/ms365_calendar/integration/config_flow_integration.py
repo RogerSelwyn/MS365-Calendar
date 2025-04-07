@@ -155,10 +155,10 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
                         CONF_TRACK_NEW_CALENDAR,
                         default=self._track_new_calendar,
                     ): BOOLEAN_SELECTOR,
-                    vol.Required(CONF_ADVANCED_OPTIONS): section(
+                    vol.Optional(CONF_ADVANCED_OPTIONS): section(
                         vol.Schema(
                             {
-                                vol.Required(
+                                vol.Optional(
                                     CONF_UPDATE_INTERVAL,
                                     default=self.config_entry.options.get(
                                         CONF_ADVANCED_OPTIONS, {}
@@ -166,13 +166,13 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
                                         CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL
                                     ),
                                 ): vol.All(vol.Coerce(int), vol.Range(min=15, max=600)),
-                                vol.Required(
+                                vol.Optional(
                                     CONF_DAYS_BACKWARD,
                                     default=self.config_entry.options.get(
                                         CONF_ADVANCED_OPTIONS, {}
                                     ).get(CONF_DAYS_BACKWARD, DEFAULT_DAYS_BACKWARD),
                                 ): vol.All(vol.Coerce(int), vol.Range(min=-90, max=90)),
-                                vol.Required(
+                                vol.Optional(
                                     CONF_DAYS_FORWARD,
                                     default=self.config_entry.options.get(
                                         CONF_ADVANCED_OPTIONS, {}
