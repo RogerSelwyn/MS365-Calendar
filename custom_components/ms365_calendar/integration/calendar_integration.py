@@ -306,8 +306,9 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
                 if event.end >= range_start and event.start <= range_end
             ]
             data_events = self._sort_events(data_events)
-            for event in data_events:
-                self._data_attribute.append(format_event_data(event))
+            self._data_attribute.extend(
+                format_event_data(event) for event in data_events
+            )
 
     async def async_create_event(self, **kwargs: Any) -> None:
         """Add a new event to calendar."""

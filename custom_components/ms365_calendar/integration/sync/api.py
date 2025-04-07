@@ -41,7 +41,6 @@ class MS365CalendarService:
         """Init the MS365 Calendar service."""
         self.hass = hass
         self.calendar_id = calendar_id
-        self._schedule = None
         self.calendar = None
         self._account = account
         self.group_calendar = calendar_id.startswith(CONST_GROUP)
@@ -53,19 +52,14 @@ class MS365CalendarService:
     async def async_calendar_init(self):
         """Async init of calendar data."""
         if self.group_calendar:
-            self._schedule = None
             self.calendar = await self.hass.async_add_executor_job(
                 ft.partial(self._account.schedule, resource=self.calendar_id)
             )
         else:
-            self._schedule = await self.hass.async_add_executor_job(
-                self._account.schedule
-            )
+            schedule = await self.hass.async_add_executor_job(self._account.schedule)
             try:
                 self.calendar = await self.hass.async_add_executor_job(
-                    ft.partial(
-                        self._schedule.get_calendar, calendar_id=self.calendar_id
-                    )
+                    ft.partial(schedule.get_calendar, calendar_id=self.calendar_id)
                 )
                 return True
             except (HTTPError, RetryError, ConnectionError) as err:
