@@ -2,3 +2,4 @@
 pytest-homeassistant-custom-component>=0.13
 aiohttp-zlib-ng
 oauthlib
+ical==9.1.0
