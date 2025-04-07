@@ -55,8 +55,17 @@ Key | Type | Required | Description
 -- | -- | -- | --
 `country` | `string` | `True` | Selection of an alternate country specific API. Currently only 21Vianet from China.
 
-### Options variables
+### Options
 
 Key | Type | Required | Description
 -- | -- | -- | --
+`calendar_list` | `list[string]` | `False` | The selectable list of calendars for which calendar entities will be created.
 `track_new_calendar` | `boolean` | `False` | If True (default), will automatically generate a calendar_entity when a new calendar is detected. The system scans for new calendars only on startup or reconfiguration/reload.
+
+### Advanced Options
+
+Key | Type | Required | Description
+-- | -- | -- | --
+`update_interval` | `integer` | `False` | How often in seconds that events will be retrieved and synced to store. Default 60. Range: 15 - 600
+`days_backward` | `integer` | `False` | The days backward from `now` for which events will be synced to store. Default -8. Range: -90 - 90
+`days_forward` | `integer` | `False` | The days forward from `now` for which events will be synced to store. Default 8. Range: -90 - 90

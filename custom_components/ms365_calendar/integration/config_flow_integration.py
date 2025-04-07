@@ -5,10 +5,10 @@ from copy import deepcopy
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant import (
-    config_entries,  # exceptions
+    config_entries,
 )
 from homeassistant.const import CONF_NAME
-from homeassistant.data_entry_flow import FlowResult
+from homeassistant.data_entry_flow import FlowResult, section
 from homeassistant.helpers import entity_registry
 from homeassistant.helpers.selector import BooleanSelector
 
@@ -20,8 +20,11 @@ from ..const import (
 )
 from ..helpers.utils import add_attribute_to_item
 from .const_integration import (
+    CONF_ADVANCED_OPTIONS,
     CONF_BASIC_CALENDAR,
     CONF_CALENDAR_LIST,
+    CONF_DAYS_BACKWARD,
+    CONF_DAYS_FORWARD,
     CONF_DEVICE_ID,
     CONF_ENTITIES,
     CONF_GROUPS,
@@ -31,6 +34,10 @@ from .const_integration import (
     CONF_SENSITIVITY_EXCLUDE,
     CONF_TRACK,
     CONF_TRACK_NEW_CALENDAR,
+    CONF_UPDATE_INTERVAL,
+    DEFAULT_DAYS_BACKWARD,
+    DEFAULT_DAYS_FORWARD,
+    DEFAULT_UPDATE_INTERVAL,
     YAML_CALENDARS_FILENAME,
 )
 from .filemgmt_integration import (
@@ -148,6 +155,33 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
                         CONF_TRACK_NEW_CALENDAR,
                         default=self._track_new_calendar,
                     ): BOOLEAN_SELECTOR,
+                    vol.Optional(CONF_ADVANCED_OPTIONS): section(
+                        vol.Schema(
+                            {
+                                vol.Optional(
+                                    CONF_UPDATE_INTERVAL,
+                                    default=self.config_entry.options.get(
+                                        CONF_ADVANCED_OPTIONS, {}
+                                    ).get(
+                                        CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL
+                                    ),
+                                ): vol.All(vol.Coerce(int), vol.Range(min=15, max=600)),
+                                vol.Optional(
+                                    CONF_DAYS_BACKWARD,
+                                    default=self.config_entry.options.get(
+                                        CONF_ADVANCED_OPTIONS, {}
+                                    ).get(CONF_DAYS_BACKWARD, DEFAULT_DAYS_BACKWARD),
+                                ): vol.All(vol.Coerce(int), vol.Range(min=-90, max=90)),
+                                vol.Optional(
+                                    CONF_DAYS_FORWARD,
+                                    default=self.config_entry.options.get(
+                                        CONF_ADVANCED_OPTIONS, {}
+                                    ).get(CONF_DAYS_FORWARD, DEFAULT_DAYS_FORWARD),
+                                ): vol.All(vol.Coerce(int), vol.Range(min=-90, max=90)),
+                            }
+                        ),
+                        {"collapsed": True},
+                    ),
                 }
             ),
             errors=errors,

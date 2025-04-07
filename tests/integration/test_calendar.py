@@ -7,10 +7,8 @@ from datetime import date, datetime, timedelta
 from unittest.mock import patch
 
 import pytest
-from freezegun.api import FrozenDateTimeFactory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
-from pytest_homeassistant_custom_component.common import async_fire_time_changed
 from requests.exceptions import HTTPError
 from requests_mock import Mocker
 from zoneinfo import ZoneInfo
@@ -74,7 +72,7 @@ async def test_perms_error(
     """Test permissions error."""
 
     with patch(
-        f"custom_components.{DOMAIN}.integration.calendar_integration.MS365CalendarData.async_calendar_data_init",
+        f"custom_components.{DOMAIN}.integration.sync.api.MS365CalendarService.async_calendar_init",
         side_effect=HTTPError(),
     ):
         await update_options(hass, base_config_entry)
@@ -86,24 +84,23 @@ async def test_fetch_error(
     hass: HomeAssistant,
     setup_base_integration,
     caplog: pytest.LogCaptureFixture,
-    freezer: FrozenDateTimeFactory,
+    base_config_entry: MS365MockConfigEntry,
 ) -> None:
     """Test error fetching data."""
+    coordinator = base_config_entry.runtime_data.coordinator[0]
     with patch(
-        f"custom_components.{DOMAIN}.integration.calendar_integration.MS365CalendarData.async_update_data",
+        "O365.calendar.Calendar.get_events",
         side_effect=HTTPError(),
     ):
-        freezer.tick(timedelta(minutes=1))
-        async_fire_time_changed(hass)
+        await coordinator.async_refresh()
         await hass.async_block_till_done()
     assert "Error getting calendar events for data" in caplog.text
 
     with patch(
-        f"custom_components.{DOMAIN}.integration.calendar_integration.MS365CalendarData.async_update_data",
+        "O365.calendar.Calendar.get_events",
         side_effect=HTTPError(),
     ):
-        freezer.tick(timedelta(minutes=1))
-        async_fire_time_changed(hass)
+        await coordinator.async_refresh()
         await hass.async_block_till_done()
     assert "Repeat error - Error getting calendar events for data" in caplog.text
 

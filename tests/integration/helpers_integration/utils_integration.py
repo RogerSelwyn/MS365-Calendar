@@ -6,11 +6,18 @@ from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
 
 from custom_components.ms365_calendar.integration.const_integration import (
+    CONF_ADVANCED_OPTIONS,
     CONF_CALENDAR_LIST,
+    CONF_DAYS_BACKWARD,
+    CONF_DAYS_FORWARD,
     CONF_HOURS_BACKWARD_TO_GET,
     CONF_HOURS_FORWARD_TO_GET,
     CONF_MAX_RESULTS,
     CONF_TRACK_NEW_CALENDAR,
+    CONF_UPDATE_INTERVAL,
+    DEFAULT_DAYS_BACKWARD,
+    DEFAULT_DAYS_FORWARD,
+    DEFAULT_UPDATE_INTERVAL,
     DOMAIN,
 )
 
@@ -38,6 +45,11 @@ async def update_options(
         user_input={
             CONF_TRACK_NEW_CALENDAR: False,
             CONF_CALENDAR_LIST: UPDATE_CALENDAR_LIST,
+            CONF_ADVANCED_OPTIONS: {
+                CONF_UPDATE_INTERVAL: DEFAULT_UPDATE_INTERVAL,
+                CONF_DAYS_BACKWARD: DEFAULT_DAYS_BACKWARD,
+                CONF_DAYS_FORWARD: DEFAULT_DAYS_FORWARD,
+            },
         },
     )
     result = await hass.config_entries.options.async_configure(

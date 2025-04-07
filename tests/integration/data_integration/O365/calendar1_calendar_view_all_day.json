@@ -3,7 +3,7 @@
     "value": [
         {
             "@odata.etag": "W/\"qIkRKy24jUSQwhcjI6uJIQAIopRuag==\"",
-            "id": "event1",
+            "id": "eventall_day",
             "categories": [],
             "reminderMinutesBeforeStart": 0,
             "isReminderOn": false,
