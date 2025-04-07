@@ -9,7 +9,14 @@ from homeassistant.core import HomeAssistant
 from O365.calendar import Event  # pylint: disable=no-name-in-module)
 from requests.exceptions import HTTPError, RetryError
 
-from ..const_integration import CONST_GROUP, ITEMS, EventResponse
+from ...classes.config_entry import MS365ConfigEntry
+from ..const_integration import (
+    CONF_TRACK_NEW_CALENDAR,
+    CONST_GROUP,
+    ITEMS,
+    EventResponse,
+)
+from ..filemgmt_integration import async_update_calendar_file
 from ..utils_integration import add_call_data_to_event
 from .store import CalendarStore
 from .timeline import MS365Timeline, calendar_timeline
@@ -221,3 +228,21 @@ class MS365CalendarEventStoreService:
         store_data = await self._store.async_load() or {}
         store_data.setdefault(ITEMS, {})
         return store_data.get(ITEMS, {})  # type: ignore[no-any-return]
+
+
+async def async_scan_for_calendars(hass, entry: MS365ConfigEntry, account):
+    """Scan for new calendars."""
+
+    schedule = await hass.async_add_executor_job(account.schedule)
+    calendars = await hass.async_add_executor_job(
+        ft.partial(schedule.list_calendars, limit=50)
+    )
+    track = entry.options.get(CONF_TRACK_NEW_CALENDAR, True)
+    for calendar in calendars:
+        await async_update_calendar_file(
+            entry,
+            calendar,
+            hass,
+            track,
+        )
+    return calendars

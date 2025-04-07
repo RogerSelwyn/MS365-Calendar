@@ -44,7 +44,6 @@ from .const_integration import (
     CONF_HOURS_BACKWARD_TO_GET,
     CONF_HOURS_FORWARD_TO_GET,
     CONF_MAX_RESULTS,
-    CONF_TRACK_NEW_CALENDAR,
     DEFAULT_OFFSET,
     DOMAIN,
     EVENT_CREATE_CALENDAR_EVENT,
@@ -57,9 +56,6 @@ from .const_integration import (
 )
 from .coordinator_integration import (
     MS365CalendarSyncCoordinator,
-)
-from .filemgmt_integration import (
-    async_update_calendar_file,
 )
 from .schema_integration import (
     CALENDAR_SERVICE_CREATE_SCHEMA,
@@ -476,22 +472,6 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
             {ATTR_EVENT_ID: event_id, EVENT_HA_EVENT: True},
         )
         _LOGGER.debug("%s - %s", event_type, event_id)
-
-
-async def async_scan_for_calendars(hass, entry: MS365ConfigEntry, account):
-    """Scan for new calendars."""
-
-    schedule = await hass.async_add_executor_job(account.schedule)
-    calendars = await hass.async_add_executor_job(schedule.list_calendars)
-    track = entry.options.get(CONF_TRACK_NEW_CALENDAR, True)
-    for calendar in calendars:
-        await async_update_calendar_file(
-            entry,
-            calendar,
-            hass,
-            track,
-        )
-    return calendars
 
 
 def _group_calendar_log(entity_id):

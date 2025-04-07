@@ -10,7 +10,6 @@ from requests.exceptions import HTTPError
 
 from ..classes.config_entry import MS365ConfigEntry
 from ..const import CONF_ENTITY_NAME
-from .calendar_integration import async_scan_for_calendars
 from .const_integration import (
     CONF_CAL_ID,
     CONF_CAN_EDIT,
@@ -34,7 +33,7 @@ from .filemgmt_integration import (
 )
 from .schema_integration import YAML_CALENDAR_DEVICE_SCHEMA
 from .store_integration import LocalCalendarStore
-from .sync.api import MS365CalendarService
+from .sync.api import MS365CalendarService, async_scan_for_calendars
 from .sync.store import ScopedCalendarStore
 from .sync.sync import (
     MS365CalendarEventSyncManager,
