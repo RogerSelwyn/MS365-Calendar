@@ -50,9 +50,7 @@ class JSONEncoder(json.JSONEncoder):
 
 def _beautify_key(key):
     index = key.find("__")
-    if index <= 0:
-        return key
-    return key[index + 2 :]
+    return key if index <= 0 else key[index + 2 :]
 
 
 class LocalCalendarStore(CalendarStore):

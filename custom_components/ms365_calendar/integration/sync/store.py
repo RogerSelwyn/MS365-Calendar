@@ -53,16 +53,12 @@ class ScopedCalendarStore(CalendarStore):
     async def async_load(self) -> dict[str, Any]:
         """Load data from the store."""
 
-        store_data = await self._store.async_load()
-        if not store_data:
-            store_data = {}
+        store_data = await self._store.async_load() or {}
         return store_data.get(self._key, {})  # type: ignore[no-any-return]
 
     async def async_save(self, data: dict[str, Any]) -> None:
         """Save data to the store, performing a read/modify/write"""
 
-        store_data = await self._store.async_load()
-        if not store_data:
-            store_data = {}
+        store_data = await self._store.async_load() or {}
         store_data[self._key] = data
         return await self._store.async_save(store_data)

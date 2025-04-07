@@ -42,8 +42,7 @@ class MS365CalendarEventSyncManager:
         """Return the set of events matching the criteria."""
         events = await self._api.async_list_events(start_date, end_date)
 
-        filtered_events = self._filter_events(list(events))
-        return filtered_events
+        return self._filter_events(list(events))
 
     def _filter_events(self, events):
         if not events or not self._exclude:
@@ -69,11 +68,8 @@ class MS365CalendarEventSyncManager:
         )
 
         # store_data[ITEMS].update(_add_update_func(store_data, new_data))
-        store_data = {}
-        items = {}
-        for item in new_data:
-            items[item.object_id] = item
-        store_data[ITEMS] = items
+        items = {item.object_id: item for item in new_data}
+        store_data = {ITEMS: items}
         await self._store.async_save(store_data)
 
 

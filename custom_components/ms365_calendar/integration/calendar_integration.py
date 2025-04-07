@@ -304,11 +304,11 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
     def _build_extra_attributes(self, range_start, range_end):
         if self.coordinator.data is not None:
             self._data_attribute = []
-            data_events = []
-            for event in self.coordinator.data:
-                if event.end >= range_start and event.start <= range_end:
-                    data_events.append(event)
-
+            data_events = [
+                event
+                for event in self.coordinator.data
+                if event.end >= range_start and event.start <= range_end
+            ]
             data_events = self._sort_events(data_events)
             for event in data_events:
                 self._data_attribute.append(format_event_data(event))

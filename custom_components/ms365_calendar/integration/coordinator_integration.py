@@ -105,7 +105,7 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
             _LOGGER.debug(
                 "Fetch events from api - %s - %s - %s", self.name, start_date, end_date
             )
-            events = await self.sync.async_list_events(start_date, end_date)
+            return await self.sync.async_list_events(start_date, end_date)
         else:
             _LOGGER.debug(
                 "Fetch events from cache - %s - %s - %s",
@@ -113,12 +113,10 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
                 start_date,
                 end_date,
             )
-            events = self.data.overlapping(
+            return self.data.overlapping(
                 start_date,
                 end_date,
             )
-
-        return events
 
     def get_current_event(self):
         """Get the current event."""
