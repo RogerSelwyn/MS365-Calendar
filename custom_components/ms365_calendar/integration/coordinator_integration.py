@@ -63,7 +63,7 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
             CONF_DAYS_FORWARD, DEFAULT_DAYS_FORWARD
         )
         self.sync = sync
-        self._upcoming_timeline: MS365Timeline | None = None
+        # self._upcoming_timeline: MS365Timeline | None = None
         self.event = None
         self._sync_event_min_time = timedelta(
             days=(min(entity.get(CONF_HOURS_BACKWARD_TO_GET) / 24, days_backward))
@@ -87,7 +87,7 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
         timeline = await self.sync.store_service.async_get_timeline(
             dt_util.get_default_time_zone()
         )
-        self._upcoming_timeline = timeline
+        # self._upcoming_timeline = timeline
         return timeline
 
     async def async_get_events(
