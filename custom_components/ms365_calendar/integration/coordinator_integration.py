@@ -84,11 +84,11 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
         except Exception as err:
             raise UpdateFailed(f"Error communicating with API: {err}") from err
 
-        timeline = await self.sync.store_service.async_get_timeline(
+        return await self.sync.store_service.async_get_timeline(
             dt_util.get_default_time_zone()
         )
         # self._upcoming_timeline = timeline
-        return timeline
+        # return timeline
 
     async def async_get_events(
         self, start_date: datetime, end_date: datetime
