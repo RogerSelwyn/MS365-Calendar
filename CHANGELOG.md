@@ -1,5 +1,66 @@
 # Changelog
 
+## v1.5.0b1 (2025/04/07)
+### 🐛 Fixes
+- [Correct procssing order to populate extra attributes](https://github.com/RogerSelwyn/MS365-Calendar/commit/93b55d90800d68d50210d40b5f2d314bedb67e9f) - @RogerSelwyn
+- [Fix MS365 Create Event](https://github.com/RogerSelwyn/MS365-Calendar/commit/96f200f4280bf5b824bb922b9aff6a74434bd38b) - @RogerSelwyn
+- [Fix send response behavior](https://github.com/RogerSelwyn/MS365-Calendar/commit/2a040479ecf17bf0a75476d76abdc26aaf5a5bec) - @None
+- [Fix the JSONEncoder](https://github.com/RogerSelwyn/MS365-Calendar/commit/d7d580a65766c984fe27d64bd70cc9530a515490) - @RogerSelwyn
+- [Add the sync directory](https://github.com/RogerSelwyn/MS365-Calendar/commit/d1846502f2975dd084eaf933b874cfac07ec45f9) - @RogerSelwyn
+- [Fix handling of data from store (then ignore)](https://github.com/RogerSelwyn/MS365-Calendar/commit/5297be15d7571a0e245147d649694501ee79f7fc) - @RogerSelwyn
+- [Increase limit on calendars retrieved](https://github.com/RogerSelwyn/MS365-Calendar/commit/a6e40a1f1379e518924525c5c3415c8f8dfec6da) - @RogerSelwyn
+- [Fix limiting to max_results](https://github.com/RogerSelwyn/MS365-Calendar/commit/ee7d536ce4286232e38d79db17636e11d0a3d03e) - @RogerSelwyn
+
+### 🧰 Maintenance
+- [Unpin msal](https://github.com/RogerSelwyn/MS365-Calendar/commit/f18bcfebc1ff81758206be70d9ea38d95dcc66ee) - @RogerSelwyn
+- [Remove unrequired imports and sort imports](https://github.com/RogerSelwyn/MS365-Calendar/commit/f38a9cc4c8009d935968f16b808a5e368b242f90) - @RogerSelwyn
+- [Remove unrequired imports and sort imp](https://github.com/RogerSelwyn/MS365-Calendar/commit/4d9039e5154b0b8214e0dd92e2dfe7f8d32b3998) - @RogerSelwyn
+- [Move import to top of file](https://github.com/RogerSelwyn/MS365-Calendar/commit/6b2de2be557ab2f0bb1035c425d65704d4be93ba) - @RogerSelwyn
+- [Remove base linting errors](https://github.com/RogerSelwyn/MS365-Calendar/commit/8e112eb1782234a1361080fa7208df2e9d895902) - @RogerSelwyn
+- [Split up code, add update interval config, delete store on remove](https://github.com/RogerSelwyn/MS365-Calendar/commit/a02453ab18a19ad92d847323357c3a0f58d43a42) - @RogerSelwyn
+- [Move coordinator setup to be consistent with MS365 integration standard](https://github.com/RogerSelwyn/MS365-Calendar/commit/2314cf95b27046eb48d098266f1b174ce5ede32e) - @RogerSelwyn
+- [Slight re-org to bring back to previous standard setup](https://github.com/RogerSelwyn/MS365-Calendar/commit/7804c8a346eab582d40090fa75318af1b1003ee2) - @RogerSelwyn
+- [Tidy up get_current_event](https://github.com/RogerSelwyn/MS365-Calendar/commit/1c1ebd8068d71be9cef3b32df59c51c406d4a90a) - @RogerSelwyn
+- [Remove unrequired code](https://github.com/RogerSelwyn/MS365-Calendar/commit/1c59d239124ba261da0b83f75b6d86241d3430e7) - @RogerSelwyn
+- [Use MS365Entity class for standardisation](https://github.com/RogerSelwyn/MS365-Calendar/commit/8bb558976ba7612e6f2a20be0f6d00a7891f1b0c) - @RogerSelwyn
+- [Add a couple of ToDos](https://github.com/RogerSelwyn/MS365-Calendar/commit/046a9c224ed3d28077b086ea1be21560938f8334) - @RogerSelwyn
+- [Tweak refreshes to use coordinator_refresh](https://github.com/RogerSelwyn/MS365-Calendar/commit/12ac905a749af4c3df10be995843ef7064ed4fd1) - @RogerSelwyn
+- [Remove codefactor errors](https://github.com/RogerSelwyn/MS365-Calendar/commit/7ced646c9ca60b97c1148cdcfb881ae713e2c767) - @RogerSelwyn
+- [Improvement in jsonencoder logic](https://github.com/RogerSelwyn/MS365-Calendar/commit/11625896dc3ca0772de4f896e01061dc59f49286) - @RogerSelwyn
+- [Improve min/max range and calculation](https://github.com/RogerSelwyn/MS365-Calendar/commit/7ea95ff092c1ae11c2773f78a8dc971599522d4a) - @RogerSelwyn
+- [Store last sync period for comparison](https://github.com/RogerSelwyn/MS365-Calendar/commit/0275a90951fc11211785659eea3a12a590431663) - @RogerSelwyn
+- [Remove unrequired commented lines](https://github.com/RogerSelwyn/MS365-Calendar/commit/f4efddda41c85cb254bcd00cdc10eb14a4fd6784) - @RogerSelwyn
+- [Set config options to optional](https://github.com/RogerSelwyn/MS365-Calendar/commit/aecd1683b7fa99b194387af5a8faefef7fff3c4e) - @RogerSelwyn
+- [Sourcery recommendations](https://github.com/RogerSelwyn/MS365-Calendar/commit/690e7b603da7756d8d4ad53d8541e631cf714558) - @RogerSelwyn
+- [Minor code tidy up](https://github.com/RogerSelwyn/MS365-Calendar/commit/8d76b463dbc82c821b00a59476a50a5a3c76a1d3) - @RogerSelwyn
+
+### ⬆️ Dependencies
+- [Update ruff to 0.11.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/2577783a0353c4ce0d6910cae38c8b0204bc5640) - @RogerSelwyn
+- [Bump python-o365 to 2.1.1](https://github.com/RogerSelwyn/MS365-Calendar/commit/d1cec1a231d645c724a50106fad651fcb2a086c8) - @RogerSelwyn
+- [Auto update requirements.txt](https://github.com/RogerSelwyn/MS365-Calendar/commit/53e332ff2788101982becca10798beb86ff18a80) - @actions-user
+
+### 📚 Documentation
+- [Update section on adding a redirect URI](https://github.com/RogerSelwyn/MS365-Calendar/commit/27b4a576c0fb6cd2b58a251bf37a1edce6cbd2b0) - @RogerSelwyn
+- [Update docs](https://github.com/RogerSelwyn/MS365-Calendar/commit/3e3ffa3d4390cd6f5bf7b20a3fb2d9f4589bb471) - @RogerSelwyn
+- [Update docs with new config options](https://github.com/RogerSelwyn/MS365-Calendar/commit/203582f8f1164867896cacd21d4daf4f4a89c9be) - @RogerSelwyn
+
+### ✅ Test
+- [Updating testing](https://github.com/RogerSelwyn/MS365-Calendar/commit/b8ee3a4607169b621dd7263436845f64f4ac4595) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.5.0b1](https://github.com/RogerSelwyn/MS365-Calendar/commit/76fd890632903c20ce23c62478b7860fb5901cf3) - @RogerSelwyn
+
+### Other
+- [build(deps): Bump ruff from 0.11.0 to 0.11.1](https://github.com/RogerSelwyn/MS365-Calendar/commit/d2046dadf5adb859ac46d69c8d61692ee97de5db) - @dependabot[bot]
+- [Get Local store save working](https://github.com/RogerSelwyn/MS365-Calendar/commit/92c74c3b3c4ae7141e02509b279ab2ad7472d41c) - @None
+- [Address outside time period missing data and improve debugging](https://github.com/RogerSelwyn/MS365-Calendar/commit/a07d1f4c1d9f9e88dcf7de46ddd425e4ba2ee6f6) - @None
+- [Update prerequisites.md](https://github.com/RogerSelwyn/MS365-Calendar/commit/ca1efede16a7817854a55727a92eb7133531bc64) - @GitHubGoody
+- [doc : Update docs](https://github.com/RogerSelwyn/MS365-Calendar/commit/72da88e74f9f06d2506735d76e913474753b50eb) - @RogerSelwyn
+- [build(deps): Bump ruff from 0.11.1 to 0.11.3](https://github.com/RogerSelwyn/MS365-Calendar/commit/c2151c656ea05fccb95b7de392aa8313500f39b1) - @dependabot[bot]
+
+
+
+
 ## v1.4.3 (2025/03/14)
 ### 🐛 Fixes
 - [Fix issue with token refresh - pin MSAL to 1.13.1](https://github.com/RogerSelwyn/MS365-Calendar/commit/1731f31a677b3cb6c0d3f5bc2f330a6870ac6f5f) - @RogerSelwyn
