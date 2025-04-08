@@ -1,6 +1,7 @@
 """Calendar coordinator processing."""
 
 import logging
+import traceback
 from collections.abc import Iterable
 from datetime import datetime, timedelta, timezone
 
@@ -9,6 +10,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
+
 from O365.calendar import Event  # pylint: disable=no-name-in-module)
 
 from .const_integration import (
@@ -82,7 +84,8 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
             self._last_sync_max = dt_util.now() + self._sync_event_max_time
             await self.sync.run(self._last_sync_min, self._last_sync_max)
         except Exception as err:
-            raise UpdateFailed(f"Error communicating with API: {err}") from err
+            err_traceback = traceback.format_exc()
+            raise UpdateFailed(f"Error communicating with API: {err_traceback}") from err
 
         return await self.sync.store_service.async_get_timeline(
             dt_util.get_default_time_zone()
