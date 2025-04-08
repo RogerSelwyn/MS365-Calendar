@@ -1,5 +1,22 @@
 # Changelog
 
+## v1.5.0b2 (2025/04/08)
+### 🧰 Maintenance
+- [Minor code change for sourcery](https://github.com/RogerSelwyn/MS365-Calendar/commit/f5ee40e82843ffacaa989ffcb3f1516fe2219b44) - @RogerSelwyn
+- [Add extra reporting for exception during coordinator update](https://github.com/RogerSelwyn/MS365-Calendar/commit/d6434db1836ad87dfd672b276d8620d569b9b2ca) - @RogerSelwyn
+
+### ✅ Test
+- [Add ical dependency](https://github.com/RogerSelwyn/MS365-Calendar/commit/53623e01ab5c54bd36efb625b025da466d80b4a2) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.5.0b2](https://github.com/RogerSelwyn/MS365-Calendar/commit/0f749d03ad5200c351e53c5fb5707f5651f01522) - @RogerSelwyn
+
+### Other
+- [build(deps): Bump ruff from 0.11.3 to 0.11.4](https://github.com/RogerSelwyn/MS365-Calendar/commit/69a82f39c1e16b02be23e0c63852602f644ac225) - @dependabot[bot]
+
+
+
+
 ## v1.5.0b1 (2025/04/07)
 ### 🐛 Fixes
 - [Correct procssing order to populate extra attributes](https://github.com/RogerSelwyn/MS365-Calendar/commit/93b55d90800d68d50210d40b5f2d314bedb67e9f) - @RogerSelwyn
