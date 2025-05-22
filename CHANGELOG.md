@@ -1,5 +1,27 @@
 # Changelog
 
+## v1.5.0 (2025/05/22)
+### 🧰 Maintenance
+- [Update bug_report.yml](https://github.com/RogerSelwyn/MS365-Calendar/commit/9fa7c3b29f02f4d8a00af5fabcf959cc73436929) - @RogerSelwyn
+- [Adjust requirements](https://github.com/RogerSelwyn/MS365-Calendar/commit/363b41d932d63ef34e39383b464e395cd00dda18) - @RogerSelwyn
+
+### ⬆️ Dependencies
+- [Pin to python-o365==2.1.2](https://github.com/RogerSelwyn/MS365-Calendar/commit/86d1ed754692126aa03afba50369adebc2ddb155) - @RogerSelwyn
+- [Auto update requirements.txt](https://github.com/RogerSelwyn/MS365-Calendar/commit/c58b0f43526cd95f93945bfdd08f5afe93109d0e) - @actions-user
+
+### 📚 Documentation
+- [Update readme](https://github.com/RogerSelwyn/MS365-Calendar/commit/7957f79309069b554bcc9b58d197dc4f31dc17e4) - @RogerSelwyn
+
+### ✅ Test
+- [Add .python-version for Rye](https://github.com/RogerSelwyn/MS365-Calendar/commit/859e61248780f9ab5a2fab10505192541dfe5613) - @RogerSelwyn
+- [Fix tests](https://github.com/RogerSelwyn/MS365-Calendar/commit/4436db519af253809f3678f7ed60465c66a1430a) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.5.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/956b7ff811b8280a84285ad602db7ab909a2908f) - @RogerSelwyn
+
+
+
+
 ## v1.5.0b2 (2025/04/08)
 ### 🧰 Maintenance
 - [Minor code change for sourcery](https://github.com/RogerSelwyn/MS365-Calendar/commit/f5ee40e82843ffacaa989ffcb3f1516fe2219b44) - @RogerSelwyn
