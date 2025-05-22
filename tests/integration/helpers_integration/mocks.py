@@ -20,7 +20,7 @@ class MS365Mocks:
             URL.CALENDARS,
             "calendar1_calendar_view",
             "calendar1/calendarView",
-            start=utcnow().strftime("%Y-%m-%d"),
+            start=(utcnow() - timedelta(days=1)).strftime("%Y-%m-%d"),
             end=(utcnow() + timedelta(days=1)).strftime("%Y-%m-%d"),
         )
         mock_call(requests_mock, URL.CALENDARS, "calendar2", "group:calendar2")
@@ -102,7 +102,7 @@ class MS365Mocks:
             URL.CALENDARS,
             "calendar1_calendar_view_all_day",
             "calendar1/calendarView",
-            start=utcnow().strftime("%Y-%m-%d"),
+            start=(utcnow() - timedelta(days=1)).strftime("%Y-%m-%d"),
             end=(utcnow() + timedelta(days=1)).strftime("%Y-%m-%d"),
         )
 

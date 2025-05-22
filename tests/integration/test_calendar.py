@@ -40,10 +40,10 @@ async def test_get_data(
     assert len(entities) == FULL_INIT_ENTITY_NO
 
     check_entity_state(
-        hass, "calendar.test_calendar1", "on", _adjust_date(BASE_STATE_CAL1)
+        hass, "calendar.test_calendar1", "on", _adjust_date(BASE_STATE_CAL1, -1, 0)
     )
     check_entity_state(
-        hass, "calendar.test_calendar2", "off", _adjust_date(BASE_STATE_CAL2, 1)
+        hass, "calendar.test_calendar2", "off", _adjust_date(BASE_STATE_CAL2, 1, 1)
     )
 
 
@@ -253,12 +253,12 @@ async def test_not_started_event(
     )
 
 
-def _adjust_date(data, adddays=0):
+def _adjust_date(data, adddays_start=0, adddays_end=0):
     new_data = deepcopy(data)
-    start = (utcnow() + timedelta(days=adddays)).replace(
+    start = (utcnow() + timedelta(days=adddays_start)).replace(
         hour=0, minute=0, second=0, microsecond=0
     )
-    end = (utcnow() + timedelta(days=1 + adddays)).replace(
+    end = (utcnow() + timedelta(days=1 + adddays_end)).replace(
         hour=23, minute=59, second=59, microsecond=0
     )
     start_all_day = start.date()
