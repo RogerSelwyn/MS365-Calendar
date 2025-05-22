@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.5.1 (2025/05/22)
+### ⬆️ Dependencies
+- [Fix dependencies](https://github.com/RogerSelwyn/MS365-Calendar/commit/2144cfcf54fc68c6850fc02cfbd023ba36586d4f) - @RogerSelwyn
+- [Auto update requirements.txt](https://github.com/RogerSelwyn/MS365-Calendar/commit/dc4dbad721b234a687e661bb189bd4f8aedf82db) - @actions-user
+
+### 📚 Documentation
+- [Update synchronization.md](https://github.com/RogerSelwyn/MS365-Calendar/commit/50c774db66bf2cdbf391d341166a6ffbb97fffda) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.5.1](https://github.com/RogerSelwyn/MS365-Calendar/commit/395acc8b8492b16ac681db207cba87e7baa599c9) - @RogerSelwyn
+
+
+
+
 ## v1.5.0 (2025/05/22)
 ### 🧰 Maintenance
 - [Update bug_report.yml](https://github.com/RogerSelwyn/MS365-Calendar/commit/9fa7c3b29f02f4d8a00af5fabcf959cc73436929) - @RogerSelwyn
