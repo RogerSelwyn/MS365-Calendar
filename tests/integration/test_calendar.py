@@ -60,6 +60,7 @@ async def test_one_not_tracked(
     entities = er.async_entries_for_config_entry(
         entity_registry, base_config_entry.entry_id
     )
+    await hass.async_block_till_done()
     assert len(entities) == 1
 
 

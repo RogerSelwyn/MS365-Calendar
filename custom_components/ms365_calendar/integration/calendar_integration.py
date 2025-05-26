@@ -89,17 +89,17 @@ async def async_integration_setup_entry(
 
     cal_no = 0
     for key in entry.runtime_data.sensors:
+        entity_id = key[CONF_ENTITY_ID]
+        entity = key[CONF_ENTITY]
+        name = entity[CONF_NAME]
         for coordinator in entry.runtime_data.coordinator:
-            entity = key[CONF_ENTITY]
-            device_id = entity[CONF_DEVICE_ID]
-            if device_id != coordinator.name:
+            if name != coordinator.name:
                 continue
 
-            entity_id = key[CONF_ENTITY_ID]
             calendar_id = coordinator.sync.calendar_id
             can_edit = key[CONF_CAN_EDIT]
             update_supported = config_update_supported and can_edit
-            name = f"{entity.get(CONF_NAME)}"
+            device_id = entity[CONF_DEVICE_ID]
             unique_id = f"{calendar_id}_{entry.data[CONF_ENTITY_NAME]}_{device_id}"
             cal = MS365CalendarEntity(
                 coordinator.sync.api,

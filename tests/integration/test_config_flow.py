@@ -46,6 +46,7 @@ async def test_options_flow(
     """Test the options flow"""
 
     result = await hass.config_entries.options.async_init(base_config_entry.entry_id)
+    await hass.async_block_till_done()
 
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "user"
@@ -69,6 +70,7 @@ async def test_options_flow(
             },
         },
     )
+    await hass.async_block_till_done()
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "calendar_config"
     assert result["last_step"] is True
@@ -87,6 +89,7 @@ async def test_options_flow(
             CONF_MAX_RESULTS: 5,
         },
     )
+    await hass.async_block_till_done()
     assert result.get("type") is FlowResultType.CREATE_ENTRY
     assert "result" in result
     assert result["result"] is True
