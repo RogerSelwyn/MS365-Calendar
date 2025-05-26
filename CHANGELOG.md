@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.5.2 (2025/05/26)
+### 🐛 Fixes
+- [Fix calendars not being created](https://github.com/RogerSelwyn/MS365-Calendar/commit/056990ee9b54b4baaeedb7e7646dda4a1c021817) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.5.2](https://github.com/RogerSelwyn/MS365-Calendar/commit/5a08f270152323b60ab8aa02e5249290fc730f1b) - @RogerSelwyn
+
+
+
+
 ## v1.5.1 (2025/05/22)
 ### ⬆️ Dependencies
 - [Fix dependencies](https://github.com/RogerSelwyn/MS365-Calendar/commit/2144cfcf54fc68c6850fc02cfbd023ba36586d4f) - @RogerSelwyn
