@@ -218,8 +218,7 @@ class MS365LockableFileSystemTokenBackend(FileSystemTokenBackend):
         _LOGGER.debug("Start should_refresh_token")
 
         # 1) check if the token is already a new one:
-        old_access_token = self.get_access_token(username=username)
-        if old_access_token:
+        if old_access_token := self.get_access_token(username=username):
             self.load_token()  # retrieve again the token from the backend
             new_access_token = self.get_access_token(username=username)
             if old_access_token["secret"] != new_access_token["secret"]:
