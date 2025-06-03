@@ -147,7 +147,8 @@ async def async_remove_entry(hass: HomeAssistant, entry: MS365ConfigEntry) -> No
 
 async def _async_check_token(hass, account, entity_name):
     try:
-        await hass.async_add_executor_job(account.get_current_user_data)
+        account = await hass.async_add_executor_job(account.get_current_user_data)
+        _LOGGER.info("Logged in user: %s, %s", account.full_name, account.object_id)
         return True
     except InvalidClientError as err:
         if "client secret" in err.description and "expired" in err.description:

@@ -1,6 +1,5 @@
 """Main calendar processing."""
 
-import asyncio
 import logging
 from copy import deepcopy
 from datetime import datetime, timedelta
@@ -69,7 +68,6 @@ from .utils_integration import (
     get_hass_date,
 )
 
-DELAY_BETWEEN_LOAD = 0.5
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -87,7 +85,6 @@ async def async_integration_setup_entry(
         )
     )
 
-    cal_no = 0
     for key in entry.runtime_data.sensors:
         entity_id = key[CONF_ENTITY_ID]
         entity = key[CONF_ENTITY]
@@ -112,9 +109,6 @@ async def async_integration_setup_entry(
                 unique_id,
             )
             async_add_entities([cal], False)
-            cal_no += 1
-            if cal_no < len(entry.runtime_data.sensors):
-                await asyncio.sleep(DELAY_BETWEEN_LOAD)
             break
 
     await _async_setup_register_services(config_update_supported)

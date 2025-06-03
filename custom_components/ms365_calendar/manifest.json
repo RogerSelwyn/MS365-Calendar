@@ -6,7 +6,6 @@
   ],
   "config_flow": true,
   "dependencies": [
-    "configurator",
     "http"
   ],
   "documentation": "https://github.com/RogerSelwyn/MS365-Calendar",
@@ -17,8 +16,9 @@
     "O365"
   ],
   "requirements": [
-    "O365==2.1.2",
+    "O365==2.1.4",
     "BeautifulSoup4>=4.10.0",
+    "portalocker>=3.1.1",
     "ical>=9.1.0"
   ],
   "version": "v1.5.2"

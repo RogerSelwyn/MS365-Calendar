@@ -1,16 +1,14 @@
 """Calendar coordinator processing."""
 
 import logging
-import traceback
 from collections.abc import Iterable
 from datetime import datetime, timedelta, timezone
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.util import dt as dt_util
-
 from O365.calendar import Event  # pylint: disable=no-name-in-module)
 
 from .const_integration import (
@@ -75,17 +73,15 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
         )
         self._last_sync_min = None
         self._last_sync_max = None
+        self.entity = entity
 
     async def _async_update_data(self) -> MS365Timeline:
         """Fetch data from API endpoint."""
         _LOGGER.debug("Started fetching %s data", self.name)
-        try:
-            self._last_sync_min = dt_util.now() + self._sync_event_min_time
-            self._last_sync_max = dt_util.now() + self._sync_event_max_time
-            await self.sync.run(self._last_sync_min, self._last_sync_max)
-        except Exception as err:
-            err_traceback = traceback.format_exc()
-            raise UpdateFailed(f"Error communicating with API: {err_traceback}") from err
+
+        self._last_sync_min = dt_util.now() + self._sync_event_min_time
+        self._last_sync_max = dt_util.now() + self._sync_event_max_time
+        await self.sync.run(self._last_sync_min, self._last_sync_max)
 
         return await self.sync.store_service.async_get_timeline(
             dt_util.get_default_time_zone()
@@ -116,6 +112,7 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
                 start_date,
                 end_date,
             )
+
             return self.data.overlapping(
                 start_date,
                 end_date,

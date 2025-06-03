@@ -2,6 +2,8 @@
 
 import logging
 import os
+import time
+from typing import Optional
 
 from O365 import (
     Account,
@@ -11,6 +13,8 @@ from O365.connection import (  # pylint: disable=import-error, no-name-in-module
     Connection,
     MSGraphProtocol,
 )
+from portalocker import Lock
+from portalocker.exceptions import LockException
 
 from ..const import (
     CONF_ENTITY_NAME,
@@ -130,7 +134,7 @@ class MS365Token:
         """Return backend token."""
         if not self._token_backend:
             _LOGGER.debug("Setup token")
-            self._token_backend = FileSystemTokenBackend(
+            self._token_backend = MS365LockableFileSystemTokenBackend(
                 token_path=self.token_path,
                 token_filename=self.token_filename,
             )
@@ -163,3 +167,112 @@ class MS365Token:
             _LOGGER.warning(TOKEN_ERROR_MISSING, full_token_path)
             return False
         return True
+
+
+class MS365LockableFileSystemTokenBackend(FileSystemTokenBackend):
+    """
+    A token backend that ensures atomic operations when working with tokens
+    stored on a file system. Avoids concurrent instances of O365 racing
+    to refresh the same token file. It does this by wrapping the token refresh
+    method in the Portalocker package's Lock class, which itself is a wrapper
+    around Python's fcntl and win32con.
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.max_tries: int = kwargs.pop("max_tries", 3)
+        self.fs_wait: bool = False
+        super().__init__(*args, **kwargs)
+
+    def should_refresh_token(
+        self, con: Optional[Connection] = None, username: Optional[str] = None
+    ):
+        """
+        Method for refreshing the token when there are concurrently running
+        O365 instances. Determines if we need to call the MSAL and refresh
+        the token and its file, or if another Connection instance has already
+        updated it, and we should just load that updated token from the file.
+
+        It will always return False, None, OR raise an error if a token file
+        couldn't be accessed after X tries. That is because this method
+        completely handles token refreshing via the passed Connection object
+        argument. If it determines that the token should be refreshed, it locks
+        the token file, calls the Connection's 'refresh_token' method (which
+        loads the fresh token from the server into memory and the file), then
+        unlocks the file. Since refreshing has been taken care of, the calling
+        method does not need to refresh and we return None.
+
+        If we are blocked because the file is locked, that means another
+        instance is using it. We'll change the backend's state to waiting,
+        sleep for 2 seconds, reload a token into memory from the file (since
+        another process is using it, we can assume it's being updated), and
+        loop again.
+
+        If this newly loaded token is not expired, the other instance loaded
+        a new token to file, and we can happily move on and return False.
+        (since we don't need to refresh the token anymore). If the same token
+        was loaded into memory again and is still expired, that means it wasn't
+        updated by the other instance yet. Try accessing the file again for X
+        more times. If we don't succeed after the loop has terminated, raise a
+        runtime exception
+        """
+        _LOGGER.debug("Start should_refresh_token")
+
+        # 1) check if the token is already a new one:
+        old_access_token = self.get_access_token(username=username)
+        if old_access_token:
+            self.load_token()  # retrieve again the token from the backend
+            new_access_token = self.get_access_token(username=username)
+            if old_access_token["secret"] != new_access_token["secret"]:
+                # The token is different so the refresh took part somewhere else.
+                # Return False so the connection can update the token access from
+                # the backend into the session
+                return False
+
+        # 2) Here the token stored in the token backend and in the token cache
+        #    of this instance is the same
+        for i in range(self.max_tries, 0, -1):
+            try:
+                with Lock(
+                    self.token_path, "r+", fail_when_locked=True, timeout=0
+                ) as token_file:
+                    # we were able to lock the file ourselves so proceed to refresh the token
+                    # we have to do the refresh here as we must do it with the lock applied
+                    _LOGGER.debug(
+                        "Locked oauth token file. Refreshing the token now..."
+                    )
+                    token_refreshed = con.refresh_token()
+                    if token_refreshed is False:
+                        raise RuntimeError("Token Refresh Operation not working")
+
+                    # we have refreshed the auth token ourselves to we must take care of
+                    # updating the header and save the token file
+                    con.update_session_auth_header()
+                    _LOGGER.debug(
+                        "New oauth token fetched. Saving the token data into the file"
+                    )
+                    token_file.write(self.serialize())
+                _LOGGER.debug("Unlocked oauth token file")
+                return None
+            except LockException:
+                # somebody else has adquired a lock so will be in the process of updating the token
+                self.fs_wait = True
+                _LOGGER.debug(
+                    "Oauth file locked. Sleeping for 2 seconds... retrying %s more times.",
+                    i - 1,
+                )
+                time.sleep(2)
+                _LOGGER.debug(
+                    "Waking up and rechecking token file for update from other instance..."
+                )
+                # Assume the token has been already updated
+                self.load_token()
+                # Check if new token has been created.
+                if not self.token_is_expired():
+                    _LOGGER.debug("Token file has been updated in other instance...")
+                    # Return False so the connection can update the token access from the
+                    # backend into the session
+                    return False
+
+        # if we exit the loop, that means we were locked out of the file after
+        # multiple retries give up and throw an error - something isn't right
+        raise RuntimeError(f"Could not access locked token file after {self.max_tries}")

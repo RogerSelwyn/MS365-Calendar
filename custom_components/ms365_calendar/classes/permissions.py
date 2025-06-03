@@ -78,9 +78,9 @@ class BasePermissions:
             permission.split(".")[2] if len(permission.split(".")) == 3 else None
         )
 
-        # If Calendar or Mail Resource then permissions can have a constraint of .Shared
+        # If Calendar, Contacts or Mail Resource then permissions can have a constraint of .Shared
         # which includes base as well. e.g. Calendars.Read is also enabled by Calendars.Read.Shared
-        if not constraint and resource in ["Calendars", "Mail"]:
+        if not constraint and resource in ["Calendars", "Contacts", "Mail"]:
             sharedpermission = f"{deepcopy(permission)}.Shared"
             return self._check_higher_permissions(sharedpermission)
         # If Presence Resource then permissions can have a constraint of .All
