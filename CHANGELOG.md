@@ -8,9 +8,6 @@
 ### 🧰 Maintenance
 - [Updates for linting](https://github.com/RogerSelwyn/MS365-Calendar/commit/06df7785905f0ce5c3463ed5118a2ecf041a2dcc) - @RogerSelwyn
 
-### ⬆️ Dependencies
-- [Release v1.6.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/d2c566e225168e27c5ef464f8d06b8196a42e75e) - @RogerSelwyn
-
 ### 📚 Documentation
 - [Correct Nabu Casa URL](https://github.com/RogerSelwyn/MS365-Calendar/commit/5af3facfba7c6d5ce52935bf28ce6440ed231875) - @RogerSelwyn
 
@@ -18,7 +15,7 @@
 - [Modify tests for recent changes](https://github.com/RogerSelwyn/MS365-Calendar/commit/2402c96c84daf9501fcb8d8aa32e5c88bd153448) - @RogerSelwyn
 
 ### 🔖 Release
-- [Release v1.5.3](https://github.com/RogerSelwyn/MS365-Calendar/commit/163267378f34b395f6ac55bbeacae5214578ca3b) - @RogerSelwyn
+- [Release v1.6.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/d2c566e225168e27c5ef464f8d06b8196a42e75e) - @RogerSelwyn
 
 
 
