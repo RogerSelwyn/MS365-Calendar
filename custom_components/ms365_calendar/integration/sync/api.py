@@ -51,15 +51,20 @@ class MS365CalendarService:
 
     async def async_calendar_init(self):
         """Async init of calendar data."""
+
         if self.group_calendar:
             self.calendar = await self.hass.async_add_executor_job(
                 ft.partial(self._account.schedule, resource=self.calendar_id)
             )
         else:
             schedule = await self.hass.async_add_executor_job(self._account.schedule)
+            query = await self.hass.async_add_executor_job(schedule.new_query)
+            query = query.select("name", "id")
             try:
                 self.calendar = await self.hass.async_add_executor_job(
-                    ft.partial(schedule.get_calendar, calendar_id=self.calendar_id)
+                    ft.partial(
+                        schedule.get_calendar, calendar_id=self.calendar_id, query=query
+                    )
                 )
                 return True
             except (HTTPError, RetryError, ConnectionError) as err:
@@ -78,6 +83,11 @@ class MS365CalendarService:
     async def async_list_events(self, start_date, end_date):
         """Get the events for the calendar."""
 
+        query_start = await self.hass.async_add_executor_job(self.calendar.new_query)
+        query_start = query_start.on_attribute("start").greater_equal(start_date)
+        query_end = await self.hass.async_add_executor_job(self.calendar.new_query)
+        query_end = query_end.on_attribute("end").less_equal(end_date)
+
         query = await self.hass.async_add_executor_job(self.calendar.new_query)
         query = query.select(
             "subject",
@@ -94,8 +104,7 @@ class MS365CalendarService:
             "is_reminder_on",
             "reminderMinutesBeforeStart",
         )
-        query = query.on_attribute("start").greater_equal(start_date)
-        query.chain("and").on_attribute("end").less_equal(end_date)
+
         if self._search is not None:
             query.chain("and").on_attribute("subject").contains(self._search)
         # As at March 2023 not contains is not supported by Graph API
@@ -111,6 +120,8 @@ class MS365CalendarService:
                     limit=self._limit,
                     query=query,
                     include_recurring=True,
+                    start_recurring=query_start,
+                    end_recurring=query_end,
                 )
             )
         except (HTTPError, RetryError, ConnectionError) as err:
@@ -228,8 +239,11 @@ async def async_scan_for_calendars(hass, entry: MS365ConfigEntry, account):
     """Scan for new calendars."""
 
     schedule = await hass.async_add_executor_job(account.schedule)
+    query = await hass.async_add_executor_job(schedule.new_query)
+    query = query.select("name", "id")
+
     calendars = await hass.async_add_executor_job(
-        ft.partial(schedule.list_calendars, limit=50)
+        ft.partial(schedule.list_calendars, query=query, limit=50)
     )
     track = entry.options.get(CONF_TRACK_NEW_CALENDAR, True)
     for calendar in calendars:
