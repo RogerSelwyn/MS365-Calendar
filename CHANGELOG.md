@@ -2,7 +2,7 @@
 
 ## v1.6.1 (2025/06/04)
 ### 🐛 Fixes
-- [Fix update service not enabled](https://github.com/RogerSelwyn/MS365-Calendar/commit/2e5d4876c1c3b46e0cca3c24ecdd5a543d595cd6) - @RogerSelwyn
+- [Fix update services not enabled](https://github.com/RogerSelwyn/MS365-Calendar/commit/2e5d4876c1c3b46e0cca3c24ecdd5a543d595cd6) - @RogerSelwyn
 
 ### 🔖 Release
 - [Release v1.6.1](https://github.com/RogerSelwyn/MS365-Calendar/commit/f4e0e9713b115f4bec72da874c58f91ddf7ce0f1) - @RogerSelwyn
