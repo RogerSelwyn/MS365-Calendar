@@ -59,7 +59,7 @@ class MS365CalendarService:
         else:
             schedule = await self.hass.async_add_executor_job(self._account.schedule)
             query = await self.hass.async_add_executor_job(schedule.new_query)
-            query = query.select("name", "id")
+            query = query.select("name", "id", "canEdit")
             try:
                 self.calendar = await self.hass.async_add_executor_job(
                     ft.partial(
@@ -240,7 +240,7 @@ async def async_scan_for_calendars(hass, entry: MS365ConfigEntry, account):
 
     schedule = await hass.async_add_executor_job(account.schedule)
     query = await hass.async_add_executor_job(schedule.new_query)
-    query = query.select("name", "id")
+    query = query.select("name", "id", "canEdit")
 
     calendars = await hass.async_add_executor_job(
         ft.partial(schedule.list_calendars, query=query, limit=50)
