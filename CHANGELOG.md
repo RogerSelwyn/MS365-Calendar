@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.6.3 (2025/06/09)
+### 🐛 Fixes
+- [Revert part of change in v1.6.2 causing 500 error](https://github.com/RogerSelwyn/MS365-Calendar/commit/0a69912b317b2a573ad3e6d405d998fc6f78ab68) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.6.3](https://github.com/RogerSelwyn/MS365-Calendar/commit/c3c183139ab1fcb0318b25913a3ab842bd80cdcc) - @RogerSelwyn
+
+
+
+
 ## v1.6.2 (2025/06/09)
 ### 🐛 Fixes
 - [Fix calendar colour missing](https://github.com/RogerSelwyn/MS365-Calendar/commit/ec8d1121265a5b150808e572058fd250372ba4fe) - @RogerSelwyn
