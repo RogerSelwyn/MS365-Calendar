@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.6.2 (2025/06/09)
+### 🐛 Fixes
+- [Fix calendar colour missing](https://github.com/RogerSelwyn/MS365-Calendar/commit/ec8d1121265a5b150808e572058fd250372ba4fe) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.6.2](https://github.com/RogerSelwyn/MS365-Calendar/commit/9769ea94eda1db451c2de331ce7e51db012d41e9) - @RogerSelwyn
+
+
+
+
 ## v1.6.1 (2025/06/04)
 ### 🐛 Fixes
 - [Fix update services not enabled](https://github.com/RogerSelwyn/MS365-Calendar/commit/2e5d4876c1c3b46e0cca3c24ecdd5a543d595cd6) - @RogerSelwyn
