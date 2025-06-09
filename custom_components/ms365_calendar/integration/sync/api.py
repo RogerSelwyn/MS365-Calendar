@@ -6,13 +6,11 @@ from datetime import datetime
 from typing import Any, cast
 
 from homeassistant.core import HomeAssistant
-from requests.exceptions import HTTPError, RetryError
-
 from O365.calendar import Event  # pylint: disable=no-name-in-module)
+from requests.exceptions import HTTPError, RetryError
 
 from ...classes.config_entry import MS365ConfigEntry
 from ..const_integration import (
-    CALENDAR_COLUMNS,
     CONF_TRACK_NEW_CALENDAR,
     CONST_GROUP,
     ITEMS,
@@ -61,7 +59,7 @@ class MS365CalendarService:
         else:
             schedule = await self.hass.async_add_executor_job(self._account.schedule)
             query = await self.hass.async_add_executor_job(schedule.new_query)
-            query = query.select(CALENDAR_COLUMNS)
+            query = query.select("name", "id", "canEdit", "color", "hexColor")
             try:
                 self.calendar = await self.hass.async_add_executor_job(
                     ft.partial(
@@ -242,7 +240,7 @@ async def async_scan_for_calendars(hass, entry: MS365ConfigEntry, account):
 
     schedule = await hass.async_add_executor_job(account.schedule)
     query = await hass.async_add_executor_job(schedule.new_query)
-    query = query.select(CALENDAR_COLUMNS)
+    query = query.select("name", "id", "canEdit", "color", "hexColor")
 
     calendars = await hass.async_add_executor_job(
         ft.partial(schedule.list_calendars, query=query, limit=50)

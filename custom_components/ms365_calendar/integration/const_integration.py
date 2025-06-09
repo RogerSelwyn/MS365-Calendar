@@ -39,7 +39,6 @@ ATTR_START = "start"
 ATTR_SUBJECT = "subject"
 ATTR_TYPE = "type"
 
-CALENDAR_COLUMNS = "name", "id", "canEdit", "color", "hexColor"
 CALENDAR_ENTITY_ID_FORMAT = "calendar.{}"
 
 CONF_ADVANCED_OPTIONS = "advanced_options"
