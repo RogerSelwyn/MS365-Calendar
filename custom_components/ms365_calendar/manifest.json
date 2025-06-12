@@ -19,7 +19,8 @@
     "O365>=2.1.4",
     "BeautifulSoup4>=4.10.0",
     "portalocker>=3.1.1",
-    "ical>=9.1.0"
+    "ical>=9.1.0",
+    "oauthlib"
   ],
   "version": "v1.6.3"
 }
