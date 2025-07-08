@@ -6,7 +6,10 @@ from datetime import datetime
 from typing import Any, cast
 
 from homeassistant.core import HomeAssistant
-from O365.calendar import Event  # pylint: disable=no-name-in-module)
+from O365.calendar import Event  # pylint: disable=no-name-in-module
+from O365.utils.query import (  # pylint: disable=no-name-in-module, import-error
+    QueryBuilder,
+)
 from requests.exceptions import HTTPError, RetryError
 
 from ...classes.config_entry import MS365ConfigEntry
@@ -48,6 +51,7 @@ class MS365CalendarService:
         self._limit = 999
         self._search = search
         self._error = False
+        self._builder = QueryBuilder(protocol=account.protocol)
 
     async def async_calendar_init(self):
         """Async init of calendar data."""
@@ -58,8 +62,7 @@ class MS365CalendarService:
             )
         else:
             schedule = await self.hass.async_add_executor_job(self._account.schedule)
-            query = await self.hass.async_add_executor_job(schedule.new_query)
-            query = query.select("name", "id", "canEdit", "color", "hexColor")
+            query = self._builder.select("name", "id", "canEdit", "color", "hexColor")
             try:
                 self.calendar = await self.hass.async_add_executor_job(
                     ft.partial(
@@ -83,13 +86,7 @@ class MS365CalendarService:
     async def async_list_events(self, start_date, end_date):
         """Get the events for the calendar."""
 
-        query_start = await self.hass.async_add_executor_job(self.calendar.new_query)
-        query_start = query_start.on_attribute("start").greater_equal(start_date)
-        query_end = await self.hass.async_add_executor_job(self.calendar.new_query)
-        query_end = query_end.on_attribute("end").less_equal(end_date)
-
-        query = await self.hass.async_add_executor_job(self.calendar.new_query)
-        query = query.select(
+        query = self._builder.select(
             "subject",
             "body",
             "start",
@@ -106,13 +103,14 @@ class MS365CalendarService:
         )
 
         if self._search is not None:
-            query.chain("and").on_attribute("subject").contains(self._search)
+            query = query & self._builder.contains("subject", self._search)
         # As at March 2023 not contains is not supported by Graph API
         # if self._exclude is not None:
         #     query.chain("and").on_attribute("subject").negate().contains(self._exclude)
         if self._sensitivity_exclude is not None:
             for item in self._sensitivity_exclude:
-                query.chain("and").on_attribute("sensitivity").unequal(item.value)
+                query = query & self._builder.unequal("sensitivity", item.value)
+
         try:
             return await self.hass.async_add_executor_job(
                 ft.partial(
@@ -120,8 +118,8 @@ class MS365CalendarService:
                     limit=self._limit,
                     query=query,
                     include_recurring=True,
-                    start_recurring=query_start,
-                    end_recurring=query_end,
+                    start_recurring=self._builder.greater_equal("start", start_date),
+                    end_recurring=self._builder.less_equal("end", end_date),
                 )
             )
         except (HTTPError, RetryError, ConnectionError) as err:
@@ -239,8 +237,8 @@ async def async_scan_for_calendars(hass, entry: MS365ConfigEntry, account):
     """Scan for new calendars."""
 
     schedule = await hass.async_add_executor_job(account.schedule)
-    query = await hass.async_add_executor_job(schedule.new_query)
-    query = query.select("name", "id", "canEdit", "color", "hexColor")
+    builder = QueryBuilder(protocol=account.protocol)
+    query = builder.select("name", "id", "canEdit", "color", "hexColor")
 
     calendars = await hass.async_add_executor_job(
         ft.partial(schedule.list_calendars, query=query, limit=50)
