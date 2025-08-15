@@ -1,8 +1,9 @@
 """A Timeline is a set of events on a calendar."""
 
 from collections.abc import Generator, Iterable
-from datetime import datetime  # time
+from datetime import datetime, timedelta  # time
 
+from homeassistant.util import dt as dt_util
 from ical.iter import (
     MergedIterable,
     SortableItem,
@@ -31,10 +32,12 @@ def timespan_of(event: Event) -> Timespan:
     #     normalize(event.start, tzinfo),
     #     normalize(event.end, tzinfo),
     # )
-    return Timespan.of(
-        event.start,
-        event.end,
-    )
+    if event.is_all_day:
+        return Timespan.of(
+            dt_util.start_of_local_day(event.start),
+            dt_util.start_of_local_day(event.end + timedelta(days=1)),
+        )
+    return Timespan.of(event.start, event.end)
 
 
 def calendar_timeline(events: list[Event], tzinfo: datetime.tzinfo) -> MS365Timeline:
