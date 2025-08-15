@@ -9,7 +9,6 @@
 
 ### ⬆️ Dependencies
 - [Add oauthlib dependency](https://github.com/RogerSelwyn/MS365-Calendar/commit/2bc7cf3149c4d0dea1bcf505b874235b05d05a8f) - @RogerSelwyn
-- [Use ruff 0.11.4](https://github.com/RogerSelwyn/MS365-Calendar/commit/1dc412187e87dbcfe82bcbe68d1253eefae223e7) - @RogerSelwyn
 - [Bump iCal to 10.0.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/5f595bb39bb024ab217fda1cdcee91fbbeae0f85) - @RogerSelwyn
 - [Auto update requirements.txt](https://github.com/RogerSelwyn/MS365-Calendar/commit/693affec8643e5a6204b2a707d14244f6197ed03) - @actions-user
 
@@ -22,13 +21,6 @@
 
 ### 🔖 Release
 - [Release v1.6.4](https://github.com/RogerSelwyn/MS365-Calendar/commit/801366a48437eef9874f62d1bc7d79107bef05bf) - @RogerSelwyn
-
-### Other
-- [build(deps): Bump ruff from 0.11.4 to 0.12.2](https://github.com/RogerSelwyn/MS365-Calendar/commit/d573c9a6aa2f7bb6426e0a09e9ab68d86176ef54) - @dependabot[bot]
-- [build(deps): Bump ruff from 0.11.4 to 0.12.2](https://github.com/RogerSelwyn/MS365-Calendar/commit/a2ff676239b203515784067d42839382d54e33a9) - @dependabot[bot]
-- [build(deps): Bump ruff from 0.12.2 to 0.12.7](https://github.com/RogerSelwyn/MS365-Calendar/commit/853a61f702a6e9c6553fcbc92a2a99a34dfb2752) - @dependabot[bot]
-
-
 
 
 ## v1.6.3 (2025/06/09)
