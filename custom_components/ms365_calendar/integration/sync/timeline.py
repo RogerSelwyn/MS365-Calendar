@@ -35,7 +35,7 @@ def timespan_of(event: Event) -> Timespan:
     if event.is_all_day:
         return Timespan.of(
             dt_util.start_of_local_day(event.start),
-            dt_util.start_of_local_day(event.end + timedelta(days=1)),
+            dt_util.start_of_local_day(event.end),
         )
     return Timespan.of(event.start, event.end)
 
