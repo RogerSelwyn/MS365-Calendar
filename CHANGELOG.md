@@ -7,11 +7,6 @@
 ### 🔖 Release
 - [Release v1.6.5](https://github.com/RogerSelwyn/MS365-Calendar/commit/42c0bb5374abf3e1c37bec2929b8eff195b4fa45) - @RogerSelwyn
 
-### Other
-- [build(deps): Bump actions/checkout from 4 to 5](https://github.com/RogerSelwyn/MS365-Calendar/commit/5877626cb2bc3b0b3f513cd01f72aeb22dd48a97) - @dependabot[bot]
-
-
-
 
 ## v1.6.4 (2025/08/15)
 ### 🐛 Fixes
