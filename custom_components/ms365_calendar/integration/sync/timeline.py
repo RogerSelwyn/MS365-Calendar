@@ -1,7 +1,7 @@
 """A Timeline is a set of events on a calendar."""
 
 from collections.abc import Generator, Iterable
-from datetime import datetime, timedelta  # time
+from datetime import datetime
 
 from homeassistant.util import dt as dt_util
 from ical.iter import (
