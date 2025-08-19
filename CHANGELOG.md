@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.6.5 (2025/08/19)
+### 🐛 Fixes
+- [Correct creation of timespan for all day event](https://github.com/RogerSelwyn/MS365-Calendar/commit/b1a900d263ae9a6025e2f11e8bad6ebf63075fa1) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.6.5](https://github.com/RogerSelwyn/MS365-Calendar/commit/42c0bb5374abf3e1c37bec2929b8eff195b4fa45) - @RogerSelwyn
+
+### Other
+- [build(deps): Bump actions/checkout from 4 to 5](https://github.com/RogerSelwyn/MS365-Calendar/commit/5877626cb2bc3b0b3f513cd01f72aeb22dd48a97) - @dependabot[bot]
+
+
+
+
 ## v1.6.4 (2025/08/15)
 ### 🐛 Fixes
 - [Fix datetime start/end datetime for all day events as passed to retrieval filter](https://github.com/RogerSelwyn/MS365-Calendar/commit/e18fe944ab7d7b7fe6fd4e4e4db1838adf820d4f) - @RogerSelwyn
