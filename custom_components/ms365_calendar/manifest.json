@@ -22,5 +22,5 @@
     "ical>=10.0.0",
     "oauthlib"
   ],
-  "version": "v1.6.4"
+  "version": "v1.6.5"
 }
