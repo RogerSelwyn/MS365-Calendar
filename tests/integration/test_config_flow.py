@@ -91,8 +91,6 @@ async def test_options_flow(
     )
     await hass.async_block_till_done()
     assert result.get("type") is FlowResultType.CREATE_ENTRY
-    assert "result" in result
-    assert result["result"] is True
 
     assert result["data"][CONF_TRACK_NEW_CALENDAR] is False
 

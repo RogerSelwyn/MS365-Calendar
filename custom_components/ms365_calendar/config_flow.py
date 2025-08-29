@@ -15,7 +15,7 @@ from homeassistant.config_entries import (
     ConfigFlowResult,
 )
 from homeassistant.core import callback
-from homeassistant.data_entry_flow import FlowResult, section
+from homeassistant.data_entry_flow import section
 from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.network import get_url
 
@@ -151,7 +151,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_request_default(
         self, user_input: dict[str, str] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Handle the confirm step of a fix flow."""
         errors = {}
         if user_input is not None:
@@ -172,7 +172,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_request_alt(
         self, user_input: dict[str, str] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Handle the confirm step of a fix flow."""
         errors = {}
         if user_input is not None:

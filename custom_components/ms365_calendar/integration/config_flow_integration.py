@@ -7,8 +7,9 @@ import voluptuous as vol
 from homeassistant import (
     config_entries,
 )
+from homeassistant.config_entries import ConfigFlowResult
 from homeassistant.const import CONF_NAME
-from homeassistant.data_entry_flow import FlowResult, section
+from homeassistant.data_entry_flow import section
 from homeassistant.helpers import entity_registry
 from homeassistant.helpers.selector import BooleanSelector
 
@@ -106,7 +107,7 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_init(
         self,
         user_input=None,  # pylint: disable=unused-argument
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Set up the option flow."""
 
         self._yaml_filepath = build_yaml_file_path(self.hass, self._yaml_filename)
@@ -124,7 +125,7 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
         self._calendar_list_selected_original = deepcopy(self._calendar_list_selected)
         return await self.async_step_user()
 
-    async def async_step_user(self, user_input=None) -> FlowResult:
+    async def async_step_user(self, user_input=None) -> ConfigFlowResult:
         """Handle a flow initialized by the user."""
         errors = {}
 
@@ -188,7 +189,7 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
             last_step=False,
         )
 
-    async def async_step_calendar_config(self, user_input=None) -> FlowResult:
+    async def async_step_calendar_config(self, user_input=None) -> ConfigFlowResult:
         """Handle calendar setup."""
         if user_input is not None:
             for calendar in self._calendars:
