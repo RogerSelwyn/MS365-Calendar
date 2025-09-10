@@ -1,5 +1,26 @@
 # Changelog
 
+## v1.6.6 (2025/09/10)
+### 🐛 Fixes
+- [Fix error in migration from O365](https://github.com/RogerSelwyn/MS365-Calendar/commit/db8cbe10d3005a067ed5a07bd9ecd5978a86aaad) - @RogerSelwyn
+
+### 🧰 Maintenance
+- [Remove unrequired import](https://github.com/RogerSelwyn/MS365-Calendar/commit/26f64f7c1ac29c382480aedee4ebed4c4b10fb0f) - @RogerSelwyn
+- [Use ConfigFlowResult instead of FlowResult](https://github.com/RogerSelwyn/MS365-Calendar/commit/f7721eed1cebbfd0e4fb452c890e84d9ca7db850) - @RogerSelwyn
+
+### ⬆️ Dependencies
+- [Bump actions/stale from 9 to 10](https://github.com/RogerSelwyn/MS365-Calendar/commit/9d078eae1f98c5e41f1b11fb97d9e9d46678e6e4) - @dependabot[bot]
+- [Bump actions/setup-python from 5 to 6](https://github.com/RogerSelwyn/MS365-Calendar/commit/7be2160226a75e0fff2f42fb7aa125ed578f3f61) - @dependabot[bot]
+
+### 📚 Documentation
+- [Update CHANGELOG.md](https://github.com/RogerSelwyn/MS365-Calendar/commit/c15d78133c35f63d86b5c8a4a1c8e58970124517) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.6.6](https://github.com/RogerSelwyn/MS365-Calendar/commit/a4ba8f0618c2cd2b91c212133c4d7f7561a7fbbc) - @RogerSelwyn
+
+
+
+
 ## v1.6.5 (2025/08/19)
 ### 🐛 Fixes
 - [Correct creation of timespan for all day event](https://github.com/RogerSelwyn/MS365-Calendar/commit/b1a900d263ae9a6025e2f11e8bad6ebf63075fa1) - @RogerSelwyn
