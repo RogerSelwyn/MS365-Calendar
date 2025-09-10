@@ -1,6 +1,7 @@
 """Calendar file management processes."""
 
 import logging
+import os
 
 import yaml
 from homeassistant.const import CONF_NAME
@@ -50,6 +51,9 @@ def load_yaml_file(path, item_id, item_schema):
 
 def write_yaml_file(yaml_filepath, cal):
     """Write to the calendar file."""
+    dirpath = os.path.dirname(yaml_filepath)
+    if not os.path.isdir(dirpath):
+        os.makedirs(dirpath)
     with open(yaml_filepath, "a", encoding="UTF8") as out:
         out.write("\n")
         yaml.dump([cal], out, default_flow_style=False, encoding="UTF8")
