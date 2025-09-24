@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.6.7 (2025/09/24)
+### 🐛 Fixes
+- [Handle deleted calendar moire gracefully](https://github.com/RogerSelwyn/MS365-Calendar/commit/3a5e0bf240bae1a5d879c7825465c13774290b54) - @RogerSelwyn
+
+### ⬆️ Dependencies
+- [Bump ruff from 0.12.7 to 0.13.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/7c8486186b633f932b21624d3a21402b587efd35) - @dependabot[bot]
+- [Bump ruff from 0.13.0 to 0.13.1](https://github.com/RogerSelwyn/MS365-Calendar/commit/97f12d2a1a07a59c44694ae45ae2c966583155ac) - @dependabot[bot]
+
+### 🔖 Release
+- [Release v1.6.7](https://github.com/RogerSelwyn/MS365-Calendar/commit/ff8996b6293ed2f12e62724f87ba16605ce15fdb) - @RogerSelwyn
+
+
+
+
 ## v1.6.6 (2025/09/10)
 ### 🐛 Fixes
 - [Fix error in migration from O365](https://github.com/RogerSelwyn/MS365-Calendar/commit/db8cbe10d3005a067ed5a07bd9ecd5978a86aaad) - @RogerSelwyn
