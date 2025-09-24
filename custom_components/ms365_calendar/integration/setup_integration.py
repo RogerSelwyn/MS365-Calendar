@@ -113,20 +113,21 @@ async def _async_setup_coordinators(
                     cal_id,
                     entity.get(CONF_SENSITIVITY_EXCLUDE),
                     entity.get(CONF_SEARCH),
+                    entity_id,
                 )
-                await api.async_calendar_init()
-                unique_id = f"{entity.get(CONF_NAME)}"
-                sync_manager = MS365CalendarEventSyncManager(
-                    api,
-                    cal_id,
-                    store=ScopedCalendarStore(local_store, unique_id),
-                    exclude=entity.get(CONF_EXCLUDE),
-                )
-                coordinators.append(
-                    MS365CalendarSyncCoordinator(
-                        hass, entry, sync_manager, unique_id, entity
+                if await api.async_calendar_init():
+                    unique_id = f"{entity.get(CONF_NAME)}"
+                    sync_manager = MS365CalendarEventSyncManager(
+                        api,
+                        cal_id,
+                        store=ScopedCalendarStore(local_store, unique_id),
+                        exclude=entity.get(CONF_EXCLUDE),
                     )
-                )
+                    coordinators.append(
+                        MS365CalendarSyncCoordinator(
+                            hass, entry, sync_manager, unique_id, entity
+                        )
+                    )
             except HTTPError:
                 _LOGGER.warning(
                     "No permission for calendar, please remove - Name: %s; Device: %s;",

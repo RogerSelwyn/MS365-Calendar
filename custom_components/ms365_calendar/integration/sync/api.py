@@ -40,6 +40,7 @@ class MS365CalendarService:
         calendar_id,
         sensitivity_exclude,
         search,
+        entity_id,
     ) -> None:
         """Init the MS365 Calendar service."""
         self.hass = hass
@@ -52,6 +53,7 @@ class MS365CalendarService:
         self._search = search
         self._error = False
         self._builder = QueryBuilder(protocol=account.protocol)
+        self._entity_id = entity_id
 
     async def async_calendar_init(self):
         """Async init of calendar data."""
@@ -60,6 +62,7 @@ class MS365CalendarService:
             self.calendar = await self.hass.async_add_executor_job(
                 ft.partial(self._account.schedule, resource=self.calendar_id)
             )
+            return True
         else:
             schedule = await self.hass.async_add_executor_job(self._account.schedule)
             query = self._builder.select("name", "id", "canEdit", "color", "hexColor")
@@ -72,9 +75,10 @@ class MS365CalendarService:
                 return True
             except (HTTPError, RetryError, ConnectionError) as err:
                 _LOGGER.warning(
-                    "Error getting calendar - %s, %s - %s",
-                    self._account,
-                    self.calendar,
+                    "Error getting calendar - %s - %s - %s Has the calendar been deleted? "
+                    + "If so, disable or delete in calendars.yaml.",
+                    self.calendar_id,
+                    self._entity_id,
                     err,
                 )
                 return False
