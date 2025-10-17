@@ -1,7 +1,5 @@
 respond_calendar_event:
   target:
-    device:
-      integration: ms365_calendar
     entity:
       integration: ms365_calendar
       domain: calendar
@@ -27,8 +25,6 @@ respond_calendar_event:
 
 create_calendar_event:
   target:
-    device:
-      integration: ms365_calendar
     entity:
       integration: ms365_calendar
       domain: calendar
@@ -101,8 +97,6 @@ create_calendar_event:
 
 modify_calendar_event:
   target:
-    device:
-      integration: ms365_calendar
     entity:
       integration: ms365_calendar
       domain: calendar
@@ -177,8 +171,6 @@ modify_calendar_event:
 
 remove_calendar_event:
   target:
-    device:
-      integration: ms365_calendar
     entity:
       integration: ms365_calendar
       domain: calendar
