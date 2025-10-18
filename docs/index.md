@@ -19,4 +19,3 @@ The general guidance for all the integrations can be found on the MS365 Home Ass
 This integration enables:
 1. Getting, creating, updating and responding to calendar events
 
-This project would not be possible without the wonderful [python-o365 project](https://github.com/O365/python-o365).

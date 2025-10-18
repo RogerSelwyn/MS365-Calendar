@@ -4,7 +4,7 @@ nav_order: 4
 ---
 
 # Installation and Configuration
-This page details the configuration details for this integration. General instructions can be found on the MS365 Home Assistant [Installation and Configuration](hhttps://rogerselwyn.github.io/MS365-HomeAssistant/installation_and_configuration.html) page.
+This page details the configuration details for this integration. General instructions can be found on the MS365 Home Assistant [Installation and Configuration](https://rogerselwyn.github.io/MS365-HomeAssistant/installation_and_configuration.html) page.
 
 ### Configuration variables
 
