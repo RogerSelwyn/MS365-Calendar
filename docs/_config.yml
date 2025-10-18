@@ -15,3 +15,10 @@ gh_edit_repository: "https://github.com/RogerSelwyn/MS365-Calendar" # the github
 gh_edit_branch: "master" # the branch that your docs is served from
 gh_edit_source: docs # the source that your files originate from
 gh_edit_view_mode: "tree" # "tree" or "edit" if you want the user to jump into the editor immediately
+
+# External navigation links
+nav_external_links:
+  - title: General Docs
+    url: https://rogerselwyn.github.io/MS365-HomeAssistant/
+    hide_icon: false # set to true to hide the external link icon - defaults to false
+    opens_in_new_tab: false # set to true to open this link in a new tab - defaults to false
