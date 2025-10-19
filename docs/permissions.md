@@ -7,7 +7,7 @@ nav_order: 3
 
 This page details the permissions for this integration. General instructions can be found on the MS365 Home Assistant [Permissions](https://rogerselwyn.github.io/MS365-HomeAssistant/permissions.html) page.
 
-Calendar - For calendars *Note the requirement for `.Shared` permissions for shared mailbox calendars*
+*Note the requirement for `.Shared` permissions for shared mailbox calendars*
 
   | Feature  | Permissions                | Update | MS Graph Description                                  | Notes |
   |----------|----------------------------|:------:|-------------------------------------------------------|-------|
