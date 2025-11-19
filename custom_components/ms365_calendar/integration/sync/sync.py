@@ -3,6 +3,9 @@
 import logging
 import re
 
+from requests.exceptions import ConnectionError as RequestConnectionError
+from requests.exceptions import HTTPError, RetryError
+
 from ..const_integration import EVENT_SYNC, ITEMS
 from .api import MS365CalendarEventStoreService, MS365CalendarService
 from .store import CalendarStore, ScopedCalendarStore
@@ -62,10 +65,15 @@ class MS365CalendarEventSyncManager:
     async def run(self, start_date, end_date) -> None:
         """Run the event sync manager."""
         # store_data = await self._store.async_load() or {}
-        new_data = await self.async_list_events(
-            start_date=start_date,
-            end_date=end_date,
-        )
+
+        try:
+            new_data = await self.async_list_events(
+                start_date=start_date,
+                end_date=end_date,
+            )
+
+        except (HTTPError, RetryError, RequestConnectionError) as err:
+            raise err
 
         # store_data[ITEMS].update(_add_update_func(store_data, new_data))
         items = {item.object_id: item for item in new_data}

@@ -2,7 +2,6 @@
 
 import functools as ft
 import logging
-from datetime import datetime
 from typing import Any, cast
 
 from homeassistant.core import HomeAssistant
@@ -51,7 +50,6 @@ class MS365CalendarService:
         self._sensitivity_exclude = sensitivity_exclude
         self._limit = 999
         self._search = search
-        self._error = False
         self._builder = QueryBuilder(protocol=account.protocol)
         self._entity_id = entity_id
 
@@ -115,20 +113,20 @@ class MS365CalendarService:
             for item in self._sensitivity_exclude:
                 query = query & self._builder.unequal("sensitivity", item.value)
 
-        try:
-            return await self.hass.async_add_executor_job(
-                ft.partial(
-                    self.calendar.get_events,
-                    limit=self._limit,
-                    query=query,
-                    include_recurring=True,
-                    start_recurring=self._builder.greater_equal("start", start_date),
-                    end_recurring=self._builder.less_equal("end", end_date),
-                )
+        # try:
+        return await self.hass.async_add_executor_job(
+            ft.partial(
+                self.calendar.get_events,
+                limit=self._limit,
+                query=query,
+                include_recurring=True,
+                start_recurring=self._builder.greater_equal("start", start_date),
+                end_recurring=self._builder.less_equal("end", end_date),
             )
-        except (HTTPError, RetryError, ConnectionError) as err:
-            self._log_error("Error getting calendar events for data", err)
-            return None
+        )
+        # except (HTTPError, RetryError, ConnectionError) as err:
+        #     self._log_error("Error getting calendar events for data", err)
+        #     return None
 
     async def async_create_event(self, subject, start, end, **kwargs) -> Event:
         """Add a new event to calendar."""
@@ -174,13 +172,6 @@ class MS365CalendarService:
                 ft.partial(event.decline_event, message, send_response=send_response)
             )
 
-    def _log_error(self, error, err):
-        if not self._error:
-            _LOGGER.warning("%s - %s", error, err)
-            self._error = True
-        else:
-            _LOGGER.debug("Repeat error - %s - %s", error, err)
-
 
 class MS365CalendarEventStoreService:
     """Performs event lookups from the local store.
@@ -201,7 +192,7 @@ class MS365CalendarEventStoreService:
         self._calendar_id = calendar_id
         self._api = api
 
-    async def async_get_timeline(self, tzinfo: datetime.tzinfo) -> MS365Timeline:
+    async def async_get_timeline(self, tzinfo) -> MS365Timeline:
         """Get the timeline of events."""
         events_data = await self._lookup_events_data()
         _LOGGER.debug("Created timeline of %s events", len(events_data))
@@ -213,7 +204,7 @@ class MS365CalendarEventStoreService:
         event_objects = [cast(Event, data) for data in events_data.values()]
         return calendar_timeline(event_objects, tzinfo)
 
-    async def async_add_event(self, subject, start, end, **kwargs) -> None:
+    async def async_add_event(self, subject, start, end, **kwargs):
         """Add the specified event to the calendar.
         You should sync the event store after adding an event.
         """

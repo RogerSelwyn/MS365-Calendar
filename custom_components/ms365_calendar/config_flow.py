@@ -74,11 +74,11 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
         """Initialise the configuration flow."""
         self._permissions = []
         self._ms365account = None
-        self._entity_name = None
+        self.entity_name = None
         self._url = None
         self._flow = None
         self._callback_view = None
-        self._user_input = None
+        self._user_input = {}
         self._config_schema: dict[vol.Required, type[str | int]] | None = None
         self._reconfigure = False
         self._entry: MS365ConfigEntry | None = None
@@ -91,7 +91,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
 
     def is_matching(self, other_flow: Self) -> bool:
         """Return True if other_flow is matching this flow."""
-        return other_flow.entity_name == self._entity_name
+        return other_flow.entity_name == self.entity_name
 
     async def async_step_user(self, user_input=None):
         """Handle the initial step."""
@@ -99,10 +99,10 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
         if user_input and not errors:
             self._user_input = user_input
 
-            if not self._entity_name:
-                self._entity_name = user_input.get(CONF_ENTITY_NAME)
+            if not self.entity_name:
+                self.entity_name = user_input.get(CONF_ENTITY_NAME)
             else:
-                user_input[CONF_ENTITY_NAME] = self._entity_name
+                user_input[CONF_ENTITY_NAME] = self.entity_name
             credentials = (
                 user_input.get(CONF_CLIENT_ID),
                 user_input.get(CONF_CLIENT_SECRET),
@@ -117,7 +117,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
                 self._ms365account.try_authentication,
                 credentials,
                 main_resource,
-                self._entity_name,
+                self.entity_name,
             )
             if not auth_error and (
                 not self._ms365account.is_authenticated or self._reconfigure
@@ -164,7 +164,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema(REQUEST_AUTHORIZATION_DEFAULT_SCHEMA),
             description_placeholders={
                 CONF_AUTH_URL: self._url,
-                CONF_ENTITY_NAME: self._entity_name,
+                CONF_ENTITY_NAME: self.entity_name,
                 CONF_FAILED_PERMISSIONS: self._failed_perms(),
             },
             errors=errors,
@@ -188,7 +188,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
             step_id="request_alt",
             description_placeholders={
                 CONF_AUTH_URL: self._url,
-                CONF_ENTITY_NAME: self._entity_name,
+                CONF_ENTITY_NAME: self.entity_name,
                 CONF_FAILED_PERMISSIONS: self._failed_perms(),
             },
             errors=errors,
@@ -214,7 +214,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
                 self._entry, data=self._user_input
             )
 
-        return self.async_create_entry(title=self._entity_name, data=self._user_input)
+        return self.async_create_entry(title=self.entity_name, data=self._user_input)
 
     async def _async_validate_response(self, user_input):
         errors = {}
@@ -262,7 +262,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
             self._ms365account.try_authentication,
             credentials,
             main_resource,
-            self._entity_name,
+            self.entity_name,
         )
         if (
             self._ms365account.account.username
@@ -294,7 +294,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
         """Re-run configuration step."""
 
         self._reconfigure = True
-        self._entity_name = entry_data[CONF_ENTITY_NAME]
+        self.entity_name = entry_data[CONF_ENTITY_NAME]
         country = get_country(entry_data)
 
         self._config_schema = {
@@ -319,7 +319,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
                 {"collapsed": True},
             ),
         }
-        self._config_schema |= integration_reconfigure_schema(entry_data)
+        self._config_schema |= integration_reconfigure_schema(entry_data)  # type: ignore
 
         return await self.async_step_user()
 
@@ -327,19 +327,19 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
         """Import a config entry."""
         data = import_data["data"]
         options = import_data["options"]
-        self._entity_name = data[CONF_ENTITY_NAME]
+        self.entity_name = data[CONF_ENTITY_NAME]
         if self._check_existing():
-            _LOGGER.info(ERROR_IMPORTED_DUPLICATE, DOMAIN, self._entity_name)
+            _LOGGER.info(ERROR_IMPORTED_DUPLICATE, DOMAIN, self.entity_name)
             return self.async_abort(reason="already_configured")
         await async_integration_imports(self.hass, import_data)
         return self.async_create_entry(
-            title=self._entity_name, data=data, options=options
+            title=self.entity_name, data=data, options=options
         )
 
     def _check_existing(self):
         config_entries = self.hass.config_entries.async_entries(DOMAIN)
         return any(
-            config_entry.title == self._entity_name for config_entry in config_entries
+            config_entry.title == self.entity_name for config_entry in config_entries
         )
 
 
@@ -361,7 +361,7 @@ class MS365AuthCallbackView(HomeAssistantView):
 
     def __init__(self):
         """Initialize."""
-        self.token_url = None
+        self.token_url = ""
 
     @callback
     async def get(self, request):

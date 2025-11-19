@@ -184,7 +184,7 @@ class MS365LockableFileSystemTokenBackend(FileSystemTokenBackend):
         super().__init__(*args, **kwargs)
 
     def should_refresh_token(
-        self, con: Optional[Connection] = None, username: Optional[str] = None
+        self, con: Optional[Connection] = None, *, username: Optional[str] = None
     ):
         """
         Method for refreshing the token when there are concurrently running
@@ -221,7 +221,10 @@ class MS365LockableFileSystemTokenBackend(FileSystemTokenBackend):
         if old_access_token := self.get_access_token(username=username):
             self.load_token()  # retrieve again the token from the backend
             new_access_token = self.get_access_token(username=username)
-            if old_access_token["secret"] != new_access_token["secret"]:
+            if (
+                new_access_token
+                and old_access_token["secret"] != new_access_token["secret"]
+            ):
                 # The token is different so the refresh took part somewhere else.
                 # Return False so the connection can update the token access from
                 # the backend into the session

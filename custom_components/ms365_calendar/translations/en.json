@@ -1,256 +1,259 @@
 {
-    "config": {
-        "abort": {
-            "reconfigure_successful": "Re-configuration was successful"
+  "config": {
+    "abort": {
+      "reconfigure_successful": "Re-configuration was successful"
+    },
+    "error": {
+      "already_configured": "This account name has already been used. Use re-configure.",
+      "error_authenticating": "Error authenticating, token invalid, check log for errors",
+      "invalid_url": "Error, the originating url does not seem to be a valid microsoft redirect",
+      "permissions": "Minimum permissions not granted for account: {entity_name}",
+      "corrupted": "Token file is corrupted after successful authentication, check log for file system errors",
+      "missing": "Token file is missing after successful authentication, check log for file system errors",
+      "token_file_error": "Token file retrieval error, check log for errors from O365. Ensure token has not expired and you are using secret value not secret id."
+    },
+    "step": {
+      "user": {
+        "data": {
+          "entity_name": "Uniquely identifying name for the entities",
+          "client_id": "Client ID",
+          "client_secret": "Client Secret",
+          "alt_auth_method": "Use alternate (more complex) authentication",
+          "enable_update": "Enable update services",
+          "basic_calendar": "Enable read only basic calendar",
+          "groups": "Enable support for group calendars",
+          "shared_mailbox": "Email address/ID of 'shared' mailbox"
         },
-        "error": {
-            "already_configured": "This account name has already been used. Use re-configure.",
-            "error_authenticating": "Error authenticating, token invalid, check log for errors",
-            "invalid_url": "Error, the originating url does not seem to be a valid microsoft redirect",
-            "permissions": "Minimum permissions not granted for account: {entity_name}",
-            "corrupted": "Token file is corrupted after successful authentication, check log for file system errors",
-            "missing": "Token file is missing after successful authentication, check log for file system errors",
-            "token_file_error": "Token file retrieval error, check log for errors from O365. Ensure token has not expired and you are using secret value not secret id."
+        "data_description": {
+          "shared_mailbox": "Do not put your own email address in this box"
         },
-        "step": {
-            "user": {
-                "data": {
-                    "entity_name": "Uniquely identifying name for the entities",
-                    "client_id": "Client ID",
-                    "client_secret": "Client Secret",
-                    "alt_auth_method": "Use alternate (more complex) authentication",
-                    "enable_update": "Enable update services",
-                    "basic_calendar": "Enable read only basic calendar",
-                    "groups": "Enable support for group calendars",
-                    "shared_mailbox": "Email address/ID of 'shared' mailbox"
-                },
-                "data_description": {
-                    "shared_mailbox": "Do not put your own email address in this box"
-                },
-                "description": "Enter previously created Entra ID App Registration credentials",
-                "sections": {
-                    "api_options": {
-                        "name": "Advanced API options",
-                        "description": "Advanced options for country specific needs",
-                        "data": {
-                            "country": "API Country"
-                        },
-                        "data_description": {
-                            "country": "Only use if you know you need it since your credentials will be sent to the selected api/country."
-                        }
-                    }
-                }
+        "description": "Enter previously created Entra ID App Registration credentials",
+        "sections": {
+          "api_options": {
+            "name": "Advanced API options",
+            "description": "Advanced options for country specific needs",
+            "data": {
+              "country": "API Country"
             },
-            "request_default": {
-                "title": "Authorization Required - {entity_name}",
-                "description": "Complete the configuration by clicking on the link and copying the returned url into this field afterwards and submit\n\n[Link MS365 account]({auth_url}){failed_permissions}",
-                "data": {
-                    "url": "Returned URL"
-                }
-            },
-            "request_alt": {
-                "title": "Authorization Required - {entity_name}",
-                "description": "To link your MS365 account, click the link, login, and authorize:\n\n[Link MS365 account]({auth_url}){failed_permissions}",
-                "submit": "I authorized successfully"
+            "data_description": {
+              "country": "Only use if you know you need it since your credentials will be sent to the selected api/country."
             }
+          }
         }
-    },
-    "options": {
-        "step": {
-            "user": {
-                "data": {
-                    "track_new_calendar": "Enable new calendars",
-                    "calendar_list": "Enabled calendars"
-                },
-                "description": "Setup options for {entity_name}",
-                "sections": {
-                    "advanced_options": {
-                        "name": "Advanced options",
-                        "description": "Advanced syncronisation configuration",
-                        "data": {
-                            "update_interval": "Update interval in seconds",
-                            "days_backward": "Number of days backwards",
-                            "days_forward": "Number of days forward"
-                        },
-                        "data_description": {
-                            "days_backward": "Days backward to sync to store",
-                            "days_forward": "Days forward to sync to store"
-                        }
-                    }
-                }
-            },
-            "calendar_config": {
-                "data": {
-                    "name": "Calendar friendly name",
-                    "end_offset": "Hours to offset the end time",
-                    "start_offset": "Hours to offset the start time",
-                    "max_results": "Max number of events to retrieve"
-                },
-                "description": "Setup options for {entity_name} - calendar device_id {device_id}"
-            }
+      },
+      "request_default": {
+        "title": "Authorization Required - {entity_name}",
+        "description": "Complete the configuration by clicking on the link and copying the returned url into this field afterwards and submit\n\n[Link MS365 account]({auth_url}){failed_permissions}",
+        "data": {
+          "url": "Returned URL"
         }
-    },
-    "issues": {
-        "corrupted": {
-            "title": "Re-authentication required - {domain} - {entity_name}",
-            "description": "The token file is corrupted. Please [Reconfigure]({url}) the integration and re-authenticate to re-create the token file."
-        },
-        "expired": {
-            "title": "Re-authentication required - {domain} - {entity_name}",
-            "description": "The token has expired. Please [Reconfigure]({url}) the integration and re-authenticate to re-create the token file."
-        },
-        "missing": {
-            "title": "Re-authentication required - {domain} - {entity_name}",
-            "description": "The token file is missing. Please [Reconfigure]({url}) the integration and re-authenticate to re-create the token file."
-        },
-        "outdated": {
-            "title": "Re-authentication required - {domain} - {entity_name}",
-            "description": "The token is outdated. Please delete the token, then [Reconfigure]({url}) the integration and re-authenticate to re-create the token file."
-        },
-        "permissions": {
-            "title": "Re-authentication required - {domain} - {entity_name}",
-            "description": "Permissions missing. Please [Reconfigure]({url}) the integration and re-authenticate to re-create the token file."
-        }
-    },
-    "exceptions": {
-        "calendar_not_editable": {
-            "message": "Calendar - {name} - is not editable"
-        },
-        "ms365_group_calendar_error": {
-            "message": "O365 Python does not have capability to update/respond to group calendar events: {entity_id}"
-        },
-        "not_authorised": {
-            "message": "Not authorised requires permission: {required_permission}"
-        }
-    },
-    "services": {
-        "respond_calendar_event": {
-            "name": "Respond to an event",
-            "description": "Respond to calendar event/invite",
-            "fields": {
-                "event_id": {
-                    "description": "ID for the event, can be found as an attribute on your calendar entity's events",
-                    "name": "Event ID"
-                },
-                "response": {
-                    "description": "The response to the invite [Accept, Tentative, Decline]",
-                    "name": "Response"
-                },
-                "message": {
-                    "description": "The response message to the invite (Optional)",
-                    "name": "Message"
-                },
-                "send_response": {
-                    "description": "Send the response to the organizer (Optional)",
-                    "name": "Send Response"
-                }
-            }
-        },
-        "create_calendar_event": {
-            "name": "Create a new event",
-            "description": "Create new calendar event",
-            "fields": {
-                "subject": {
-                    "description": "The subject of the created event",
-                    "name": "Subject"
-                },
-                "start": {
-                    "description": "The start time of the event",
-                    "name": "Start"
-                },
-                "end": {
-                    "description": "The end time of the event",
-                    "name": "End"
-                },
-                "body": {
-                    "description": "The body text for the event (optional)",
-                    "name": "Body"
-                },
-                "location": {
-                    "description": "The location for the event (optional)",
-                    "name": "Location"
-                },
-                "categories": {
-                    "description": "List of categories for the event (optional)",
-                    "name": "Categories"
-                },
-                "sensitivity": {
-                    "description": "The sensitivity for the event (optional) [Normal, Personal, Private, Confidential]",
-                    "name": "Sensitivity"
-                },
-                "show_as": {
-                    "description": "Show event as (optional) [Free, Tentative, Busy, Oof, WorkingElsewhere, Unknown]",
-                    "name": "Show_as"
-                },
-                "is_all_day": {
-                    "description": "Set whether event is all day (optional)",
-                    "name": "All Day"
-                },
-                "attendees": {
-                    "description": "List of attendees formatted as email: example@example.com type: Required, Optional, or Resource (optional)",
-                    "name": "Attendees"
-                }
-            }
-        },
-        "modify_calendar_event": {
-            "name": "Modify an event",
-            "description": "Modify existing calendar event, all properties except event_id are optional",
-            "fields": {
-                "event_id": {
-                    "description": "ID for the event, can be found as an attribute on your calendar entity's events",
-                    "name": "Event ID"
-                },
-                "subject": {
-                    "description": "The subject of the event",
-                    "name": "Subject"
-                },
-                "start": {
-                    "description": "The start time of the event",
-                    "name": "Start"
-                },
-                "end": {
-                    "description": "The end time of the event",
-                    "name": "End"
-                },
-                "body": {
-                    "description": "The body text for the event",
-                    "name": "Body"
-                },
-                "location": {
-                    "description": "The location for the event",
-                    "name": "Location"
-                },
-                "categories": {
-                    "description": "List of categories for the event",
-                    "name": "Categories"
-                },
-                "sensitivity": {
-                    "description": "The sensitivity for the event [Normal, Personal, Private, Confidential]",
-                    "name": "Sensitivity"
-                },
-                "show_as": {
-                    "description": "Show event as [Free, Tentative, Busy, Oof, WorkingElsewhere, Unknown]",
-                    "name": "Show_as"
-                },
-                "is_all_day": {
-                    "description": "Set whether event is all day",
-                    "name": "All Day"
-                },
-                "attendees": {
-                    "description": "List of attendees formatted as email: example@example.com type: Required, Optional, or Resource",
-                    "name": "Attendees"
-                }
-            }
-        },
-        "remove_calendar_event": {
-            "name": "Delete an event",
-            "description": "Delete calendar event",
-            "fields": {
-                "event_id": {
-                    "description": "ID for the event, can be found as an attribute on your calendar entity's events",
-                    "name": "Event ID"
-                }
-            }
-        }
+      },
+      "request_alt": {
+        "title": "Authorization Required - {entity_name}",
+        "description": "To link your MS365 account, click the link, login, and authorize:\n\n[Link MS365 account]({auth_url}){failed_permissions}",
+        "submit": "I authorized successfully"
+      }
     }
+  },
+  "options": {
+    "step": {
+      "user": {
+        "data": {
+          "track_new_calendar": "Enable new calendars",
+          "calendar_list": "Enabled calendars"
+        },
+        "description": "Setup options for {entity_name}",
+        "sections": {
+          "advanced_options": {
+            "name": "Advanced options",
+            "description": "Advanced syncronisation configuration",
+            "data": {
+              "update_interval": "Update interval in seconds",
+              "days_backward": "Number of days backwards",
+              "days_forward": "Number of days forward"
+            },
+            "data_description": {
+              "days_backward": "Days backward to sync to store",
+              "days_forward": "Days forward to sync to store"
+            }
+          }
+        }
+      },
+      "calendar_config": {
+        "data": {
+          "name": "Calendar friendly name",
+          "end_offset": "Hours to offset the end time",
+          "start_offset": "Hours to offset the start time",
+          "max_results": "Max number of events to retrieve"
+        },
+        "description": "Setup options for {entity_name} - calendar device_id {device_id}"
+      }
+    }
+  },
+  "issues": {
+    "corrupted": {
+      "title": "Re-authentication required - {domain} - {entity_name}",
+      "description": "The token file is corrupted. Please [Reconfigure]({url}) the integration and re-authenticate to re-create the token file."
+    },
+    "expired": {
+      "title": "Re-authentication required - {domain} - {entity_name}",
+      "description": "The token has expired. Please [Reconfigure]({url}) the integration and re-authenticate to re-create the token file."
+    },
+    "missing": {
+      "title": "Re-authentication required - {domain} - {entity_name}",
+      "description": "The token file is missing. Please [Reconfigure]({url}) the integration and re-authenticate to re-create the token file."
+    },
+    "outdated": {
+      "title": "Re-authentication required - {domain} - {entity_name}",
+      "description": "The token is outdated. Please delete the token, then [Reconfigure]({url}) the integration and re-authenticate to re-create the token file."
+    },
+    "permissions": {
+      "title": "Re-authentication required - {domain} - {entity_name}",
+      "description": "Permissions missing. Please [Reconfigure]({url}) the integration and re-authenticate to re-create the token file."
+    }
+  },
+  "exceptions": {
+    "calendar_not_editable": {
+      "message": "Calendar - {name} - is not editable"
+    },
+    "ms365_group_calendar_error": {
+      "message": "O365 Python does not have capability to update/respond to group calendar events: {entity_id}"
+    },
+    "not_authorised": {
+      "message": "Not authorised requires permission: {required_permission}"
+    },
+    "cannot_connect": {
+      "message": "Error syncing calendar events from MS Graph."
+    }
+  },
+  "services": {
+    "respond_calendar_event": {
+      "name": "Respond to an event",
+      "description": "Respond to calendar event/invite",
+      "fields": {
+        "event_id": {
+          "description": "ID for the event, can be found as an attribute on your calendar entity's events",
+          "name": "Event ID"
+        },
+        "response": {
+          "description": "The response to the invite [Accept, Tentative, Decline]",
+          "name": "Response"
+        },
+        "message": {
+          "description": "The response message to the invite (Optional)",
+          "name": "Message"
+        },
+        "send_response": {
+          "description": "Send the response to the organizer (Optional)",
+          "name": "Send Response"
+        }
+      }
+    },
+    "create_calendar_event": {
+      "name": "Create a new event",
+      "description": "Create new calendar event",
+      "fields": {
+        "subject": {
+          "description": "The subject of the created event",
+          "name": "Subject"
+        },
+        "start": {
+          "description": "The start time of the event",
+          "name": "Start"
+        },
+        "end": {
+          "description": "The end time of the event",
+          "name": "End"
+        },
+        "body": {
+          "description": "The body text for the event (optional)",
+          "name": "Body"
+        },
+        "location": {
+          "description": "The location for the event (optional)",
+          "name": "Location"
+        },
+        "categories": {
+          "description": "List of categories for the event (optional)",
+          "name": "Categories"
+        },
+        "sensitivity": {
+          "description": "The sensitivity for the event (optional) [Normal, Personal, Private, Confidential]",
+          "name": "Sensitivity"
+        },
+        "show_as": {
+          "description": "Show event as (optional) [Free, Tentative, Busy, Oof, WorkingElsewhere, Unknown]",
+          "name": "Show_as"
+        },
+        "is_all_day": {
+          "description": "Set whether event is all day (optional)",
+          "name": "All Day"
+        },
+        "attendees": {
+          "description": "List of attendees formatted as email: example@example.com type: Required, Optional, or Resource (optional)",
+          "name": "Attendees"
+        }
+      }
+    },
+    "modify_calendar_event": {
+      "name": "Modify an event",
+      "description": "Modify existing calendar event, all properties except event_id are optional",
+      "fields": {
+        "event_id": {
+          "description": "ID for the event, can be found as an attribute on your calendar entity's events",
+          "name": "Event ID"
+        },
+        "subject": {
+          "description": "The subject of the event",
+          "name": "Subject"
+        },
+        "start": {
+          "description": "The start time of the event",
+          "name": "Start"
+        },
+        "end": {
+          "description": "The end time of the event",
+          "name": "End"
+        },
+        "body": {
+          "description": "The body text for the event",
+          "name": "Body"
+        },
+        "location": {
+          "description": "The location for the event",
+          "name": "Location"
+        },
+        "categories": {
+          "description": "List of categories for the event",
+          "name": "Categories"
+        },
+        "sensitivity": {
+          "description": "The sensitivity for the event [Normal, Personal, Private, Confidential]",
+          "name": "Sensitivity"
+        },
+        "show_as": {
+          "description": "Show event as [Free, Tentative, Busy, Oof, WorkingElsewhere, Unknown]",
+          "name": "Show_as"
+        },
+        "is_all_day": {
+          "description": "Set whether event is all day",
+          "name": "All Day"
+        },
+        "attendees": {
+          "description": "List of attendees formatted as email: example@example.com type: Required, Optional, or Resource",
+          "name": "Attendees"
+        }
+      }
+    },
+    "remove_calendar_event": {
+      "name": "Delete an event",
+      "description": "Delete calendar event",
+      "fields": {
+        "event_id": {
+          "description": "ID for the event, can be found as an attribute on your calendar entity's events",
+          "name": "Event ID"
+        }
+      }
+    }
+  }
 }

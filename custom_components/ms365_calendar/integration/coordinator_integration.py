@@ -7,9 +7,11 @@ from datetime import datetime, timedelta, timezone
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 from O365.calendar import Event  # pylint: disable=no-name-in-module)
+from requests.exceptions import ConnectionError as RequestConnectionError
+from requests.exceptions import HTTPError, RetryError
 
 from .const_integration import (
     CONF_ADVANCED_OPTIONS,
@@ -21,6 +23,7 @@ from .const_integration import (
     DEFAULT_DAYS_BACKWARD,
     DEFAULT_DAYS_FORWARD,
     DEFAULT_UPDATE_INTERVAL,
+    DOMAIN,
 )
 from .sync.sync import MS365CalendarEventSyncManager
 from .sync.timeline import MS365Timeline
@@ -74,6 +77,7 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
         self._last_sync_min = None
         self._last_sync_max = None
         self.entity = entity
+        self._error = False
 
     async def _async_update_data(self) -> MS365Timeline:
         """Fetch data from API endpoint."""
@@ -81,7 +85,17 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
 
         self._last_sync_min = dt_util.now() + self._sync_event_min_time
         self._last_sync_max = dt_util.now() + self._sync_event_max_time
-        await self.sync.run(self._last_sync_min, self._last_sync_max)
+        try:
+            await self.sync.run(self._last_sync_min, self._last_sync_max)
+        except (HTTPError, RetryError, RequestConnectionError) as err:
+            # _LOGGER.error(
+            #     "Error getting calendar events for data. Error connecting to MS Graph: %s",
+            #     err,
+            # )
+            raise UpdateFailed(
+                translation_domain=DOMAIN,
+                translation_key="cannot_connect",
+            ) from err
 
         return await self.sync.store_service.async_get_timeline(
             dt_util.get_default_time_zone()
@@ -104,19 +118,25 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
             _LOGGER.debug(
                 "Fetch events from api - %s - %s - %s", self.name, start_date, end_date
             )
-            return await self.sync.async_list_events(start_date, end_date)
-        else:
-            _LOGGER.debug(
-                "Fetch events from cache - %s - %s - %s",
-                self.name,
-                start_date,
-                end_date,
-            )
+            try:
+                return await self.sync.async_list_events(start_date, end_date)
+            except (HTTPError, RetryError, RequestConnectionError) as err:
+                self._log_error(
+                    "Error getting calendar event range "
+                    + "from MS Graph, fetching from cache.",
+                    err,
+                )
+        _LOGGER.debug(
+            "Fetch events from cache - %s - %s - %s",
+            self.name,
+            start_date,
+            end_date,
+        )
 
-            return self.data.overlapping(
-                start_date,
-                end_date,
-            )
+        return self.data.overlapping(
+            start_date,
+            end_date,
+        )
 
     def get_current_event(self):
         """Get the current event."""
@@ -126,7 +146,8 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
                 self.sync.calendar_id,
             )
             self.event = None
-            return
+            return None
+
         today = datetime.now(timezone.utc)
         events = self.data.overlapping(
             today,
@@ -187,3 +208,10 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
             date_obj = obj
 
         return dt_util.as_utc(date_obj)
+
+    def _log_error(self, error, err):
+        if not self._error:
+            _LOGGER.warning("%s - %s", error, err)
+            self._error = True
+        else:
+            _LOGGER.debug("Repeat error - %s - %s", error, err)

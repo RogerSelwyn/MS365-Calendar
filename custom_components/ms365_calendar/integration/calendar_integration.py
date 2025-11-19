@@ -113,7 +113,7 @@ async def async_integration_setup_entry(
 
     await _async_setup_register_services(config_update_supported)
 
-    return True
+    return
 
 
 async def _async_setup_register_services(config_update_supported):

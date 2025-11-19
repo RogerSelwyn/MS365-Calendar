@@ -5,8 +5,11 @@ import logging
 from copy import deepcopy
 from datetime import date, datetime, timedelta
 from unittest.mock import patch
-
 import pytest
+
+from homeassistant.util import dt as dt_util
+from homeassistant.components.calendar import DOMAIN as CALENDAR_DOMAIN
+from homeassistant.components.calendar import SERVICE_GET_EVENTS
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from requests.exceptions import HTTPError
@@ -81,7 +84,7 @@ async def test_perms_error(
     assert "No permission for calendar" in caplog.text
 
 
-async def test_fetch_error(
+async def test_sync_fetch_error(
     hass: HomeAssistant,
     setup_base_integration,
     caplog: pytest.LogCaptureFixture,
@@ -95,15 +98,51 @@ async def test_fetch_error(
     ):
         await coordinator.async_refresh()
         await hass.async_block_till_done()
-    assert "Error getting calendar events for data" in caplog.text
+    assert "Error syncing calendar events from MS Graph" in caplog.text
+
+
+async def test_get_events_fetch_error(
+    hass: HomeAssistant,
+    setup_base_integration,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test get events inside range - HA Service."""
+    calendar_name = "calendar.test_calendar1"
+    start_date = dt_util.utcnow() + timedelta(hours=-1440)
+    end_date = dt_util.utcnow() + timedelta(hours=1440)
+    with patch(
+        "O365.calendar.Calendar.get_events",
+        side_effect=HTTPError(),
+    ):
+        await hass.services.async_call(
+            CALENDAR_DOMAIN,
+            SERVICE_GET_EVENTS,
+            {
+                "entity_id": calendar_name,
+                "start_date_time": start_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "end_date_time": end_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            },
+            blocking=True,
+            return_response=True,
+        )
+    assert "Error getting calendar event range" in caplog.text
 
     with patch(
         "O365.calendar.Calendar.get_events",
         side_effect=HTTPError(),
     ):
-        await coordinator.async_refresh()
-        await hass.async_block_till_done()
-    assert "Repeat error - Error getting calendar events for data" in caplog.text
+        await hass.services.async_call(
+            CALENDAR_DOMAIN,
+            SERVICE_GET_EVENTS,
+            {
+                "entity_id": calendar_name,
+                "start_date_time": start_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "end_date_time": end_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            },
+            blocking=True,
+            return_response=True,
+        )
+    assert "Repeat error - Error getting calendar event range" in caplog.text
 
 
 async def test_get_calendar_error(
