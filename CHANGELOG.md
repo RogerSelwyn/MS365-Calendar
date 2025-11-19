@@ -1,5 +1,31 @@
 # Changelog
 
+## v1.7.0 (2025/11/19)
+### ✨ Enhancements
+- [Retrieve data from cache if connection fails](https://github.com/RogerSelwyn/MS365-Calendar/commit/d5b6136f995b8e5495c74df2794e6fd4e9850421) - @RogerSelwyn
+
+### 🧰 Maintenance
+- [Remove device filter from target selector](https://github.com/RogerSelwyn/MS365-Calendar/commit/489f3fd58a9e8ca6b21c2589fd68e72dec2f0564) - @RogerSelwyn
+
+### ⬆️ Dependencies
+- [Bump github/codeql-action from 3 to 4](https://github.com/RogerSelwyn/MS365-Calendar/commit/1e97c5dff45d9797e9b9c2cb663f571860c9f045) - @dependabot[bot]
+- [Bump ruff from 0.13.1 to 0.14.1](https://github.com/RogerSelwyn/MS365-Calendar/commit/239bc3fffacd4400b830774988cd915abad2f0c3) - @dependabot[bot]
+- [Bump ruff from 0.14.1 to 0.14.4](https://github.com/RogerSelwyn/MS365-Calendar/commit/eafbedd4e43d25abc59fc9d2263d5846456b8976) - @dependabot[bot]
+
+### 📚 Documentation
+- [Update docs to point to generic docs](https://github.com/RogerSelwyn/MS365-Calendar/commit/46145ea7137023e737db57651400897983cdb615) - @RogerSelwyn
+- [Update index page](https://github.com/RogerSelwyn/MS365-Calendar/commit/86cdc82ed05397b020e2d71b3ad6ce11d1c9d312) - @RogerSelwyn
+- [Link corrections](https://github.com/RogerSelwyn/MS365-Calendar/commit/878282cdcba63d86f31ed05be5acd46c2ff9acd6) - @RogerSelwyn
+- [Add link to generic](https://github.com/RogerSelwyn/MS365-Calendar/commit/76b5c409e4c9bd647169f2825edf4ae375ac523e) - @RogerSelwyn
+- [Tweaks](https://github.com/RogerSelwyn/MS365-Calendar/commit/98aab6aefb7aafe70a870ed59d491a828e261bbe) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.7.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/2073b80f61c279f718afb641cc923b0c892ed16c) - @RogerSelwyn
+- [Auto update manifest.json](https://github.com/RogerSelwyn/MS365-Calendar/commit/fb7a7a7203c4e8291bb4bab2af53263550e2b5f1) - @actions-user
+
+
+
+
 ## v1.6.7 (2025/09/24)
 ### 🐛 Fixes
 - [Handle deleted calendar moire gracefully](https://github.com/RogerSelwyn/MS365-Calendar/commit/3a5e0bf240bae1a5d879c7825465c13774290b54) - @RogerSelwyn
