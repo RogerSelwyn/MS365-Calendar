@@ -5,9 +5,10 @@ from collections.abc import Iterable
 from datetime import datetime, timedelta, timezone
 
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import STATE_OK, STATE_PROBLEM, STATE_UNKNOWN
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.util import dt as dt_util
 from O365.calendar import Event  # pylint: disable=no-name-in-module)
 from requests.exceptions import ConnectionError as RequestConnectionError
@@ -23,7 +24,6 @@ from .const_integration import (
     DEFAULT_DAYS_BACKWARD,
     DEFAULT_DAYS_FORWARD,
     DEFAULT_UPDATE_INTERVAL,
-    DOMAIN,
 )
 from .sync.sync import MS365CalendarEventSyncManager
 from .sync.timeline import MS365Timeline
@@ -78,6 +78,7 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
         self._last_sync_max = None
         self.entity = entity
         self._error = False
+        self.sync_state = STATE_UNKNOWN
 
     async def _async_update_data(self) -> MS365Timeline:
         """Fetch data from API endpoint."""
@@ -87,19 +88,18 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
         self._last_sync_max = dt_util.now() + self._sync_event_max_time
         try:
             await self.sync.run(self._last_sync_min, self._last_sync_max)
+            self.sync_state = STATE_OK
         except (HTTPError, RetryError, RequestConnectionError) as err:
-            # _LOGGER.error(
-            #     "Error getting calendar events for data. Error connecting to MS Graph: %s",
-            #     err,
-            # )
-            raise UpdateFailed(
-                translation_domain=DOMAIN,
-                translation_key="cannot_connect",
-            ) from err
+            _LOGGER.error(
+                "Error syncing calendar events from MS Graph, fetching from cache: %s",
+                err,
+            )
+            self.sync_state = STATE_PROBLEM
 
         return await self.sync.store_service.async_get_timeline(
             dt_util.get_default_time_zone()
         )
+
         # self._upcoming_timeline = timeline
         # return timeline
 

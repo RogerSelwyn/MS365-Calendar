@@ -37,6 +37,7 @@ ATTR_SENSITIVITY = "sensitivity"
 ATTR_SHOW_AS = "show_as"
 ATTR_START = "start"
 ATTR_SUBJECT = "subject"
+ATTR_SYNC_STATE = "sync_state"
 ATTR_TYPE = "type"
 
 CALENDAR_ENTITY_ID_FORMAT = "calendar.{}"

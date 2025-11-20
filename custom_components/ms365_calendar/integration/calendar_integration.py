@@ -36,6 +36,7 @@ from .const_integration import (
     ATTR_EVENT_ID,
     ATTR_HEX_COLOR,
     ATTR_OFFSET,
+    ATTR_SYNC_STATE,
     CONF_CAN_EDIT,
     CONF_DEVICE_ID,
     CONF_ENTITY,
@@ -185,6 +186,7 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
         """Extra state attributes."""
         attributes = {
             ATTR_DATA: self._data_attribute,
+            ATTR_SYNC_STATE: self.coordinator.sync_state,
         }
         if hasattr(self.api.calendar, ATTR_COLOR):
             attributes[ATTR_COLOR] = self.api.calendar.color
