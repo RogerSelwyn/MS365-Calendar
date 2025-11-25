@@ -72,6 +72,8 @@ def integration_reconfigure_schema(entry_data):
 
 def integration_validate_schema(user_input):  # pylint: disable=unused-argument
     """Validate the user input."""
+    if user_input.get(CONF_BASIC_CALENDAR) and user_input.get(CONF_SHARED_MAILBOX):
+        return {CONF_BASIC_CALENDAR: "cannot_have_basic_shared"}
     return {}
 
 
