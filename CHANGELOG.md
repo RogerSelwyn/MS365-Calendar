@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.7.2 (2025/11/25)
+### 🧰 Maintenance
+- [Validate to avoid invalid Calendar.ReadBasic.Shared permission request](https://github.com/RogerSelwyn/MS365-Calendar/commit/86e026a2b32733b8aab6cb896baed4fab00de51b) - @RogerSelwyn
+
+### 🔖 Release
+- [Auto update manifest.json](https://github.com/RogerSelwyn/MS365-Calendar/commit/6f89119d9c6e4fdb89b691c5127fb96ce08d209a) - @actions-user
+
+
+
+
 ## v1.7.1 (2025/11/20)
 ### ✨ Enhancements
 - [Return data from cache if MS Graph unavailable](https://github.com/RogerSelwyn/MS365-Calendar/commit/ae544bff2248d6e59ae56ea1ddd7eff10276e176) - @RogerSelwyn
