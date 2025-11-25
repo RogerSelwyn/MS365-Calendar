@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.7.1 (2025/11/20)
+### ✨ Enhancements
+- [Return data from cache if MS Graph unavailable](https://github.com/RogerSelwyn/MS365-Calendar/commit/ae544bff2248d6e59ae56ea1ddd7eff10276e176) - @RogerSelwyn
+
+### 🔖 Release
+- [Auto update manifest.json](https://github.com/RogerSelwyn/MS365-Calendar/commit/2c2331435f3c0e5264e83718d5b1ec950ed7b7ce) - @actions-user
+
+
+
+
 ## v1.7.0 (2025/11/19)
 ### ✨ Enhancements
 - [Retrieve data from cache if connection fails](https://github.com/RogerSelwyn/MS365-Calendar/commit/d5b6136f995b8e5495c74df2794e6fd4e9850421) - @RogerSelwyn
