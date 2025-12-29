@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.7.3 (2025/12/29)
+### 🐛 Fixes
+- [Validate conflicting config options](https://github.com/RogerSelwyn/MS365-Calendar/commit/39519dac0a6b4c2d73e342264e9bce025371978b) - @RogerSelwyn
+
+### 📚 Documentation
+- [Update installation_and_configuration.md](https://github.com/RogerSelwyn/MS365-Calendar/commit/33fd58f27bd3350e680c9bab5b5538c39049e27d) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.7.3](https://github.com/RogerSelwyn/MS365-Calendar/commit/2c5faa04c0aeaf3a5070ab1c39e1ac84a1449b4d) - @RogerSelwyn
+
+
+
+
 ## v1.7.2 (2025/11/25)
 ### 🧰 Maintenance
 - [Validate to avoid invalid Calendar.ReadBasic.Shared permission request](https://github.com/RogerSelwyn/MS365-Calendar/commit/86e026a2b32733b8aab6cb896baed4fab00de51b) - @RogerSelwyn
