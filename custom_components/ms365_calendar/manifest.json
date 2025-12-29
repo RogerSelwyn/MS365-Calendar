@@ -1,20 +1,13 @@
 {
   "domain": "ms365_calendar",
   "name": "Microsoft 365 - Calendar",
-  "codeowners": [
-    "@RogerSelwyn"
-  ],
+  "codeowners": ["@RogerSelwyn"],
   "config_flow": true,
-  "dependencies": [
-    "http"
-  ],
+  "dependencies": ["http"],
   "documentation": "https://github.com/RogerSelwyn/MS365-Calendar",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/RogerSelwyn/MS365-Calendar/issues",
-  "loggers": [
-    "custom_components.ms365_calendar",
-    "O365"
-  ],
+  "loggers": ["custom_components.ms365_calendar", "O365"],
   "requirements": [
     "O365>=2.1.4",
     "BeautifulSoup4>=4.10.0",
@@ -22,5 +15,5 @@
     "ical>=10.0.0",
     "oauthlib"
   ],
-  "version": "v1.7.2"
+  "version": "v1.7.3"
 }
