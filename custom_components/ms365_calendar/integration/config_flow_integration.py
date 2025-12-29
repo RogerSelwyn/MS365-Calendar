@@ -74,6 +74,10 @@ def integration_validate_schema(user_input):  # pylint: disable=unused-argument
     """Validate the user input."""
     if user_input.get(CONF_BASIC_CALENDAR) and user_input.get(CONF_SHARED_MAILBOX):
         return {CONF_BASIC_CALENDAR: "cannot_have_basic_shared"}
+    if user_input.get(CONF_BASIC_CALENDAR) and user_input.get(CONF_ENABLE_UPDATE):
+        return {CONF_BASIC_CALENDAR: "cannot_have_basic_update"}
+    if user_input.get(CONF_GROUPS) and user_input.get(CONF_SHARED_MAILBOX):
+        return {CONF_GROUPS: "cannot_have_groups_shared"}
     return {}
 
 
