@@ -6,7 +6,6 @@ from copy import deepcopy
 from ..classes.permissions import BasePermissions
 from ..const import (
     CONF_ENABLE_UPDATE,
-    CONF_ENTITY_NAME,
     CONF_SHARED_MAILBOX,
     PERM_BASE_PERMISSIONS,
     PERM_SHARED,
