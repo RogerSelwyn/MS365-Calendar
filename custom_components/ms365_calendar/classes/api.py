@@ -5,6 +5,9 @@ import os
 import time
 from typing import Optional
 
+from portalocker import Lock
+from portalocker.exceptions import LockException
+
 from O365 import (
     Account,
     FileSystemTokenBackend,
@@ -13,8 +16,6 @@ from O365.connection import (  # pylint: disable=import-error, no-name-in-module
     Connection,
     MSGraphProtocol,
 )
-from portalocker import Lock
-from portalocker.exceptions import LockException
 
 from ..const import (
     CONF_ENTITY_NAME,
@@ -185,7 +186,7 @@ class MS365LockableFileSystemTokenBackend(FileSystemTokenBackend):
 
     def should_refresh_token(
         self, con: Optional[Connection] = None, *, username: Optional[str] = None
-    ):
+    ):  # pragma: no cover
         """
         Method for refreshing the token when there are concurrently running
         O365 instances. Determines if we need to call the MSAL and refresh

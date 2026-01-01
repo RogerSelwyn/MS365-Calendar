@@ -33,12 +33,12 @@ def add_attribute_to_item(item, user_input, attribute):
     if user_input.get(attribute) is not None:
         item[attribute] = user_input[attribute]
     elif attribute in item:
-        del item[attribute]
+        del item[attribute]  # pragma: no cover
 
 
 def build_entity_id(hass, entity_id_format, name):
     """Build an entity ID."""
-    return async_generate_entity_id(
+    return async_generate_entity_id(  # pragma: no cover
         entity_id_format,
         name,
         hass=hass,

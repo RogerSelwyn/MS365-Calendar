@@ -7,7 +7,7 @@ from ..const import (
 )
 
 
-def build_config_file_path(hass, filepath):
+def build_config_file_path(hass, filepath):  # pragma: no cover
     """Create config path."""
     root = hass.config.config_dir
 

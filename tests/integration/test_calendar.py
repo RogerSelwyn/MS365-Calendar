@@ -172,7 +172,7 @@ async def test_no_events(
     base_token,
     base_config_entry: MS365MockConfigEntry,
 ) -> None:
-    """Test calendar with not events."""
+    """Test calendar with no events."""
     MS365MOCKS.no_events_mocks(requests_mock)
 
     base_config_entry.add_to_hass(hass)

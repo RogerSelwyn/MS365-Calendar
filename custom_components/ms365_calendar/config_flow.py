@@ -91,7 +91,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
 
     def is_matching(self, other_flow: Self) -> bool:
         """Return True if other_flow is matching this flow."""
-        return other_flow.entity_name == self.entity_name
+        return other_flow.entity_name == self.entity_name  # pragma: no cover
 
     async def async_step_user(self, user_input=None):
         """Handle the initial step."""

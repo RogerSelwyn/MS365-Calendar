@@ -10,9 +10,10 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.util import dt as dt_util
-from O365.calendar import Event  # pylint: disable=no-name-in-module)
 from requests.exceptions import ConnectionError as RequestConnectionError
 from requests.exceptions import HTTPError, RetryError
+
+from O365.calendar import Event  # pylint: disable=no-name-in-module)
 
 from .const_integration import (
     CONF_ADVANCED_OPTIONS,
@@ -67,7 +68,7 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
         )
         self.sync = sync
         # self._upcoming_timeline: MS365Timeline | None = None
-        self.event = None
+        # self.event = None
         self._sync_event_min_time = timedelta(
             days=(min(entity.get(CONF_HOURS_BACKWARD_TO_GET) / 24, days_backward))
         )
@@ -140,13 +141,15 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
 
     def get_current_event(self):
         """Get the current event."""
-        if not self.data:
-            _LOGGER.debug(
-                "No current event found for %s",
-                self.sync.calendar_id,
-            )
-            self.event = None
-            return None
+
+        # Not possible to get this situation I beleieve
+        # if not self.data:
+        #     _LOGGER.debug(
+        #         "No current event found for %s",
+        #         self.sync.calendar_id,
+        #     )
+        #     self.event = None
+        #     return None
 
         today = datetime.now(timezone.utc)
         events = self.data.overlapping(

@@ -46,12 +46,6 @@ class Permissions(BasePermissions):
 
     def _build_calendar_permissions(self):
         if self._config.get(CONF_BASIC_CALENDAR, False):
-            if self._enable_update:
-                _LOGGER.warning(
-                    "'enable_update' should not be true when 'basic_calendar' is true ."
-                    + "for account: %s ReadBasic used. ",
-                    self._config[CONF_ENTITY_NAME],
-                )
             self._requested_permissions.append(PERM_CALENDARS_READBASIC + self._shared)
         elif self._enable_update:
             self._requested_permissions.append(PERM_CALENDARS_READWRITE + self._shared)

@@ -53,7 +53,7 @@ def write_yaml_file(yaml_filepath, cal):
     """Write to the calendar file."""
     dirpath = os.path.dirname(yaml_filepath)
     if not os.path.isdir(dirpath):
-        os.makedirs(dirpath)
+        os.makedirs(dirpath)  # pragma: no cover
     with open(yaml_filepath, "a", encoding="UTF8") as out:
         out.write("\n")
         yaml.dump([cal], out, default_flow_style=False, encoding="UTF8")

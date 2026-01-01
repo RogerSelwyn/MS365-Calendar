@@ -30,7 +30,9 @@ from ..helpers.mock_config_entry import MS365MockConfigEntry
 from ..helpers.utils import build_token_url, get_schema_default, mock_token
 from .const_integration import (
     AUTH_CALLBACK_PATH_DEFAULT,
+    RECONFIGURE_CONFIG_ENTRY,
     BASE_CONFIG_ENTRY,
+    BASE_TOKEN_PERMS,
     DOMAIN,
     SHARED_TOKEN_PERMS,
     UPDATE_CALENDAR_LIST,
@@ -97,28 +99,62 @@ async def test_options_flow(
     assert result["data"][CONF_CALENDAR_LIST] == UPDATE_CALENDAR_LIST
 
 
-@pytest.mark.parametrize(
-    "base_config_entry",
-    [{"basic_calendar": True, "enable_update": True}],
-    indirect=True,
-)
-async def test_invalid_entry(
+async def test_invalid_combinations(
     hass: HomeAssistant,
     requests_mock: Mocker,
-    base_token,
+    setup_base_integration,
     base_config_entry: MS365MockConfigEntry,
-    caplog: pytest.LogCaptureFixture,
 ) -> None:
-    """Test for invalid config mix."""
-    MS365MOCKS.standard_mocks(requests_mock)
-    base_config_entry.add_to_hass(hass)
-    await hass.config_entries.async_setup(base_config_entry.entry_id)
-    await hass.async_block_till_done()
-
-    assert (
-        "'enable_update' should not be true when 'basic_calendar' is true"
-        in caplog.text
+    """Test the reconfigure flow."""
+    mock_token(requests_mock, BASE_TOKEN_PERMS)
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN,
+        context={
+            "source": config_entries.SOURCE_RECONFIGURE,
+            "entry_id": base_config_entry.entry_id,
+        },
     )
+    assert result.get("type") is FlowResultType.FORM
+    assert result["step_id"] == "user"
+
+    reconfigure_config_entry = deepcopy(RECONFIGURE_CONFIG_ENTRY)
+    reconfigure_config_entry["basic_calendar"] = True
+    reconfigure_config_entry["enable_update"] = True
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        user_input=reconfigure_config_entry,
+    )
+
+    assert "errors" in result
+    assert "basic_calendar" in result["errors"]
+    assert result["errors"]["basic_calendar"] == "cannot_have_basic_update"
+
+    reconfigure_config_entry = deepcopy(RECONFIGURE_CONFIG_ENTRY)
+    reconfigure_config_entry["basic_calendar"] = True
+    reconfigure_config_entry["shared_mailbox"] = "john@nospam.com"
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        user_input=reconfigure_config_entry,
+    )
+
+    assert "errors" in result
+    assert "basic_calendar" in result["errors"]
+    assert result["errors"]["basic_calendar"] == "cannot_have_basic_shared"
+
+    reconfigure_config_entry = deepcopy(RECONFIGURE_CONFIG_ENTRY)
+    reconfigure_config_entry["groups"] = True
+    reconfigure_config_entry["shared_mailbox"] = "john@nospam.com"
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        user_input=reconfigure_config_entry,
+    )
+
+    assert "errors" in result
+    assert "groups" in result["errors"]
+    assert result["errors"]["groups"] == "cannot_have_groups_shared"
 
 
 async def test_shared_email_invalid(
