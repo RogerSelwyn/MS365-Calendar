@@ -37,7 +37,7 @@ class MS365Entity(CoordinatorEntity):
     @property
     def entity_key(self):
         """Entity Key property."""
-        return self._entity_id  # pragma: no cover
+        return self._entity_id
 
     @property
     def unique_id(self):

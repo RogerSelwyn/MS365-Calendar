@@ -89,9 +89,9 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
         """MS365 options callback."""
         return MS365OptionsFlowHandler(config_entry)
 
-    def is_matching(self, other_flow: Self) -> bool:
+    def is_matching(self, other_flow: Self) -> bool:  # pragma: no cover
         """Return True if other_flow is matching this flow."""
-        return other_flow.entity_name == self.entity_name  # pragma: no cover
+        return other_flow.entity_name == self.entity_name
 
     async def async_step_user(self, user_input=None):
         """Handle the initial step."""

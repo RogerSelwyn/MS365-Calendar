@@ -81,15 +81,15 @@ class BasePermissions:
         # If Calendar, Contacts or Mail Resource then permissions can have a constraint of .Shared
         # which includes base as well. e.g. Calendars.Read is also enabled by Calendars.Read.Shared
         if not constraint and resource in ["Calendars", "Contacts", "Mail"]:
-            sharedpermission = f"{deepcopy(permission)}.Shared"  # pragma: no cover
-            return self._check_higher_permissions(sharedpermission)  # pragma: no cover
+            sharedpermission = f"{deepcopy(permission)}.Shared"
+            return self._check_higher_permissions(sharedpermission)
         # If Presence Resource then permissions can have a constraint of .All
         # which includes base as well. e.g. Presence.Read is also enabled by Presence.Read.All
         if not constraint and resource in ["Presence"]:
-            allpermission = f"{deepcopy(permission)}.All"  # pragma: no cover
-            return self._check_higher_permissions(allpermission)  # pragma: no cover
+            allpermission = f"{deepcopy(permission)}.All"
+            return self._check_higher_permissions(allpermission)
 
-        return False
+        return False  # pragma: no cover
 
     def _check_higher_permissions(self, permission):
         operation = permission.split(".")[1]
