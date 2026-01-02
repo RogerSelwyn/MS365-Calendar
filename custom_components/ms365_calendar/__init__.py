@@ -141,7 +141,7 @@ async def async_remove_entry(hass: HomeAssistant, entry: MS365ConfigEntry) -> No
     token_backend = MS365Token(hass, entry.data)
     await hass.async_add_executor_job(token_backend.delete_token)
     if not hasattr(setup_integration, "async_integration_remove_entry"):
-        return  # pragma: no cover
+        return
     await setup_integration.async_integration_remove_entry(hass, entry)
 
 
