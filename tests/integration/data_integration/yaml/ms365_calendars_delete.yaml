@@ -19,3 +19,10 @@
     name: Calendar3
     start_offset: 0
     track: true
+- cal_id: delete_calendar
+  entities:
+  - device_id: Delete calendar
+    end_offset: 24
+    name: Delete Calendar
+    start_offset: 0
+    track: true

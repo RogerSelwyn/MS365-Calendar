@@ -59,3 +59,25 @@ async def test_corrupt_file(
     await hass.async_block_till_done()
 
     assert "Invalid Data - duplicate entries may be created" in caplog.text
+
+async def test_deleted_file(
+    tmp_path,
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    base_token,
+    base_config_entry: MS365MockConfigEntry,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test for deleting yaml content."""
+    # logging.disable(logging.WARNING)
+    MS365MOCKS.standard_mocks(requests_mock)
+    yaml_setup(tmp_path, "ms365_calendars_delete")
+
+    base_config_entry.add_to_hass(hass)
+
+    await hass.config_entries.async_setup(base_config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    check_yaml_file_contents(tmp_path, "ms365_calendars_base")
+
+    assert "Calendar deleted from" in caplog.text

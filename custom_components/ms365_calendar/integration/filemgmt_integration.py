@@ -56,7 +56,6 @@ def write_yaml_file(yaml_filepath, cal):
     if not os.path.isdir(dirpath):
         os.makedirs(dirpath)  # pragma: no cover
     with open(yaml_filepath, "a", encoding="UTF8") as out:
-        out.write("\n")
         yaml.dump([cal], out, default_flow_style=False, encoding="UTF8")
         out.close()
 
@@ -107,6 +106,8 @@ async def async_check_for_deleted_calendars(entry: MS365ConfigEntry, calendars, 
         ]:
             updated_calendars.append(existing_calendars[e_cal_id])
             continue
+        _LOGGER.info("Calendar deleted from %s: %s", path, e_cal_id)
+
         deleted_calendars.append(existing_calendars[e_cal_id])
     if deleted_calendars:
         await hass.async_add_executor_job(

@@ -1,4 +1,3 @@
-
 - cal_id: calendar1
   entities:
   - device_id: Calendar1
@@ -8,7 +7,6 @@
     track: true
     sensitivity_exclude: 
      - "private"
-
 - cal_id: group:calendar2
   entities:
   - device_id: Calendar2
