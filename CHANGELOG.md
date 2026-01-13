@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.7.4 (2026/01/13)
+### 🧰 Maintenance
+- [Remove linting error](https://github.com/RogerSelwyn/MS365-Calendar/commit/3e30d20dc025db58b2dc6d81a0ae4e2e94d9f13a) - @RogerSelwyn
+- [Tidy up deleted calendars at startup](https://github.com/RogerSelwyn/MS365-Calendar/commit/69348a780d5142203f06f2a86c44d697306dbf38) - @RogerSelwyn
+
+### 📚 Documentation
+- [Update README.md](https://github.com/RogerSelwyn/MS365-Calendar/commit/a9d8d2b40bf4be049dcb4961c6a93d61abb4ada0) - @RogerSelwyn
+
+### ✅ Test
+- [Update tests for recent changes](https://github.com/RogerSelwyn/MS365-Calendar/commit/52c152017d52f5dacdc195442138cbcf4e541c0a) - @RogerSelwyn
+- [Update test coverage handling](https://github.com/RogerSelwyn/MS365-Calendar/commit/5bce1d0becad9edade1d405185cba52e33ff181a) - @RogerSelwyn
+- [Update test coverage handling](https://github.com/RogerSelwyn/MS365-Calendar/commit/b11d13b5a344f9de7c090b85b38824372cd04b36) - @RogerSelwyn
+- [Add test for deleting calendar](https://github.com/RogerSelwyn/MS365-Calendar/commit/36be27cee789a96ccfe03c5a7cab3939749095d6) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.7.4](https://github.com/RogerSelwyn/MS365-Calendar/commit/06f6bdb7e9eca83c17ddd6c03ba508b5c83bd4a1) - @RogerSelwyn
+
+
+
+
 ## v1.7.3 (2025/12/29)
 ### 🐛 Fixes
 - [Validate conflicting config options](https://github.com/RogerSelwyn/MS365-Calendar/commit/39519dac0a6b4c2d73e342264e9bce025371978b) - @RogerSelwyn
