@@ -5,11 +5,12 @@ import logging
 from typing import Any, cast
 
 from homeassistant.core import HomeAssistant
+from requests.exceptions import HTTPError, RetryError
+
 from O365.calendar import Event  # pylint: disable=no-name-in-module
 from O365.utils.query import (  # pylint: disable=no-name-in-module, import-error
     QueryBuilder,
 )
-from requests.exceptions import HTTPError, RetryError
 
 from ...classes.config_entry import MS365ConfigEntry
 from ..const_integration import (
@@ -18,7 +19,10 @@ from ..const_integration import (
     ITEMS,
     EventResponse,
 )
-from ..filemgmt_integration import async_update_calendar_file
+from ..filemgmt_integration import (
+    async_check_for_deleted_calendars,
+    async_update_calendar_file,
+)
 from ..utils_integration import add_call_data_to_event
 from .store import CalendarStore
 from .timeline import MS365Timeline, calendar_timeline
@@ -246,4 +250,5 @@ async def async_scan_for_calendars(hass, entry: MS365ConfigEntry, account):
             hass,
             track,
         )
-    return calendars
+    deleted_calendars = await async_check_for_deleted_calendars(entry, calendars, hass)
+    return calendars, deleted_calendars

@@ -38,7 +38,7 @@ from .sync.store import ScopedCalendarStore
 from .sync.sync import (
     MS365CalendarEventSyncManager,
 )
-from .utils_integration import build_calendar_entity_id
+from .utils_integration import async_delete_calendar, build_calendar_entity_id
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -46,7 +46,10 @@ _LOGGER = logging.getLogger(__name__)
 async def async_do_setup(hass: HomeAssistant, entry: ConfigEntry, account):
     """Run the setup after we have everything configured."""
 
-    scanned_calendars = await async_scan_for_calendars(hass, entry, account)
+    scanned_calendars, deleted_calendars = await async_scan_for_calendars(
+        hass, entry, account
+    )
+    await _async_delete_calendar_entities(hass, entry, deleted_calendars)
     coordinators, keys = await _async_setup_coordinators(
         hass,
         account,
@@ -65,6 +68,14 @@ async def async_integration_remove_entry(hass: HomeAssistant, entry: MS365Config
         await hass.async_add_executor_job(os.remove, yaml_filepath)
     store = LocalCalendarStore(hass, entry.entry_id)
     await store.async_remove()
+
+
+async def _async_delete_calendar_entities(
+    hass: HomeAssistant, entry: MS365ConfigEntry, deleted_calendars
+):
+    for calendar in deleted_calendars:
+        for entity in calendar.get(CONF_ENTITIES):
+            await async_delete_calendar(hass, entry, entity[CONF_DEVICE_ID])
 
 
 async def _async_setup_coordinators(
