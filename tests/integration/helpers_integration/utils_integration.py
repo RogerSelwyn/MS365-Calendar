@@ -71,8 +71,4 @@ def check_yaml_file_contents(tmp_path, filename):
     path = TEST_DATA_INTEGRATION_LOCATION / f"yaml/{filename}.yaml"
     with open(path, encoding="utf8") as file:
         compare_yaml = file.read()
-    print("-------created---------")
-    print(created_yaml)
-    print("-------compare---------")
-    print(compare_yaml)
     assert created_yaml == compare_yaml
