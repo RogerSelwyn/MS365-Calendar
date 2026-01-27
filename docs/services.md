@@ -35,3 +35,11 @@ data:
       type: Required
 ```
 
+Response - Note uid is shown as an attribute of the entity_id since multiple entities can potentially be actioned at the same time.
+
+```yaml
+calendar.user_primary:
+  uid: >-
+    long_guid
+```
+

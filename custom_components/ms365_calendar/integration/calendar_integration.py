@@ -19,7 +19,7 @@ from homeassistant.components.calendar import (
     is_offset_reached,
 )
 from homeassistant.const import CONF_ENTITY_ID, CONF_NAME
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, ServiceResponse, SupportsResponse
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import entity_platform
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -125,6 +125,7 @@ async def _async_setup_register_services(config_update_supported):
             "create_calendar_event",
             CALENDAR_SERVICE_CREATE_SCHEMA,
             "async_create_calendar_event",
+            supports_response=SupportsResponse.OPTIONAL,
         )
         platform.async_register_entity_service(
             "modify_calendar_event",
@@ -305,7 +306,7 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
             data = [format_event_data(event) for event in data_events]
             self._data_attribute = data[: self._max_results]
 
-    async def async_create_event(self, **kwargs: Any) -> None:
+    async def async_create_event(self, **kwargs: Any) -> ServiceResponse:
         """Add a new event to calendar."""
         start = kwargs[EVENT_START]
         end = kwargs[EVENT_END]
@@ -313,7 +314,7 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
         subject = kwargs[EVENT_SUMMARY]
         body = kwargs.get(EVENT_DESCRIPTION)
         rrule = kwargs.get(EVENT_RRULE)
-        await self.async_create_calendar_event(
+        return await self.async_create_calendar_event(
             subject,
             start,
             end,
@@ -357,7 +358,9 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
         """Delete an event on the calendar."""
         await self.async_remove_calendar_event(uid, recurrence_id, recurrence_range)
 
-    async def async_create_calendar_event(self, subject, start, end, **kwargs):
+    async def async_create_calendar_event(
+        self, subject, start, end, **kwargs
+    ) -> ServiceResponse:
         """Create the event."""
 
         self._validate_calendar_permissions()
@@ -368,6 +371,7 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
 
         self._raise_event(EVENT_CREATE_CALENDAR_EVENT, event.object_id)
         await self.coordinator.async_refresh()
+        return {"uid": event.object_id}
 
     async def async_modify_calendar_event(
         self,

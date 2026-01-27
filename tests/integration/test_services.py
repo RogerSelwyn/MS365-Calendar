@@ -207,7 +207,7 @@ async def test_create_ms365_event(
 
     calendar_name = "calendar.test_calendar1"
     with patch("O365.calendar.Event.save") as mock_save:
-        await hass.services.async_call(
+        response = await hass.services.async_call(
             DOMAIN,
             "create_calendar_event",
             {
@@ -220,9 +220,10 @@ async def test_create_ms365_event(
                 "is_all_day": True,
             },
             blocking=True,
-            return_response=False,
+            return_response=True,
         )
     await hass.async_block_till_done()
+    assert response == {calendar_name: {"uid": None}}
     assert mock_save.called
     assert len(listener_setup.events) == 1
     assert listener_setup.events[0].event_type == f"{DOMAIN}_create_calendar_event"
