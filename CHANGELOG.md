@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.8.0 (2026/01/27)
+### ✨ Enhancements
+- [Return event id when creating new event](https://github.com/RogerSelwyn/MS365-Calendar/commit/7ae8c4d2c4b4b1b9c2e25bba1ebdb519875230af) - @RogerSelwyn
+
+### ✅ Test
+- [Tidy up test](https://github.com/RogerSelwyn/MS365-Calendar/commit/d8e4c3e8fd168d2f079bd0bbb523060559b057e1) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.8.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/c9b5d1bf6b080a232ba3efd66bd7c46023f00787) - @RogerSelwyn
+
+
+
+
 ## v1.7.4 (2026/01/13)
 ### 🧰 Maintenance
 - [Remove linting error](https://github.com/RogerSelwyn/MS365-Calendar/commit/3e30d20dc025db58b2dc6d81a0ae4e2e94d9f13a) - @RogerSelwyn
