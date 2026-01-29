@@ -55,6 +55,7 @@ create_calendar_event:
     categories:
       selector:
         text:
+          multiple: true
     sensitivity:
       example: normal
       selector:
@@ -129,6 +130,7 @@ modify_calendar_event:
     categories:
       selector:
         text:
+          multiple: true
     sensitivity:
       example: normal
       selector:
@@ -180,4 +182,3 @@ remove_calendar_event:
       required: true
       selector:
         text:
-
