@@ -195,6 +195,10 @@
         "attendees": {
           "description": "List of attendees formatted as email: example@example.com type: Required, Optional, or Resource (optional)",
           "name": "Attendees"
+        },
+        "remind_before_minutes": {
+          "description": "Minutes before event to set reminder",
+          "name": "Remind before Minutes"
         }
       }
     },
@@ -245,6 +249,10 @@
         "attendees": {
           "description": "List of attendees formatted as email: example@example.com type: Required, Optional, or Resource",
           "name": "Attendees"
+        },
+        "remind_before_minutes": {
+          "description": "Minutes before event to set reminder",
+          "name": "Remind before Minutes"
         }
       }
     },

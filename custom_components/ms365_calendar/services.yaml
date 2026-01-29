@@ -95,6 +95,14 @@ create_calendar_event:
     attendees:
       selector:
         object:
+    remind_before_minutes:
+      example: 15
+      selector:
+        number:
+          step: 1
+          min: 0
+          max: 1440
+          unit_of_measurement: minutes
 
 modify_calendar_event:
   target:
@@ -170,6 +178,14 @@ modify_calendar_event:
     attendees:
       selector:
         object:
+    remind_before_minutes:
+      example: 15
+      selector:
+        number:
+          step: 1
+          min: 0
+          max: 1440
+          unit_of_measurement: minutes
 
 remove_calendar_event:
   target:
