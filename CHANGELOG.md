@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.8.1 (2026/01/29)
+### ✨ Enhancements
+- [Add ability to set and modify a reminder](https://github.com/RogerSelwyn/MS365-Calendar/commit/d5f70ef00a9c703f9709dc81b9c626430feacb6c) - @RogerSelwyn
+
+### 🐛 Fixes
+- [Fix errors with categories in UI mode action](https://github.com/RogerSelwyn/MS365-Calendar/commit/c61aa4b31da3ad15c1626eddb14b4479b1683b16) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.8.1](https://github.com/RogerSelwyn/MS365-Calendar/commit/99a0935ac444189735646b4c14faced960b1f266) - @RogerSelwyn
+
+
+
+
 ## v1.8.0 (2026/01/27)
 ### ✨ Enhancements
 - [Return event id when creating new event](https://github.com/RogerSelwyn/MS365-Calendar/commit/7ae8c4d2c4b4b1b9c2e25bba1ebdb519875230af) - @RogerSelwyn
