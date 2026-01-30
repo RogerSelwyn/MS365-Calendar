@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.8.2 (2026/01/30)
+### ✨ Enhancements
+- [Add ability to set reminder off/on](https://github.com/RogerSelwyn/MS365-Calendar/commit/de27ce4e1f4bd23c71e8cd8133151c2add16fa36) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.8.2](https://github.com/RogerSelwyn/MS365-Calendar/commit/8d6dfe31a6232b8bf30a07548732a9cbe50d100d) - @RogerSelwyn
+
+
+
+
 ## v1.8.1 (2026/01/29)
 ### ✨ Enhancements
 - [Add ability to set and modify a reminder](https://github.com/RogerSelwyn/MS365-Calendar/commit/d5f70ef00a9c703f9709dc81b9c626430feacb6c) - @RogerSelwyn
