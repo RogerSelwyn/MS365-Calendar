@@ -95,6 +95,12 @@ create_calendar_event:
     attendees:
       selector:
         object:
+    is_reminder_on:
+      example: True
+      required: false
+      default: true
+      selector:
+        boolean:
     remind_before_minutes:
       example: 15
       selector:
@@ -178,6 +184,10 @@ modify_calendar_event:
     attendees:
       selector:
         object:
+    is_reminder_on:
+      example: True
+      selector:
+        boolean:
     remind_before_minutes:
       example: 15
       selector:

@@ -27,6 +27,7 @@ from .const_integration import (
     ATTR_END,
     ATTR_EVENT_ID,
     ATTR_IS_ALL_DAY,
+    ATTR_IS_REMINDER_ON,
     ATTR_LOCATION,
     ATTR_MESSAGE,
     ATTR_REMIND_BEFORE_MINUTES,
@@ -119,6 +120,7 @@ CALENDAR_SERVICE_CREATE_SCHEMA = vol.All(
             vol.Optional(ATTR_SHOW_AS): vol.Coerce(EventShowAs),
             vol.Optional(ATTR_IS_ALL_DAY): bool,
             vol.Optional(ATTR_ATTENDEES): [CALENDAR_SERVICE_ATTENDEE_SCHEMA],
+            vol.Optional(ATTR_IS_REMINDER_ON): bool,
             vol.Optional(ATTR_REMIND_BEFORE_MINUTES): vol.All(
                 vol.Coerce(int), vol.Range(min=0, max=1440)
             ),
@@ -143,6 +145,7 @@ CALENDAR_SERVICE_MODIFY_SCHEMA = vol.All(
             vol.Optional(ATTR_SHOW_AS): vol.Coerce(EventShowAs),
             vol.Optional(ATTR_IS_ALL_DAY): bool,
             vol.Optional(ATTR_ATTENDEES): [CALENDAR_SERVICE_ATTENDEE_SCHEMA],
+            vol.Optional(ATTR_IS_REMINDER_ON): bool,
             vol.Optional(ATTR_REMIND_BEFORE_MINUTES): vol.All(
                 vol.Coerce(int), vol.Range(min=0, max=1440)
             ),
