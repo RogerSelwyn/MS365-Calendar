@@ -13,6 +13,7 @@ CONF_ENTITY_NAME = "entity_name"
 CONF_ALT_AUTH_METHOD = "alt_auth_method"
 CONF_API_COUNTRY = "country"
 CONF_API_OPTIONS = "api_options"
+CONF_TENANT_ID = "tenant_id"
 CONF_AUTH_URL = "auth_url"
 CONF_CLIENT_ID = "client_id"
 CONF_CLIENT_SECRET = "client_secret"  # nosec
@@ -87,7 +88,7 @@ class CountryOptions(StrEnum):
     CN21V = "21Vianet (China)"
 
 
-MSAL_AUTHORITY = "msal_authority"
+MSAL_AUTHORITY_BASE = "msal_authority_base"
 OAUTH_REDIRECT_URL = "auth_redirect_url"
 OAUTH_SCOPE_PREFIX = "oauth_scope_prefix"
 PERMISSION_PREFIX = "permission_prefix"
@@ -95,13 +96,14 @@ PROTOCOL_URL = "protocol_url"
 
 COUNTRY_URLS = {
     CountryOptions.CN21V: {
-        MSAL_AUTHORITY: "https://login.partner.microsoftonline.cn/common",
+        MSAL_AUTHORITY_BASE: "https://login.partner.microsoftonline.cn",
         OAUTH_REDIRECT_URL: "https://login.partner.microsoftonline.cn/common/oauth2/nativeclient",
         OAUTH_SCOPE_PREFIX: "https://microsoftgraph.chinacloudapi.cn/",
         PERMISSION_PREFIX: "https://microsoftgraph.chinacloudapi.cn/",
         PROTOCOL_URL: "https://microsoftgraph.chinacloudapi.cn/",
     },
     CountryOptions.DEFAULT: {
+        MSAL_AUTHORITY_BASE: "https://login.microsoftonline.com",
         OAUTH_REDIRECT_URL: "https://login.microsoftonline.com/common/oauth2/nativeclient",
         PERMISSION_PREFIX: "https://graph.microsoft.com/",
     },
