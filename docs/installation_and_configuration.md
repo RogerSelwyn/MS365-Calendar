@@ -26,6 +26,7 @@ These options will only be relevant for users in very specific circumstances.
 Key | Type | Required | Description
 -- | -- | -- | --
 `country` | `string` | `True` | Selection of an alternate country specific API. Currently only 21Vianet from China.
+`tenant_id` | `string` | `False` | Azure tenant ID for single-tenant app registrations. Leave blank for multi-tenant apps.
 
 ### Options
 
