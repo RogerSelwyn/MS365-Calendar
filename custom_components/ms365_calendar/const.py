@@ -105,7 +105,6 @@ COUNTRY_URLS = {
         PROTOCOL_URL: "https://microsoftgraph.chinacloudapi.cn/",
     },
     CountryOptions.DEFAULT: {
-        MSAL_AUTHORITY_BASE: "https://login.microsoftonline.com",
         OAUTH_REDIRECT_URL: "https://login.microsoftonline.com/common/oauth2/nativeclient",
         PERMISSION_PREFIX: "https://graph.microsoft.com/",
     },
