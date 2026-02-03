@@ -30,6 +30,15 @@ def mock_token(requests_mock, scope):
     )
     mock_call(requests_mock, URL.OPENID, "openid")
 
+def mock_cn21v_token(requests_mock, scope):
+    """Mock up the token response based on scope."""
+    # Mock the token endpoint that MSAL will use (from the openid config)
+    token = json.dumps(build_retrieved_token(scope))
+    requests_mock.post(
+        "https://login.partner.microsoftonline.cn/common/oauth2/v2.0/token",
+        text=token,
+    )
+
 
 def _build_file_token(scope):
     """Build a token"""

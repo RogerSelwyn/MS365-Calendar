@@ -19,12 +19,12 @@ from .helpers.utils import (
     build_token_url,
     load_json,
     mock_call,
+    mock_cn21v_token,
 )
 from .integration.const_integration import (
     AUTH_CALLBACK_PATH_DEFAULT,
     BASE_CONFIG_ENTRY,
     BASE_TOKEN_PERMS,
-    CN21VURL,
     COUNTRY_CONFIG_ENTRY,
     DOMAIN,
     URL,
@@ -228,37 +228,13 @@ async def test_reconfigure_preserves_tenant_id(
 
 # --- CN21V (China cloud) integration tests ---
 
-
-def _mock_cn21v_tenant_token(requests_mock, scope):
-    """Mock token and openid responses for CN21V tenant-specific endpoint."""
-    # Mock instance discovery
-    mock_call(requests_mock, CN21VURL.DISCOVERY, "discovery")
-    # Mock the /common/ openid config with CN21V-specific URLs.
-    # MSAL fetches this via the discovery response's tenant_discovery_endpoint.
-    openid_data = load_json("O365/openid.json")
-    openid_data = openid_data.replace(
-        "login.microsoftonline.com",
-        "login.partner.microsoftonline.cn",
-    )
-    requests_mock.get(CN21VURL.OPENID.value, text=openid_data)
-    # Mock the token endpoint that MSAL will use (from the openid config)
-    token = json.dumps(build_retrieved_token(scope))
-    requests_mock.post(
-        "https://login.partner.microsoftonline.cn/common/oauth2/v2.0/token",
-        text=token,
-    )
-
-
 async def test_flow_cn21v_with_tenant_id(
     hass: HomeAssistant,
     requests_mock: Mocker,
 ) -> None:
     """Test config flow with CN21V country uses tenant-specific authority URL."""
-    _mock_cn21v_tenant_token(requests_mock, BASE_TOKEN_PERMS)
-    mock_call(requests_mock, CN21VURL.ME, "me")
-    mock_call(requests_mock, CN21VURL.CALENDARS, "calendars")
-    mock_call(requests_mock, CN21VURL.CALENDARS, "calendar1", "calendar1")
-    mock_call(requests_mock, CN21VURL.CALENDARS, "calendar3", "calendar3")
+    MS365MOCKS.cn21v_mocks(requests_mock)
+    mock_cn21v_token(requests_mock, BASE_TOKEN_PERMS)
 
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}

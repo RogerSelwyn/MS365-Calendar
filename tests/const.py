@@ -14,7 +14,10 @@ TOKEN_PARAMS = "code=fake.code&state={0}&session_state=fakesessionstate"
 TOKEN_URL_ASSERT = (
     "https://login.microsoftonline.com/common/oauth2/v2.0/" + "authorize?client_id="
 )
-
+TOKEN_URL_CN21V_ASSERT = (
+    "https://login.partner.microsoftonline.cn/common/oauth2/v2.0/"
+    + "authorize?client_id="
+)
 STORAGE_LOCATION = "storage"
 TOKEN_LOCATION = "storage/tokens"
 
