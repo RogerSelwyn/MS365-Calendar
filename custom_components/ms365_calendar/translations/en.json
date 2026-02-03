@@ -36,10 +36,12 @@
             "name": "Advanced API options",
             "description": "Advanced options for country specific needs",
             "data": {
-              "country": "API Country"
+              "country": "API Country",
+              "tenant_id": "Tenant ID"
             },
             "data_description": {
-              "country": "Only use if you know you need it since your credentials will be sent to the selected api/country."
+              "country": "Only use if you know you need it since your credentials will be sent to the selected api/country.",
+              "tenant_id": "Azure tenant ID for single-tenant app registrations. Leave blank for multi-tenant apps."
             }
           }
         }

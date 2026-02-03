@@ -33,8 +33,10 @@ from .const import (
     CONF_ENTITY_NAME,
     CONF_FAILED_PERMISSIONS,
     CONF_SHARED_MAILBOX,
+    CONF_TENANT_ID,
     CONF_URL,
     COUNTRY_URLS,
+    DEFAULT_TENANT_ID,
     ERROR_IMPORTED_DUPLICATE,
     ERROR_INVALID_SHARED_MAILBOX,
     OAUTH_REDIRECT_URL,
@@ -45,7 +47,7 @@ from .const import (
     TOKEN_FILE_PERMISSIONS,
     CountryOptions,
 )
-from .helpers.utils import get_country
+from .helpers.utils import get_country, get_tenant_id
 from .integration.config_flow_integration import (
     MS365OptionsFlowHandler,
     async_integration_imports,
@@ -296,6 +298,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
         self._reconfigure = True
         self.entity_name = entry_data[CONF_ENTITY_NAME]
         country = get_country(entry_data)
+        tenant_id = get_tenant_id(entry_data)
 
         self._config_schema = {
             vol.Required(CONF_CLIENT_ID, default=entry_data[CONF_CLIENT_ID]): vol.All(
@@ -313,7 +316,11 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
                         vol.Required(
                             CONF_API_COUNTRY,
                             default=country,
-                        ): vol.In(CountryOptions)
+                        ): vol.In(CountryOptions),
+                        vol.Optional(
+                            CONF_TENANT_ID,
+                            default=tenant_id if tenant_id != DEFAULT_TENANT_ID else "",
+                        ): vol.All(cv.string, vol.Strip),
                     }
                 ),
                 {"collapsed": True},

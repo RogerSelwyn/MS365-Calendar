@@ -8,9 +8,15 @@ from homeassistant.data_entry_flow import FlowResultType
 from pytest_homeassistant_custom_component.typing import ClientSessionGenerator
 from requests_mock import Mocker
 
-from .const import CLIENT_ID, ENTITY_NAME, TOKEN_URL_ASSERT
+from .const import CLIENT_ID, ENTITY_NAME, TOKEN_URL_ASSERT, TOKEN_URL_CN21V_ASSERT
 from .helpers.mock_config_entry import MS365MockConfigEntry
-from .helpers.utils import build_token_url, mock_call, mock_token, token_setup
+from .helpers.utils import (
+    build_token_url,
+    mock_call,
+    mock_token,
+    token_setup,
+    mock_cn21v_token,
+)
 from .integration.const_integration import (
     ALT_CONFIG_ENTRY,
     AUTH_CALLBACK_PATH_ALT,
@@ -111,7 +117,7 @@ async def test_non_default_country(
     requests_mock: Mocker,
 ) -> None:
     """Test the 21Vianet config_flow."""
-    mock_token(requests_mock, BASE_TOKEN_PERMS)
+    mock_cn21v_token(requests_mock, BASE_TOKEN_PERMS)
     MS365MOCKS.cn21v_mocks(requests_mock)
 
     result = await hass.config_entries.flow.async_init(
@@ -128,7 +134,7 @@ async def test_non_default_country(
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "request_default"
     assert result["description_placeholders"]["auth_url"].startswith(
-        f"{TOKEN_URL_ASSERT}{CLIENT_ID}"
+        f"{TOKEN_URL_CN21V_ASSERT}{CLIENT_ID}"
     )
     assert result["description_placeholders"]["entity_name"] == ENTITY_NAME
     assert result["description_placeholders"]["failed_permissions"] is None
