@@ -1,5 +1,27 @@
 # Changelog
 
+## v1.10.0 (2026/02/03)
+### ✨ Enhancements
+- [add tenant_id support for single-tenant app registrations](https://github.com/RogerSelwyn/MS365-Calendar/commit/3e6924a4fbdb7a96142e69684ae359f51d92092d) - @wipash
+
+### 🧰 Maintenance
+- [Implement sourcery recommendation](https://github.com/RogerSelwyn/MS365-Calendar/commit/8c46ce4757da3d398f910deedf89ad41108f8c13) - @RogerSelwyn
+- [Removed unrequired constant](https://github.com/RogerSelwyn/MS365-Calendar/commit/c7d8103f637763d7025ab6283795787986c51be8) - @RogerSelwyn
+
+### ✅ Test
+- [add tests for tenant_id functionality](https://github.com/RogerSelwyn/MS365-Calendar/commit/ab00ba93590279f6e2ff8181b88f12baeace92a8) - @wipash
+- [Tweak tests to match existing style](https://github.com/RogerSelwyn/MS365-Calendar/commit/41832c501870d0636defc203cf9e3be7a2051805) - @RogerSelwyn
+- [Change import location for get_tenant_id](https://github.com/RogerSelwyn/MS365-Calendar/commit/799ba996a32444cd480eee70d05593eebada44ee) - @RogerSelwyn
+
+### 🔖 Release
+- [Release 1.10.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/9465bf5f66d17eaf4df31b6411e0284660f35981) - @RogerSelwyn
+
+### Other
+- [docs: add tenant_id to config documentation](https://github.com/RogerSelwyn/MS365-Calendar/commit/9d97772343c085d71c9b95f1855c95a61d2dba36) - @wipash
+
+
+
+
 ## v1.8.2 (2026/01/30)
 ### ✨ Enhancements
 - [Add ability to set reminder off/on](https://github.com/RogerSelwyn/MS365-Calendar/commit/de27ce4e1f4bd23c71e8cd8133151c2add16fa36) - @RogerSelwyn
