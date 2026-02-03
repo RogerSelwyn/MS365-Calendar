@@ -28,6 +28,8 @@ CONST_UTC_TIMEZONE = "UTC"
 
 DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 
+DEFAULT_TENANT_ID = "common"
+
 EVENT_HA_EVENT = "ha_event"
 
 MS365_STORAGE = "ms365_storage"

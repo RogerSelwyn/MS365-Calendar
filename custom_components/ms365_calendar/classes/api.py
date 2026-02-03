@@ -5,9 +5,6 @@ import os
 import time
 from typing import Optional
 
-from portalocker import Lock
-from portalocker.exceptions import LockException
-
 from O365 import (
     Account,
     FileSystemTokenBackend,
@@ -16,11 +13,14 @@ from O365.connection import (  # pylint: disable=import-error, no-name-in-module
     Connection,
     MSGraphProtocol,
 )
+from portalocker import Lock
+from portalocker.exceptions import LockException
 
 from ..const import (
     CONF_ENTITY_NAME,
     CONST_UTC_TIMEZONE,
     COUNTRY_URLS,
+    DEFAULT_TENANT_ID,
     MS365_STORAGE_TOKEN,
     MSAL_AUTHORITY_BASE,
     OAUTH_REDIRECT_URL,
@@ -64,7 +64,7 @@ class MS365Connection(Connection):
         super().__init__(credentials, **kwargs)
         if country != CountryOptions.DEFAULT:
             # Override after super().__init__ to ensure our values are used
-            tenant_id = kwargs.get("tenant_id", "common")
+            tenant_id = kwargs.get("tenant_id", DEFAULT_TENANT_ID)
             self._msal_authority = (
                 f"{COUNTRY_URLS[country][MSAL_AUTHORITY_BASE]}/{tenant_id}"
             )

@@ -5,7 +5,13 @@ import warnings
 from bs4 import BeautifulSoup, MarkupResemblesLocatorWarning
 from homeassistant.helpers.entity import async_generate_entity_id
 
-from ..const import CONF_API_COUNTRY, CONF_API_OPTIONS, CONF_TENANT_ID, CountryOptions
+from ..const import (
+    CONF_API_COUNTRY,
+    CONF_API_OPTIONS,
+    CONF_TENANT_ID,
+    DEFAULT_TENANT_ID,
+    CountryOptions,
+)
 
 warnings.filterwarnings("ignore", category=MarkupResemblesLocatorWarning)
 
@@ -59,4 +65,4 @@ def get_tenant_id(entry_data):
         tid = entry_data[CONF_API_OPTIONS].get(CONF_TENANT_ID, "")
         if tid.strip():
             return tid.strip()
-    return "common"
+    return DEFAULT_TENANT_ID

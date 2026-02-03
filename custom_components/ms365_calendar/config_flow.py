@@ -36,6 +36,7 @@ from .const import (
     CONF_TENANT_ID,
     CONF_URL,
     COUNTRY_URLS,
+    DEFAULT_TENANT_ID,
     ERROR_IMPORTED_DUPLICATE,
     ERROR_INVALID_SHARED_MAILBOX,
     OAUTH_REDIRECT_URL,
@@ -318,7 +319,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
                         ): vol.In(CountryOptions),
                         vol.Optional(
                             CONF_TENANT_ID,
-                            default=tenant_id if tenant_id != "common" else "",
+                            default=tenant_id if tenant_id != DEFAULT_TENANT_ID else "",
                         ): vol.All(cv.string, vol.Strip),
                     }
                 ),
