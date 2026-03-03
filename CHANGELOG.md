@@ -1,5 +1,22 @@
 # Changelog
 
+## v1.10.1 (2026/03/03)
+### 🐛 Fixes
+- [Fix incorrectly deleted location support in modify schema](https://github.com/RogerSelwyn/MS365-Calendar/commit/f8a0803611218fe4a6ca88332fab6e067b1be45d) - @RogerSelwyn
+
+### 🧰 Maintenance
+- [Add local band logos](https://github.com/RogerSelwyn/MS365-Calendar/commit/10d36f1c3b99cfef97c6d5234135e522674f201d) - @RogerSelwyn
+
+### ⬆️ Dependencies
+- [Bump ruff from 0.14.4 to 0.15.1](https://github.com/RogerSelwyn/MS365-Calendar/commit/38a63e5abd434a1098f14930f63584cbfb647e36) - @dependabot[bot]
+- [Bump ruff from 0.15.1 to 0.15.4](https://github.com/RogerSelwyn/MS365-Calendar/commit/2fabcc4765bd01357bdb4cd18072b483d6704abd) - @dependabot[bot]
+
+### 🔖 Release
+- [Release v1.10.1](https://github.com/RogerSelwyn/MS365-Calendar/commit/3e5cc6e96f30c6c76602ed78a2adebd3d3bfa6ab) - @RogerSelwyn
+
+
+
+
 ## v1.10.0 (2026/02/03)
 ### ✨ Enhancements
 - [Add optional tenant_id support for single-tenant Azure AD apps](https://github.com/RogerSelwyn/MS365-Calendar/pull/163) - @wipash 
