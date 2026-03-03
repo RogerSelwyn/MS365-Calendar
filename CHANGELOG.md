@@ -5,7 +5,7 @@
 - [Fix incorrectly deleted location support in modify schema](https://github.com/RogerSelwyn/MS365-Calendar/commit/f8a0803611218fe4a6ca88332fab6e067b1be45d) - @RogerSelwyn
 
 ### 🧰 Maintenance
-- [Add local band logos](https://github.com/RogerSelwyn/MS365-Calendar/commit/10d36f1c3b99cfef97c6d5234135e522674f201d) - @RogerSelwyn
+- [Add local brand logos](https://github.com/RogerSelwyn/MS365-Calendar/commit/10d36f1c3b99cfef97c6d5234135e522674f201d) - @RogerSelwyn
 
 ### ⬆️ Dependencies
 - [Bump ruff from 0.14.4 to 0.15.1](https://github.com/RogerSelwyn/MS365-Calendar/commit/38a63e5abd434a1098f14930f63584cbfb647e36) - @dependabot[bot]
