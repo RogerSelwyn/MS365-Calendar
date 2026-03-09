@@ -21,11 +21,11 @@ from ..integration.const_integration import DOMAIN, URL
 TOKEN_TIME = 5000
 
 
-def mock_token(requests_mock, scope):
+def mock_token(requests_mock, scope, tenant_id="common"):
     """Mock up the token response based on scope."""
     token = json.dumps(build_retrieved_token(scope))
     requests_mock.post(
-        "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+        f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token",
         text=token,
     )
     mock_call(requests_mock, URL.OPENID, "openid")
@@ -38,7 +38,6 @@ def mock_cn21v_token(requests_mock, scope):
         "https://login.partner.microsoftonline.cn/common/oauth2/v2.0/token",
         text=token,
     )
-
 
 def _build_file_token(scope):
     """Build a token"""
@@ -136,6 +135,7 @@ def mock_call(
     start=None,
     end=None,
     method="get",
+    tenant_id=None,
 ):
     """Mock a call"""
     data = load_json(f"O365/{datafile}.json")
@@ -144,6 +144,8 @@ def mock_call(
     url = urlname.value
     if unique:
         url = f"{url}/{unique}"
+    if tenant_id:
+        data = data.replace("/common/", f"/{tenant_id}/")
     if method == "get":
         requests_mock.get(
             url,

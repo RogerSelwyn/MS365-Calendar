@@ -1,7 +1,6 @@
 # pylint: disable=line-too-long, unused-argument
 """Test tenant_id functionality."""
 
-import json
 from copy import deepcopy
 from enum import Enum
 
@@ -13,10 +12,9 @@ from requests_mock import Mocker
 from .const import CLIENT_ID
 from .helpers.mock_config_entry import MS365MockConfigEntry
 from .helpers.utils import (
-    build_retrieved_token,
     build_token_url,
-    load_json,
     mock_call,
+    mock_token,
     mock_cn21v_token,
 )
 from .integration import get_tenant_id
@@ -32,8 +30,6 @@ from .integration.helpers_integration.mocks import MS365MOCKS
 
 
 # --- Unit tests for get_tenant_id ---
-
-
 class TestGetTenantId:
     """Tests for the get_tenant_id helper function."""
 
@@ -98,19 +94,13 @@ class TenantURL(Enum):
     """Tenant-specific URLs for mocking."""
 
     OPENID = f"https://login.microsoftonline.com/{TENANT_ID}/v2.0/.well-known/openid-configuration"
+    OPENIDCN = f"https://login.partner.microsoftonline.cn/{TENANT_ID}/v2.0/.well-known/openid-configuration"
 
 
-def _mock_tenant_token(requests_mock, scope):
+def _mock_tenant_urls(requests_mock, scope):
     """Mock token response for tenant-specific endpoint."""
-    token = json.dumps(build_retrieved_token(scope))
-    requests_mock.post(
-        f"https://login.microsoftonline.com/{TENANT_ID}/oauth2/v2.0/token",
-        text=token,
-    )
-    # Mock tenant-specific openid discovery
-    openid_data = load_json("O365/openid.json")
-    openid_data = openid_data.replace("/common/", f"/{TENANT_ID}/")
-    requests_mock.get(TenantURL.OPENID.value, text=openid_data)
+    mock_token(requests_mock, scope, TENANT_ID)
+    mock_call(requests_mock, TenantURL.OPENID, "openid", tenant_id=TENANT_ID)
 
 
 async def test_flow_with_tenant_id(
@@ -118,7 +108,7 @@ async def test_flow_with_tenant_id(
     requests_mock: Mocker,
 ) -> None:
     """Test config flow passes tenant_id through to the auth URL."""
-    _mock_tenant_token(requests_mock, BASE_TOKEN_PERMS)
+    _mock_tenant_urls(requests_mock, BASE_TOKEN_PERMS)
     MS365MOCKS.standard_mocks(requests_mock)
 
     result = await hass.config_entries.flow.async_init(
@@ -186,7 +176,7 @@ async def test_reconfigure_preserves_tenant_id(
     base_config_entry: MS365MockConfigEntry,
 ) -> None:
     """Test reconfigure flow preserves existing tenant_id."""
-    _mock_tenant_token(requests_mock, BASE_TOKEN_PERMS)
+    _mock_tenant_urls(requests_mock, BASE_TOKEN_PERMS)
     MS365MOCKS.standard_mocks(requests_mock)
 
     result = await hass.config_entries.flow.async_init(
@@ -232,8 +222,9 @@ async def test_flow_cn21v_with_tenant_id(
     requests_mock: Mocker,
 ) -> None:
     """Test config flow with CN21V country uses tenant-specific authority URL."""
-    MS365MOCKS.cn21v_mocks(requests_mock)
+    # Mock tenant-specific openid discovery
     mock_cn21v_token(requests_mock, BASE_TOKEN_PERMS)
+    MS365MOCKS.cn21v_mocks(requests_mock, TENANT_ID)
 
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
