@@ -16,20 +16,6 @@
 
 
 
-
-## v1.10.2 (2026/04/21)
-### 🐛 Fixes
-- [Fix filtering out of events due to timzone handling](https://github.com/RogerSelwyn/MS365-Calendar/commit/d784ee6a039303c84b17ee43c1b4040f65da1f3c) - @RogerSelwyn
-
-### ✅ Test
-- [Fix tests for CN21V](https://github.com/RogerSelwyn/MS365-Calendar/commit/3a13b7c7bf3d2f2bff58714167653649a4c1c05d) - @RogerSelwyn
-
-### 🔖 Release
-- [Release v1.10.2](https://github.com/RogerSelwyn/MS365-Calendar/commit/d2b88f661fcfd43ac8704de10c658c41298f6f88) - @RogerSelwyn
-
-
-
-
 ## v1.10.1 (2026/03/03)
 ### 🐛 Fixes
 - [Fix incorrectly deleted location support in modify schema](https://github.com/RogerSelwyn/MS365-Calendar/commit/f8a0803611218fe4a6ca88332fab6e067b1be45d) - @RogerSelwyn
