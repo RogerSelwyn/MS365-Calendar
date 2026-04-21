@@ -167,20 +167,23 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
                 if not all_day_event:
                     all_day_event = event
                 continue
-            if self.is_started(event):
-                if not started_event:
+            if not started_event:
+                if self.is_started(event):
                     started_event = event
-                continue
 
         #
         # If no current events, then find unfinished event within next day
         #
-        if not current_events:
+        if not started_event and not all_day_event:
             events = self.data.overlapping(
                 today,
                 today + timedelta(days=1),
             )
             for event in events:
+                if event.is_all_day:
+                    continue
+                if self.is_started(event):
+                    continue
                 if (
                     not self.is_finished(event)
                     and not event.is_all_day
