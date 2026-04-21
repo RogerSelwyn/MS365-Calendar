@@ -167,9 +167,8 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
                 if not all_day_event:
                     all_day_event = event
                 continue
-            if not started_event:
-                if self.is_started(event):
-                    started_event = event
+            if not started_event and self.is_started(event):
+                started_event = event
 
         #
         # If no current events, then find unfinished event within next day
