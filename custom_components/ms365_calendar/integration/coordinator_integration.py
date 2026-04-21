@@ -10,10 +10,9 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.util import dt as dt_util
+from O365.calendar import Event  # pylint: disable=no-name-in-module)
 from requests.exceptions import ConnectionError as RequestConnectionError
 from requests.exceptions import HTTPError, RetryError
-
-from O365.calendar import Event  # pylint: disable=no-name-in-module)
 
 from .const_integration import (
     CONF_ADVANCED_OPTIONS,
@@ -151,30 +150,43 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
         #     self.event = None
         #     return None
 
+        #
+        # Get events that are current now
+        #
         today = datetime.now(timezone.utc)
-        events = self.data.overlapping(
-            today,
-            today + timedelta(days=1),
-        )
 
+        current_events = self.data.overlapping(
+            today,
+            today,
+        )
         started_event = None
         not_started_event = None
         all_day_event = None
-        for event in events:
+        for event in current_events:
             if event.is_all_day:
-                if not all_day_event and not self.is_finished(event):
+                if not all_day_event:
                     all_day_event = event
                 continue
-            if self.is_started(event) and not self.is_finished(event):
+            if self.is_started(event):
                 if not started_event:
                     started_event = event
                 continue
-            if (
-                not self.is_finished(event)
-                and not event.is_all_day
-                and not not_started_event
-            ):
-                not_started_event = event
+
+        #
+        # If no current events, then find unfinished event within next day
+        #
+        if not current_events:
+            events = self.data.overlapping(
+                today,
+                today + timedelta(days=1),
+            )
+            for event in events:
+                if (
+                    not self.is_finished(event)
+                    and not event.is_all_day
+                    and not not_started_event
+                ):
+                    not_started_event = event
 
         vevent = None
         if started_event:
