@@ -251,6 +251,7 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
         return event
 
     def _sort_events(self, events):
+        events = list(events)
         for event in events:
             event.start_sort = event.start
             if event.is_all_day:
@@ -296,11 +297,7 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
 
     def _build_extra_attributes(self, range_start, range_end):
         if self.coordinator.data is not None:
-            data_events = [
-                event
-                for event in self.coordinator.data
-                if event.end >= range_start and event.start <= range_end
-            ]
+            data_events = self.coordinator.data.overlapping(range_start, range_end)
             data_events = self._sort_events(data_events)
 
             data = [format_event_data(event) for event in data_events]
