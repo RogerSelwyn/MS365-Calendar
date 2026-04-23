@@ -149,6 +149,7 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
 
     _attr_should_poll = False
     _unrecorded_attributes = frozenset((ATTR_DATA, ATTR_COLOR, ATTR_HEX_COLOR))
+    _attr_initial_color: str | None
 
     def __init__(
         self,
@@ -181,6 +182,8 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
         self._max_results = entity.get(CONF_MAX_RESULTS)
         self._error = None
         self.exclude = entity.get(CONF_EXCLUDE)
+        if hasattr(self.api.calendar, ATTR_HEX_COLOR) and self.api.calendar.hex_color:
+            self._attr_initial_color = self.api.calendar.hex_color
 
     @property
     def extra_state_attributes(self):
