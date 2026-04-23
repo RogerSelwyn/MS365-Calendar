@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.10.3 (2026/04/22)
+### 🐛 Fixes
+- [Fix issue with all day events in data attribute](https://github.com/RogerSelwyn/MS365-Calendar/commit/6db947846f2a4a91672814eeb71b8a9bc413402f) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.10.3](https://github.com/RogerSelwyn/MS365-Calendar/commit/e73d18a91d09d30c136328e6903d24e8f22c3f5c) - @RogerSelwyn
+
+
+
+
 ## v1.10.2 (2026/04/21)
 ### 🐛 Fixes
 - [Fix filtering out of events due to timzone handling](https://github.com/RogerSelwyn/MS365-Calendar/commit/d784ee6a039303c84b17ee43c1b4040f65da1f3c) - @RogerSelwyn
