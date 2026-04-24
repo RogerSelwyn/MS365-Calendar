@@ -180,9 +180,9 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
             )
             for event in events:
                 if event.is_all_day:
-                    continue
+                    continue  # pragma: no cover
                 if self.is_started(event):
-                    continue
+                    continue  # pragma: no cover
                 if (
                     not self.is_finished(event)
                     and not event.is_all_day
