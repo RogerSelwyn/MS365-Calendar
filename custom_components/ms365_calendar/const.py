@@ -88,6 +88,7 @@ class CountryOptions(StrEnum):
 
     DEFAULT = "Default"
     CN21V = "21Vianet (China)"
+    GCC_HIGH = "MS365 GCC"
 
 
 MSAL_AUTHORITY_BASE = "msal_authority_base"
@@ -103,6 +104,13 @@ COUNTRY_URLS = {
         OAUTH_SCOPE_PREFIX: "https://microsoftgraph.chinacloudapi.cn/",
         PERMISSION_PREFIX: "https://microsoftgraph.chinacloudapi.cn/",
         PROTOCOL_URL: "https://microsoftgraph.chinacloudapi.cn/",
+    },
+    CountryOptions.GCC_HIGH: {
+        MSAL_AUTHORITY_BASE: "https://login.microsoftonline.us",
+        OAUTH_REDIRECT_URL: "https://login.microsoftonline.us/common/oauth2/nativeclient",
+        OAUTH_SCOPE_PREFIX: "https://graph.microsoft.us/",
+        PERMISSION_PREFIX: "https://graph.microsoft.us/",
+        PROTOCOL_URL: "https://graph.microsoft.us/",
     },
     CountryOptions.DEFAULT: {
         OAUTH_REDIRECT_URL: "https://login.microsoftonline.com/common/oauth2/nativeclient",
