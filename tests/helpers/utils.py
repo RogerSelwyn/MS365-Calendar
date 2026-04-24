@@ -180,8 +180,11 @@ def check_entity_state(
     print(state.attributes)
     assert state.state == entity_state
     if entity_attributes:
-
         if "data" in state.attributes:
+            print("--- Data Attributes")
+            print(state.attributes["data"])
+            print("--- Match Attributes")
+            print(entity_attributes)
             assert state.attributes["data"] == entity_attributes
         else:
             assert state.attributes == entity_attributes

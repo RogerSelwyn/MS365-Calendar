@@ -85,7 +85,25 @@
                     "longitude": 0
                 }
             },
-            "attendees": []
+            "attendees": [
+                {
+                    "type": "required",
+                    "status": {
+                        "response": "notResponded",
+                        "time": "0001-01-01T00:00:00Z"
+                    },
+                    "emailAddress": {
+                        "name": "Jane Doe",
+                        "address": "jane@nomail.com"
+                    }
+                }
+            ],
+             "organizer": {
+                "emailAddress": {
+                    "name": "John Doe",
+                    "address": "john@nomail.com"
+                }
+            }
         }
     ]
 }
