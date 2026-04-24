@@ -1,5 +1,30 @@
 # Changelog
 
+## v1.11.0 (2026/04/24)
+### ✨ Enhancements
+- [Add support for intial calendar color taken from MS365](https://github.com/RogerSelwyn/MS365-Calendar/commit/fa694553b1c9dbde71e53575faa0f81b0e7c16c9) - @RogerSelwyn
+- [Add organiser and response status to event info](https://github.com/RogerSelwyn/MS365-Calendar/commit/317564df4b419e2ca8799a47947625d48ce50e0e) - @RogerSelwyn
+- [Add support for MS365 GCC](https://github.com/RogerSelwyn/MS365-Calendar/commit/ad97e68f833e3b8b2afff2454383869feaa4585a) - @RogerSelwyn
+
+### ⬆️ Dependencies
+- [Update pygithub requirement from >=1.51 to >=2.9.1](https://github.com/RogerSelwyn/MS365-Calendar/commit/790d38b7d33b693fd3194ccc336f9e1918145961) - @dependabot[bot]
+- [Update pytest-homeassistant-custom-component requirement](https://github.com/RogerSelwyn/MS365-Calendar/commit/c3a62be5d8ffed72243b573aa18e96e8a0b19958) - @dependabot[bot]
+- [Update ical requirement from >=10.0.0 to >=13.2.2](https://github.com/RogerSelwyn/MS365-Calendar/commit/6efb1c15c653ba79126b59e8cf33962c8d82fd1b) - @dependabot[bot]
+- [Update o365 requirement from >=2.1.4 to >=2.1.9](https://github.com/RogerSelwyn/MS365-Calendar/commit/2d69dc8e0acc7007d0c8c11382516c337d13282f) - @dependabot[bot]
+- [Update portalocker requirement from >=3.1.1 to >=3.2.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/62daf49af08066c9b3a664223a0964a695de59ff) - @dependabot[bot]
+- [Update beautifulsoup4 requirement from >=4.10.0 to >=4.14.3](https://github.com/RogerSelwyn/MS365-Calendar/commit/9206b3182e0dda886ea7888d77c3db4735c7ea54) - @dependabot[bot]
+- [Auto update requirements.txt](https://github.com/RogerSelwyn/MS365-Calendar/commit/0bf97cd6c5ee1a4dc4f7d195dbd8b4226b50d173) - @actions-user
+
+### ✅ Test
+- [Update tests for new attributes](https://github.com/RogerSelwyn/MS365-Calendar/commit/d90d460635e254ff95642fcfc34aca9ccd20234a) - @RogerSelwyn
+- [Update test coverage](https://github.com/RogerSelwyn/MS365-Calendar/commit/e8e68868326dfdc5b50ec82e3211bea6fa1c2bac) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.11.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/4025a91ecbf1ec386162301d759a91c20a5a3d94) - @RogerSelwyn
+
+
+
+
 ## v1.10.3 (2026/04/22)
 ### 🐛 Fixes
 - [Fix issue with all day events in data attribute](https://github.com/RogerSelwyn/MS365-Calendar/commit/6db947846f2a4a91672814eeb71b8a9bc413402f) - @RogerSelwyn
