@@ -15,8 +15,6 @@ from homeassistant.components.calendar import (
     CalendarEntity,
     CalendarEntityFeature,
     CalendarEvent,
-    extract_offset,
-    is_offset_reached,
 )
 from homeassistant.const import CONF_ENTITY_ID, CONF_NAME
 from homeassistant.core import HomeAssistant, ServiceResponse, SupportsResponse
@@ -35,7 +33,6 @@ from .const_integration import (
     ATTR_DATA,
     ATTR_EVENT_ID,
     ATTR_HEX_COLOR,
-    ATTR_OFFSET,
     ATTR_SYNC_STATE,
     CONF_CAN_EDIT,
     CONF_DEVICE_ID,
@@ -44,7 +41,6 @@ from .const_integration import (
     CONF_HOURS_BACKWARD_TO_GET,
     CONF_HOURS_FORWARD_TO_GET,
     CONF_MAX_RESULTS,
-    DEFAULT_OFFSET,
     DOMAIN,
     EVENT_CREATE_CALENDAR_EVENT,
     EVENT_MODIFY_CALENDAR_EVENT,
@@ -169,7 +165,6 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
         self._end_offset = entity.get(CONF_HOURS_FORWARD_TO_GET)
         self._event = None
         self.entity_id = entity_id
-        self._offset_reached = False
         self._data_attribute = []
 
         self._update_supported = update_supported
@@ -200,7 +195,6 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
             attributes[ATTR_ALL_DAY] = (
                 self._event.all_day if self._event is not None else False
             )
-            attributes[ATTR_OFFSET] = self._offset_reached
         return attributes
 
     @property
@@ -292,11 +286,6 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
             return
 
         self._event = deepcopy(self._build_calendar_event(vevent))
-        self._event.summary, offset = extract_offset(
-            self._event.summary, DEFAULT_OFFSET
-        )
-        start = MS365CalendarSyncCoordinator.to_datetime(self._event.start)
-        self._offset_reached = is_offset_reached(start, offset)
 
     def _build_extra_attributes(self, range_start, range_end):
         if self.coordinator.data is not None:

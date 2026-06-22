@@ -30,7 +30,6 @@ ATTR_IS_ALL_DAY = "is_all_day"
 ATTR_IS_REMINDER_ON = "is_reminder_on"
 ATTR_LOCATION = "location"
 ATTR_MESSAGE = "message"
-ATTR_OFFSET = "offset_reached"
 ATTR_RESPONSE = "response"
 ATTR_REMIND_BEFORE_MINUTES = "remind_before_minutes"
 ATTR_RRULE = "rrule"
@@ -80,7 +79,6 @@ DAYS = {
 
 DEFAULT_DAYS_BACKWARD = -8
 DEFAULT_DAYS_FORWARD = 8
-DEFAULT_OFFSET = "!!"
 DEFAULT_UPDATE_INTERVAL = 60
 
 EVENT_CREATE_CALENDAR_EVENT = "create_calendar_event"
