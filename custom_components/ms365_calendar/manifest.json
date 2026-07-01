@@ -11,7 +11,7 @@
   "requirements": [
     "O365>=2.1.4",
     "BeautifulSoup4>=4.10.0",
-    "portalocker>=3.1.1",
+    "portalocker>=3.2.0",
     "ical>=10.0.0",
     "oauthlib"
   ],
