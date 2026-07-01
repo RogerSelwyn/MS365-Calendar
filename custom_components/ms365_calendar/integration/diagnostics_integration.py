@@ -22,11 +22,9 @@ async def async_integration_diagnostics(hass: HomeAssistant, entry: MS365ConfigE
     calendars = await hass.async_add_executor_job(
         load_yaml_file, yaml_filepath, CONF_CAL_ID, YAML_CALENDAR_DEVICE_SCHEMA
     )
-    i = 0
+
     redacted_calendars = {}
-    for key in calendars.keys():
-        i += 1
+    for i, key in enumerate(calendars.keys(), start=1):
         group = CONST_GROUP if key.startswith(CONST_GROUP) else ""
         redacted_calendars[f"**{group}REDACTED{i}**"] = calendars[key]
-
     return async_redact_data(redacted_calendars, TO_REDACT)
