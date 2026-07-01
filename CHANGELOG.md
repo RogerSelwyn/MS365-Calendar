@@ -1,5 +1,27 @@
 # Changelog
 
+## v1.11.1 (2026/07/01)
+### 🐛 Fixes
+- [Add redacted yaml file contents to diagnostics](https://github.com/RogerSelwyn/MS365-Calendar/commit/0db0e94806b161035cb4577ce232ea2470b8c8c2) - @RogerSelwyn
+
+### 🧰 Maintenance
+- [Updated to remove deprecation warning](https://github.com/RogerSelwyn/MS365-Calendar/commit/82b151a50b740f4e5079332fd5e3155c8143b917) - @RogerSelwyn
+- [Remove redundant offset_reached attribute](https://github.com/RogerSelwyn/MS365-Calendar/commit/a48c8b75d460704c91f23ab76041e616af00e393) - @RogerSelwyn
+- [Sourcery recommendations](https://github.com/RogerSelwyn/MS365-Calendar/commit/6a4c11f69ecd488af10d75f7976eff7b979d02a4) - @RogerSelwyn
+
+### ⬆️ Dependencies
+- [Update o365 requirement from >=2.1.4 to >=2.1.9](https://github.com/RogerSelwyn/MS365-Calendar/commit/f9b931a02a10d9699156f8eb13999da45ea40bfc) - @dependabot[bot]
+- [Update ical requirement from >=10.0.0 to >=13.2.2](https://github.com/RogerSelwyn/MS365-Calendar/commit/733ff89eb8150d95e28e415375c7824cd0e20fa1) - @dependabot[bot]
+- [Update beautifulsoup4 requirement from >=4.10.0 to >=4.14.3](https://github.com/RogerSelwyn/MS365-Calendar/commit/65ceb3f4e1d4998a206df6c3dd5cb443db67e52c) - @dependabot[bot]
+- [Update portalocker requirement from >=3.1.1 to >=3.2.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/b172a3915c68a8e225617696f4ff0ebf73541bb1) - @dependabot[bot]
+- [Auto update requirements.txt](https://github.com/RogerSelwyn/MS365-Calendar/commit/a17d34d3c860a087d51f66e299e0fb734367fdb6) - @actions-user
+
+### 📚 Documentation
+- [Update countries available](https://github.com/RogerSelwyn/MS365-Calendar/commit/3a1d7cbb1b537aad305a7cf9c421c397c6da8c32) - @RogerSelwyn
+
+
+
+
 ## v1.11.0 (2026/04/24)
 ### ✨ Enhancements
 - [Add support for intial calendar color taken from MS365](https://github.com/RogerSelwyn/MS365-Calendar/commit/fa694553b1c9dbde71e53575faa0f81b0e7c16c9) - @RogerSelwyn
