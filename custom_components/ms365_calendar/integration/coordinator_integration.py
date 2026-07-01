@@ -10,9 +10,10 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.util import dt as dt_util
-from O365.calendar import Event  # pylint: disable=no-name-in-module)
 from requests.exceptions import ConnectionError as RequestConnectionError
 from requests.exceptions import HTTPError, RetryError
+
+from O365.calendar import Event  # pylint: disable=no-name-in-module)
 
 from .const_integration import (
     CONF_ADVANCED_OPTIONS,
@@ -220,7 +221,7 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
         if not isinstance(obj, datetime):
             date_obj = dt_util.start_of_local_day(
                 dt_util.dt.datetime.combine(obj, dt_util.dt.time.min)
-            )
+            )  # pragma: no cover
         else:
             date_obj = obj
 
