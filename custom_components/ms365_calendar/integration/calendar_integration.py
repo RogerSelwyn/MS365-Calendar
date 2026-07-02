@@ -26,7 +26,6 @@ from homeassistant.util import dt as dt_util
 from ..classes.config_entry import MS365ConfigEntry
 from ..classes.entity import MS365Entity
 from ..const import CONF_ENABLE_UPDATE, CONF_ENTITY_NAME, EVENT_HA_EVENT
-from ..helpers.utils import clean_html
 from .const_integration import (
     ATTR_ALL_DAY,
     ATTR_COLOR,
@@ -60,6 +59,7 @@ from .schema_integration import (
     CALENDAR_SERVICE_RESPOND_SCHEMA,
 )
 from .utils_integration import (
+    clean_html,
     format_event_data,
     get_end_date,
     get_hass_date,
