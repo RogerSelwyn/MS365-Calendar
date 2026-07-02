@@ -10,7 +10,7 @@ jobs:
     name: Update requirements
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v6"
+      - uses: "actions/checkout@v7"
       - name: Update requirements.txt
         uses: "rogerselwyn/actions/update-requirements@main"
         with:
@@ -22,7 +22,7 @@ jobs:
     needs: update_requirements
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v6"
+      - uses: "actions/checkout@v7"
       - name: Release Asset
         uses: "rogerselwyn/actions/release-asset@main"
         with:
@@ -34,7 +34,7 @@ jobs:
     needs: release_zip_file
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v6"
+      - uses: "actions/checkout@v7"
       - name: Release Notes
         uses: "rogerselwyn/actions/release-notes@main"
         with:
