@@ -1,5 +1,5 @@
 O365>=2.1.4
-BeautifulSoup4>=4.13.3
+BeautifulSoup4>=4.15.0
 portalocker>=3.2.0
 ical>=10.0.0
 oauthlib
