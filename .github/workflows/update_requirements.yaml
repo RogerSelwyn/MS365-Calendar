@@ -1,0 +1,20 @@
+name: Update Requirements
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+
+jobs:
+  update_requirements:
+    name: Update requirements
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/checkout@v6"
+      - name: Update requirements.txt
+        uses: "rogerselwyn/actions/update-requirements@main"
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          component: ms365_calendar

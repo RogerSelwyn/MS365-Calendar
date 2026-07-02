@@ -1,12 +1,25 @@
 name: MS365 Release
 
+
 on:
   release:
     types: [published]
 
 jobs:
+  update_requirements:
+    name: Update requirements
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/checkout@v6"
+      - name: Update requirements.txt
+        uses: "rogerselwyn/actions/update-requirements@main"
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          component: ms365_calendar
+
   release_zip_file:
     name: Prepare release asset
+    needs: update_requirements
     runs-on: "ubuntu-latest"
     steps:
       - uses: "actions/checkout@v6"
