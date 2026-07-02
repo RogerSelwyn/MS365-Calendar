@@ -3,8 +3,6 @@ name: Update Requirements
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 
 jobs:
