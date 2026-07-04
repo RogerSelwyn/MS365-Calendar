@@ -67,6 +67,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
                 entry.options,
             )
             await hass.config_entries.async_forward_entry_setups(entry, platforms)
+            if hasattr(setup_integration, "async_extra_platform_setup"):
+                await setup_integration.async_extra_platform_setup(hass, entry)
+
             entry.async_on_unload(entry.add_update_listener(async_reload_entry))
             return True
         else:
