@@ -11,17 +11,20 @@ jobs:
     name: Lint
     runs-on: "ubuntu-latest"
     steps:
-        - name: "Checkout the repository"
-          uses: actions/checkout@v7
+      - name: "Checkout the repository"
+        uses: actions/checkout@v7
 
-        - name: "Set up Python"
-          uses: actions/setup-python@v6
-          with:
-            python-version: "3.14"
-            cache: "pip"
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+      - name: Install Python 3.14
+        run: uv python install 3.14
 
-        - name: "Install requirements"
-          run: python3 -m pip install -r requirements_release.txt
 
-        - name: "Run"
-          run: python3 -m ruff check .
+      - name: "Create venv"
+        run: uv venv
+
+      - name: "Install requirements"
+        run: uv pip install -r requirements_release.txt
+
+      - name: "Ruff"
+        run: uv run python3 -m ruff check .
