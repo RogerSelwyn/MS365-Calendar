@@ -181,7 +181,9 @@
 - [Release v1.7.4](https://github.com/RogerSelwyn/MS365-Calendar/commit/06f6bdb7e9eca83c17ddd6c03ba508b5c83bd4a1) - @RogerSelwyn
 
 
-
+## Past Changes
+<details>
+  <summary>Changes 2025</summary>
 
 ## v1.7.3 (2025/12/29)
 ### 🐛 Fixes
@@ -532,6 +534,10 @@
 - [Release v1.1.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/c0f81e672e5a4021eef200f260e91e76d039d370) - @RogerSelwyn
 
 
+</details>
+<details>
+  <summary>Changes 2024</summary>
+
 ## v1.0.3 (2024/12/30)
 ### 🐛 Fixes
 - [Fix event update permissions for shared calendars](https://github.com/RogerSelwyn/MS365-Calendar/commit/c31eb0977e6b1fa15d7031edefdfdcb16a21a737) - @RogerSelwyn
@@ -765,3 +771,4 @@
 ## v0.0.1 (2024/05/29)
 Initial release
 
+</details>
