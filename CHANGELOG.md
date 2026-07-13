@@ -1,5 +1,33 @@
 # Changelog
 
+## v1.11.2 (2026/07/13)
+### 🐛 Fixes
+- [Reinstate async_update_reload_and_abort to reload on reconfigure](https://github.com/RogerSelwyn/MS365-Calendar/commit/553be7a624cb4bbfdee2aa44b4299009ea824f6b) - @RogerSelwyn
+
+### 🧰 Maintenance
+- [Break out update_requirements workflow](https://github.com/RogerSelwyn/MS365-Calendar/commit/5b53c1d6b82178111fc66edbf9b96f67ed77bed9) - @RogerSelwyn
+- [Tidy up beautifulsoup](https://github.com/RogerSelwyn/MS365-Calendar/commit/3c7bc2e2a3cd1b4f30f75519c05e34ddc7b2074f) - @RogerSelwyn
+- [Remove wokflow run on PR](https://github.com/RogerSelwyn/MS365-Calendar/commit/7d7f479134045f7a0e8c47fcd66be7a6770c4ff2) - @RogerSelwyn
+- [Update base to support extra platforms](https://github.com/RogerSelwyn/MS365-Calendar/commit/cdd7362258ea41e3ca3c7920b26631e8c99fb97b) - @RogerSelwyn
+
+### ⬆️ Dependencies
+- [Bump portalocker to 3.2.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/512870b3bc81c35e28a3b693bb440128920bc0df) - @RogerSelwyn
+- [Auto update requirements.txt](https://github.com/RogerSelwyn/MS365-Calendar/commit/097889278aede5ef58e7c338744d9901d54fe1af) - @actions-user
+- [Bump actions/checkout from 6 to 7](https://github.com/RogerSelwyn/MS365-Calendar/commit/dd663bbb4edb764c73512166f4abb41c980e86d2) - @dependabot[bot]
+- [Auto update requirements.txt](https://github.com/RogerSelwyn/MS365-Calendar/commit/6a080d1d669fa470e1a3e1668e6810fedf462790) - @actions-user
+
+### ✅ Test
+- [Increase python version to HA default](https://github.com/RogerSelwyn/MS365-Calendar/commit/602ca60444898d551a72609303237dbd0f158c86) - @RogerSelwyn
+- [Increase python version to HA default](https://github.com/RogerSelwyn/MS365-Calendar/commit/e2aef6043acd2eba099407965fcdd7670a1ed0d2) - @RogerSelwyn
+- [Update workflows to UV](https://github.com/RogerSelwyn/MS365-Calendar/commit/97c5121f14fd7147c521458c7831d6db3cfb4631) - @RogerSelwyn
+- [Bump pytest-homeassistant-custom-component](https://github.com/RogerSelwyn/MS365-Calendar/commit/5c7fa562b584d2e3c306fef356b26ae673e90281) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.11.2](https://github.com/RogerSelwyn/MS365-Calendar/commit/3d40724ccaa2e0988b5cd1d4e5884b117140b904) - @RogerSelwyn
+
+
+
+
 ## v1.11.1 (2026/07/01)
 ### 🐛 Fixes
 - [Add redacted yaml file contents to diagnostics](https://github.com/RogerSelwyn/MS365-Calendar/commit/0db0e94806b161035cb4577ce232ea2470b8c8c2) - @RogerSelwyn
