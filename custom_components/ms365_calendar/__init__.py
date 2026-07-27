@@ -135,8 +135,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: MS365ConfigEntry) -> bo
 
 async def async_reload_entry(hass: HomeAssistant, entry: MS365ConfigEntry) -> None:
     """Handle options update - only reload if the options have changed."""
-    if entry.runtime_data.options != entry.options:
-        await hass.config_entries.async_reload(entry.entry_id)
+    await hass.config_entries.async_reload(entry.entry_id)
 
 
 async def async_remove_entry(hass: HomeAssistant, entry: MS365ConfigEntry) -> None:
