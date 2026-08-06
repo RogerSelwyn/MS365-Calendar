@@ -12,6 +12,7 @@ from ical.iter import (
     SortedItemIterable,
 )
 from ical.timespan import Timespan
+
 from O365.calendar import Event  # pylint: disable=no-name-in-module)
 
 
@@ -42,9 +43,7 @@ def timespan_of(event: Event) -> Timespan:
 
 def calendar_timeline(events: list[Event], tzinfo: datetime.tzinfo) -> MS365Timeline:
     """Create a timeline for events on a calendar, including recurrence."""
-    normal_events: list[Event] = []
-    for event in events:
-        normal_events.append(event)
+    normal_events = events.copy()
 
     def sortable_items() -> Generator[SortableItem[Timespan, Event], None, None]:
         nonlocal normal_events

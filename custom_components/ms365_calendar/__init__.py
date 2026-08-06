@@ -162,4 +162,4 @@ async def _async_check_token(hass, account, entity_name):
         if "Refresh token operation failed: invalid_grant" in str(err):
             _LOGGER.warning(TOKEN_EXPIRED, entity_name)
             return False
-        raise err
+        raise

@@ -100,7 +100,7 @@ async def async_check_for_deleted_calendars(entry: MS365ConfigEntry, calendars, 
     )
     updated_calendars = []
     deleted_calendars = []
-    for e_cal_id in existing_calendars.keys():
+    for e_cal_id in existing_calendars:
         if e_cal_id.startswith(CONST_GROUP) or e_cal_id in [
             calendar.calendar_id for calendar in calendars
         ]:

@@ -90,7 +90,6 @@ async def async_integration_imports(hass, import_data):
 
     for calendar in calendars.values():
         await hass.async_add_executor_job(write_yaml_file, yaml_filepath, calendar)
-    return
 
 
 class MS365OptionsFlowHandler(config_entries.OptionsFlow):

@@ -3,7 +3,9 @@
 import logging
 import os
 import time
-from typing import Optional
+
+from portalocker import Lock
+from portalocker.exceptions import LockException
 
 from O365 import (
     Account,
@@ -13,8 +15,6 @@ from O365.connection import (  # pylint: disable=import-error, no-name-in-module
     Connection,
     MSGraphProtocol,
 )
-from portalocker import Lock
-from portalocker.exceptions import LockException
 
 from ..const import (
     CONF_ENTITY_NAME,
@@ -190,7 +190,7 @@ class MS365LockableFileSystemTokenBackend(FileSystemTokenBackend):
         super().__init__(*args, **kwargs)
 
     def should_refresh_token(
-        self, con: Optional[Connection] = None, *, username: Optional[str] = None
+        self, con: Connection | None = None, *, username: str | None = None
     ):  # pragma: no cover
         """
         Method for refreshing the token when there are concurrently running

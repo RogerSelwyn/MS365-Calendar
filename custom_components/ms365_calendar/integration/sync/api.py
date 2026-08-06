@@ -5,11 +5,12 @@ import logging
 from typing import Any, cast
 
 from homeassistant.core import HomeAssistant
+from requests.exceptions import HTTPError, RetryError
+
 from O365.calendar import Event  # pylint: disable=no-name-in-module
 from O365.utils.query import (  # pylint: disable=no-name-in-module, import-error
     QueryBuilder,
 )
-from requests.exceptions import HTTPError, RetryError
 
 from ...classes.config_entry import MS365ConfigEntry
 from ..const_integration import (

@@ -9,6 +9,7 @@ import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant.const import CONF_NAME
 from homeassistant.util import dt as dt_util
+
 from O365.calendar import (  # pylint: disable=no-name-in-module
     AttendeeType,
     EventSensitivity,

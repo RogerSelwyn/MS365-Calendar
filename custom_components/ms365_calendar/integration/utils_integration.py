@@ -7,6 +7,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup, MarkupResemblesLocatorWarning
 from dateutil import parser
 from homeassistant.helpers import entity_registry
+from homeassistant.util import dt as dt_util
 from homeassistant.util import slugify
 
 from O365.calendar import Attendee  # pylint: disable=no-name-in-module)
@@ -145,10 +146,22 @@ def _add_all_day(is_all_day, event):
         event.is_all_day = is_all_day
         if event.is_all_day:
             event.start = datetime(
-                event.start.year, event.start.month, event.start.day, 0, 0, 0
+                event.start.year,
+                event.start.month,
+                event.start.day,
+                0,
+                0,
+                0,
+                tzinfo=dt_util.DEFAULT_TIME_ZONE,
             )
             event.end = datetime(
-                event.end.year, event.end.month, event.end.day, 0, 0, 0
+                event.end.year,
+                event.end.month,
+                event.end.day,
+                0,
+                0,
+                0,
+                tzinfo=dt_util.DEFAULT_TIME_ZONE,
             )
 
 
