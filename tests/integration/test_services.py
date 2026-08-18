@@ -326,7 +326,7 @@ async def test_update_event(
     listener_setup: ListenerSetupData,
     requests_mock: Mocker,
 ) -> None:
-    """Test update event - MS365 service"""
+    """Test update event - MS365 service."""
 
     event_name = "event1"
     mock_call(

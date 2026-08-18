@@ -23,7 +23,7 @@ from .const_integration import DOMAIN
 
 @pytest.fixture(autouse=True)
 def yaml_storage_path_setup(tmp_path):
-    """Setup the storage paths."""
+    """Create the storage paths."""
     yml_path = tmp_path / STORAGE_LOCATION / f"{DOMAIN}s_test.yaml"
 
     with patch.object(

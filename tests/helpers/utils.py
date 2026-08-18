@@ -40,7 +40,7 @@ def mock_cn21v_token(requests_mock, scope):
     )
 
 def _build_file_token(scope):
-    """Build a token"""
+    """Build a token."""
     perms = f"{scope} User.Read email openid profile"
     expire = int(time.time() + TOKEN_TIME)
     return {
@@ -101,7 +101,7 @@ def _build_file_token(scope):
 
 
 def build_retrieved_token(scope):
-    """Build a token"""
+    """Build a token."""
     return {
         "token_type": "Bearer",
         "scope": f"{scope} User.Read profile openid email",
@@ -113,7 +113,7 @@ def build_retrieved_token(scope):
 
 
 def build_token_url(result, token_url):
-    """Build the correct token url"""
+    """Build the correct token url."""
     state = re.search("state=(.*?)&", result["description_placeholders"]["auth_url"])[1]
 
     return f"{token_url}?{TOKEN_PARAMS.format(state)}"
@@ -137,7 +137,7 @@ def mock_call(
     method="get",
     tenant_id=None,
 ):
-    """Mock a call"""
+    """Mock a call."""
     data = load_json(f"O365/{datafile}.json")
     if start:
         data = data.replace("2020-01-01", start).replace("2020-01-02", end)
@@ -174,17 +174,17 @@ def check_entity_state(
 ):
     """Check entity state."""
     state = hass.states.get(entity_name)
-    print("*************************** State")
-    print(state)
-    print("--- State Attributes")
-    print(state.attributes)
+    # print("*************************** State")
+    # print(state)
+    # print("--- State Attributes")
+    # print(state.attributes)
     assert state.state == entity_state
     if entity_attributes:
         if "data" in state.attributes:
-            print("--- Data Attributes")
-            print(state.attributes["data"])
-            print("--- Match Attributes")
-            print(entity_attributes)
+            # print("--- Data Attributes")
+            # print(state.attributes["data"])
+            # print("--- Match Attributes")
+            # print(entity_attributes)
             assert state.attributes["data"] == entity_attributes
         else:
             assert state.attributes == entity_attributes
@@ -202,7 +202,7 @@ def utcnow():
 
 
 def token_setup(tmp_path, infile):
-    """Setup a token file"""
+    """Create a token file."""
     fromfile = TEST_DATA_LOCATION / f"token/{infile}.token"
     tofile = tmp_path / TOKEN_LOCATION / f"{DOMAIN}_test.token"
     shutil.copy(fromfile, tofile)

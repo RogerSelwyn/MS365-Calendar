@@ -505,7 +505,7 @@ split-on-trailing-comma = false
 "script/*" = ["T20"]
 
 # Allow relative imports within auth and within components
-"tests/components/*/*/*" = ["TID252"]
+"tests/*" = ["TID252"]
 "custom_components/*/*/*"  = ["TID252"]
 
 # Temporary

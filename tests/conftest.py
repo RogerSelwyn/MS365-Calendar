@@ -33,14 +33,14 @@ THIS_MODULE = sys.modules[__name__]
 
 @pytest.fixture(autouse=True)
 def folder_setup(tmp_path):
-    """Setup the testing session."""
+    """Folder setup for testing session."""
     directory = tmp_path / TOKEN_LOCATION
     directory.mkdir(parents=True, exist_ok=True)
 
 
 @pytest.fixture(autouse=True)
 def token_storage_path_setup(tmp_path):
-    """Setup the storage paths."""
+    """Storage paths setup."""
     tk_path = tmp_path / TOKEN_LOCATION
 
     with patch.object(
@@ -126,7 +126,7 @@ def v1_config_entry(request, hass: HomeAssistant) -> MS365MockConfigEntry:
 
 @pytest.fixture
 def base_token(request, tmp_path):
-    """Setup a basic token."""
+    """Create the Base token."""
     perms = BASE_TOKEN_PERMS
     if hasattr(request, "param"):
         perms = request.param
@@ -135,7 +135,7 @@ def base_token(request, tmp_path):
 
 @pytest.fixture
 def legacy_token(tmp_path):
-    """Setup a legacy token."""
+    """Create a legacy token."""
     token = LEGACY_TOKEN
     filename = tmp_path / TOKEN_LOCATION / f"{DOMAIN}_{ENTITY_NAME}.token"
     with open(filename, "w", encoding="UTF8") as f:

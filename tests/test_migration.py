@@ -1,5 +1,5 @@
 # pylint: disable=unused-argument
-"""Test migration"""
+"""Test migration."""
 
 import pytest
 from homeassistant import config_entries

@@ -9,7 +9,7 @@ class MS365Mocks:
     """Standard mocks."""
 
     def standard_mocks(self, requests_mock):
-        """Setup the standard mocks."""
+        """Create the standard mocks."""
         mock_call(requests_mock, URL.OPENID, "openid")
         mock_call(requests_mock, URL.ME, "me")
         mock_call(requests_mock, URL.CALENDARS, "calendars")
@@ -42,7 +42,7 @@ class MS365Mocks:
         )
 
     def cn21v_mocks(self, requests_mock, tenant_id="common"):
-        """Setup the standard mocks."""
+        """Create the standard mocks."""
         mock_call(requests_mock, CN21VURL.DISCOVERY, "discovery")
         # Mock the /common/ openid config with CN21V-specific URLs.
         # MSAL fetches this via the discovery response's tenant_discovery_endpoint.
@@ -59,7 +59,7 @@ class MS365Mocks:
         mock_call(requests_mock, CN21VURL.CALENDARS, "calendar3", "calendar3")
 
     def shared_mocks(self, requests_mock):
-        """Setup the standard mocks."""
+        """Create the standard mocks."""
         mock_call(requests_mock, URL.OPENID, "openid")
         mock_call(requests_mock, URL.ME, "me")
         mock_call(requests_mock, URL.SHARED_CALENDARS, "calendars")
@@ -90,7 +90,7 @@ class MS365Mocks:
         )
 
     def no_events_mocks(self, requests_mock):
-        """Setup the standard mocks."""
+        """Create the standard mocks."""
         _generic_mocks(requests_mock)
         mock_call(
             requests_mock,
@@ -102,7 +102,7 @@ class MS365Mocks:
         )
 
     def all_day_event_mocks(self, requests_mock):
-        """Setup the standard mocks."""
+        """Create the standard mocks."""
         _generic_mocks(requests_mock)
         mock_call(
             requests_mock,
@@ -114,7 +114,7 @@ class MS365Mocks:
         )
 
     def started_event_mocks(self, requests_mock):
-        """Setup the standard mocks."""
+        """Create the standard mocks."""
         _generic_mocks(requests_mock)
         mock_call(
             requests_mock,
@@ -126,7 +126,7 @@ class MS365Mocks:
         )
 
     def not_started_event_mocks(self, requests_mock):
-        """Setup the standard mocks."""
+        """Create the standard mocks."""
         _generic_mocks(requests_mock)
         mock_call(
             requests_mock,

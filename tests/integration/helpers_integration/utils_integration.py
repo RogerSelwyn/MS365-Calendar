@@ -27,7 +27,7 @@ from ..const_integration import UPDATE_CALENDAR_LIST
 
 
 def yaml_setup(tmp_path, infile):
-    """Setup a yaml file"""
+    """Create a yaml file."""
     fromfile = TEST_DATA_INTEGRATION_LOCATION / f"yaml/{infile}.yaml"
     tofile = tmp_path / STORAGE_LOCATION / f"{DOMAIN}s_test.yaml"
     shutil.copy(fromfile, tofile)
@@ -37,7 +37,7 @@ async def update_options(
     hass: HomeAssistant,
     base_config_entry: MS365MockConfigEntry,
 ) -> None:
-    """Test the options flow"""
+    """Test the options flow."""
 
     result = await hass.config_entries.options.async_init(base_config_entry.entry_id)
     result = await hass.config_entries.options.async_configure(

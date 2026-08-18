@@ -9,7 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from requests_mock import Mocker
 
-from .const import CLIENT_ID
+from .const import CLIENT_ID, TOKEN_URL_ASSERT
 from .helpers.mock_config_entry import MS365MockConfigEntry
 from .helpers.utils import (
     build_token_url,
@@ -78,8 +78,7 @@ class TestGetTenantId:
 
 TENANT_ID = "11111111-2222-3333-4444-555555555555"
 TENANT_TOKEN_URL_ASSERT = (
-    f"https://login.microsoftonline.com/{TENANT_ID}/oauth2/v2.0/"
-    + "authorize?client_id="
+    f"https://login.microsoftonline.com/{TENANT_ID}/oauth2/v2.0/authorize?client_id="
 )
 
 
@@ -147,7 +146,6 @@ async def test_flow_without_tenant_id_uses_common(
     requests_mock: Mocker,
 ) -> None:
     """Test config flow uses /common when tenant_id is not set."""
-    from .const import TOKEN_URL_ASSERT
 
     mock_call(requests_mock, URL.OPENID, "openid")
 
