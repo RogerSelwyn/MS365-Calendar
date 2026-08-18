@@ -44,9 +44,10 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class MS365Protocol(MSGraphProtocol):
-    """Protocol class"""
+    """Protocol class."""
 
     def __init__(self, country: CountryOptions):
+        """Initialise MS365 protocol."""
         if country != CountryOptions.DEFAULT:
             # Override before super().__init__ to ensure our values are used
             self._protocol_url = COUNTRY_URLS[country][PROTOCOL_URL]
@@ -105,7 +106,7 @@ class MS365Account:
                 main_resource=main_resource,
             )
             self.is_authenticated = self.account.is_authenticated
-            return False
+
         except ValueError as err:
             if TOKEN_INVALID in str(err):
                 _LOGGER.warning(
@@ -123,6 +124,8 @@ class MS365Account:
                 err,
             )
             return TOKEN_FILE_CORRUPTED
+
+        return False
 
 
 class MS365Token:
@@ -176,15 +179,16 @@ class MS365Token:
 
 
 class MS365LockableFileSystemTokenBackend(FileSystemTokenBackend):
-    """
-    A token backend that ensures atomic operations when working with tokens
-    stored on a file system. Avoids concurrent instances of O365 racing
+    """A token backend that ensures atomic operations.
+
+    When working with tokens stored on a file system. Avoids concurrent instances of O365 racing
     to refresh the same token file. It does this by wrapping the token refresh
     method in the Portalocker package's Lock class, which itself is a wrapper
     around Python's fcntl and win32con.
     """
 
     def __init__(self, *args, **kwargs):
+        """Initialise the Lockable file system."""
         self.max_tries: int = kwargs.pop("max_tries", 3)
         self.fs_wait: bool = False
         super().__init__(*args, **kwargs)
@@ -192,9 +196,10 @@ class MS365LockableFileSystemTokenBackend(FileSystemTokenBackend):
     def should_refresh_token(
         self, con: Connection | None = None, *, username: str | None = None
     ):  # pragma: no cover
-        """
-        Method for refreshing the token when there are concurrently running
-        O365 instances. Determines if we need to call the MSAL and refresh
+        """Check if token needs refreshing.
+
+        When there are concurrently running  O365 instances.
+        Determines if we need to call the MSAL and refresh
         the token and its file, or if another Connection instance has already
         updated it, and we should just load that updated token from the file.
 
@@ -260,7 +265,7 @@ class MS365LockableFileSystemTokenBackend(FileSystemTokenBackend):
                     )
                     token_file.write(self.serialize())
                 _LOGGER.debug("Unlocked oauth token file")
-                return None
+
             except LockException:
                 # somebody else has adquired a lock so will be in the process of updating the token
                 self.fs_wait = True
@@ -281,6 +286,7 @@ class MS365LockableFileSystemTokenBackend(FileSystemTokenBackend):
                     # backend into the session
                     return False
 
+            return None
         # if we exit the loop, that means we were locked out of the file after
         # multiple retries give up and throw an error - something isn't right
         raise RuntimeError(f"Could not access locked token file after {self.max_tries}")
