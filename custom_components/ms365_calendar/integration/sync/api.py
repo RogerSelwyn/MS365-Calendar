@@ -144,7 +144,7 @@ class MS365CalendarService:
         return event
 
     async def async_patch_event(self, event_id, subject, start, end, **kwargs) -> None:
-        """Update an event using patch semantics, with raw API data."""
+        """Updates an event using patch semantics, with raw API data."""
         event = await self.async_get_event(event_id)
         event = add_call_data_to_event(event, subject, start, end, **kwargs)
         await self.hass.async_add_executor_job(event.save)
