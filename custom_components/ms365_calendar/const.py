@@ -42,28 +42,28 @@ PERM_BASE_PERMISSIONS = [PERM_USER_READ]
 ERROR_IMPORTED_DUPLICATE = "Entry already imported for '%s' - '%s'"
 ERROR_INVALID_SHARED_MAILBOX = (
     "Login email address '%s' should not be "
-    + "entered as shared email address, config attribute removed."
+    "entered as shared email address, config attribute removed."
 )
 SECRET_EXPIRED = (
     "Client Secret expired for account: %s. "
-    + "Create new Client Secret in Entra ID App Registration."
+    "Create new Client Secret in Entra ID App Registration."
 )
 TOKEN_DELETED = (
     "Token %s has been deleted as part of upgrade"
-    + " - please re-configure to re-authenticate"
+    " - please re-configure to re-authenticate"
 )
 TOKEN_ERROR = "Token error for account: %s. Error - %s"
 TOKEN_ERROR_CORRUPT = (
     "Token file corrupted for integration '%s', unique identifier '%s', "
-    + "please delete token, re-configure and re-authenticate - %s"
+    "please delete token, re-configure and re-authenticate - %s"
 )
 TOKEN_ERROR_FILE = (
     "Token file retrieval error, check log for errors from O365. "
-    + "Ensure token has not expired and you are using secret value not secret id."
+    "Ensure token has not expired and you are using secret value not secret id."
 )
 TOKEN_ERROR_LEGACY = (
     "Token no longer valid for integration '%s', unique identifier '%s', "
-    + "please delete token, re-configure and re-authenticate - %s"
+    "please delete token, re-configure and re-authenticate - %s"
 )
 TOKEN_ERROR_MISSING = "Could not locate token at %s"
 TOKEN_ERROR_PERMISSIONS = (

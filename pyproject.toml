@@ -473,6 +473,9 @@ ignore = [
   # Disabled to implement in follow up PRs after ruff 0.16 bump
   "ISC004",
   "LOG004",
+
+  # RWJS - OK in dev
+  "PERF203",
 ]
 
 [tool.ruff.lint.flake8-import-conventions.extend-aliases]
@@ -499,13 +502,9 @@ split-on-trailing-comma = false
 [tool.ruff.lint.per-file-ignores]
 
 # Allow for main entry & scripts to write to stdout
-"homeassistant/__main__.py" = ["T201"]
-"homeassistant/scripts/*" = ["T201"]
 "script/*" = ["T20"]
 
 # Allow relative imports within auth and within components
-"homeassistant/auth/*/*" = ["TID252"]
-"homeassistant/components/*/*/*" = ["TID252"]
 "tests/components/*/*/*" = ["TID252"]
 "custom_components/*/*/*"  = ["TID252"]
 

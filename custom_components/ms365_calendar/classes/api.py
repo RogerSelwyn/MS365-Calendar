@@ -7,10 +7,8 @@ import time
 from portalocker import Lock
 from portalocker.exceptions import LockException
 
-from O365 import (
-    Account,
-    FileSystemTokenBackend,
-)
+from homeassistant.core import HomeAssistant
+from O365 import Account, FileSystemTokenBackend
 from O365.connection import (  # pylint: disable=import-error, no-name-in-module
     Connection,
     MSGraphProtocol,
@@ -46,7 +44,7 @@ _LOGGER = logging.getLogger(__name__)
 class MS365Protocol(MSGraphProtocol):
     """Protocol class."""
 
-    def __init__(self, country: CountryOptions):
+    def __init__(self, country: CountryOptions) -> None:
         """Initialise MS365 protocol."""
         if country != CountryOptions.DEFAULT:
             # Override before super().__init__ to ensure our values are used
@@ -60,7 +58,7 @@ class MS365Protocol(MSGraphProtocol):
 class MS365Connection(Connection):
     """Connection class."""
 
-    def __init__(self, credentials, country=None, **kwargs):
+    def __init__(self, credentials, country=None, **kwargs) -> None:
         """Override init to set China cloud specific values."""
         super().__init__(credentials, **kwargs)
         if country != CountryOptions.DEFAULT:
@@ -81,7 +79,7 @@ class MS365CustomAccount(Account):
 class MS365Account:
     """Class for Account setup."""
 
-    def __init__(self, perms, entry_data: MS365ConfigEntry):
+    def __init__(self, perms, entry_data: MS365ConfigEntry) -> None:
         """Initialise the account."""
         self._country = get_country(entry_data)
         self._tenant_id = get_tenant_id(entry_data)
@@ -131,7 +129,7 @@ class MS365Account:
 class MS365Token:
     """Class for Token setup."""
 
-    def __init__(self, hass, config):
+    def __init__(self, hass: HomeAssistant, config) -> None:
         """Initialise the class."""
         self._hass = hass
         self._config = config
@@ -187,7 +185,7 @@ class MS365LockableFileSystemTokenBackend(FileSystemTokenBackend):
     around Python's fcntl and win32con.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         """Initialise the Lockable file system."""
         self.max_tries: int = kwargs.pop("max_tries", 3)
         self.fs_wait: bool = False
@@ -250,9 +248,7 @@ class MS365LockableFileSystemTokenBackend(FileSystemTokenBackend):
                 ) as token_file:
                     # we were able to lock the file ourselves so proceed to refresh the token
                     # we have to do the refresh here as we must do it with the lock applied
-                    _LOGGER.debug(
-                        "Locked oauth token file. Refreshing the token now..."
-                    )
+                    _LOGGER.debug("Locked oauth token file. Refreshing the token now")
                     token_refreshed = con.refresh_token()
                     if token_refreshed is False:
                         raise RuntimeError("Token Refresh Operation not working")
@@ -270,18 +266,18 @@ class MS365LockableFileSystemTokenBackend(FileSystemTokenBackend):
                 # somebody else has adquired a lock so will be in the process of updating the token
                 self.fs_wait = True
                 _LOGGER.debug(
-                    "Oauth file locked. Sleeping for 2 seconds... retrying %s more times.",
+                    "Oauth file locked. Sleeping for 2 seconds... retrying %s more times",
                     i - 1,
                 )
                 time.sleep(2)
                 _LOGGER.debug(
-                    "Waking up and rechecking token file for update from other instance..."
+                    "Waking up and rechecking token file for update from other instance"
                 )
                 # Assume the token has been already updated
                 self.load_token()
                 # Check if new token has been created.
                 if not self.token_is_expired():
-                    _LOGGER.debug("Token file has been updated in other instance...")
+                    _LOGGER.debug("Token file has been updated in other instance")
                     # Return False so the connection can update the token access from the
                     # backend into the session
                     return False

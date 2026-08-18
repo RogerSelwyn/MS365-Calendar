@@ -3,10 +3,11 @@
 import logging
 import os
 
+from requests.exceptions import HTTPError
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_ENTITY_ID, CONF_NAME
 from homeassistant.core import HomeAssistant
-from requests.exceptions import HTTPError
 
 from ..classes.config_entry import MS365ConfigEntry
 from ..const import CONF_ENTITY_NAME
@@ -23,9 +24,7 @@ from .const_integration import (
     PLATFORMS,
     YAML_CALENDARS_FILENAME,
 )
-from .coordinator_integration import (
-    MS365CalendarSyncCoordinator,
-)
+from .coordinator_integration import MS365CalendarSyncCoordinator
 from .filemgmt_integration import (
     build_yaml_file_path,
     build_yaml_filename,
@@ -35,9 +34,7 @@ from .schema_integration import YAML_CALENDAR_DEVICE_SCHEMA
 from .store_integration import LocalCalendarStore
 from .sync.api import MS365CalendarService, async_scan_for_calendars
 from .sync.store import ScopedCalendarStore
-from .sync.sync import (
-    MS365CalendarEventSyncManager,
-)
+from .sync.sync import MS365CalendarEventSyncManager
 from .utils_integration import async_delete_calendar, build_calendar_entity_id
 
 _LOGGER = logging.getLogger(__name__)
@@ -79,7 +76,7 @@ async def _async_delete_calendar_entities(
 
 
 async def _async_setup_coordinators(
-    hass,
+    hass: HomeAssistant,
     account,
     entry: MS365ConfigEntry,
     scanned_calendars,

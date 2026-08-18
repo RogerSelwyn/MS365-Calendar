@@ -1,7 +1,9 @@
 """Generic Permissions processes."""
 
-import logging
 from copy import deepcopy
+import logging
+
+from homeassistant.core import HomeAssistant
 
 from ..const import (
     CONF_ENTITY_NAME,
@@ -21,7 +23,7 @@ _LOGGER = logging.getLogger(__name__)
 class BasePermissions:
     """Class in support of building permission sets."""
 
-    def __init__(self, hass, config, token_backend):
+    def __init__(self, hass: HomeAssistant, config, token_backend) -> None:
         """Initialise the class."""
         self._hass = hass
         self._config = config
@@ -47,7 +49,7 @@ class BasePermissions:
             self._get_permissions
         )
 
-        if error in [TOKEN_FILE_CORRUPTED]:
+        if error == TOKEN_FILE_CORRUPTED:
             return error
         self.failed_permissions = []
         for permission in self.requested_permissions:
@@ -85,7 +87,7 @@ class BasePermissions:
             return self._check_higher_permissions(sharedpermission)
         # If Presence Resource then permissions can have a constraint of .All
         # which includes base as well. e.g. Presence.Read is also enabled by Presence.Read.All
-        if not constraint and resource in ["Presence"]:
+        if not constraint and resource == "Presence":
             allpermission = f"{deepcopy(permission)}.All"
             return self._check_higher_permissions(allpermission)
 

@@ -3,7 +3,6 @@
 from collections.abc import Generator, Iterable
 from datetime import datetime
 
-from homeassistant.util import dt as dt_util
 from ical.iter import (
     MergedIterable,
     SortableItem,
@@ -13,11 +12,13 @@ from ical.iter import (
 )
 from ical.timespan import Timespan
 
+from homeassistant.util import dt as dt_util
 from O365.calendar import Event  # pylint: disable=no-name-in-module)
 
 
 class MS365Timeline(SortableItemTimeline[Event]):
     """A set of events on a calendar.
+
     A timeline is created by the local sync API and not instantiated directly.
     """
 
@@ -45,7 +46,7 @@ def calendar_timeline(events: list[Event], tzinfo: datetime.tzinfo) -> MS365Time
     """Create a timeline for events on a calendar, including recurrence."""
     normal_events = events.copy()
 
-    def sortable_items() -> Generator[SortableItem[Timespan, Event], None, None]:
+    def sortable_items() -> Generator[SortableItem[Timespan, Event]]:
         nonlocal normal_events
         for event in normal_events:
             yield SortableItemValue(timespan_of(event), event)

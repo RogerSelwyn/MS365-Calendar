@@ -1,22 +1,23 @@
 """Configuration flow for the skyq platform."""
 
+from collections.abc import Mapping
 import functools as ft
 import logging
-from collections.abc import Mapping
 from typing import Any, Self
 
-import homeassistant.helpers.config_validation as cv
-import voluptuous as vol
 from aiohttp import web_response
+import voluptuous as vol
+
 from homeassistant.components.http import HomeAssistantView
 from homeassistant.config_entries import (
     CONN_CLASS_CLOUD_POLL,
     ConfigFlow,
     ConfigFlowResult,
 )
-from homeassistant.core import callback
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import section
 from homeassistant.helpers import issue_registry as ir
+import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.network import get_url
 
 from .classes.api import MS365Account, MS365Token
@@ -57,10 +58,7 @@ from .integration.config_flow_integration import (
 from .integration.const_integration import DOMAIN
 from .integration.permissions_integration import Permissions
 from .integration.schema_integration import CONFIG_SCHEMA_INTEGRATION
-from .schema import (
-    CONFIG_SCHEMA,
-    REQUEST_AUTHORIZATION_DEFAULT_SCHEMA,
-)
+from .schema import CONFIG_SCHEMA, REQUEST_AUTHORIZATION_DEFAULT_SCHEMA
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -72,7 +70,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
     MINOR_VERSION = 0
     CONNECTION_CLASS = CONN_CLASS_CLOUD_POLL
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialise the configuration flow."""
         self._permissions = []
         self._ms365account = None
@@ -324,7 +322,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
                 {"collapsed": True},
             ),
         }
-        self._config_schema |= integration_reconfigure_schema(entry_data)  # type: ignore
+        self._config_schema |= integration_reconfigure_schema(entry_data)
 
         return await self.async_step_user()
 
@@ -348,7 +346,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
         )
 
 
-def get_callback_url(hass, alt_config, user_input):
+def get_callback_url(hass: HomeAssistant, alt_config, user_input):
     """Get the callback URL."""
     if alt_config:
         return f"{get_url(hass, prefer_external=True)}{AUTH_CALLBACK_PATH_ALT}"
@@ -364,11 +362,10 @@ class MS365AuthCallbackView(HomeAssistantView):
     url = AUTH_CALLBACK_PATH_ALT
     name = AUTH_CALLBACK_NAME
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize."""
         self.token_url = ""
 
-    @callback
     async def get(self, request):
         """Receive authorization token."""
         self.token_url = str(request.url)

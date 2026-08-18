@@ -1,10 +1,8 @@
 """MS365 Calendar local storage."""
 
-from __future__ import annotations
-
+from datetime import datetime
 import json
 import logging
-from datetime import datetime
 from typing import Any
 
 from homeassistant.core import HomeAssistant
@@ -22,13 +20,14 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class JSONEncoder(json.JSONEncoder):
-    """Encoder for serialising an event"""
+    """Encoder for serialising an event."""
 
     def default(self, o):
+        """Default method for the JSONEncoder."""
         attributes = {}
 
         if not hasattr(o, "__dict__"):
-            return
+            return None
         for k, v in vars(o).items():
             key = _beautify_key(k)
             if key not in [

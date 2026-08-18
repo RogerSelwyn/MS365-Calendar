@@ -1,12 +1,12 @@
-"""Items that relate to gcal_sync.api"""
+"""Items that relate to gcal_sync.api."""
 
 import functools as ft
 import logging
 from typing import Any, cast
 
-from homeassistant.core import HomeAssistant
 from requests.exceptions import HTTPError, RetryError
 
+from homeassistant.core import HomeAssistant
 from O365.calendar import Event  # pylint: disable=no-name-in-module
 from O365.utils.query import (  # pylint: disable=no-name-in-module, import-error
     QueryBuilder,
@@ -32,6 +32,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class MS365CalendarService:
     """Calendar service interface to MS365.
+
     The `MS365CalendarService` is the primary API service for this library. It supports
     operations like listing events.
     """
@@ -65,25 +66,27 @@ class MS365CalendarService:
                 ft.partial(self._account.schedule, resource=self.calendar_id)
             )
             return True
-        else:
-            schedule = await self.hass.async_add_executor_job(self._account.schedule)
-            query = self._builder.select("name", "id", "canEdit", "color", "hexColor")
-            try:
-                self.calendar = await self.hass.async_add_executor_job(
-                    ft.partial(
-                        schedule.get_calendar, calendar_id=self.calendar_id, query=query
-                    )
+
+        schedule = await self.hass.async_add_executor_job(self._account.schedule)
+        query = self._builder.select("name", "id", "canEdit", "color", "hexColor")
+        try:
+            self.calendar = await self.hass.async_add_executor_job(
+                ft.partial(
+                    schedule.get_calendar, calendar_id=self.calendar_id, query=query
                 )
-                return True
-            except (HTTPError, RetryError, ConnectionError) as err:
-                _LOGGER.warning(
-                    "Error getting calendar - %s - %s - %s Has the calendar been deleted? "
-                    + "If so, disable or delete in calendars.yaml.",
-                    self.calendar_id,
-                    self._entity_id,
-                    err,
-                )
-                return False
+            )
+
+        except (HTTPError, RetryError, ConnectionError) as err:
+            _LOGGER.warning(
+                "Error getting calendar - %s - %s - %s Has the calendar been deleted? "
+                "If so, disable or delete in calendars.yaml",
+                self.calendar_id,
+                self._entity_id,
+                err,
+            )
+            return False
+
+        return True
 
     async def async_get_event(self, event_id: str) -> Event:
         """Get specific event."""
@@ -211,6 +214,7 @@ class MS365CalendarEventStoreService:
 
     async def async_add_event(self, subject, start, end, **kwargs):
         """Add the specified event to the calendar.
+
         You should sync the event store after adding an event.
         """
         # Should be adding to the event store I believe
@@ -219,6 +223,7 @@ class MS365CalendarEventStoreService:
 
     async def async_delete_event(self, event_id) -> None:
         """Delete the event from the calendar.
+
         This method is used to delete an existing event. For a recurring event
         either the whole event or instances of an event may be deleted.
         """
@@ -233,7 +238,9 @@ class MS365CalendarEventStoreService:
         return store_data.get(ITEMS, {})  # type: ignore[no-any-return]
 
 
-async def async_scan_for_calendars(hass, entry: MS365ConfigEntry, account):
+async def async_scan_for_calendars(
+    hass: HomeAssistant, entry: MS365ConfigEntry, account
+):
     """Scan for new calendars."""
 
     schedule = await hass.async_add_executor_job(account.schedule)

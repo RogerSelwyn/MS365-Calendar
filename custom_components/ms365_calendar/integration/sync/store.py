@@ -1,9 +1,7 @@
 """Library for local storage of calendar data. Direct copy of gcal_sync.store."""
 
-from __future__ import annotations
-
-import logging
 from abc import ABC
+import logging
 from typing import Any
 
 __all__ = [
@@ -13,17 +11,17 @@ __all__ = [
 _LOGGER = logging.getLogger(__name__)
 
 
-class CalendarStore(ABC):
+class CalendarStore(ABC):  # noqa: B024
     """Interface for external calendar storage.
 
     This is an abstract class that may be implemented by callers to provide a
     custom implementation for storing the calendar database.
     """
 
-    async def async_load(self) -> dict[str, Any] | None:
+    async def async_load(self) -> dict[str, Any] | None:  # noqa: B027
         """Load data."""
 
-    async def async_save(self, data: dict[str, Any]) -> None:
+    async def async_save(self, data: dict[str, Any]) -> None:  # noqa: B027
         """Save data."""
 
 
@@ -57,7 +55,7 @@ class ScopedCalendarStore(CalendarStore):
         return store_data.get(self._key, {})  # type: ignore[no-any-return]
 
     async def async_save(self, data: dict[str, Any]) -> None:
-        """Save data to the store, performing a read/modify/write"""
+        """Save data to the store, performing a read/modify/write."""
 
         store_data = await self._store.async_load() or {}
         store_data[self._key] = data

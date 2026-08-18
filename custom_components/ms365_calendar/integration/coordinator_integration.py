@@ -1,8 +1,14 @@
 """Calendar coordinator processing."""
 
-import logging
 from collections.abc import Iterable
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
+import logging
+
+from requests.exceptions import (
+    ConnectionError as RequestConnectionError,
+    HTTPError,
+    RetryError,
+)
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_OK, STATE_PROBLEM, STATE_UNKNOWN
@@ -10,9 +16,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.util import dt as dt_util
-from requests.exceptions import ConnectionError as RequestConnectionError
-from requests.exceptions import HTTPError, RetryError
-
 from O365.calendar import Event  # pylint: disable=no-name-in-module)
 
 from .const_integration import (
@@ -124,7 +127,7 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
             except (HTTPError, RetryError, RequestConnectionError) as err:
                 self._log_error(
                     "Error getting calendar event range "
-                    + "from MS Graph, fetching from cache.",
+                    "from MS Graph, fetching from cache.",
                     err,
                 )
         _LOGGER.debug(
@@ -154,7 +157,7 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
         #
         # Get events that are current now
         #
-        today = datetime.now(timezone.utc)
+        today = dt_util.utcnow()
 
         current_events = self.data.overlapping(
             today,

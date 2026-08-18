@@ -1,7 +1,5 @@
 """Diagnostics support for MS365."""
 
-from __future__ import annotations
-
 from homeassistant.components.diagnostics import async_redact_data
 from homeassistant.const import CONF_CLIENT_ID, CONF_CLIENT_SECRET
 from homeassistant.core import HomeAssistant

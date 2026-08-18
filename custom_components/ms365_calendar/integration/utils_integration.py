@@ -1,15 +1,15 @@
 """Calendar utilities processes."""
 
+from datetime import datetime
 import logging
 import warnings
-from datetime import datetime
 
 from bs4 import BeautifulSoup, MarkupResemblesLocatorWarning
 from dateutil import parser
-from homeassistant.helpers import entity_registry
-from homeassistant.util import dt as dt_util
-from homeassistant.util import slugify
 
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
+from homeassistant.util import dt as dt_util, slugify
 from O365.calendar import Attendee  # pylint: disable=no-name-in-module)
 
 from ..classes.config_entry import MS365ConfigEntry
@@ -54,7 +54,7 @@ def clean_html(html):
 
 def format_event_data(event):
     """Format the event data."""
-    attendees = event.attendees._Attendees__attendees  # pylint: disable=protected-access
+    attendees = event.attendees._Attendees__attendees  # noqa: SLF001
     return {
         "summary": event.subject,
         "start": get_hass_date(event.start, event.is_all_day),
@@ -102,26 +102,24 @@ def get_start_date(obj):
 def add_call_data_to_event(event, subject, start, end, **kwargs):
     """Add the call data."""
     event.subject = _add_attribute(subject, event.subject)
-    event.body = _add_attribute(kwargs.get(ATTR_BODY, None), event.body)
-    event.location = _add_attribute(kwargs.get(ATTR_LOCATION, None), event.location)
+    event.body = _add_attribute(kwargs.get(ATTR_BODY), event.body)
+    event.location = _add_attribute(kwargs.get(ATTR_LOCATION), event.location)
     event.categories = _add_attribute(kwargs.get(ATTR_CATEGORIES, []), event.categories)
-    event.show_as = _add_attribute(kwargs.get(ATTR_SHOW_AS, None), event.show_as)
+    event.show_as = _add_attribute(kwargs.get(ATTR_SHOW_AS), event.show_as)
     event.start = _add_attribute(start, event.start)
     event.end = _add_attribute(end, event.end)
     event.is_reminder_on = _add_attribute(
-        kwargs.get(ATTR_IS_REMINDER_ON, None), event.is_reminder_on
+        kwargs.get(ATTR_IS_REMINDER_ON), event.is_reminder_on
     )
     if event.is_reminder_on:
         event.remind_before_minutes = _add_attribute(
-            kwargs.get(ATTR_REMIND_BEFORE_MINUTES, None), event.remind_before_minutes
+            kwargs.get(ATTR_REMIND_BEFORE_MINUTES), event.remind_before_minutes
         )
-    event.sensitivity = _add_attribute(
-        kwargs.get(ATTR_SENSITIVITY, None), event.sensitivity
-    )
+    event.sensitivity = _add_attribute(kwargs.get(ATTR_SENSITIVITY), event.sensitivity)
     _add_attendees(kwargs.get(ATTR_ATTENDEES, []), event)
     _add_all_day(kwargs.get(ATTR_IS_ALL_DAY, False), event)
 
-    if kwargs.get(ATTR_RRULE, None):
+    if kwargs.get(ATTR_RRULE):
         _rrule_processing(event, kwargs[ATTR_RRULE])
     return event
 
@@ -220,13 +218,13 @@ def build_calendar_entity_id(device_id, entity_name):
     return CALENDAR_ENTITY_ID_FORMAT.format(slugify(name))
 
 
-async def async_delete_calendar(hass, config_entry: MS365ConfigEntry, calendar):
+async def async_delete_calendar(
+    hass: HomeAssistant, config_entry: MS365ConfigEntry, calendar
+):
     """Delete a calendar."""
     entity_id = build_calendar_entity_id(calendar, config_entry.data[CONF_ENTITY_NAME])
-    ent_reg = entity_registry.async_get(hass)
-    entities = entity_registry.async_entries_for_config_entry(
-        ent_reg, config_entry.entry_id
-    )
+    ent_reg = er.async_get(hass)
+    entities = er.async_entries_for_config_entry(ent_reg, config_entry.entry_id)
     for entity in entities:
         if entity.entity_id == entity_id:
             ent_reg.async_remove(entity_id)

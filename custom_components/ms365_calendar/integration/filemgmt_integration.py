@@ -3,14 +3,14 @@
 import logging
 import os
 
-import yaml
-from homeassistant.const import CONF_NAME
 from voluptuous.error import Error as VoluptuousError
+import yaml
+
+from homeassistant.const import CONF_NAME
+from homeassistant.core import HomeAssistant
 
 from ..classes.config_entry import MS365ConfigEntry
-from ..const import (
-    CONF_ENTITY_NAME,
-)
+from ..const import CONF_ENTITY_NAME
 from ..helpers.filemgmt import build_config_file_path
 from .const_integration import (
     CONF_CAL_ID,
@@ -77,7 +77,7 @@ def _get_calendar_info(calendar, track_new_devices):
 
 
 async def async_update_calendar_file(
-    entry: MS365ConfigEntry, calendar, hass, track_new_devices
+    entry: MS365ConfigEntry, calendar, hass: HomeAssistant, track_new_devices
 ):
     """Update the calendar file."""
     path = build_yaml_filename(entry, YAML_CALENDARS_FILENAME)
@@ -91,7 +91,9 @@ async def async_update_calendar_file(
     await hass.async_add_executor_job(write_yaml_file, yaml_filepath, cal)
 
 
-async def async_check_for_deleted_calendars(entry: MS365ConfigEntry, calendars, hass):
+async def async_check_for_deleted_calendars(
+    entry: MS365ConfigEntry, calendars, hass: HomeAssistant
+):
     """Delete removed calendars from yaml file."""
     path = build_yaml_filename(entry, YAML_CALENDARS_FILENAME)
     yaml_filepath = build_yaml_file_path(hass, path)
@@ -122,7 +124,7 @@ def build_yaml_filename(conf: MS365ConfigEntry, filename):
     return filename.format(f"_{conf.data.get(CONF_ENTITY_NAME)}")
 
 
-def build_yaml_file_path(hass, yaml_filename):
+def build_yaml_file_path(hass: HomeAssistant, yaml_filename):
     """Create yaml path."""
     return build_config_file_path(hass, yaml_filename)
 

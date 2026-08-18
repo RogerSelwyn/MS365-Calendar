@@ -1,25 +1,22 @@
 """Schema for MS365 Integration."""
 
-import datetime
 from collections.abc import Callable
+import datetime
 from itertools import groupby
 from typing import Any
 
-import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-from homeassistant.const import CONF_NAME
-from homeassistant.util import dt as dt_util
 
+from homeassistant.const import CONF_NAME
+import homeassistant.helpers.config_validation as cv
+from homeassistant.util import dt as dt_util
 from O365.calendar import (  # pylint: disable=no-name-in-module
     AttendeeType,
     EventSensitivity,
     EventShowAs,
 )
 
-from ..const import (
-    CONF_ENABLE_UPDATE,
-    CONF_SHARED_MAILBOX,
-)
+from ..const import CONF_ENABLE_UPDATE, CONF_SHARED_MAILBOX
 from .const_integration import (
     ATTR_ATTENDEES,
     ATTR_BODY,
@@ -63,7 +60,7 @@ def _has_consistent_timezone(*keys: Any) -> Callable[[dict[str, Any]], dict[str,
         tzinfos = []
         for key in keys:
             if obj.get(key):
-                tzinfos.append(obj.get(key).tzinfo)
+                tzinfos.append(obj.get(key).tzinfo)  # noqa: PERF401
         uniq_values = groupby(tzinfos)
         if len(list(uniq_values)) > 1:
             raise vol.Invalid("Expected all values to have the same timezone")

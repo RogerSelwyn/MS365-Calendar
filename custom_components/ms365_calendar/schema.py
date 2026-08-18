@@ -1,8 +1,9 @@
 """Schema for MS365 Integration."""
 
-import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
+
 from homeassistant.data_entry_flow import section
+import homeassistant.helpers.config_validation as cv
 
 from .const import (
     CONF_ALT_AUTH_METHOD,
@@ -27,9 +28,7 @@ CONFIG_SCHEMA = {
                 vol.Required(CONF_API_COUNTRY, default=CountryOptions.DEFAULT): vol.In(
                     CountryOptions
                 ),
-                vol.Optional(CONF_TENANT_ID, default=""): vol.All(
-                    cv.string, vol.Strip
-                ),
+                vol.Optional(CONF_TENANT_ID, default=""): vol.All(cv.string, vol.Strip),
             }
         ),
         {"collapsed": True},

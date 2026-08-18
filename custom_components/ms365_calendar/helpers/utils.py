@@ -1,5 +1,6 @@
 """Utilities processes."""
 
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import async_generate_entity_id
 
 from ..const import (
@@ -19,7 +20,7 @@ def add_attribute_to_item(item, user_input, attribute):
         del item[attribute]
 
 
-def build_entity_id(hass, entity_id_format, name):
+def build_entity_id(hass: HomeAssistant, entity_id_format, name):
     """Build an entity ID."""
     return async_generate_entity_id(
         entity_id_format,
@@ -29,7 +30,7 @@ def build_entity_id(hass, entity_id_format, name):
 
 
 def get_country(entry_data):
-    """Get the country from entry_data"""
+    """Get the country from entry_data."""
     country = CountryOptions.DEFAULT
     if entry_data.get(CONF_API_OPTIONS):
         country = entry_data[CONF_API_OPTIONS][CONF_API_COUNTRY]

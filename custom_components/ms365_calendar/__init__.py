@@ -2,10 +2,11 @@
 
 import logging
 
+from oauthlib.oauth2.rfc6749.errors import InvalidClientError
+
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.network import get_url
-from oauthlib.oauth2.rfc6749.errors import InvalidClientError
 
 from .classes.api import MS365Account, MS365Token
 from .classes.config_entry import MS365ConfigEntry, MS365Data
@@ -72,8 +73,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
 
             entry.async_on_unload(entry.add_update_listener(async_reload_entry))
             return True
-        else:
-            error = TOKEN_FILE_EXPIRED
+
+        error = TOKEN_FILE_EXPIRED
 
     url = f"{get_url(hass)}/config/integrations/integration/{DOMAIN}"
     ir.async_create_issue(
@@ -147,11 +148,11 @@ async def async_remove_entry(hass: HomeAssistant, entry: MS365ConfigEntry) -> No
     await setup_integration.async_integration_remove_entry(hass, entry)
 
 
-async def _async_check_token(hass, account, entity_name):
+async def _async_check_token(hass: HomeAssistant, account, entity_name):
     try:
         account = await hass.async_add_executor_job(account.get_current_user_data)
         _LOGGER.info("Logged in user: %s, %s", account.full_name, account.object_id)
-        return True
+
     except InvalidClientError as err:
         if "client secret" in err.description and "expired" in err.description:
             _LOGGER.warning(SECRET_EXPIRED, entity_name)
@@ -163,3 +164,5 @@ async def _async_check_token(hass, account, entity_name):
             _LOGGER.warning(TOKEN_EXPIRED, entity_name)
             return False
         raise
+
+    return True

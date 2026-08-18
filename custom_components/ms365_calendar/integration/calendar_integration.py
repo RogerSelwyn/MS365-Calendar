@@ -1,8 +1,8 @@
 """Main calendar processing."""
 
-import logging
 from copy import deepcopy
 from datetime import datetime, timedelta
+import logging
 from operator import attrgetter
 from typing import Any, cast
 
@@ -49,9 +49,7 @@ from .const_integration import (
     EVENT_RESPOND_CALENDAR_EVENT,
     PERM_CALENDARS_READWRITE,
 )
-from .coordinator_integration import (
-    MS365CalendarSyncCoordinator,
-)
+from .coordinator_integration import MS365CalendarSyncCoordinator
 from .schema_integration import (
     CALENDAR_SERVICE_CREATE_SCHEMA,
     CALENDAR_SERVICE_MODIFY_SCHEMA,
@@ -155,7 +153,7 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
         update_supported,
         name,
         unique_id,
-    ):
+    ) -> None:
         """Initialise the MS365 Calendar Event."""
         super().__init__(coordinator, entry, name, entity_id, unique_id)
         self.api = api
@@ -210,7 +208,7 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
             "mS365.calendar-refresh",
         )
 
-    async def async_get_events(self, hass, start_date, end_date):
+    async def async_get_events(self, hass: HomeAssistant, start_date, end_date):
         """Get events."""
         _LOGGER.debug("Start get_events for %s", self.name)
 
