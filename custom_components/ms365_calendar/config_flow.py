@@ -210,7 +210,9 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
                 TOKEN_FILE_EXPIRED,
             ]:
                 ir.async_delete_issue(self.hass, DOMAIN, error)
-            return self.async_update_and_abort(self._entry, data=self._user_input)
+            return self.async_update_and_abort(
+                self._entry, data=self._user_input, reason="reconfigure_successful"
+            )
 
         return self.async_create_entry(title=self.entity_name, data=self._user_input)
 

@@ -493,8 +493,10 @@ mark-parentheses = false
 [tool.ruff.lint.isort]
 force-sort-within-sections = true
 known-first-party = [
-    "homeassistant", 
+    "homeassistant",
     "pyhomelink",
+    "O365",
+    "geniushub-client"
 ]
 combine-as-imports = true
 split-on-trailing-comma = false
