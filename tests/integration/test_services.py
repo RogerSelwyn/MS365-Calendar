@@ -147,6 +147,27 @@ async def test_get_calendar_events_outside_range(
     assert all("attendees" in event and "organizer" in event for event in events)
 
 
+async def test_get_calendar_events_naive_datetimes(
+    hass: HomeAssistant,
+    setup_base_integration,
+) -> None:
+    """Test get_calendar_events treats naive datetimes as local time."""
+    calendar_name = "calendar.test_calendar1"
+    result = await hass.services.async_call(
+        DOMAIN,
+        "get_calendar_events",
+        {
+            "entity_id": calendar_name,
+            "start_date_time": "2022-03-22T20:00:00",
+            "end_date_time": "2022-03-22T22:00:00",
+        },
+        blocking=True,
+        return_response=True,
+    )
+    events = result[calendar_name]["events"]
+    assert len(events) == 2
+
+
 async def test_get_calendar_events_end_before_start(
     hass: HomeAssistant,
     setup_base_integration,

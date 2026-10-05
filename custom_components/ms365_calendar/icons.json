@@ -5,6 +5,7 @@
         "respond_calendar_event": "mdi:calendar-arrow-left",
         "create_calendar_event": "mdi:calendar-plus",
         "modify_calendar_event": "mdi:calendar-edit",
-        "remove_calendar_event": "mdi:calendar-remove"
+        "remove_calendar_event": "mdi:calendar-remove",
+        "get_calendar_events": "mdi:calendar-search"
     }
 }
