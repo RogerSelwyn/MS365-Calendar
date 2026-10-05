@@ -14,6 +14,8 @@ Modify an event in the specified calendar - All parameters are shown in the avai
 Remove an event in the specified calendar - All parameters are shown in the available parameter list on the Developer Tools/Services tab. Not possible for group calendars.
 ### ms365_calendar.respond_calendar_event
 Respond to an event in the specified calendar - All parameters are shown in the available parameter list on the Developer Tools/Services tab. Not possible for group calendars.
+### ms365_calendar.get_calendar_events
+Get the events in a time range, with the same per-event detail as the calendar entity's `data` attribute - including `attendees` (email, type, response status), `organizer`, `categories`, `sensitivity`, `show_as` and `uid`. Use it with `response_variable`. Unlike the core `calendar.get_events` action, which only returns summary, start, end, description and location, and unlike the `data` attribute, which only covers the entity's `start_offset`/`end_offset` window.
 
 #### Example create event service call
 
@@ -43,3 +45,16 @@ calendar.user_primary:
     long_guid
 ```
 
+#### Example get events service call
+
+```yaml
+action: ms365_calendar.get_calendar_events
+target:
+  entity_id: calendar.user_primary
+data:
+  start_date_time: "{{ now().isoformat() }}"
+  end_date_time: "{{ (now() + timedelta(days=3)).isoformat() }}"
+response_variable: events
+```
+
+The response is keyed by entity: `events['calendar.user_primary'].events` is a list of events, each with `summary`, `start`, `end`, `all_day`, `description`, `location`, `categories`, `sensitivity`, `show_as`, `reminder`, `organizer`, `attendees` and `uid`.

@@ -129,6 +129,9 @@
     },
     "cannot_connect": {
       "message": "Error syncing calendar events from MS Graph."
+    },
+    "end_before_start": {
+      "message": "The end date time must be after the start date time"
     }
   },
   "services": {
@@ -273,6 +276,20 @@
         "event_id": {
           "description": "ID for the event, can be found as an attribute on your calendar entity's events",
           "name": "Event ID"
+        }
+      }
+    },
+    "get_calendar_events": {
+      "name": "Get events",
+      "description": "Get the events in a time range with their full MS365 detail, including attendees and organizer",
+      "fields": {
+        "start_date_time": {
+          "name": "Start date time",
+          "description": "Return events that end after this time"
+        },
+        "end_date_time": {
+          "name": "End date time",
+          "description": "Return events that start before this time"
         }
       }
     }

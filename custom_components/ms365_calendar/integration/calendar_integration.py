@@ -52,6 +52,7 @@ from .const_integration import (
 from .coordinator_integration import MS365CalendarSyncCoordinator
 from .schema_integration import (
     CALENDAR_SERVICE_CREATE_SCHEMA,
+    CALENDAR_SERVICE_GET_EVENTS_SCHEMA,
     CALENDAR_SERVICE_MODIFY_SCHEMA,
     CALENDAR_SERVICE_REMOVE_SCHEMA,
     CALENDAR_SERVICE_RESPOND_SCHEMA,
@@ -111,6 +112,14 @@ async def async_integration_setup_entry(
 
 async def _async_setup_register_services(config_update_supported):
     platform = entity_platform.async_get_current_platform()
+
+    # Read-only, so registered whether or not calendar updates are enabled.
+    platform.async_register_entity_service(
+        "get_calendar_events",
+        CALENDAR_SERVICE_GET_EVENTS_SCHEMA,
+        "async_get_calendar_events",
+        supports_response=SupportsResponse.ONLY,
+    )
 
     if config_update_supported:
         platform.async_register_entity_service(
@@ -424,6 +433,29 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
         self._raise_event(ha_event, event_id)
         await self.coordinator.async_refresh()
 
+    async def async_get_calendar_events(
+        self, start_date_time: datetime, end_date_time: datetime
+    ) -> ServiceResponse:
+        """Get events with the full MS365 detail, attendees and organizer included.
+
+        Core's calendar.get_events returns only the fields of CalendarEvent, so
+        attendees, organizer, categories etc. never reach it; this returns the same
+        per-event data as the entity's `data` attribute, for any time range.
+        """
+        start = _with_default_timezone(start_date_time)
+        end = _with_default_timezone(end_date_time)
+        if end <= start:
+            raise ServiceValidationError(
+                translation_domain=DOMAIN,
+                translation_key="end_before_start",
+            )
+        results = await self.coordinator.async_get_events(start, end)
+        events = [
+            _serialise_event_data(format_event_data(event))
+            for event in self._sort_events(results)
+        ]
+        return {"events": cast(list[Any], events)}
+
     async def async_respond_calendar_event(
         self, event_id, response, send_response=True, message=None
     ):
@@ -467,3 +499,18 @@ def _group_calendar_log(entity_id):
             "entity_id": entity_id,
         },
     )
+
+
+def _with_default_timezone(value: datetime) -> datetime:
+    """Treat a naive datetime as local time, as core's calendar.get_events does."""
+    if value.tzinfo is None:
+        return value.replace(tzinfo=dt_util.get_default_time_zone())
+    return value
+
+
+def _serialise_event_data(event_data: dict[str, Any]) -> dict[str, Any]:
+    """Make format_event_data output JSON-safe for a service response."""
+    for key in ("start", "end"):
+        if hasattr(event_data[key], "isoformat"):
+            event_data[key] = event_data[key].isoformat()
+    return event_data

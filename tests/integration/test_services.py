@@ -83,6 +83,90 @@ async def test_get_events_outside_range(
     assert "events" in result[calendar_name]
     assert len(result[calendar_name]["events"]) == 2
 
+
+async def test_get_calendar_events_service_setup(
+    hass: HomeAssistant,
+    setup_base_integration,
+) -> None:
+    """Test get_calendar_events is available without calendar updates enabled."""
+    assert hass.services.has_service(DOMAIN, "get_calendar_events")
+
+
+async def test_get_calendar_events_inside_range(
+    hass: HomeAssistant,
+    setup_base_integration,
+) -> None:
+    """Test get_calendar_events inside range returns attendees and organizer."""
+    calendar_name = "calendar.test_calendar1"
+    start_date = dt_util.utcnow() + timedelta(hours=-24)
+    end_date = dt_util.utcnow() + timedelta(hours=24)
+    result = await hass.services.async_call(
+        DOMAIN,
+        "get_calendar_events",
+        {
+            "entity_id": calendar_name,
+            "start_date_time": start_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "end_date_time": end_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        },
+        blocking=True,
+        return_response=True,
+    )
+    events = result[calendar_name]["events"]
+    assert len(events) == 2
+    with_attendees = [event for event in events if event["attendees"]]
+    assert len(with_attendees) == 1
+    event = with_attendees[0]
+    assert event["attendees"] == [
+        {"email": "jane@nomail.com", "type": "required", "status": "not_responded"}
+    ]
+    assert event["organizer"] == "john@nomail.com"
+    assert isinstance(event["start"], str)
+    assert isinstance(event["end"], str)
+    assert event["uid"]
+
+
+async def test_get_calendar_events_outside_range(
+    hass: HomeAssistant,
+    setup_base_integration,
+) -> None:
+    """Test get_calendar_events outside the synced range fetches from MS Graph."""
+    calendar_name = "calendar.test_calendar1"
+    result = await hass.services.async_call(
+        DOMAIN,
+        "get_calendar_events",
+        {
+            "entity_id": calendar_name,
+            "start_date_time": "2022-03-22T20:00:00.000Z",
+            "end_date_time": "2022-03-22T22:00:00.000Z",
+        },
+        blocking=True,
+        return_response=True,
+    )
+    events = result[calendar_name]["events"]
+    assert len(events) == 2
+    assert all("attendees" in event and "organizer" in event for event in events)
+
+
+async def test_get_calendar_events_end_before_start(
+    hass: HomeAssistant,
+    setup_base_integration,
+) -> None:
+    """Test get_calendar_events rejects an end before the start."""
+    start_date = dt_util.utcnow()
+    end_date = start_date + timedelta(hours=-1)
+    with pytest.raises(ServiceValidationError):
+        await hass.services.async_call(
+            DOMAIN,
+            "get_calendar_events",
+            {
+                "entity_id": "calendar.test_calendar1",
+                "start_date_time": start_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "end_date_time": end_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            },
+            blocking=True,
+            return_response=True,
+        )
+
 async def test_get_events_too_quick(
     hass: HomeAssistant,
     setup_base_integration,
