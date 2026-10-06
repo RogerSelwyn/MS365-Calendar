@@ -145,13 +145,14 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
     def get_current_event(self):
         """Get the current event."""
 
-        # No data yet when the first refresh failed with an error that is not caught
-        if self.data is None:
-            _LOGGER.debug(
-                "No current event found for %s",
-                self.sync.calendar_id,
-            )
-            return None
+        # Not possible to get this situation I beleieve
+        # if not self.data:
+        #     _LOGGER.debug(
+        #         "No current event found for %s",
+        #         self.sync.calendar_id,
+        #     )
+        #     self.event = None
+        #     return None
 
         #
         # Get events that are current now
