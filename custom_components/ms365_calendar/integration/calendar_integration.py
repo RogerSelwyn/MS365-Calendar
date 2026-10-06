@@ -421,9 +421,6 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
         length is carried over, and moving the occurrence to another day is refused.
         The series is kept in the local time zone so it still follows daylight saving.
         """
-        if start is None or end is None:
-            return start, end
-
         series = await self.api.async_get_event(series_id)
         if _event_date(start, False) != _event_date(
             occurrence.start, occurrence.is_all_day

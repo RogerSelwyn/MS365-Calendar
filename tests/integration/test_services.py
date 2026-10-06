@@ -2,6 +2,7 @@
 """Test service usage."""
 
 from datetime import datetime, timedelta
+import logging
 from unittest.mock import patch
 
 import pytest
@@ -12,7 +13,7 @@ from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.util import dt as dt_util
 from requests_mock import Mocker
 from voluptuous.error import MultipleInvalid
-from zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from custom_components.ms365_calendar.const import CONF_ENABLE_UPDATE
 
@@ -913,6 +914,79 @@ async def test_update_series_from_moved_occurrence(
     assert payload["subject"] == "Weekly sync (renamed)"
     assert payload["start"]["dateTime"] == "2026-09-07T10:00:00"
     assert payload["end"]["dateTime"] == "2026-09-07T11:00:00"
+
+
+async def test_update_all_day_series(
+    ws_client: ClientFixture,
+    setup_update_integration,
+    requests_mock: Mocker,
+) -> None:
+    """Test update this and following - an all day series keeps its date."""
+
+    event_name = "event2"
+    mock_call(
+        requests_mock,
+        URL.CALENDARS,
+        "calendar1_event2",
+        f"calendar1/events/{event_name}",
+    )
+    client = await ws_client()
+    with patch("O365.calendar.Event.save", autospec=True) as mock_save:
+        await client.cmd_result(
+            "update",
+            {
+                "entity_id": "calendar.test_calendar1",
+                "uid": event_name,
+                "recurrence_id": event_name,
+                "recurrence_range": "THISANDFUTURE",
+                "event": {
+                    "summary": "Renamed all day series",
+                    "dtstart": "2022-10-24",
+                    "dtend": "2022-10-25",
+                },
+            },
+        )
+
+    payload = _saved_payload(mock_save)
+    assert payload["isAllDay"] is True
+    assert payload["start"]["dateTime"] == "2022-10-24T00:00:00"
+    assert payload["end"]["dateTime"] == "2022-10-25T00:00:00"
+
+
+async def test_create_recurring_event_unknown_time_zone(
+    ws_client: ClientFixture,
+    setup_update_integration,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test create recurring event - no Windows time zone for the HA time zone."""
+
+    caplog.set_level(logging.DEBUG, logger=f"custom_components.{DOMAIN}")
+    client = await ws_client()
+    with (
+        patch(
+            f"custom_components.{DOMAIN}.integration.utils_integration.get_windows_tz",
+            side_effect=ZoneInfoNotFoundError("Unknown"),
+        ),
+        patch("O365.calendar.Event.save", autospec=True) as mock_save,
+    ):
+        await client.cmd_result(
+            "create",
+            {
+                "entity_id": "calendar.test_calendar1",
+                "event": {
+                    "summary": "Gym",
+                    "dtstart": "2099-01-16T18:00:00",
+                    "dtend": "2099-01-16T19:00:00",
+                    "rrule": "FREQ=DAILY;COUNT=5",
+                },
+            },
+        )
+
+    event = mock_save.call_args.args[0]
+    recurrence_range = event.recurrence.to_api_data()["range"]
+    assert recurrence_range["startDate"] == "2099-01-16"
+    assert recurrence_range["recurrenceTimeZone"] == "UTC"
+    assert "recurrence time zone left unchanged" in caplog.text
 
 
 def _saved_payload(mock_save):
