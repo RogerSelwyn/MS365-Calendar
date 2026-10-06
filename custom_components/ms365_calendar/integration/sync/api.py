@@ -70,7 +70,7 @@ class MS365CalendarService:
                 await self.hass.async_add_executor_job(
                     self.calendar.get_default_calendar
                 )
-            except (HTTPError, RetryError, ConnectionError) as err:
+            except HTTPError as err:
                 _LOGGER.warning(
                     "Error getting group calendar - %s - %s - %s Is the group id "
                     "correct and do you still have access to the group? If not, "
@@ -80,6 +80,11 @@ class MS365CalendarService:
                     err,
                 )
                 return False
+            except RetryError as err:
+                # MS Graph is busy or failing, so keep the calendar for the next poll
+                _LOGGER.debug(
+                    "Group calendar check failed - %s - %s", self.calendar_id, err
+                )
             return True
 
         schedule = await self.hass.async_add_executor_job(self._account.schedule)

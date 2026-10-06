@@ -130,7 +130,8 @@ async def _async_setup_coordinators(
                     sync_manager = MS365CalendarEventSyncManager(
                         api,
                         cal_id,
-                        store=ScopedCalendarStore(local_store, unique_id),
+                        # Names can be shared, so keep the events of each entity apart
+                        store=ScopedCalendarStore(local_store, entity[CONF_DEVICE_ID]),
                         exclude=entity.get(CONF_EXCLUDE),
                     )
                     coordinators.append(
