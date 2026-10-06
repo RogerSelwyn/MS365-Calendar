@@ -80,6 +80,7 @@ async def test_perms_error(
         side_effect=HTTPError(),
     ):
         await update_options(hass, base_config_entry)
+        await hass.async_block_till_done()
 
     assert "No permission for calendar" in caplog.text
 

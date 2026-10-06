@@ -270,5 +270,7 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
             if calendar not in self._calendar_list_selected:
                 await async_delete_calendar(self.hass, self.config_entry, calendar)
         update = self.async_create_entry(title="", data=user_input)
-        await self.hass.config_entries.async_reload(self._config_entry_id)
+        if user_input == dict(self.config_entry.options):
+            # Only the yaml changed, so the update listener will not reload
+            self.hass.config_entries.async_schedule_reload(self._config_entry_id)
         return update
