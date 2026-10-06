@@ -544,7 +544,7 @@ async def test_update_recurring_event(
         f"calendar1/events/{event_name}",
     )
     client = await ws_client()
-    with patch("O365.calendar.Event.save") as mock_save:
+    with patch("O365.calendar.Event.save", autospec=True) as mock_save:
         await client.cmd_result(
             "update",
             {
@@ -561,9 +561,12 @@ async def test_update_recurring_event(
             },
         )
 
-    assert mock_save.called
+    recurrence = _saved_recurrence(mock_save)
+    assert recurrence["pattern"] == {"type": "daily", "interval": 1}
+    assert recurrence["range"]["type"] == "numbered"
+    assert recurrence["range"]["numberOfOccurrences"] == 5
 
-    with patch("O365.calendar.Event.save") as mock_save:
+    with patch("O365.calendar.Event.save", autospec=True) as mock_save:
         await client.cmd_result(
             "update",
             {
@@ -580,9 +583,12 @@ async def test_update_recurring_event(
             },
         )
 
-    assert mock_save.called
+    recurrence = _saved_recurrence(mock_save)
+    assert recurrence["pattern"]["type"] == "weekly"
+    assert recurrence["pattern"]["daysOfWeek"] == ["monday"]
+    assert recurrence["range"]["endDate"] == "2099-01-01"
 
-    with patch("O365.calendar.Event.save") as mock_save:
+    with patch("O365.calendar.Event.save", autospec=True) as mock_save:
         await client.cmd_result(
             "update",
             {
@@ -599,9 +605,11 @@ async def test_update_recurring_event(
             },
         )
 
-    assert mock_save.called
+    recurrence = _saved_recurrence(mock_save)
+    assert recurrence["pattern"]["type"] == "absoluteMonthly"
+    assert recurrence["pattern"]["dayOfMonth"] == 24
 
-    with patch("O365.calendar.Event.save") as mock_save:
+    with patch("O365.calendar.Event.save", autospec=True) as mock_save:
         await client.cmd_result(
             "update",
             {
@@ -618,9 +626,12 @@ async def test_update_recurring_event(
             },
         )
 
-    assert mock_save.called
+    recurrence = _saved_recurrence(mock_save)
+    assert recurrence["pattern"]["type"] == "relativeMonthly"
+    assert recurrence["pattern"]["daysOfWeek"] == ["friday"]
+    assert recurrence["pattern"]["index"] == "fourth"
 
-    with patch("O365.calendar.Event.save") as mock_save:
+    with patch("O365.calendar.Event.save", autospec=True) as mock_save:
         await client.cmd_result(
             "update",
             {
@@ -637,7 +648,10 @@ async def test_update_recurring_event(
             },
         )
 
-    assert mock_save.called
+    recurrence = _saved_recurrence(mock_save)
+    assert recurrence["pattern"]["type"] == "absoluteYearly"
+    assert recurrence["pattern"]["month"] == 10
+    assert recurrence["pattern"]["dayOfMonth"] == 24
 
 
 async def test_update_event_keeps_omitted_fields(
@@ -790,8 +804,8 @@ async def test_create_recurring_event_starts_on_event_date(
     event = mock_save.call_args.args[0]
     recurrence_range = event.recurrence.to_api_data()["range"]
     assert recurrence_range["startDate"] == "2099-01-16"
-    until = dt_util.as_local(datetime(2099, 3, 20, 5, 0, 0, tzinfo=dt_util.UTC))
-    assert recurrence_range["endDate"] == until.date().isoformat()
+    # 05:00 UTC on 20 March is still 19 March in the US/Pacific test time zone
+    assert recurrence_range["endDate"] == "2099-03-19"
     assert event.to_api_data()["body"] == {
         "contentType": "text",
         "content": "Line one\nLine two",
@@ -987,6 +1001,13 @@ async def test_create_recurring_event_unknown_time_zone(
     assert recurrence_range["startDate"] == "2099-01-16"
     assert recurrence_range["recurrenceTimeZone"] == "UTC"
     assert "recurrence time zone left unchanged" in caplog.text
+
+
+def _saved_recurrence(mock_save):
+    """Get the recurrence that saving the event sends to Graph, anchored on its date."""
+    recurrence = mock_save.call_args.args[0].recurrence.to_api_data()
+    assert recurrence["range"]["startDate"] == "2022-10-24"
+    return recurrence
 
 
 def _saved_payload(mock_save):
