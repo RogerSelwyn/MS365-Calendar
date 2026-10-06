@@ -101,3 +101,4 @@ class CN21VURL(Enum):
     OPENID = "https://login.partner.microsoftonline.cn/common/v2.0/.well-known/openid-configuration"
     ME = "https://microsoftgraph.chinacloudapi.cn/v1.0/me"
     CALENDARS = "https://microsoftgraph.chinacloudapi.cn/v1.0/me/calendars"
+    GROUP_CALENDARS = "https://microsoftgraph.chinacloudapi.cn/v1.0/groups"

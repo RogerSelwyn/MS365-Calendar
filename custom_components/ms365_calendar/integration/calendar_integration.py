@@ -58,6 +58,7 @@ from .schema_integration import (
     CALENDAR_SERVICE_RESPOND_SCHEMA,
 )
 from .utils_integration import (
+    build_calendar_unique_id,
     clean_html,
     format_event_data,
     get_end_date,
@@ -86,14 +87,17 @@ async def async_integration_setup_entry(
         entity = key[CONF_ENTITY]
         name = entity[CONF_NAME]
         for coordinator in entry.runtime_data.coordinator:
-            if name != coordinator.name:
+            # Names can be shared, so use the coordinator set up for this entity
+            if coordinator.entity is not entity:
                 continue
 
             calendar_id = coordinator.sync.calendar_id
             can_edit = key[CONF_CAN_EDIT]
             update_supported = config_update_supported and can_edit
             device_id = entity[CONF_DEVICE_ID]
-            unique_id = f"{calendar_id}_{entry.data[CONF_ENTITY_NAME]}_{device_id}"
+            unique_id = build_calendar_unique_id(
+                calendar_id, device_id, entry.data[CONF_ENTITY_NAME]
+            )
             cal = MS365CalendarEntity(
                 coordinator.sync.api,
                 coordinator,
@@ -174,11 +178,15 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
 
         self._update_supported = update_supported
         if self._update_supported:
-            self._attr_supported_features = (
-                CalendarEntityFeature.CREATE_EVENT
-                | CalendarEntityFeature.DELETE_EVENT
-                | CalendarEntityFeature.UPDATE_EVENT
-            )
+            if self.api.group_calendar:
+                # O365 can only create events in a group calendar
+                self._attr_supported_features = CalendarEntityFeature.CREATE_EVENT
+            else:
+                self._attr_supported_features = (
+                    CalendarEntityFeature.CREATE_EVENT
+                    | CalendarEntityFeature.DELETE_EVENT
+                    | CalendarEntityFeature.UPDATE_EVENT
+                )
         self._max_results = entity.get(CONF_MAX_RESULTS)
         self._error = None
         self.exclude = entity.get(CONF_EXCLUDE)

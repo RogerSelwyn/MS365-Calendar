@@ -65,6 +65,21 @@ class MS365CalendarService:
             self.calendar = await self.hass.async_add_executor_job(
                 ft.partial(self._account.schedule, resource=self.calendar_id)
             )
+            # The schedule makes no call, so check the group calendar can be read
+            try:
+                await self.hass.async_add_executor_job(
+                    self.calendar.get_default_calendar
+                )
+            except (HTTPError, RetryError, ConnectionError) as err:
+                _LOGGER.warning(
+                    "Error getting group calendar - %s - %s - %s Is the group id "
+                    "correct and do you still have access to the group? If not, "
+                    "disable or delete in calendars.yaml",
+                    self.calendar_id,
+                    self._entity_id,
+                    err,
+                )
+                return False
             return True
 
         schedule = await self.hass.async_add_executor_job(self._account.schedule)

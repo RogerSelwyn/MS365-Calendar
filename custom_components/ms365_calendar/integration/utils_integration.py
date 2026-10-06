@@ -7,6 +7,7 @@ import warnings
 from bs4 import BeautifulSoup, MarkupResemblesLocatorWarning
 from dateutil import parser
 
+from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from homeassistant.util import dt as dt_util, slugify
@@ -27,6 +28,7 @@ from .const_integration import (
     ATTR_SHOW_AS,
     CALENDAR_ENTITY_ID_FORMAT,
     DAYS,
+    DOMAIN,
     INDEXES,
 )
 
@@ -218,14 +220,19 @@ def build_calendar_entity_id(device_id, entity_name):
     return CALENDAR_ENTITY_ID_FORMAT.format(slugify(name))
 
 
+def build_calendar_unique_id(cal_id, device_id, entity_name):
+    """Build calendar unique_id."""
+    return f"{cal_id}_{entity_name}_{device_id}"
+
+
 async def async_delete_calendar(
-    hass: HomeAssistant, config_entry: MS365ConfigEntry, calendar
+    hass: HomeAssistant, config_entry: MS365ConfigEntry, cal_id, device_id
 ):
     """Delete a calendar."""
-    entity_id = build_calendar_entity_id(calendar, config_entry.data[CONF_ENTITY_NAME])
+    unique_id = build_calendar_unique_id(
+        cal_id, device_id, config_entry.data[CONF_ENTITY_NAME]
+    )
     ent_reg = er.async_get(hass)
-    entities = er.async_entries_for_config_entry(ent_reg, config_entry.entry_id)
-    for entity in entities:
-        if entity.entity_id == entity_id:
-            ent_reg.async_remove(entity_id)
-            return
+    # Found by unique id, as the user can change the entity id
+    if entity_id := ent_reg.async_get_entity_id(Platform.CALENDAR, DOMAIN, unique_id):
+        ent_reg.async_remove(entity_id)
