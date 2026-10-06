@@ -232,6 +232,28 @@ async def test_options_flow_reload(
     assert state.attributes["friendly_name"] == "Calendar1_Renamed"
 
 
+async def test_options_flow_retries_failed_setup(
+    tmp_path,
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    base_config_entry: MS365MockConfigEntry,
+) -> None:
+    """Test changing the options of an entry that failed to set up retries it."""
+    MS365MOCKS.standard_mocks(requests_mock)
+    yaml_setup(tmp_path, "ms365_calendars_base")
+    base_config_entry.add_to_hass(hass)
+    # No token file, so the setup fails
+    await hass.config_entries.async_setup(base_config_entry.entry_id)
+    await hass.async_block_till_done()
+    assert base_config_entry.state is config_entries.ConfigEntryState.SETUP_ERROR
+
+    with patch.object(hass.config_entries, "async_schedule_reload") as schedule_reload:
+        await update_options(hass, base_config_entry)
+        await hass.async_block_till_done()
+
+    schedule_reload.assert_called_once_with(base_config_entry.entry_id)
+
+
 def _calendar_scans(requests_mock, start):
     """Count the requests for the list of calendars made since start."""
     return len(
