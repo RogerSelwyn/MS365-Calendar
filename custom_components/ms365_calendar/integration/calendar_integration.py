@@ -439,7 +439,9 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
         if occurrence.is_all_day or series.is_all_day:
             series_start = datetime.combine(series_date, start.timetz())
         else:
-            series_start = dt_util.as_local(series.start) + (start - occurrence.start)
+            # Compare clock times, so the change is the same either side of a DST change
+            change = _clock_time(start) - _clock_time(occurrence.start)
+            series_start = dt_util.as_local(series.start) + change
         return series_start, series_start + (end - start)
 
     async def _async_update_calendar_event(
@@ -551,6 +553,11 @@ def _event_date(value, is_all_day):
     if is_all_day:
         return value.date()
     return dt_util.as_local(value).date()
+
+
+def _clock_time(value: datetime) -> datetime:
+    """Get the local date and time as shown on a clock, without the time zone."""
+    return dt_util.as_local(value).replace(tzinfo=None)
 
 
 def _with_default_timezone(value: datetime) -> datetime:

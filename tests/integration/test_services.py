@@ -873,6 +873,48 @@ async def test_update_series_keeps_series_date(
     assert not mock_save.called
 
 
+async def test_update_series_from_moved_occurrence(
+    ws_client: ClientFixture,
+    setup_update_integration,
+    requests_mock: Mocker,
+) -> None:
+    """Test update this and following - a moved occurrence does not move the series."""
+
+    mock_call(
+        requests_mock,
+        URL.CALENDARS,
+        "calendar1_series_exception",
+        "calendar1/events/occurrence4",
+    )
+    mock_call(
+        requests_mock,
+        URL.CALENDARS,
+        "calendar1_series_master",
+        "calendar1/events/master3",
+    )
+    client = await ws_client()
+    with patch("O365.calendar.Event.save", autospec=True) as mock_save:
+        await client.cmd_result(
+            "update",
+            {
+                "entity_id": "calendar.test_calendar1",
+                "uid": "occurrence4",
+                "recurrence_id": "master3",
+                "recurrence_range": "THISANDFUTURE",
+                "event": {
+                    "summary": "Weekly sync (renamed)",
+                    "dtstart": "2026-11-02T08:00:00-08:00",
+                    "dtend": "2026-11-02T09:00:00-08:00",
+                },
+            },
+        )
+
+    payload = _saved_payload(mock_save)
+    assert payload["subject"] == "Weekly sync (renamed)"
+    assert payload["start"]["dateTime"] == "2026-09-07T10:00:00"
+    assert payload["end"]["dateTime"] == "2026-09-07T11:00:00"
+
+
 def _saved_payload(mock_save):
     """Get the data that saving the patched event sends to Graph."""
     event = mock_save.call_args.args[0]
