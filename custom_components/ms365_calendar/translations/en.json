@@ -93,6 +93,9 @@
         },
         "description": "Setup options for {entity_name} - calendar device_id {device_id}"
       }
+    },
+    "abort": {
+      "no_calendars": "No calendars have been found for this account yet. Make sure the integration has set up successfully, then try again."
     }
   },
   "issues": {

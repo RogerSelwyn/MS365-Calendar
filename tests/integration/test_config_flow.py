@@ -10,6 +10,7 @@ from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from requests_mock import Mocker
+import yaml
 
 from custom_components.ms365_calendar.integration.const_integration import (
     CONF_ADVANCED_OPTIONS,
@@ -26,6 +27,7 @@ from custom_components.ms365_calendar.integration.const_integration import (
     DEFAULT_UPDATE_INTERVAL,
 )
 
+from ..const import STORAGE_LOCATION
 from ..helpers.mock_config_entry import MS365MockConfigEntry
 from ..helpers.utils import build_token_url, get_schema_default, mock_token
 from .const_integration import (
@@ -38,6 +40,7 @@ from .const_integration import (
     UPDATE_CALENDAR_LIST,
 )
 from .helpers_integration.mocks import MS365MOCKS
+from .helpers_integration.utils_integration import update_options, yaml_setup
 
 
 async def test_options_flow(
@@ -97,6 +100,79 @@ async def test_options_flow(
     assert result["data"][CONF_TRACK_NEW_CALENDAR] is False
 
     assert result["data"][CONF_CALENDAR_LIST] == UPDATE_CALENDAR_LIST
+
+
+async def test_options_flow_keeps_sensitivity_exclude(
+    tmp_path,
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    base_token,
+    base_config_entry: MS365MockConfigEntry,
+) -> None:
+    """Test the options flow keeps settings it does not show."""
+    MS365MOCKS.standard_mocks(requests_mock)
+    yaml_setup(tmp_path, "ms365_calendars_sensitivity")
+    base_config_entry.add_to_hass(hass)
+    await hass.config_entries.async_setup(base_config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    await update_options(hass, base_config_entry)
+    await hass.async_block_till_done()
+
+    path = tmp_path / STORAGE_LOCATION / f"{DOMAIN}s_test.yaml"
+    with open(path, encoding="utf8") as file:
+        calendars = yaml.safe_load(file)
+    entity = calendars[0]["entities"][0]
+    assert entity[CONF_NAME] == "Calendar1_Changed"
+    assert entity["sensitivity_exclude"] == ["private"]
+
+
+async def test_options_flow_no_offsets(
+    tmp_path,
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    base_token,
+    base_config_entry: MS365MockConfigEntry,
+) -> None:
+    """Test the options flow for a calendar with no offsets in the yaml file."""
+    MS365MOCKS.standard_mocks(requests_mock)
+    yaml_setup(tmp_path, "ms365_calendars_no_offsets")
+    base_config_entry.add_to_hass(hass)
+    await hass.config_entries.async_setup(base_config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    result = await hass.config_entries.options.async_init(base_config_entry.entry_id)
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"],
+        user_input={
+            CONF_TRACK_NEW_CALENDAR: True,
+            CONF_CALENDAR_LIST: UPDATE_CALENDAR_LIST,
+            CONF_ADVANCED_OPTIONS: {
+                CONF_UPDATE_INTERVAL: DEFAULT_UPDATE_INTERVAL,
+                CONF_DAYS_BACKWARD: DEFAULT_DAYS_BACKWARD,
+                CONF_DAYS_FORWARD: DEFAULT_DAYS_FORWARD,
+            },
+        },
+    )
+    assert result["step_id"] == "calendar_config"
+    schema = result["data_schema"].schema
+    assert get_schema_default(schema, CONF_HOURS_FORWARD_TO_GET) == 24
+    assert get_schema_default(schema, CONF_HOURS_BACKWARD_TO_GET) == 0
+
+
+async def test_options_flow_no_calendars(
+    tmp_path,
+    hass: HomeAssistant,
+    setup_base_integration,
+    base_config_entry: MS365MockConfigEntry,
+) -> None:
+    """Test the options flow when the calendars yaml file is missing."""
+    (tmp_path / STORAGE_LOCATION / f"{DOMAIN}s_test.yaml").unlink()
+
+    result = await hass.config_entries.options.async_init(base_config_entry.entry_id)
+
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "no_calendars"
 
 
 async def test_invalid_combinations(

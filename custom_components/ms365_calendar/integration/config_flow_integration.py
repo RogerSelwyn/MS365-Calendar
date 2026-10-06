@@ -27,12 +27,13 @@ from .const_integration import (
     CONF_HOURS_BACKWARD_TO_GET,
     CONF_HOURS_FORWARD_TO_GET,
     CONF_MAX_RESULTS,
-    CONF_SENSITIVITY_EXCLUDE,
     CONF_TRACK,
     CONF_TRACK_NEW_CALENDAR,
     CONF_UPDATE_INTERVAL,
     DEFAULT_DAYS_BACKWARD,
     DEFAULT_DAYS_FORWARD,
+    DEFAULT_HOURS_BACKWARD_TO_GET,
+    DEFAULT_HOURS_FORWARD_TO_GET,
     DEFAULT_UPDATE_INTERVAL,
     YAML_CALENDARS_FILENAME,
 )
@@ -115,6 +116,8 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
             read_calendar_yaml_file,
             self._yaml_filepath,
         )
+        if not self._calendars:
+            return self.async_abort(reason="no_calendars")
 
         for calendar in self._calendars:
             for entity in calendar.get(CONF_ENTITIES):
@@ -206,9 +209,6 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
                             entity, user_input, CONF_HOURS_BACKWARD_TO_GET
                         )
                         add_attribute_to_item(entity, user_input, CONF_MAX_RESULTS)
-                        add_attribute_to_item(
-                            entity, user_input, CONF_SENSITIVITY_EXCLUDE
-                        )
                         return await self.async_step_calendar_config()
 
         if self._calendar_no == len(self._calendar_list_selected):
@@ -230,11 +230,15 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
                     ): cv.string,
                     vol.Required(
                         CONF_HOURS_FORWARD_TO_GET,
-                        default=calendar_item[CONF_HOURS_FORWARD_TO_GET],
+                        default=calendar_item.get(
+                            CONF_HOURS_FORWARD_TO_GET, DEFAULT_HOURS_FORWARD_TO_GET
+                        ),
                     ): int,
                     vol.Required(
                         CONF_HOURS_BACKWARD_TO_GET,
-                        default=calendar_item[CONF_HOURS_BACKWARD_TO_GET],
+                        default=calendar_item.get(
+                            CONF_HOURS_BACKWARD_TO_GET, DEFAULT_HOURS_BACKWARD_TO_GET
+                        ),
                     ): int,
                     vol.Optional(
                         CONF_MAX_RESULTS,

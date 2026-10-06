@@ -55,9 +55,25 @@ def write_yaml_file(yaml_filepath, cal):
     dirpath = os.path.dirname(yaml_filepath)
     if not os.path.isdir(dirpath):
         os.makedirs(dirpath)  # pragma: no cover
+    missing_newline = _ends_without_newline(yaml_filepath)
     with open(yaml_filepath, "a", encoding="UTF8") as out:
-        yaml.dump([cal], out, default_flow_style=False, encoding="UTF8")
+        # A hand edited file may not end with a newline, which would join the
+        # new calendar onto its last line
+        if missing_newline:
+            out.write("\n")
+        yaml.safe_dump([cal], out, default_flow_style=False, encoding="UTF8")
         out.close()
+
+
+def _ends_without_newline(path):
+    try:
+        with open(path, "rb") as file:
+            if file.seek(0, os.SEEK_END) == 0:
+                return False
+            file.seek(-1, os.SEEK_END)
+            return file.read(1) != b"\n"
+    except FileNotFoundError:
+        return False
 
 
 def _get_calendar_info(calendar, track_new_devices):
@@ -95,25 +111,34 @@ async def async_check_for_deleted_calendars(
     entry: MS365ConfigEntry, calendars, hass: HomeAssistant
 ):
     """Delete removed calendars from yaml file."""
+    if not calendars:
+        # Every account has a calendar, so an empty list means the scan failed
+        _LOGGER.warning("No calendars found, so none deleted from yaml file")
+        return []
+
     path = build_yaml_filename(entry, YAML_CALENDARS_FILENAME)
     yaml_filepath = build_yaml_file_path(hass, path)
     existing_calendars = await hass.async_add_executor_job(
         load_yaml_file, yaml_filepath, CONF_CAL_ID, YAML_CALENDAR_DEVICE_SCHEMA
     )
-    updated_calendars = []
+    calendar_ids = {calendar.calendar_id for calendar in calendars}
     deleted_calendars = []
     for e_cal_id in existing_calendars:
-        if e_cal_id.startswith(CONST_GROUP) or e_cal_id in [
-            calendar.calendar_id for calendar in calendars
-        ]:
-            updated_calendars.append(existing_calendars[e_cal_id])
+        if e_cal_id.startswith(CONST_GROUP) or e_cal_id in calendar_ids:
             continue
         _LOGGER.info("Calendar deleted from %s: %s", path, e_cal_id)
 
         deleted_calendars.append(existing_calendars[e_cal_id])
     if deleted_calendars:
+        # Rewrite the file as written, not as validated, which holds O365 objects
+        deleted_ids = {calendar[CONF_CAL_ID] for calendar in deleted_calendars}
+        raw_calendars = await hass.async_add_executor_job(
+            read_calendar_yaml_file, yaml_filepath
+        )
         await hass.async_add_executor_job(
-            write_calendar_yaml_file, yaml_filepath, updated_calendars
+            write_calendar_yaml_file,
+            yaml_filepath,
+            [cal for cal in raw_calendars if cal.get(CONF_CAL_ID) not in deleted_ids],
         )
     return deleted_calendars
 
@@ -130,12 +155,15 @@ def build_yaml_file_path(hass: HomeAssistant, yaml_filename):
 
 
 def read_calendar_yaml_file(yaml_filepath):
-    """Read the yaml file."""
-    with open(yaml_filepath, encoding="utf8") as file:
-        return yaml.safe_load(file)
+    """Read the yaml file, with no calendars if it is missing or empty."""
+    try:
+        with open(yaml_filepath, encoding="utf8") as file:
+            return yaml.safe_load(file) or []
+    except FileNotFoundError:
+        return []
 
 
 def write_calendar_yaml_file(yaml_filepath, contents):
     """Write the yaml file."""
     with open(yaml_filepath, "w", encoding="UTF8") as out:
-        yaml.dump(contents, out, default_flow_style=False, encoding="UTF8")
+        yaml.safe_dump(contents, out, default_flow_style=False, encoding="UTF8")
