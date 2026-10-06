@@ -18,6 +18,7 @@ from requests_mock import Mocker
 from .const import (
     CLIENT_ID,
     ENTITY_NAME,
+    TOKEN_LOCATION,
     TOKEN_PARAMS,
     TOKEN_URL_ASSERT,
     TOKEN_URL_CN21V_ASSERT,
@@ -456,8 +457,13 @@ async def _async_setup_failed_entry(hass, requests_mock, entry):
     assert entry.state is ConfigEntryState.SETUP_ERROR
 
 
+def _token_file(tmp_path):
+    """Return the path of the token file."""
+    return tmp_path / TOKEN_LOCATION / f"{DOMAIN}_{ENTITY_NAME}.token"
+
+
 async def _async_reconfigure(
-    hass, requests_mock, entry, user_input=RECONFIGURE_CONFIG_ENTRY
+    hass, requests_mock, entry, user_input=RECONFIGURE_CONFIG_ENTRY, token_file=None
 ):
     """Run a successful reconfigure flow."""
     mock_token(requests_mock, BASE_TOKEN_PERMS)
@@ -473,6 +479,9 @@ async def _async_reconfigure(
         user_input=user_input,
     )
     assert result["step_id"] == "request_default"
+    if token_file:
+        # The unreadable token is gone before the user authorizes
+        assert not token_file.is_file()
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
@@ -543,14 +552,19 @@ async def test_reconfigure_corrupt_token(
     assert [issue.translation_key for issue in issue_registry.issues.values()] == [
         "corrupted"
     ]
+    token_file = _token_file(tmp_path)
+    assert token_file.is_file()
 
-    await _async_reconfigure(hass, requests_mock, base_config_entry)
+    await _async_reconfigure(
+        hass, requests_mock, base_config_entry, token_file=token_file
+    )
 
     assert base_config_entry.state is ConfigEntryState.LOADED
     assert not issue_registry.issues
 
 
 async def test_reconfigure_outdated_token(
+    tmp_path,
     hass: HomeAssistant,
     requests_mock: Mocker,
     base_config_entry: MS365MockConfigEntry,
@@ -562,8 +576,12 @@ async def test_reconfigure_outdated_token(
     assert [issue.translation_key for issue in issue_registry.issues.values()] == [
         "outdated"
     ]
+    token_file = _token_file(tmp_path)
+    assert token_file.is_file()
 
-    await _async_reconfigure(hass, requests_mock, base_config_entry)
+    await _async_reconfigure(
+        hass, requests_mock, base_config_entry, token_file=token_file
+    )
 
     assert base_config_entry.state is ConfigEntryState.LOADED
     assert not issue_registry.issues
@@ -756,7 +774,7 @@ async def test_unusable_returned_url(
     requests_mock: Mocker,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
-    """Test a pasted authorization link or a stale url shows an error."""
+    """Test a pasted authorization link, a stale url or an error redirect."""
     mock_token(requests_mock, BASE_TOKEN_PERMS)
     MS365MOCKS.standard_mocks(requests_mock)
 
@@ -785,6 +803,14 @@ async def test_unusable_returned_url(
     assert result["step_id"] == "request_default"
     assert result["errors"] == {"url": "invalid_url"}
     assert "state mismatch" in caplog.text
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        user_input={"url": token_url.replace("code=fake.code", "error=access_denied")},
+    )
+    assert result["step_id"] == "request_default"
+    assert result["errors"] == {"url": "token_file_error"}
+    assert "access_denied" in caplog.text
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
