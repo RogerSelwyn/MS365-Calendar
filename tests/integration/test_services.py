@@ -1074,6 +1074,93 @@ async def test_update_event_ui_location(
     assert payload["subject"] == "Holiday"
 
 
+async def test_create_monthly_event_on_day_of_month(
+    ws_client: ClientFixture,
+    setup_update_integration,
+) -> None:
+    """Test create monthly event - HA API call keeps the day of the month asked for."""
+
+    client = await ws_client()
+    with patch("O365.calendar.Event.save", autospec=True) as mock_save:
+        await client.cmd_result(
+            "create",
+            {
+                "entity_id": "calendar.test_calendar1",
+                "event": {
+                    "summary": "Pay rent",
+                    "dtstart": "2027-02-28",
+                    "dtend": "2027-03-01",
+                    "rrule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+                },
+            },
+        )
+
+    # Outlook's last day of the month is the last of any day of the week
+    recurrence = mock_save.call_args.args[0].recurrence.to_api_data()
+    pattern = recurrence["pattern"]
+    assert pattern["type"] == "relativeMonthly"
+    assert pattern["index"] == "last"
+    assert sorted(pattern["daysOfWeek"]) == [
+        "friday",
+        "monday",
+        "saturday",
+        "sunday",
+        "thursday",
+        "tuesday",
+        "wednesday",
+    ]
+    assert recurrence["range"]["startDate"] == "2027-02-28"
+
+    with patch("O365.calendar.Event.save", autospec=True) as mock_save:
+        await client.cmd_result(
+            "create",
+            {
+                "entity_id": "calendar.test_calendar1",
+                "event": {
+                    "summary": "Pay rent",
+                    "dtstart": "2027-02-03",
+                    "dtend": "2027-02-04",
+                    "rrule": "FREQ=MONTHLY;BYMONTHDAY=15",
+                },
+            },
+        )
+
+    pattern = mock_save.call_args.args[0].recurrence.to_api_data()["pattern"]
+    assert pattern == {"type": "absoluteMonthly", "interval": 1, "dayOfMonth": 15}
+
+
+async def test_create_weekly_event_without_byday(
+    ws_client: ClientFixture,
+    setup_update_integration,
+) -> None:
+    """Test create weekly event - HA API call without BYDAY repeats on the start day."""
+
+    client = await ws_client()
+    with patch("O365.calendar.Event.save", autospec=True) as mock_save:
+        await client.cmd_result(
+            "create",
+            {
+                "entity_id": "calendar.test_calendar1",
+                "event": {
+                    "summary": "Gym",
+                    "dtstart": "2099-01-16T18:00:00",
+                    "dtend": "2099-01-16T19:00:00",
+                    "rrule": "FREQ=WEEKLY;COUNT=4",
+                },
+            },
+        )
+
+    # 18:00 on Friday in US/Pacific is already Saturday in UTC
+    recurrence = mock_save.call_args.args[0].recurrence.to_api_data()
+    assert recurrence["pattern"] == {
+        "type": "weekly",
+        "interval": 1,
+        "daysOfWeek": ["friday"],
+        "firstDayOfWeek": "sunday",
+    }
+    assert recurrence["range"]["numberOfOccurrences"] == 4
+
+
 def _saved_recurrence(mock_save):
     """Get the recurrence that saving the event sends to Graph, anchored on its date."""
     recurrence = mock_save.call_args.args[0].recurrence.to_api_data()

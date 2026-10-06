@@ -231,12 +231,19 @@ def _rrule_processing(event, rrule):
         event.recurrence.set_yearly(interval, event.start.month, **kwargs)
 
     if rules["FREQ"] == "MONTHLY":
-        if "BYDAY" not in rules:
-            kwargs["day_of_month"] = event.start.day
+        if rules.get("BYMONTHDAY") == "-1":
+            # Outlook's 'last day of the month' is the last of any day of the week
+            kwargs["days_of_week"] = list(DAYS.values())
+            kwargs["index"] = "last"
+        elif "BYDAY" not in rules:
+            kwargs["day_of_month"] = int(rules.get("BYMONTHDAY", event.start.day))
         event.recurrence.set_monthly(interval, **kwargs)
 
     if rules["FREQ"] == "WEEKLY":
         kwargs["first_day_of_week"] = "sunday"
+        # Without BYDAY the series repeats on the day of the week it starts on
+        weekday = list(DAYS.values())[kwargs["start"].weekday()]
+        kwargs.setdefault("days_of_week", [weekday])
         event.recurrence.set_weekly(interval, **kwargs)
 
     if rules["FREQ"] == "DAILY":
