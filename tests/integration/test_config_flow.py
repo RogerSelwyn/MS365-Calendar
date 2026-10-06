@@ -40,6 +40,7 @@ from .const_integration import (
 )
 from .helpers_integration.mocks import MS365MOCKS
 from .helpers_integration.utils_integration import (
+    check_yaml_file_contents,
     read_yaml_file,
     update_options,
     yaml_setup,
@@ -223,6 +224,27 @@ async def test_options_flow_reload(
     assert result["type"] is FlowResultType.CREATE_ENTRY
     state = hass.states.get("calendar.test_calendar1")
     assert state.attributes["friendly_name"] == "Calendar1_Renamed"
+
+
+async def test_import_without_calendars(
+    tmp_path,
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    base_token,
+) -> None:
+    """Test a legacy import with no calendars, as sent when it has no yaml file."""
+    MS365MOCKS.standard_mocks(requests_mock)
+
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN,
+        context={"source": config_entries.SOURCE_IMPORT},
+        data={"data": deepcopy(BASE_CONFIG_ENTRY), "options": {}},
+    )
+    await hass.async_block_till_done()
+
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["result"].state is config_entries.ConfigEntryState.LOADED
+    check_yaml_file_contents(tmp_path, "ms365_calendars_base")
 
 
 async def test_invalid_combinations(

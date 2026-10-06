@@ -79,7 +79,8 @@ def integration_validate_schema(user_input):  # pylint: disable=unused-argument
 
 async def async_integration_imports(hass: HomeAssistant, import_data):
     """Do the integration  level import tasks."""
-    calendars = import_data["calendars"]
+    # The legacy integration leaves calendars out when it has no calendars yaml
+    calendars = import_data.get("calendars", {})
     path = YAML_CALENDARS_FILENAME.format(
         f"_{import_data['data'].get(CONF_ENTITY_NAME)}"
     )
