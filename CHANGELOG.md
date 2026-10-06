@@ -1,8 +1,11 @@
 # Changelog
 
 ## v1.12.0 (2026/10/06)
+### ✨ Enhancements
+- [Add get_calendar_events service returning attendees and organizer](https://github.com/RogerSelwyn/MS365-Calendar/pull/232) - @buhito81
+
 ### 🐛 Fixes
-- [Show reconfigure succesful transalation](https://github.com/RogerSelwyn/MS365-Calendar/commit/a7c2c886393bc60a071edae537b391f8e8089291) - @RogerSelwyn
+- [Show reconfigure successful transalation](https://github.com/RogerSelwyn/MS365-Calendar/commit/a7c2c886393bc60a071edae537b391f8e8089291) - @RogerSelwyn
 
 ### 🧰 Maintenance
 - [Remove double reload after config change](https://github.com/RogerSelwyn/MS365-Calendar/commit/25e150e5123d08c713a16552b24fa2f8803d9854) - @RogerSelwyn
@@ -10,7 +13,8 @@
 - [Ruff fixes](https://github.com/RogerSelwyn/MS365-Calendar/commit/6d490ec6898a01ee89ce8e03b092af8d266a9f73) - @RogerSelwyn
 - [Apply HA standards for Ruff formatting](https://github.com/RogerSelwyn/MS365-Calendar/commit/860f5d98184859ee4c2f65930d295be417c54071) - @RogerSelwyn
 - [Minor Ruff change](https://github.com/RogerSelwyn/MS365-Calendar/commit/48262b2f97cc6b29da888cf39e9688f17fd21df7) - @RogerSelwyn
-
+- [Revert "maint: Minor Ruff change"](https://github.com/RogerSelwyn/MS365-Calendar/commit/e597b1327a2ab1a10a8d3786f882abd0c7b44663) - @RogerSelwyn
+- 
 ### ⬆️ Dependencies
 - [Add versioning strategy to Dependabot config](https://github.com/RogerSelwyn/MS365-Calendar/commit/50ca181cbfaaa0e93aeab81a051f83f2f1bd46d2) - @RogerSelwyn
 - [Bump actions/setup-python from 6 to 7](https://github.com/RogerSelwyn/MS365-Calendar/commit/7a7ccd0b784a1ce8b0dcfec2a84d34df1d08b30d) - @dependabot[bot]
@@ -36,11 +40,6 @@
 
 ### 🔖 Release
 - [Release v1.12.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/dd4d0cc28053d339e5539c5ed730cc079afd56fc) - @RogerSelwyn
-
-### Other
-- [Revert "maint: Minor Ruff change"](https://github.com/RogerSelwyn/MS365-Calendar/commit/e597b1327a2ab1a10a8d3786f882abd0c7b44663) - @RogerSelwyn
-- [Add get_calendar_events service returning attendees and organizer](https://github.com/RogerSelwyn/MS365-Calendar/commit/f6890095303b134167a19bed66a661838c9b2aa2) - @None
-- [Add icon for get_calendar_events and cover naive datetimes](https://github.com/RogerSelwyn/MS365-Calendar/commit/995bec93bced3a6ef47e3559e5beb3bec76df28f) - @None
 
 
 
