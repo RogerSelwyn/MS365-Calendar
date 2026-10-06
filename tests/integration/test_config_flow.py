@@ -10,7 +10,6 @@ from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from requests_mock import Mocker
-import yaml
 
 from custom_components.ms365_calendar.integration.const_integration import (
     CONF_ADVANCED_OPTIONS,
@@ -40,7 +39,11 @@ from .const_integration import (
     UPDATE_CALENDAR_LIST,
 )
 from .helpers_integration.mocks import MS365MOCKS
-from .helpers_integration.utils_integration import update_options, yaml_setup
+from .helpers_integration.utils_integration import (
+    read_yaml_file,
+    update_options,
+    yaml_setup,
+)
 
 
 async def test_options_flow(
@@ -119,10 +122,7 @@ async def test_options_flow_keeps_sensitivity_exclude(
     await update_options(hass, base_config_entry)
     await hass.async_block_till_done()
 
-    path = tmp_path / STORAGE_LOCATION / f"{DOMAIN}s_test.yaml"
-    with open(path, encoding="utf8") as file:
-        calendars = yaml.safe_load(file)
-    entity = calendars[0]["entities"][0]
+    entity = read_yaml_file(tmp_path)[0]["entities"][0]
     assert entity[CONF_NAME] == "Calendar1_Changed"
     assert entity["sensitivity_exclude"] == ["private"]
 

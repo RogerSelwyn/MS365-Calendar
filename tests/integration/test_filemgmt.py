@@ -5,14 +5,16 @@ import pytest
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
 from requests_mock import Mocker
-import yaml
 
-from ..const import STORAGE_LOCATION
 from ..helpers.mock_config_entry import MS365MockConfigEntry
 from ..helpers.utils import load_json, mock_call
-from .const_integration import DOMAIN, URL
+from .const_integration import URL
 from .helpers_integration.mocks import MS365MOCKS
-from .helpers_integration.utils_integration import check_yaml_file_contents, yaml_setup
+from .helpers_integration.utils_integration import (
+    check_yaml_file_contents,
+    read_yaml_file,
+    yaml_setup,
+)
 
 
 async def test_base_filemgmt(
@@ -104,7 +106,7 @@ async def test_deleted_file_keeps_sensitivity(
     await hass.config_entries.async_setup(base_config_entry.entry_id)
     await hass.async_block_till_done()
 
-    calendars = _read_yaml_file(tmp_path)
+    calendars = read_yaml_file(tmp_path)
     assert [calendar["cal_id"] for calendar in calendars] == [
         "calendar1",
         "group:calendar2",
@@ -181,9 +183,3 @@ async def test_no_calendars_found(
 
     check_yaml_file_contents(tmp_path, "ms365_calendars_base")
     assert "No calendars found, so none deleted" in caplog.text
-
-
-def _read_yaml_file(tmp_path):
-    path = tmp_path / STORAGE_LOCATION / f"{DOMAIN}s_test.yaml"
-    with open(path, encoding="utf8") as file:
-        return yaml.safe_load(file)
