@@ -13,14 +13,14 @@
     "showAs": "busy",
     "body": {
         "contentType": "html",
-        "content": "<html>\r\n<body>\r\n<p>Weekly sync</p>\r\n</body>\r\n</html>\r\n"
+        "content": "<html>\r\n<body>\r\n<p>Weekly sync - agenda: budget</p>\r\n</body>\r\n</html>\r\n"
     },
     "start": {
-        "dateTime": "2026-10-19T17:00:00.0000000",
+        "dateTime": "2026-11-02T18:00:00.0000000",
         "timeZone": "UTC"
     },
     "end": {
-        "dateTime": "2026-10-19T18:00:00.0000000",
+        "dateTime": "2026-11-02T19:00:00.0000000",
         "timeZone": "UTC"
     },
     "location": {

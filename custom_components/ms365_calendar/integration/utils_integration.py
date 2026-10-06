@@ -1,6 +1,6 @@
 """Calendar utilities processes."""
 
-from datetime import datetime
+from datetime import datetime, time
 import logging
 import warnings
 from zoneinfo import ZoneInfoNotFoundError
@@ -107,35 +107,39 @@ def get_start_date(obj):
 def add_call_data_to_event(event, subject, start, end, **kwargs):
     """Add the call data.
 
-    Anything not supplied is left as it is, so an update only changes what was asked.
+    Only what is supplied is set. O365 sends every attribute that has been set, even
+    to its current value, so anything else is left out of an update.
     """
-    event.subject = _add_attribute(subject, event.subject)
+    is_all_day = _is_all_day(kwargs.get(ATTR_IS_ALL_DAY), event, start, end)
+    _add_attribute(event, "subject", subject)
     _add_body(kwargs.get(ATTR_BODY), kwargs.get(ATTR_BODY_IS_TEXT, False), event)
-    event.location = _add_attribute(kwargs.get(ATTR_LOCATION), event.location)
-    event.categories = _add_attribute(kwargs.get(ATTR_CATEGORIES), event.categories)
-    event.show_as = _add_attribute(kwargs.get(ATTR_SHOW_AS), event.show_as)
-    if start is not None:
-        event.start = start
-    if end is not None:
-        event.end = end
-    event.is_reminder_on = _add_attribute(
-        kwargs.get(ATTR_IS_REMINDER_ON), event.is_reminder_on
-    )
+    _add_attribute(event, "location", kwargs.get(ATTR_LOCATION))
+    _add_attribute(event, "categories", kwargs.get(ATTR_CATEGORIES))
+    _add_attribute(event, "show_as", kwargs.get(ATTR_SHOW_AS))
+    _add_attribute(event, "start", start)
+    _add_attribute(event, "end", end)
+    _add_attribute(event, "is_reminder_on", kwargs.get(ATTR_IS_REMINDER_ON))
     if event.is_reminder_on:
-        event.remind_before_minutes = _add_attribute(
-            kwargs.get(ATTR_REMIND_BEFORE_MINUTES), event.remind_before_minutes
+        _add_attribute(
+            event, "remind_before_minutes", kwargs.get(ATTR_REMIND_BEFORE_MINUTES)
         )
-    event.sensitivity = _add_attribute(kwargs.get(ATTR_SENSITIVITY), event.sensitivity)
+    _add_attribute(event, "sensitivity", kwargs.get(ATTR_SENSITIVITY))
     _add_attendees(kwargs.get(ATTR_ATTENDEES, []), event)
-    _add_all_day(kwargs.get(ATTR_IS_ALL_DAY), event)
+    _add_all_day(is_all_day, event)
 
     if kwargs.get(ATTR_RRULE):
         _rrule_processing(event, kwargs[ATTR_RRULE])
     return event
 
 
-def _add_attribute(attribute, event_attribute):
-    return attribute if attribute is not None else event_attribute
+def is_unchanged_text(text, body):
+    """Check if text from the HA calendar is just the text of the body."""
+    return text is not None and text.strip() == clean_html(body).strip()
+
+
+def _add_attribute(event, name, value):
+    if value is not None:
+        setattr(event, name, value)
 
 
 def _add_body(body, body_is_text, event):
@@ -144,10 +148,21 @@ def _add_body(body, body_is_text, event):
     if body_is_text:
         # The HA calendar only has the text from clean_html, so writing it back
         # unchanged would replace the HTML body and lose its links and formatting
-        if body.strip() == clean_html(event.body).strip():
+        if is_unchanged_text(body, event.body):
             return
         event.body_type = "text"
     event.body = body
+
+
+def _is_all_day(is_all_day, event, start, end):
+    """Work out the all day setting when the caller did not give one."""
+    if is_all_day is not None or not event.is_all_day:
+        return is_all_day
+    # Times of day on an all day event mean it is moving to a timed slot
+    for value in (start, end):
+        if isinstance(value, datetime) and dt_util.as_local(value).time() != time():
+            return False
+    return None
 
 
 def _add_attendees(attendees, event):

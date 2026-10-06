@@ -668,9 +668,43 @@ async def test_update_event_keeps_omitted_fields(
         )
 
     payload = _saved_payload(mock_save)
-    assert payload["subject"] == "Bank holiday"
-    for key in ("categories", "isAllDay", "start", "end", "body"):
-        assert key not in payload
+    assert payload == {"subject": "Bank holiday"}
+
+
+async def test_update_all_day_event_to_timed(
+    hass: HomeAssistant,
+    setup_update_integration,
+    requests_mock: Mocker,
+) -> None:
+    """Test update event - times of day on an all day event make it timed."""
+
+    event_name = "event3"
+    mock_call(
+        requests_mock,
+        URL.CALENDARS,
+        "calendar1_event_categories",
+        f"calendar1/events/{event_name}",
+    )
+
+    with patch("O365.calendar.Event.save", autospec=True) as mock_save:
+        await hass.services.async_call(
+            DOMAIN,
+            "modify_calendar_event",
+            {
+                "entity_id": "calendar.test_calendar1",
+                "event_id": event_name,
+                "start": "2026-03-22T09:00:00-07:00",
+                "end": "2026-03-22T10:00:00-07:00",
+            },
+            blocking=True,
+            return_response=False,
+        )
+
+    payload = _saved_payload(mock_save)
+    assert payload["isAllDay"] is False
+    assert payload["start"]["dateTime"] == "2026-03-22T09:00:00"
+    assert payload["end"]["dateTime"] == "2026-03-22T10:00:00"
+    assert "categories" not in payload
 
 
 async def test_update_event_ui_keeps_html_body(
@@ -794,19 +828,29 @@ async def test_update_series_keeps_series_date(
                 "recurrence_range": "THISANDFUTURE",
                 "event": {
                     "summary": "Weekly sync (later)",
-                    "dtstart": "2026-10-19T10:30:00-07:00",
-                    "dtend": "2026-10-19T11:30:00-07:00",
+                    "dtstart": "2026-11-02T10:30:00-08:00",
+                    "dtend": "2026-11-02T11:30:00-08:00",
+                    "description": "Weekly sync - agenda: budget",
                     "rrule": "FREQ=WEEKLY;BYDAY=MO",
                 },
             },
         )
 
+    # The occurrence is after the change to winter time, the series starts before it
     event = mock_save.call_args.args[0]
     assert event.object_id == "master3"
-    assert event.subject == "Weekly sync (later)"
-    assert event.start == datetime(2026, 9, 7, 17, 30, 0, tzinfo=dt_util.UTC)
-    assert event.end == datetime(2026, 9, 7, 18, 30, 0, tzinfo=dt_util.UTC)
-    assert event.recurrence.to_api_data()["range"]["startDate"] == "2026-09-07"
+    payload = _saved_payload(mock_save)
+    assert payload["subject"] == "Weekly sync (later)"
+    assert payload["start"] == {
+        "dateTime": "2026-09-07T10:30:00",
+        "timeZone": "Pacific Standard Time",
+    }
+    assert payload["end"] == {
+        "dateTime": "2026-09-07T11:30:00",
+        "timeZone": "Pacific Standard Time",
+    }
+    assert payload["recurrence"]["range"]["startDate"] == "2026-09-07"
+    assert "body" not in payload
 
     with patch("O365.calendar.Event.save", autospec=True) as mock_save:
         resp = await client.cmd(
@@ -818,8 +862,8 @@ async def test_update_series_keeps_series_date(
                 "recurrence_range": "THISANDFUTURE",
                 "event": {
                     "summary": "Weekly sync",
-                    "dtstart": "2026-10-20T10:00:00-07:00",
-                    "dtend": "2026-10-20T11:00:00-07:00",
+                    "dtstart": "2026-11-03T10:00:00-08:00",
+                    "dtend": "2026-11-03T11:00:00-08:00",
                 },
             },
         )

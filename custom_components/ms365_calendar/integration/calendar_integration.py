@@ -28,6 +28,8 @@ from ..classes.entity import MS365Entity
 from ..const import CONF_ENABLE_UPDATE, CONF_ENTITY_NAME, EVENT_HA_EVENT
 from .const_integration import (
     ATTR_ALL_DAY,
+    ATTR_BODY,
+    ATTR_BODY_IS_TEXT,
     ATTR_COLOR,
     ATTR_DATA,
     ATTR_EVENT_ID,
@@ -62,6 +64,7 @@ from .utils_integration import (
     format_event_data,
     get_end_date,
     get_hass_date,
+    is_unchanged_text,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -387,9 +390,15 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
             _group_calendar_log(self.entity_id)
 
         if recurrence_range:
+            occurrence = await self.api.async_get_event(event_id)
             start, end = await self._async_get_series_start_end(
-                event_id, recurrence_id, start, end
+                occurrence, recurrence_id, start, end
             )
+            # The text shown was the occurrence's, so check that against what was sent
+            if kwargs.get(ATTR_BODY_IS_TEXT) and is_unchanged_text(
+                kwargs.get(ATTR_BODY), occurrence.body
+            ):
+                kwargs[ATTR_BODY] = None
             await self._async_update_calendar_event(
                 recurrence_id,
                 EVENT_MODIFY_CALENDAR_RECURRENCES,
@@ -404,17 +413,17 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
             )
         await self.coordinator.async_refresh()
 
-    async def _async_get_series_start_end(self, event_id, series_id, start, end):
+    async def _async_get_series_start_end(self, occurrence, series_id, start, end):
         """Move the change made to one occurrence onto the whole series.
 
         Graph has no 'this and following' edit, so the series is changed. The series
         has to keep its own start date, so only a change to the time of day or the
         length is carried over, and moving the occurrence to another day is refused.
+        The series is kept in the local time zone so it still follows daylight saving.
         """
         if start is None or end is None:
             return start, end
 
-        occurrence = await self.api.async_get_event(event_id)
         series = await self.api.async_get_event(series_id)
         if _event_date(start, False) != _event_date(
             occurrence.start, occurrence.is_all_day
@@ -430,7 +439,7 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
         if occurrence.is_all_day or series.is_all_day:
             series_start = datetime.combine(series_date, start.timetz())
         else:
-            series_start = series.start + (start - occurrence.start)
+            series_start = dt_util.as_local(series.start) + (start - occurrence.start)
         return series_start, series_start + (end - start)
 
     async def _async_update_calendar_event(
