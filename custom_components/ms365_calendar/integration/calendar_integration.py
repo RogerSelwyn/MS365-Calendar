@@ -9,6 +9,7 @@ from typing import Any, cast
 from homeassistant.components.calendar import (
     EVENT_DESCRIPTION,
     EVENT_END,
+    EVENT_LOCATION,
     EVENT_RRULE,
     EVENT_START,
     EVENT_SUMMARY,
@@ -310,12 +311,14 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
         is_all_day = not isinstance(start, datetime)
         subject = kwargs[EVENT_SUMMARY]
         body = kwargs.get(EVENT_DESCRIPTION)
+        location = kwargs.get(EVENT_LOCATION)
         rrule = kwargs.get(EVENT_RRULE)
         return await self.async_create_calendar_event(
             subject,
             start,
             end,
             body=body,
+            location=location,
             is_all_day=is_all_day,
             rrule=rrule,
             body_is_text=True,
@@ -334,6 +337,7 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
         is_all_day = not isinstance(start, datetime)
         subject = event[EVENT_SUMMARY]
         body = event.get(EVENT_DESCRIPTION)
+        location = event.get(EVENT_LOCATION)
         rrule = event.get(EVENT_RRULE)
         await self.async_modify_calendar_event(
             event_id=uid,
@@ -343,6 +347,7 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
             start=start,
             end=end,
             body=body,
+            location=location,
             is_all_day=is_all_day,
             rrule=rrule,
             body_is_text=True,

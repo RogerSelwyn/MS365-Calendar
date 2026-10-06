@@ -1003,6 +1003,77 @@ async def test_create_recurring_event_unknown_time_zone(
     assert "recurrence time zone left unchanged" in caplog.text
 
 
+async def test_create_event_with_location(
+    hass: HomeAssistant,
+    setup_update_integration,
+) -> None:
+    """Test create event - HA service sends the location."""
+
+    with patch("O365.calendar.Event.save", autospec=True) as mock_save:
+        await hass.services.async_call(
+            CALENDAR_DOMAIN,
+            CREATE_EVENT_SERVICE,
+            {
+                "entity_id": "calendar.test_calendar1",
+                "summary": "Dentist",
+                "location": "Dentist, Main St 1",
+                "start_date_time": "2022-03-22T20:00:00.000Z",
+                "end_date_time": "2022-03-22T22:00:00.000Z",
+            },
+            blocking=True,
+            return_response=False,
+        )
+
+    event = mock_save.call_args.args[0]
+    assert event.to_api_data()["location"] == {"displayName": "Dentist, Main St 1"}
+
+
+@pytest.mark.parametrize(
+    ("location", "expected"),
+    [
+        ("Test Location", None),
+        ("Room 2", {"displayName": "Room 2"}),
+        ("", {"displayName": ""}),
+    ],
+)
+async def test_update_event_ui_location(
+    ws_client: ClientFixture,
+    setup_update_integration,
+    requests_mock: Mocker,
+    location,
+    expected,
+) -> None:
+    """Test update event - HA API call sends the location only when it changed."""
+
+    event_name = "event3"
+    mock_call(
+        requests_mock,
+        URL.CALENDARS,
+        "calendar1_event_categories",
+        f"calendar1/events/{event_name}",
+    )
+    client = await ws_client()
+    with patch("O365.calendar.Event.save", autospec=True) as mock_save:
+        await client.cmd_result(
+            "update",
+            {
+                "entity_id": "calendar.test_calendar1",
+                "uid": event_name,
+                "event": {
+                    "summary": "Holiday",
+                    "dtstart": "2026-03-22",
+                    "dtend": "2026-03-23",
+                    "location": location,
+                },
+            },
+        )
+
+    # An unchanged name is left out, so Graph keeps the full location
+    payload = _saved_payload(mock_save)
+    assert payload.get("location") == expected
+    assert payload["subject"] == "Holiday"
+
+
 def _saved_recurrence(mock_save):
     """Get the recurrence that saving the event sends to Graph, anchored on its date."""
     recurrence = mock_save.call_args.args[0].recurrence.to_api_data()

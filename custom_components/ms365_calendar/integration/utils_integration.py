@@ -113,7 +113,7 @@ def add_call_data_to_event(event, subject, start, end, **kwargs):
     is_all_day = _is_all_day(kwargs.get(ATTR_IS_ALL_DAY), event, start, end)
     _add_attribute(event, "subject", subject)
     _add_body(kwargs.get(ATTR_BODY), kwargs.get(ATTR_BODY_IS_TEXT, False), event)
-    _add_attribute(event, "location", kwargs.get(ATTR_LOCATION))
+    _add_location(kwargs.get(ATTR_LOCATION), event)
     _add_attribute(event, "categories", kwargs.get(ATTR_CATEGORIES))
     _add_attribute(event, "show_as", kwargs.get(ATTR_SHOW_AS))
     _add_attribute(event, "start", start)
@@ -152,6 +152,13 @@ def _add_body(body, body_is_text, event):
             return
         event.body_type = "text"
     event.body = body
+
+
+def _add_location(location, event):
+    # Only a name can be given, and Graph replaces the whole location (and any other
+    # locations, such as a room) when it is set, so an unchanged name is not sent
+    if location is not None and location != event.location.get("displayName"):
+        event.location = location
 
 
 def _is_all_day(is_all_day, event, start, end):
