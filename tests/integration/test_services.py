@@ -551,8 +551,8 @@ async def test_update_recurring_event(
                 "uid": event_name,
                 "event": {
                     "summary": "Festival International de Jazz de Montreal",
-                    "dtstart": "2024-10-24T07:00:00.0000000",
-                    "dtend": "2024-10-24T07:30:00.0000000",
+                    "dtstart": "2022-10-24T07:00:00.0000000",
+                    "dtend": "2022-10-24T07:30:00.0000000",
                     "rrule": "COUNT=5;FREQ=DAILY",
                 },
                 "recurrence_range": "some range",
@@ -570,8 +570,8 @@ async def test_update_recurring_event(
                 "uid": event_name,
                 "event": {
                     "summary": "Festival International de Jazz de Montreal",
-                    "dtstart": "2024-10-24T07:00:00.0000000",
-                    "dtend": "2024-10-24T07:30:00.0000000",
+                    "dtstart": "2022-10-24T07:00:00.0000000",
+                    "dtend": "2022-10-24T07:30:00.0000000",
                     "rrule": "UNTIL=20990101T010101;FREQ=WEEKLY;BYDAY=MO",
                 },
                 "recurrence_range": "some range",
@@ -589,8 +589,8 @@ async def test_update_recurring_event(
                 "uid": event_name,
                 "event": {
                     "summary": "Festival International de Jazz de Montreal",
-                    "dtstart": "2024-10-24T07:00:00.0000000",
-                    "dtend": "2024-10-24T07:30:00.0000000",
+                    "dtstart": "2022-10-24T07:00:00.0000000",
+                    "dtend": "2022-10-24T07:30:00.0000000",
                     "rrule": "UNTIL=20990101T010101;FREQ=MONTHLY",
                 },
                 "recurrence_range": "some range",
@@ -608,8 +608,8 @@ async def test_update_recurring_event(
                 "uid": event_name,
                 "event": {
                     "summary": "Festival International de Jazz de Montreal",
-                    "dtstart": "2024-10-24T07:00:00.0000000",
-                    "dtend": "2024-10-24T07:30:00.0000000",
+                    "dtstart": "2022-10-24T07:00:00.0000000",
+                    "dtend": "2022-10-24T07:30:00.0000000",
                     "rrule": "FREQ=MONTHLY;BYDAY=+4FR",
                 },
                 "recurrence_range": "some range",
@@ -627,8 +627,8 @@ async def test_update_recurring_event(
                 "uid": event_name,
                 "event": {
                     "summary": "Festival International de Jazz de Montreal",
-                    "dtstart": "2024-10-24T07:00:00.0000000",
-                    "dtend": "2024-10-24T07:30:00.0000000",
+                    "dtstart": "2022-10-24T07:00:00.0000000",
+                    "dtend": "2022-10-24T07:30:00.0000000",
                     "rrule": "UNTIL=20990101T010101;FREQ=YEARLY",
                 },
                 "recurrence_range": "some range",
@@ -637,6 +637,202 @@ async def test_update_recurring_event(
         )
 
     assert mock_save.called
+
+
+async def test_update_event_keeps_omitted_fields(
+    hass: HomeAssistant,
+    setup_update_integration,
+    requests_mock: Mocker,
+) -> None:
+    """Test update event - fields not supplied are left unchanged."""
+
+    event_name = "event3"
+    mock_call(
+        requests_mock,
+        URL.CALENDARS,
+        "calendar1_event_categories",
+        f"calendar1/events/{event_name}",
+    )
+
+    with patch("O365.calendar.Event.save", autospec=True) as mock_save:
+        await hass.services.async_call(
+            DOMAIN,
+            "modify_calendar_event",
+            {
+                "entity_id": "calendar.test_calendar1",
+                "event_id": event_name,
+                "subject": "Bank holiday",
+            },
+            blocking=True,
+            return_response=False,
+        )
+
+    payload = _saved_payload(mock_save)
+    assert payload["subject"] == "Bank holiday"
+    for key in ("categories", "isAllDay", "start", "end", "body"):
+        assert key not in payload
+
+
+async def test_update_event_ui_keeps_html_body(
+    ws_client: ClientFixture,
+    setup_update_integration,
+    requests_mock: Mocker,
+) -> None:
+    """Test update event - HA API call keeps the HTML body unless the text changed."""
+
+    calendar_name = "calendar.test_calendar1"
+    event_name = "event3"
+    mock_call(
+        requests_mock,
+        URL.CALENDARS,
+        "calendar1_event_categories",
+        f"calendar1/events/{event_name}",
+    )
+    client = await ws_client()
+    with patch("O365.calendar.Event.save", autospec=True) as mock_save:
+        await client.cmd_result(
+            "update",
+            {
+                "entity_id": calendar_name,
+                "uid": event_name,
+                "event": {
+                    "summary": "Holiday",
+                    "dtstart": "2026-03-22",
+                    "dtend": "2026-03-24",
+                    "description": "Join the meeting now",
+                },
+            },
+        )
+
+    payload = _saved_payload(mock_save)
+    assert "body" not in payload
+    assert "categories" not in payload
+
+    with patch("O365.calendar.Event.save", autospec=True) as mock_save:
+        await client.cmd_result(
+            "update",
+            {
+                "entity_id": calendar_name,
+                "uid": event_name,
+                "event": {
+                    "summary": "Holiday",
+                    "dtstart": "2026-03-22",
+                    "dtend": "2026-03-24",
+                    "description": "Back on Tuesday\nCall if urgent",
+                },
+            },
+        )
+
+    payload = _saved_payload(mock_save)
+    assert payload["body"] == {
+        "contentType": "text",
+        "content": "Back on Tuesday\nCall if urgent",
+    }
+
+
+async def test_create_recurring_event_starts_on_event_date(
+    ws_client: ClientFixture,
+    setup_update_integration,
+) -> None:
+    """Test create recurring event - HA API call anchors the series on the event."""
+
+    client = await ws_client()
+    with patch("O365.calendar.Event.save", autospec=True) as mock_save:
+        await client.cmd_result(
+            "create",
+            {
+                "entity_id": "calendar.test_calendar1",
+                "event": {
+                    "summary": "Gym",
+                    "dtstart": "2099-01-16T18:00:00",
+                    "dtend": "2099-01-16T19:00:00",
+                    "rrule": "FREQ=WEEKLY;BYDAY=FR;UNTIL=20990320T050000Z",
+                    "description": "Line one\nLine two",
+                },
+            },
+        )
+
+    event = mock_save.call_args.args[0]
+    recurrence_range = event.recurrence.to_api_data()["range"]
+    assert recurrence_range["startDate"] == "2099-01-16"
+    until = dt_util.as_local(datetime(2099, 3, 20, 5, 0, 0, tzinfo=dt_util.UTC))
+    assert recurrence_range["endDate"] == until.date().isoformat()
+    assert event.to_api_data()["body"] == {
+        "contentType": "text",
+        "content": "Line one\nLine two",
+    }
+
+
+async def test_update_series_keeps_series_date(
+    ws_client: ClientFixture,
+    setup_update_integration,
+    requests_mock: Mocker,
+) -> None:
+    """Test update this and following - HA API call keeps the series dates."""
+
+    calendar_name = "calendar.test_calendar1"
+    mock_call(
+        requests_mock,
+        URL.CALENDARS,
+        "calendar1_series_occurrence",
+        "calendar1/events/occurrence3",
+    )
+    mock_call(
+        requests_mock,
+        URL.CALENDARS,
+        "calendar1_series_master",
+        "calendar1/events/master3",
+    )
+    client = await ws_client()
+    with patch("O365.calendar.Event.save", autospec=True) as mock_save:
+        await client.cmd_result(
+            "update",
+            {
+                "entity_id": calendar_name,
+                "uid": "occurrence3",
+                "recurrence_id": "master3",
+                "recurrence_range": "THISANDFUTURE",
+                "event": {
+                    "summary": "Weekly sync (later)",
+                    "dtstart": "2026-10-19T10:30:00-07:00",
+                    "dtend": "2026-10-19T11:30:00-07:00",
+                    "rrule": "FREQ=WEEKLY;BYDAY=MO",
+                },
+            },
+        )
+
+    event = mock_save.call_args.args[0]
+    assert event.object_id == "master3"
+    assert event.subject == "Weekly sync (later)"
+    assert event.start == datetime(2026, 9, 7, 17, 30, 0, tzinfo=dt_util.UTC)
+    assert event.end == datetime(2026, 9, 7, 18, 30, 0, tzinfo=dt_util.UTC)
+    assert event.recurrence.to_api_data()["range"]["startDate"] == "2026-09-07"
+
+    with patch("O365.calendar.Event.save", autospec=True) as mock_save:
+        resp = await client.cmd(
+            "update",
+            {
+                "entity_id": calendar_name,
+                "uid": "occurrence3",
+                "recurrence_id": "master3",
+                "recurrence_range": "THISANDFUTURE",
+                "event": {
+                    "summary": "Weekly sync",
+                    "dtstart": "2026-10-20T10:00:00-07:00",
+                    "dtend": "2026-10-20T11:00:00-07:00",
+                },
+            },
+        )
+
+    assert not resp["success"]
+    assert "date cannot be changed" in resp["error"]["message"]
+    assert not mock_save.called
+
+
+def _saved_payload(mock_save):
+    """Get the data that saving the patched event sends to Graph."""
+    event = mock_save.call_args.args[0]
+    return event.to_api_data(restrict_keys=event._track_changes)  # noqa: SLF001
 
 
 async def test_delete_event(

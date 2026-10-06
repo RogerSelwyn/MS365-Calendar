@@ -132,6 +132,9 @@
     },
     "end_before_start": {
       "message": "The end date time must be after the start date time"
+    },
+    "series_date_change": {
+      "message": "Changes to this and following events apply to the whole series, which keeps its own dates, so the date cannot be changed. Change the date of this event only, or change the series in Outlook"
     }
   },
   "services": {

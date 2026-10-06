@@ -315,6 +315,7 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
             body=body,
             is_all_day=is_all_day,
             rrule=rrule,
+            body_is_text=True,
         )
 
     async def async_update_event(
@@ -341,6 +342,7 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
             body=body,
             is_all_day=is_all_day,
             rrule=rrule,
+            body_is_text=True,
         )
 
     async def async_delete_event(
@@ -385,6 +387,9 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
             _group_calendar_log(self.entity_id)
 
         if recurrence_range:
+            start, end = await self._async_get_series_start_end(
+                event_id, recurrence_id, start, end
+            )
             await self._async_update_calendar_event(
                 recurrence_id,
                 EVENT_MODIFY_CALENDAR_RECURRENCES,
@@ -398,6 +403,35 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
                 event_id, EVENT_MODIFY_CALENDAR_EVENT, subject, start, end, **kwargs
             )
         await self.coordinator.async_refresh()
+
+    async def _async_get_series_start_end(self, event_id, series_id, start, end):
+        """Move the change made to one occurrence onto the whole series.
+
+        Graph has no 'this and following' edit, so the series is changed. The series
+        has to keep its own start date, so only a change to the time of day or the
+        length is carried over, and moving the occurrence to another day is refused.
+        """
+        if start is None or end is None:
+            return start, end
+
+        occurrence = await self.api.async_get_event(event_id)
+        series = await self.api.async_get_event(series_id)
+        if _event_date(start, False) != _event_date(
+            occurrence.start, occurrence.is_all_day
+        ):
+            raise ServiceValidationError(
+                translation_domain=DOMAIN,
+                translation_key="series_date_change",
+            )
+
+        series_date = _event_date(series.start, series.is_all_day)
+        if not isinstance(start, datetime):
+            return series_date, series_date + (end - start)
+        if occurrence.is_all_day or series.is_all_day:
+            series_start = datetime.combine(series_date, start.timetz())
+        else:
+            series_start = series.start + (start - occurrence.start)
+        return series_start, series_start + (end - start)
 
     async def _async_update_calendar_event(
         self, event_id, ha_event, subject, start, end, **kwargs
@@ -499,6 +533,15 @@ def _group_calendar_log(entity_id):
             "entity_id": entity_id,
         },
     )
+
+
+def _event_date(value, is_all_day):
+    """Get the date as HA shows it; all day events keep their own date."""
+    if not isinstance(value, datetime):
+        return value
+    if is_all_day:
+        return value.date()
+    return dt_util.as_local(value).date()
 
 
 def _with_default_timezone(value: datetime) -> datetime:

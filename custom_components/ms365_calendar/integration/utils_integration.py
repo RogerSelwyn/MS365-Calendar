@@ -3,6 +3,7 @@
 from datetime import datetime
 import logging
 import warnings
+from zoneinfo import ZoneInfoNotFoundError
 
 from bs4 import BeautifulSoup, MarkupResemblesLocatorWarning
 from dateutil import parser
@@ -11,12 +12,16 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from homeassistant.util import dt as dt_util, slugify
 from O365.calendar import Attendee  # pylint: disable=no-name-in-module)
+from O365.utils.windows_tz import (  # pylint: disable=no-name-in-module, import-error
+    get_windows_tz,
+)
 
 from ..classes.config_entry import MS365ConfigEntry
 from ..const import CONF_ENTITY_NAME
 from .const_integration import (
     ATTR_ATTENDEES,
     ATTR_BODY,
+    ATTR_BODY_IS_TEXT,
     ATTR_CATEGORIES,
     ATTR_IS_ALL_DAY,
     ATTR_IS_REMINDER_ON,
@@ -100,14 +105,19 @@ def get_start_date(obj):
 
 
 def add_call_data_to_event(event, subject, start, end, **kwargs):
-    """Add the call data."""
+    """Add the call data.
+
+    Anything not supplied is left as it is, so an update only changes what was asked.
+    """
     event.subject = _add_attribute(subject, event.subject)
-    event.body = _add_attribute(kwargs.get(ATTR_BODY), event.body)
+    _add_body(kwargs.get(ATTR_BODY), kwargs.get(ATTR_BODY_IS_TEXT, False), event)
     event.location = _add_attribute(kwargs.get(ATTR_LOCATION), event.location)
-    event.categories = _add_attribute(kwargs.get(ATTR_CATEGORIES, []), event.categories)
+    event.categories = _add_attribute(kwargs.get(ATTR_CATEGORIES), event.categories)
     event.show_as = _add_attribute(kwargs.get(ATTR_SHOW_AS), event.show_as)
-    event.start = _add_attribute(start, event.start)
-    event.end = _add_attribute(end, event.end)
+    if start is not None:
+        event.start = start
+    if end is not None:
+        event.end = end
     event.is_reminder_on = _add_attribute(
         kwargs.get(ATTR_IS_REMINDER_ON), event.is_reminder_on
     )
@@ -117,7 +127,7 @@ def add_call_data_to_event(event, subject, start, end, **kwargs):
         )
     event.sensitivity = _add_attribute(kwargs.get(ATTR_SENSITIVITY), event.sensitivity)
     _add_attendees(kwargs.get(ATTR_ATTENDEES, []), event)
-    _add_all_day(kwargs.get(ATTR_IS_ALL_DAY, False), event)
+    _add_all_day(kwargs.get(ATTR_IS_ALL_DAY), event)
 
     if kwargs.get(ATTR_RRULE):
         _rrule_processing(event, kwargs[ATTR_RRULE])
@@ -126,6 +136,18 @@ def add_call_data_to_event(event, subject, start, end, **kwargs):
 
 def _add_attribute(attribute, event_attribute):
     return attribute if attribute is not None else event_attribute
+
+
+def _add_body(body, body_is_text, event):
+    if body is None:
+        return
+    if body_is_text:
+        # The HA calendar only has the text from clean_html, so writing it back
+        # unchanged would replace the HTML body and lose its links and formatting
+        if body.strip() == clean_html(event.body).strip():
+            return
+        event.body_type = "text"
+    event.body = body
 
 
 def _add_attendees(attendees, event):
@@ -169,13 +191,12 @@ def _rrule_processing(event, rrule):
         keys = item.split("=")
         rules[keys[0]] = keys[1]
 
-    kwargs = {}
+    # Without a start date, O365 starts the series today rather than on the event
+    kwargs = {"start": _local_date(event.start, event.is_all_day)}
     if "COUNT" in rules:
         kwargs["occurrences"] = int(rules["COUNT"])
     if "UNTIL" in rules:
-        end = parser.parse(rules["UNTIL"])
-        end.replace(tzinfo=event.start.tzinfo)
-        kwargs["end"] = end
+        kwargs["end"] = _local_date(parser.parse(rules["UNTIL"]), False)
     interval = int(rules["INTERVAL"]) if "INTERVAL" in rules else 1
     if "BYDAY" in rules:
         days, index = _process_byday(rules["BYDAY"])
@@ -198,6 +219,24 @@ def _rrule_processing(event, rrule):
 
     if rules["FREQ"] == "DAILY":
         event.recurrence.set_daily(interval, **kwargs)
+
+    # The range dates are local dates, so Graph has to read them in the local zone
+    try:
+        event.recurrence.recurrence_time_zone = get_windows_tz(
+            dt_util.get_default_time_zone()
+        )
+    except ZoneInfoNotFoundError:
+        _LOGGER.debug(
+            "No Windows time zone for %s, recurrence time zone left unchanged",
+            dt_util.get_default_time_zone(),
+        )
+
+
+def _local_date(value, is_all_day):
+    """Get the date as HA shows it; all day and naive values are already local."""
+    if is_all_day or value.tzinfo is None:
+        return value.date()
+    return dt_util.as_local(value).date()
 
 
 def _process_byday(byday):

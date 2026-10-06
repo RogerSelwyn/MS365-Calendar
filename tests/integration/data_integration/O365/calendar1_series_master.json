@@ -1,0 +1,52 @@
+{
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('fake-user-id')/calendars",
+    "@odata.etag": "W/\"qIkRKy24jUSQwhcjI6uJIQAIopRuag==\"",
+    "id": "master3",
+    "type": "seriesMaster",
+    "categories": [],
+    "reminderMinutesBeforeStart": 0,
+    "isReminderOn": false,
+    "subject": "Weekly sync",
+    "sensitivity": "normal",
+    "isAllDay": false,
+    "seriesMasterId": null,
+    "showAs": "busy",
+    "body": {
+        "contentType": "html",
+        "content": "<html>\r\n<body>\r\n<p>Weekly sync</p>\r\n</body>\r\n</html>\r\n"
+    },
+    "start": {
+        "dateTime": "2026-09-07T17:00:00.0000000",
+        "timeZone": "UTC"
+    },
+    "end": {
+        "dateTime": "2026-09-07T18:00:00.0000000",
+        "timeZone": "UTC"
+    },
+    "recurrence": {
+        "pattern": {
+            "type": "weekly",
+            "interval": 1,
+            "month": 0,
+            "dayOfMonth": 0,
+            "daysOfWeek": ["monday"],
+            "firstDayOfWeek": "sunday",
+            "index": "first"
+        },
+        "range": {
+            "type": "noEnd",
+            "startDate": "2026-09-07",
+            "endDate": "0001-01-01",
+            "recurrenceTimeZone": "Pacific Standard Time",
+            "numberOfOccurrences": 0
+        }
+    },
+    "location": {
+        "displayName": "",
+        "locationType": "default",
+        "uniqueIdType": "unknown",
+        "address": {},
+        "coordinates": {}
+    },
+    "attendees": []
+}

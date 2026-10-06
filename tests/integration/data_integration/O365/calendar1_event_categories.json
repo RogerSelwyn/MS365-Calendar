@@ -1,0 +1,44 @@
+{
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('fake-user-id')/calendars",
+    "@odata.etag": "W/\"qIkRKy24jUSQwhcjI6uJIQAIopRuag==\"",
+    "id": "event3",
+    "categories": ["Red category", "Project X"],
+    "reminderMinutesBeforeStart": 0,
+    "isReminderOn": false,
+    "subject": "Holiday",
+    "sensitivity": "normal",
+    "isAllDay": true,
+    "seriesMasterId": null,
+    "showAs": "oof",
+    "body": {
+        "contentType": "html",
+        "content": "<html>\r\n<head>\r\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\r\n</head>\r\n<body>\r\n<p>Join <a href=\"https://teams.microsoft.com/l/meetup-join/test\">the meeting now</a></p>\r\n</body>\r\n</html>\r\n"
+    },
+    "start": {
+        "dateTime": "2026-03-22T00:00:00.0000000",
+        "timeZone": "UTC"
+    },
+    "end": {
+        "dateTime": "2026-03-23T00:00:00.0000000",
+        "timeZone": "UTC"
+    },
+    "location": {
+        "displayName": "Test Location",
+        "locationUri": "",
+        "locationType": "default",
+        "uniqueId": "Test Location",
+        "uniqueIdType": "private",
+        "address": {
+            "street": "",
+            "city": "",
+            "state": "",
+            "countryOrRegion": "",
+            "postalCode": ""
+        },
+        "coordinates": {
+            "latitude": 0,
+            "longitude": 0
+        }
+    },
+    "attendees": []
+}
