@@ -167,6 +167,30 @@ async def test_flow_without_tenant_id_uses_common(
     )
 
 
+async def test_flow_with_unknown_tenant_id(
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+) -> None:
+    """Test an unknown tenant_id shows an error instead of failing the flow."""
+    requests_mock.get(
+        "https://login.microsoftonline.com/unknown-tenant/v2.0/.well-known/openid-configuration",
+        status_code=400,
+        json={"error": "invalid_tenant"},
+    )
+
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        user_input=_config_entry_with_tenant("unknown-tenant"),
+    )
+
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "user"
+    assert result["errors"] == {"base": "invalid_tenant"}
+
+
 async def test_reconfigure_preserves_tenant_id(
     hass: HomeAssistant,
     requests_mock: Mocker,

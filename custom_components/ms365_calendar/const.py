@@ -6,6 +6,7 @@ ATTR_DATA = "data"
 ATTR_ERROR = "error"
 ATTR_STATE = "state"
 
+AUTH_CALLBACK_DATA = "ms365_auth_callback"
 AUTH_CALLBACK_NAME = "api:ms365"
 AUTH_CALLBACK_PATH_ALT = "/api/ms365"
 
@@ -44,6 +45,10 @@ ERROR_INVALID_SHARED_MAILBOX = (
     "Login email address '%s' should not be "
     "entered as shared email address, config attribute removed."
 )
+ERROR_INVALID_TENANT = (
+    "Authorization url could not be created, check the tenant ID - %s"
+)
+ERROR_INVALID_URL = "Returned url could not be used to request a token - %s"
 SECRET_EXPIRED = (
     "Client Secret expired for account: %s. "
     "Create new Client Secret in Entra ID App Registration."

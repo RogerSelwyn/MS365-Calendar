@@ -1,6 +1,7 @@
 """Utilities processes."""
 
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.entity import async_generate_entity_id
 
 from ..const import (
@@ -8,8 +9,14 @@ from ..const import (
     CONF_API_OPTIONS,
     CONF_TENANT_ID,
     DEFAULT_TENANT_ID,
+    TOKEN_FILE_CORRUPTED,
+    TOKEN_FILE_EXPIRED,
+    TOKEN_FILE_MISSING,
+    TOKEN_FILE_OUTDATED,
+    TOKEN_FILE_PERMISSIONS,
     CountryOptions,
 )
+from ..integration.const_integration import DOMAIN
 
 
 def add_attribute_to_item(item, user_input, attribute):
@@ -18,6 +25,18 @@ def add_attribute_to_item(item, user_input, attribute):
         item[attribute] = user_input[attribute]
     elif attribute in item:
         del item[attribute]
+
+
+def async_delete_token_issues(hass: HomeAssistant, entry_id):
+    """Delete the token repair issues of a config entry."""
+    for error in (
+        TOKEN_FILE_CORRUPTED,
+        TOKEN_FILE_EXPIRED,
+        TOKEN_FILE_MISSING,
+        TOKEN_FILE_OUTDATED,
+        TOKEN_FILE_PERMISSIONS,
+    ):
+        ir.async_delete_issue(hass, DOMAIN, f"{error}_{entry_id}")
 
 
 def build_entity_id(hass: HomeAssistant, entity_id_format, name):

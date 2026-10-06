@@ -4,6 +4,7 @@
 from unittest.mock import patch
 
 import pytest
+from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers import issue_registry as ir
@@ -12,7 +13,12 @@ from requests_mock import Mocker
 
 from .const import ENTITY_NAME, TOKEN_LOCATION
 from .helpers.mock_config_entry import MS365MockConfigEntry
-from .integration.const_integration import DOMAIN, FULL_INIT_ENTITY_NO
+from .helpers.utils import build_token_file
+from .integration.const_integration import (
+    BASE_TOKEN_PERMS,
+    DOMAIN,
+    FULL_INIT_ENTITY_NO,
+)
 from .integration.helpers_integration.mocks import MS365MOCKS
 
 
@@ -107,6 +113,46 @@ async def test_remove_entry(
     await hass.async_block_till_done()
     filename = tmp_path / TOKEN_LOCATION / f"{DOMAIN}_{ENTITY_NAME}.token"
     assert not filename.is_file()
+
+
+async def test_setup_clears_repair_issue(
+    tmp_path,
+    hass: HomeAssistant,
+    base_config_entry: MS365MockConfigEntry,
+    requests_mock: Mocker,
+    issue_registry: ir.IssueRegistry,
+):
+    """Test a successful setup clears the repair issue of an earlier failure."""
+    MS365MOCKS.standard_mocks(requests_mock)
+    base_config_entry.add_to_hass(hass)
+    await hass.config_entries.async_setup(base_config_entry.entry_id)
+    await hass.async_block_till_done()
+    assert base_config_entry.state is ConfigEntryState.SETUP_ERROR
+    assert len(issue_registry.issues) == 1
+
+    build_token_file(tmp_path, BASE_TOKEN_PERMS)
+    assert await hass.config_entries.async_reload(base_config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    assert base_config_entry.state is ConfigEntryState.LOADED
+    assert not issue_registry.issues
+
+
+async def test_remove_entry_clears_repair_issue(
+    hass: HomeAssistant,
+    base_config_entry: MS365MockConfigEntry,
+    issue_registry: ir.IssueRegistry,
+):
+    """Test removing an entry clears its repair issue."""
+    base_config_entry.add_to_hass(hass)
+    await hass.config_entries.async_setup(base_config_entry.entry_id)
+    await hass.async_block_till_done()
+    assert len(issue_registry.issues) == 1
+
+    assert await hass.config_entries.async_remove(base_config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    assert not issue_registry.issues
 
 
 async def test_expired_token(
