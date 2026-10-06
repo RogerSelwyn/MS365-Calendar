@@ -23,6 +23,7 @@ from .const_integration import (
     ATTR_CATEGORIES,
     ATTR_EMAIL,
     ATTR_END,
+    ATTR_END_DATE_TIME,
     ATTR_EVENT_ID,
     ATTR_IS_ALL_DAY,
     ATTR_IS_REMINDER_ON,
@@ -34,6 +35,7 @@ from .const_integration import (
     ATTR_SENSITIVITY,
     ATTR_SHOW_AS,
     ATTR_START,
+    ATTR_START_DATE_TIME,
     ATTR_SUBJECT,
     ATTR_TYPE,
     CONF_BASIC_CALENDAR,
@@ -157,6 +159,11 @@ CALENDAR_SERVICE_MODIFY_SCHEMA = vol.All(
 
 CALENDAR_SERVICE_REMOVE_SCHEMA = {
     vol.Required(ATTR_EVENT_ID): cv.string,
+}
+
+CALENDAR_SERVICE_GET_EVENTS_SCHEMA = {
+    vol.Required(ATTR_START_DATE_TIME): cv.datetime,
+    vol.Required(ATTR_END_DATE_TIME): cv.datetime,
 }
 
 YAML_CALENDAR_ENTITY_SCHEMA = vol.Schema(

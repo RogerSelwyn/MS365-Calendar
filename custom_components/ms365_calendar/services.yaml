@@ -208,3 +208,20 @@ remove_calendar_event:
       required: true
       selector:
         text:
+
+get_calendar_events:
+  target:
+    entity:
+      integration: ms365_calendar
+      domain: calendar
+  fields:
+    start_date_time:
+      example: "2025-03-22 00:00:00"
+      required: true
+      selector:
+        datetime:
+    end_date_time:
+      example: "2025-03-25 00:00:00"
+      required: true
+      selector:
+        datetime:
