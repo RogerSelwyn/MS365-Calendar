@@ -37,6 +37,7 @@ from .const_integration import (
     DOMAIN,
     SHARED_TOKEN_PERMS,
     UPDATE_CALENDAR_LIST,
+    URL,
 )
 from .helpers_integration.mocks import MS365MOCKS
 from .helpers_integration.utils_integration import (
@@ -191,9 +192,12 @@ async def test_options_flow_reload(
 
     # Two calendars have been created since the last start
     MS365MOCKS.standard_mocks(requests_mock)
+    start = len(requests_mock.request_history)
     await update_options(hass, base_config_entry)
     await hass.async_block_till_done()
 
+    # Reloaded once, as each setup scans for calendars once
+    assert _calendar_scans(requests_mock, start) == 1
     calendars = read_yaml_file(tmp_path)
     assert [calendar["cal_id"] for calendar in calendars] == [
         "calendar1",
@@ -207,6 +211,7 @@ async def test_options_flow_reload(
     ]
 
     # Same options, so only the yaml changes
+    start = len(requests_mock.request_history)
     result = await hass.config_entries.options.async_init(base_config_entry.entry_id)
     result = await hass.config_entries.options.async_configure(
         result["flow_id"], user_input=dict(base_config_entry.options)
@@ -222,8 +227,21 @@ async def test_options_flow_reload(
     await hass.async_block_till_done()
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert _calendar_scans(requests_mock, start) == 1
     state = hass.states.get("calendar.test_calendar1")
     assert state.attributes["friendly_name"] == "Calendar1_Renamed"
+
+
+def _calendar_scans(requests_mock, start):
+    """Count the requests for the list of calendars made since start."""
+    return len(
+        [
+            request
+            for request in requests_mock.request_history[start:]
+            if request.method == "GET"
+            and request.url.split("?")[0] == URL.CALENDARS.value
+        ]
+    )
 
 
 async def test_import_without_calendars(
