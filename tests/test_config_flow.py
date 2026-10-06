@@ -4,8 +4,10 @@
 from copy import deepcopy
 from unittest.mock import patch
 
+from aiohttp import web_response
 import pytest
 from homeassistant import config_entries
+from homeassistant.components.http import HomeAssistantView
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
@@ -668,12 +670,24 @@ async def test_already_configured_without_token(
     assert result["errors"] == {"entity_name": "already_configured"}
 
 
+class OtherCallbackView(HomeAssistantView):
+    """Callback view of another integration at the same path."""
+
+    requires_auth = False
+    url = AUTH_CALLBACK_PATH_ALT
+    name = "api:other"
+
+    async def get(self, request):
+        """Receive the callback."""
+        return web_response.Response(text="other")
+
+
 async def test_alt_flow_after_abandoned_flow(
     hass: HomeAssistant,
     hass_client: ClientSessionGenerator,
     requests_mock: Mocker,
 ) -> None:
-    """Test the alternate flow works after an earlier one was abandoned."""
+    """Test the alternate flow works after an abandoned flow and another view."""
     mock_token(requests_mock, BASE_TOKEN_PERMS)
     MS365MOCKS.standard_mocks(requests_mock)
 
@@ -687,6 +701,9 @@ async def test_alt_flow_after_abandoned_flow(
     assert result["step_id"] == "request_alt"
     abandoned_url = build_token_url(result, AUTH_CALLBACK_PATH_ALT)
     hass.config_entries.flow.async_abort(result["flow_id"])
+    assert not hass.data.get("ms365_auth_callback")
+    # An integration on an older shared core takes over the callback path
+    hass.http.register_view(OtherCallbackView())
 
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
@@ -708,6 +725,7 @@ async def test_alt_flow_after_abandoned_flow(
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["result"].state is ConfigEntryState.LOADED
+    assert hass.data["ms365_auth_callback"] == {}
 
 
 async def test_alt_flow_no_callback(

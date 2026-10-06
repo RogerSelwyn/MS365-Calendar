@@ -399,11 +399,10 @@ def get_callback_url(hass: HomeAssistant, alt_config, user_input):
 
 @callback
 def _async_get_callback_urls(hass: HomeAssistant):
-    """Get the returned urls, registering the callback view only once."""
-    if (token_urls := hass.data.get(AUTH_CALLBACK_DATA)) is None:
-        token_urls = {}
-        hass.http.register_view(MS365AuthCallbackView(token_urls))
-        hass.data[AUTH_CALLBACK_DATA] = token_urls
+    """Get the returned urls and register the callback view for this flow."""
+    token_urls = hass.data.setdefault(AUTH_CALLBACK_DATA, {})
+    # A view registered later at this path takes it over, so register for every flow
+    hass.http.register_view(MS365AuthCallbackView(token_urls))
     return token_urls
 
 
