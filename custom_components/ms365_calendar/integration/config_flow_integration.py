@@ -256,7 +256,7 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
                     == self._calendar_list_selected[self._calendar_no - 1]
                 ):
                     return entity
-        return None
+        return None  # pragma: no cover
 
     async def _async_tidy_up(self, user_input):
         await self.hass.async_add_executor_job(
