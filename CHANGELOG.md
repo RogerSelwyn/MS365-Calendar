@@ -1,5 +1,50 @@
 # Changelog
 
+## v1.12.0 (2026/10/06)
+### 🐛 Fixes
+- [Show reconfigure succesful transalation](https://github.com/RogerSelwyn/MS365-Calendar/commit/a7c2c886393bc60a071edae537b391f8e8089291) - @RogerSelwyn
+
+### 🧰 Maintenance
+- [Remove double reload after config change](https://github.com/RogerSelwyn/MS365-Calendar/commit/25e150e5123d08c713a16552b24fa2f8803d9854) - @RogerSelwyn
+- [Implement ruff improvements](https://github.com/RogerSelwyn/MS365-Calendar/commit/e6934df1e01c9ef1b602f10492083759d8ddd6c8) - @RogerSelwyn
+- [Ruff fixes](https://github.com/RogerSelwyn/MS365-Calendar/commit/6d490ec6898a01ee89ce8e03b092af8d266a9f73) - @RogerSelwyn
+- [Apply HA standards for Ruff formatting](https://github.com/RogerSelwyn/MS365-Calendar/commit/860f5d98184859ee4c2f65930d295be417c54071) - @RogerSelwyn
+- [Minor Ruff change](https://github.com/RogerSelwyn/MS365-Calendar/commit/48262b2f97cc6b29da888cf39e9688f17fd21df7) - @RogerSelwyn
+
+### ⬆️ Dependencies
+- [Add versioning strategy to Dependabot config](https://github.com/RogerSelwyn/MS365-Calendar/commit/50ca181cbfaaa0e93aeab81a051f83f2f1bd46d2) - @RogerSelwyn
+- [Bump actions/setup-python from 6 to 7](https://github.com/RogerSelwyn/MS365-Calendar/commit/7a7ccd0b784a1ce8b0dcfec2a84d34df1d08b30d) - @dependabot[bot]
+- [Bump actions/stale from 10 to 11](https://github.com/RogerSelwyn/MS365-Calendar/commit/f3e664dc607d62c1703ba9141ef19748e861bc0b) - @dependabot[bot]
+- [Bump astral-sh/setup-uv from 8.1.0 to 10.0.1](https://github.com/RogerSelwyn/MS365-Calendar/commit/efee5d05fd941662998363daf9ded26dc7c08fcd) - @dependabot[bot]
+- [Update pytest-homeassistant-custom-component requirement](https://github.com/RogerSelwyn/MS365-Calendar/commit/2fabb8fe6622b8be0ea6a3435ef763c1e6100b78) - @dependabot[bot]
+- [Bump ruff from 0.15.4 to 0.16.3](https://github.com/RogerSelwyn/MS365-Calendar/commit/a14bd6201f8e6b93bfbf650e05921e278ef7ae69) - @dependabot[bot]
+- [Bump ruff from 0.16.3 to 0.16.4](https://github.com/RogerSelwyn/MS365-Calendar/commit/d0b0d9d5c0cf9583b8a7c368b6fce1fc95c6fd06) - @dependabot[bot]
+- [Update pytest-homeassistant-custom-component requirement](https://github.com/RogerSelwyn/MS365-Calendar/commit/c7be279725a405b6111d33a39906eb51faaccc3e) - @dependabot[bot]
+- [Bump astral-sh/setup-uv from 10.0.1 to 10.2.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/1b69e84f5875a53426faad9ee40b2ec1778ed7dc) - @dependabot[bot]
+- [Update pygithub requirement from >=2.9.1 to >=2.10.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/0b765351ab337290de2ffa7d84eb4d867d385348) - @dependabot[bot]
+- [Update pytest-homeassistant-custom-component requirement](https://github.com/RogerSelwyn/MS365-Calendar/commit/f42908909947d67864f0665c2242198dd49a0625) - @dependabot[bot]
+- [Bump ruff from 0.16.4 to 0.16.10](https://github.com/RogerSelwyn/MS365-Calendar/commit/f4636a156545b1c95407945e4cda46077dbfc762) - @dependabot[bot]
+
+### 📚 Documentation
+- [Tidy up changelog](https://github.com/RogerSelwyn/MS365-Calendar/commit/1b382dd544653a268acf89f929b077e26672cbe9) - @RogerSelwyn
+
+### ✅ Test
+- [Ruff formatting for test code](https://github.com/RogerSelwyn/MS365-Calendar/commit/b37df12b8345853c514b46a1b78d571afb88c7cb) - @RogerSelwyn
+- [Minor ruff updates](https://github.com/RogerSelwyn/MS365-Calendar/commit/3bea91a42e38a1e5096c1dbe7183dfbeec1a23e0) - @RogerSelwyn
+- [Update exclusion for previous code change](https://github.com/RogerSelwyn/MS365-Calendar/commit/f26db3e7585170b6d6293262636a8f0c20ab05fb) - @RogerSelwyn
+- [Update test coverage](https://github.com/RogerSelwyn/MS365-Calendar/commit/5e75b7f427ddf2cc4d00932a32b8a4273e3f5ded) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.12.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/dd4d0cc28053d339e5539c5ed730cc079afd56fc) - @RogerSelwyn
+
+### Other
+- [Revert "maint: Minor Ruff change"](https://github.com/RogerSelwyn/MS365-Calendar/commit/e597b1327a2ab1a10a8d3786f882abd0c7b44663) - @RogerSelwyn
+- [Add get_calendar_events service returning attendees and organizer](https://github.com/RogerSelwyn/MS365-Calendar/commit/f6890095303b134167a19bed66a661838c9b2aa2) - @None
+- [Add icon for get_calendar_events and cover naive datetimes](https://github.com/RogerSelwyn/MS365-Calendar/commit/995bec93bced3a6ef47e3559e5beb3bec76df28f) - @None
+
+
+
+
 ## v1.11.2 (2026/07/13)
 ### 🐛 Fixes
 - [Reinstate async_update_reload_and_abort to reload on reconfigure](https://github.com/RogerSelwyn/MS365-Calendar/commit/553be7a624cb4bbfdee2aa44b4299009ea824f6b) - @RogerSelwyn
