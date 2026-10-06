@@ -26,7 +26,7 @@ class MS365CalendarEventSyncManager:
         self._store = ScopedCalendarStore(
             ScopedCalendarStore(store, EVENT_SYNC), self.calendar_id
         )
-        self._exclude = exclude
+        self._exclude = _compile_excludes(exclude)
 
     @property
     def store_service(self) -> MS365CalendarEventStoreService:
@@ -50,11 +50,9 @@ class MS365CalendarEventSyncManager:
 
         rtn_events = []
         for event in events:
-            include = True
-            for exclude in self._exclude:
-                if re.search(exclude, event.subject):
-                    include = False
-            if include:
+            # Graph sends a null subject for an event without a title
+            subject = event.subject or ""
+            if not any(exclude.search(subject) for exclude in self._exclude):
                 rtn_events.append(event)
 
         return rtn_events
@@ -72,6 +70,23 @@ class MS365CalendarEventSyncManager:
         items = {item.object_id: item for item in new_data}
         store_data = {ITEMS: items}
         await self._store.async_save(store_data)
+
+
+def _compile_excludes(excludes):
+    """Compile the exclude patterns; text that is not a valid regex matches as text."""
+    compiled = []
+    for exclude in excludes or []:
+        try:
+            compiled.append(re.compile(exclude))
+        except re.error as err:
+            _LOGGER.warning(
+                "Exclude '%s' is not a valid regular expression (%s), "
+                "so it is matched as plain text",
+                exclude,
+                err,
+            )
+            compiled.append(re.compile(re.escape(exclude)))
+    return compiled
 
 
 # def _add_update_func(store_data, new_data) -> dict[str, Any]:

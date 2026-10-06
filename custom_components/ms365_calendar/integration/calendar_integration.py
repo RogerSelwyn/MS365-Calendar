@@ -243,7 +243,7 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
         event = CalendarEvent(
             get_hass_date(vevent.start, vevent.is_all_day),
             get_hass_date(get_end_date(vevent), vevent.is_all_day),
-            vevent.subject,
+            vevent.subject or "",
             clean_html(vevent.body),
             vevent.location["displayName"],
             uid=vevent.object_id,
