@@ -999,27 +999,36 @@ async def test_update_all_day_series(
         "calendar1_event2",
         f"calendar1/events/{event_name}",
     )
+    mock_call(
+        requests_mock,
+        URL.CALENDARS,
+        "calendar1_event2_occurrence",
+        "calendar1/events/occurrence2",
+    )
     client = await ws_client()
     with patch("O365.calendar.Event.save", autospec=True) as mock_save:
         await client.cmd_result(
             "update",
             {
                 "entity_id": "calendar.test_calendar1",
-                "uid": event_name,
+                "uid": "occurrence2",
                 "recurrence_id": event_name,
                 "recurrence_range": "THISANDFUTURE",
                 "event": {
                     "summary": "Renamed all day series",
-                    "dtstart": "2022-10-24",
-                    "dtend": "2022-10-25",
+                    "dtstart": "2022-11-03",
+                    "dtend": "2022-11-05",
                 },
             },
         )
 
+    # The occurrence is made two days long, the series still starts on its own date
+    event = mock_save.call_args.args[0]
+    assert event.object_id == event_name
     payload = _saved_payload(mock_save)
     assert payload["isAllDay"] is True
     assert payload["start"]["dateTime"] == "2022-10-24T00:00:00"
-    assert payload["end"]["dateTime"] == "2022-10-25T00:00:00"
+    assert payload["end"]["dateTime"] == "2022-10-26T00:00:00"
 
 
 async def test_create_recurring_event_unknown_time_zone(
