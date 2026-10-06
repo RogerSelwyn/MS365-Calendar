@@ -10,7 +10,7 @@ This page details the configuration details for this integration. General instru
 
 Key | Type | Required | Description
 -- | -- | -- | --
-`entity_name` | `string` | `True` | Uniquely identifying name for the account. Calendars entity names will be suffixed with this. `calendar.calendar_account1`. Do not use email address or spaces.
+`entity_name` | `string` | `True` | Uniquely identifying name for the account. Calendar entity_ids will be prefixed with this, e.g. `calendar.account1_calendar`. Do not use email address or spaces.
 `client_id` | `string` | `True` | Client ID from your Entra ID App Registration.
 `client_secret` | `string` | `True` | Client Secret from your Entra ID App Registration.
 `alt_auth_method` | `boolean` | `False` | If False (default), authentication is not dependent on internet access to your HA instance. [See Authentication](./authentication.md)
