@@ -589,9 +589,7 @@ async def test_repair_issues_per_entry(
     await _async_reconfigure(hass, requests_mock, base_config_entry)
 
     assert base_config_entry.state is ConfigEntryState.LOADED
-    assert list(issue_registry.issues) == [
-        (DOMAIN, f"missing_{other_entry.entry_id}")
-    ]
+    assert list(issue_registry.issues) == [(DOMAIN, f"missing_{other_entry.entry_id}")]
 
 
 async def test_change_entity_name(

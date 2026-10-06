@@ -227,11 +227,12 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
     async def _async_create_update_entry(self):
         if self._reconfigure:
             async_delete_token_issues(self.hass, self._entry.entry_id)
+            # The update listener of a loaded entry reloads it when the data changes
+            loaded = self._entry.state is ConfigEntryState.LOADED
             changed = self.hass.config_entries.async_update_entry(
                 self._entry, data=self._user_input
             )
-            # The update listener only reloads a loaded entry whose data changed
-            if not changed or self._entry.state is not ConfigEntryState.LOADED:
+            if not (loaded and changed):
                 self.hass.config_entries.async_schedule_reload(self._entry.entry_id)
             return self.async_abort(reason="reconfigure_successful")
 
