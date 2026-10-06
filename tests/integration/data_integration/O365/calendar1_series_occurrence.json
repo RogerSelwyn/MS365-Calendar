@@ -24,10 +24,18 @@
         "timeZone": "UTC"
     },
     "location": {
-        "displayName": "",
-        "locationType": "default",
-        "uniqueIdType": "unknown",
-        "address": {},
+        "displayName": "Room A",
+        "locationType": "conferenceRoom",
+        "locationUri": "room-a@example.com",
+        "uniqueId": "room-a@example.com",
+        "uniqueIdType": "directory",
+        "address": {
+            "street": "1 Main Street",
+            "city": "Springfield",
+            "state": "",
+            "countryOrRegion": "",
+            "postalCode": "12345"
+        },
         "coordinates": {}
     },
     "attendees": []

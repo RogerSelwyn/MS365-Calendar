@@ -35,6 +35,7 @@ from .const_integration import (
     ATTR_DATA,
     ATTR_EVENT_ID,
     ATTR_HEX_COLOR,
+    ATTR_LOCATION,
     ATTR_SYNC_STATE,
     CONF_CAN_EDIT,
     CONF_DEVICE_ID,
@@ -399,11 +400,14 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
             start, end = await self._async_get_series_start_end(
                 occurrence, recurrence_id, start, end
             )
-            # The text shown was the occurrence's, so check that against what was sent
+            # The text and location shown were the occurrence's, so check those
+            # against what was sent
             if kwargs.get(ATTR_BODY_IS_TEXT) and is_unchanged_text(
                 kwargs.get(ATTR_BODY), occurrence.body
             ):
                 kwargs[ATTR_BODY] = None
+            if kwargs.get(ATTR_LOCATION) == occurrence.location.get("displayName"):
+                kwargs[ATTR_LOCATION] = None
             await self._async_update_calendar_event(
                 recurrence_id,
                 EVENT_MODIFY_CALENDAR_RECURRENCES,

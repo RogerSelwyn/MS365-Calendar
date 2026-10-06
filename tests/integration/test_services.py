@@ -930,6 +930,61 @@ async def test_update_series_from_moved_occurrence(
     assert payload["end"]["dateTime"] == "2026-09-07T11:00:00"
 
 
+@pytest.mark.parametrize(
+    ("location", "expected"),
+    [
+        ("Room B", None),
+        ("Room C", {"displayName": "Room C"}),
+        ("", {"displayName": ""}),
+    ],
+)
+async def test_update_series_ui_location(
+    ws_client: ClientFixture,
+    setup_update_integration,
+    requests_mock: Mocker,
+    location,
+    expected,
+) -> None:
+    """Test update this and following - the occurrence's location is not sent."""
+
+    mock_call(
+        requests_mock,
+        URL.CALENDARS,
+        "calendar1_series_exception",
+        "calendar1/events/occurrence4",
+    )
+    mock_call(
+        requests_mock,
+        URL.CALENDARS,
+        "calendar1_series_master",
+        "calendar1/events/master3",
+    )
+    client = await ws_client()
+    with patch("O365.calendar.Event.save", autospec=True) as mock_save:
+        await client.cmd_result(
+            "update",
+            {
+                "entity_id": "calendar.test_calendar1",
+                "uid": "occurrence4",
+                "recurrence_id": "master3",
+                "recurrence_range": "THISANDFUTURE",
+                "event": {
+                    "summary": "Weekly sync",
+                    "dtstart": "2026-11-02T08:30:00-08:00",
+                    "dtend": "2026-11-02T09:30:00-08:00",
+                    "location": location,
+                },
+            },
+        )
+
+    # Room B is only this occurrence's, so sending it back keeps the series' Room A
+    event = mock_save.call_args.args[0]
+    assert event.object_id == "master3"
+    payload = _saved_payload(mock_save)
+    assert payload.get("location") == expected
+    assert payload["start"]["dateTime"] == "2026-09-07T10:30:00"
+
+
 async def test_update_all_day_series(
     ws_client: ClientFixture,
     setup_update_integration,

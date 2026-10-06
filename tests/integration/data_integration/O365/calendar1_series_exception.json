@@ -24,9 +24,11 @@
         "timeZone": "UTC"
     },
     "location": {
-        "displayName": "",
-        "locationType": "default",
-        "uniqueIdType": "unknown",
+        "displayName": "Room B",
+        "locationType": "conferenceRoom",
+        "locationUri": "room-b@example.com",
+        "uniqueId": "room-b@example.com",
+        "uniqueIdType": "directory",
         "address": {},
         "coordinates": {}
     },
