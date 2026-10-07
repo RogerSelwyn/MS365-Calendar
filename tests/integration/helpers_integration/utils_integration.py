@@ -1,6 +1,7 @@
 """Utilities for MS365 testing."""
 
 import shutil
+import yaml
 
 from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
@@ -72,3 +73,9 @@ def check_yaml_file_contents(tmp_path, filename):
     with open(path, encoding="utf8") as file:
         compare_yaml = file.read()
     assert created_yaml == compare_yaml
+
+def read_yaml_file(tmp_path):
+    """Read the calendars yaml file."""
+    path = tmp_path / STORAGE_LOCATION / f"{DOMAIN}s_test.yaml"
+    with open(path, encoding="utf8") as file:
+        return yaml.safe_load(file)

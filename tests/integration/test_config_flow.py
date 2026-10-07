@@ -26,7 +26,11 @@ from custom_components.ms365_calendar.integration.const_integration import (
     DEFAULT_UPDATE_INTERVAL,
 )
 
-from .helpers_integration.utils_integration import yaml_setup
+from .helpers_integration.utils_integration import (
+    yaml_setup,
+    update_options,
+    read_yaml_file,
+)
 from ..helpers.mock_config_entry import MS365MockConfigEntry
 from ..helpers.utils import build_token_url, get_schema_default, mock_token
 from .const_integration import (
@@ -99,6 +103,54 @@ async def test_options_flow(
 
     assert result["data"][CONF_CALENDAR_LIST] == UPDATE_CALENDAR_LIST
 
+async def test_options_flow_reload(
+    tmp_path,
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    base_token,
+    base_config_entry: MS365MockConfigEntry,
+) -> None:
+    """Test the options flow reloads once, after the new options are saved."""
+    MS365MOCKS.no_events_mocks(requests_mock)
+    base_config_entry.add_to_hass(hass)
+    await hass.config_entries.async_setup(base_config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    # Two calendars have been created since the last start
+    MS365MOCKS.standard_mocks(requests_mock)
+    await update_options(hass, base_config_entry)
+    await hass.async_block_till_done()
+
+    calendars = read_yaml_file(tmp_path)
+    assert [calendar["cal_id"] for calendar in calendars] == [
+        "calendar1",
+        "group:calendar2",
+        "calendar3",
+    ]
+    assert [calendar["entities"][0]["track"] for calendar in calendars] == [
+        True,
+        False,
+        False,
+    ]
+
+    # Same options, so only the yaml changes
+    result = await hass.config_entries.options.async_init(base_config_entry.entry_id)
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"], user_input=dict(base_config_entry.options)
+    )
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"],
+        user_input={
+            CONF_NAME: "Calendar1_Renamed",
+            CONF_HOURS_FORWARD_TO_GET: 48,
+            CONF_HOURS_BACKWARD_TO_GET: -48,
+        },
+    )
+    await hass.async_block_till_done()
+
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    state = hass.states.get("calendar.test_calendar1")
+    assert state.attributes["friendly_name"] == "Calendar1_Renamed"
 
 async def test_invalid_combinations(
     hass: HomeAssistant,
