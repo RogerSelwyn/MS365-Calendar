@@ -5,7 +5,10 @@ from datetime import datetime, timedelta
 from unittest.mock import patch
 
 import pytest
-from homeassistant.components.calendar import CREATE_EVENT_SERVICE, SERVICE_GET_EVENTS
+from homeassistant.components.calendar import (
+    CREATE_EVENT_SERVICE,
+    SERVICE_GET_EVENTS,
+)
 from homeassistant.components.calendar import DOMAIN as CALENDAR_DOMAIN
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
@@ -426,6 +429,42 @@ async def test_create_event_no_perms(
 
 
 async def test_update_event(
+    ws_client: ClientFixture,
+    setup_update_integration,
+    requests_mock: Mocker,
+) -> None:
+    """Test update event - MS365 service."""
+
+    event_name = "event1"
+    mock_call(
+        requests_mock,
+        URL.CALENDARS,
+        "calendar1_event1",
+        f"calendar1/events/{event_name}",
+    )
+
+    client = await ws_client()
+    calendar_name = "calendar.test_calendar1"
+    with patch("O365.calendar.Event.save", autospec=True) as mock_save:
+        await client.cmd_result(
+            "update",
+            {
+                "entity_id": calendar_name,
+                "uid": event_name,
+                "event": {
+                    "summary": "Holiday",
+                    "dtstart": "2026-03-22",
+                    "dtend": "2026-03-23",
+                    "description": "Test",
+                    "location": "Changed",
+                },
+            },
+        )
+
+    assert mock_save.called
+
+
+async def test_update_ms365_event(
     hass: HomeAssistant,
     setup_update_integration,
     listener_setup: ListenerSetupData,
@@ -450,7 +489,7 @@ async def test_update_event(
                 "entity_id": calendar_name,
                 "event_id": event_name,
                 "subject": "Department Party",
-                "body": "Meeting to provide technical review for 'Phoenix' design.",
+                "body": "Test",
                 "start": "2022-03-22T20:00:00.000Z",
                 "end": "2022-03-22T22:00:00.000Z",
             },
@@ -611,6 +650,25 @@ async def test_update_recurring_event(
                     "dtstart": "2024-10-24T07:00:00.0000000",
                     "dtend": "2024-10-24T07:30:00.0000000",
                     "rrule": "FREQ=MONTHLY;BYDAY=+4FR",
+                },
+                "recurrence_range": "some range",
+                "recurrence_id": event_name,
+            },
+        )
+
+    assert mock_save.called
+
+    with patch("O365.calendar.Event.save") as mock_save:
+        await client.cmd_result(
+            "update",
+            {
+                "entity_id": calendar_name,
+                "uid": event_name,
+                "event": {
+                    "summary": "Festival International de Jazz de Montreal",
+                    "dtstart": "2024-10-31T07:00:00.0000000",
+                    "dtend": "2024-10-31T07:30:00.0000000",
+                    "rrule": "FREQ=MONTHLY;BYMONTHDAY=-1",
                 },
                 "recurrence_range": "some range",
                 "recurrence_id": event_name,

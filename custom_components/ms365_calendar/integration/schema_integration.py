@@ -139,9 +139,7 @@ CALENDAR_SERVICE_MODIFY_SCHEMA = vol.All(
             vol.Optional(ATTR_SUBJECT): cv.string,
             vol.Optional(ATTR_BODY): cv.string,
             vol.Optional(ATTR_LOCATION): cv.string,
-            vol.Optional(ATTR_CATEGORIES, default=list): vol.All(
-                cv.ensure_list, [cv.string]
-            ),
+            vol.Optional(ATTR_CATEGORIES): vol.All(cv.ensure_list, [cv.string]),
             vol.Optional(ATTR_SENSITIVITY): vol.Coerce(EventSensitivity),
             vol.Optional(ATTR_SHOW_AS): vol.Coerce(EventShowAs),
             vol.Optional(ATTR_IS_ALL_DAY): bool,

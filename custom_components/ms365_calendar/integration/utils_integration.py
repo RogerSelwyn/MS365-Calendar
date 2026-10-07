@@ -17,6 +17,7 @@ from ..const import CONF_ENTITY_NAME
 from .const_integration import (
     ATTR_ATTENDEES,
     ATTR_BODY,
+    ATTR_BODY_IS_TEXT,
     ATTR_CATEGORIES,
     ATTR_IS_ALL_DAY,
     ATTR_IS_REMINDER_ON,
@@ -102,9 +103,9 @@ def get_start_date(obj):
 def add_call_data_to_event(event, subject, start, end, **kwargs):
     """Add the call data."""
     event.subject = _add_attribute(subject, event.subject)
-    event.body = _add_attribute(kwargs.get(ATTR_BODY), event.body)
-    event.location = _add_attribute(kwargs.get(ATTR_LOCATION), event.location)
-    event.categories = _add_attribute(kwargs.get(ATTR_CATEGORIES, []), event.categories)
+    _add_body(kwargs.get(ATTR_BODY), kwargs.get(ATTR_BODY_IS_TEXT, False), event)
+    _add_location(kwargs.get(ATTR_LOCATION), event)
+    event.categories = _add_attribute(kwargs.get(ATTR_CATEGORIES), event.categories)
     event.show_as = _add_attribute(kwargs.get(ATTR_SHOW_AS), event.show_as)
     event.start = _add_attribute(start, event.start)
     event.end = _add_attribute(end, event.end)
@@ -116,8 +117,8 @@ def add_call_data_to_event(event, subject, start, end, **kwargs):
             kwargs.get(ATTR_REMIND_BEFORE_MINUTES), event.remind_before_minutes
         )
     event.sensitivity = _add_attribute(kwargs.get(ATTR_SENSITIVITY), event.sensitivity)
-    _add_attendees(kwargs.get(ATTR_ATTENDEES, []), event)
-    _add_all_day(kwargs.get(ATTR_IS_ALL_DAY, False), event)
+    _add_attendees(kwargs.get(ATTR_ATTENDEES), event)
+    _add_all_day(kwargs.get(ATTR_IS_ALL_DAY), event)
 
     if kwargs.get(ATTR_RRULE):
         _rrule_processing(event, kwargs[ATTR_RRULE])
@@ -163,20 +164,43 @@ def _add_all_day(is_all_day, event):
             )
 
 
+def _add_body(body, body_is_text, event):
+    if body is None:
+        return
+    if body_is_text:
+        # The HA calendar only has the text from clean_html, so writing it back
+        # unchanged would replace the HTML body and lose its links and formatting
+        if is_unchanged_text(body, event.body):
+            return
+        event.body_type = "text"
+    event.body = body
+
+
+def _add_location(location, event):
+    # Only a name can be given, and Graph replaces the whole location (and any other
+    # locations, such as a room) when it is set, so an unchanged name is not sent
+    if location is not None and location != event.location.get("displayName"):
+        event.location = location
+
+
 def _rrule_processing(event, rrule):
     rules = {}
     for item in rrule.split(";"):
         keys = item.split("=")
         rules[keys[0]] = keys[1]
 
-    kwargs = {}
+    kwargs = {"start": event.start}
     if "COUNT" in rules:
         kwargs["occurrences"] = int(rules["COUNT"])
     if "UNTIL" in rules:
         end = parser.parse(rules["UNTIL"])
-        end.replace(tzinfo=event.start.tzinfo)
-        kwargs["end"] = end
+        kwargs["end"] = end.replace(tzinfo=event.start.tzinfo)
     interval = int(rules["INTERVAL"]) if "INTERVAL" in rules else 1
+
+    if rules.get("BYMONTHDAY") == "-1":
+        kwargs["days_of_week"] = list(DAYS.values())
+        kwargs["index"] = "last"
+
     if "BYDAY" in rules:
         days, index = _process_byday(rules["BYDAY"])
         kwargs["days_of_week"] = days
@@ -188,12 +212,14 @@ def _rrule_processing(event, rrule):
         event.recurrence.set_yearly(interval, event.start.month, **kwargs)
 
     if rules["FREQ"] == "MONTHLY":
-        if "BYDAY" not in rules:
+        if "BYDAY" not in rules and rules.get("BYMONTHDAY") != "-1":
             kwargs["day_of_month"] = event.start.day
         event.recurrence.set_monthly(interval, **kwargs)
 
     if rules["FREQ"] == "WEEKLY":
         kwargs["first_day_of_week"] = "sunday"
+        weekday = list(DAYS.values())[kwargs["start"].weekday()]
+        kwargs.setdefault("days_of_week", [weekday])
         event.recurrence.set_weekly(interval, **kwargs)
 
     if rules["FREQ"] == "DAILY":
@@ -210,6 +236,11 @@ def _process_byday(byday):
             days.append(DAYS[item[:2]])
             index = None
     return days, index
+
+
+def is_unchanged_text(text, body):
+    """Check if text from the HA calendar is just the text of the body."""
+    return text is not None and text.strip() == clean_html(body).strip()
 
 
 def build_calendar_entity_id(device_id, entity_name):

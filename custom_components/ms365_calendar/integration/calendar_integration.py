@@ -9,6 +9,7 @@ from typing import Any, cast
 from homeassistant.components.calendar import (
     EVENT_DESCRIPTION,
     EVENT_END,
+    EVENT_LOCATION,
     EVENT_RRULE,
     EVENT_START,
     EVENT_SUMMARY,
@@ -307,14 +308,14 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
         is_all_day = not isinstance(start, datetime)
         subject = kwargs[EVENT_SUMMARY]
         body = kwargs.get(EVENT_DESCRIPTION)
-        rrule = kwargs.get(EVENT_RRULE)
         return await self.async_create_calendar_event(
             subject,
             start,
             end,
             body=body,
             is_all_day=is_all_day,
-            rrule=rrule,
+            body_is_text=True,
+            **kwargs,
         )
 
     async def async_update_event(
@@ -323,6 +324,7 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
         event: dict[str, Any],
         recurrence_id: str | None = None,
         recurrence_range: str | None = None,
+        **kwargs: Any,
     ) -> None:
         """Update an event on the calendar."""
         start = event[EVENT_START]
@@ -331,6 +333,7 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
         subject = event[EVENT_SUMMARY]
         body = event.get(EVENT_DESCRIPTION)
         rrule = event.get(EVENT_RRULE)
+        location = event.get(EVENT_LOCATION)
         await self.async_modify_calendar_event(
             event_id=uid,
             recurrence_id=recurrence_id,
@@ -341,6 +344,8 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
             body=body,
             is_all_day=is_all_day,
             rrule=rrule,
+            location=location,
+            body_is_text=True,
         )
 
     async def async_delete_event(
