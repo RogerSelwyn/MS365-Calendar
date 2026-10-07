@@ -19,6 +19,7 @@ from .const_integration import (
     ATTR_BODY,
     ATTR_BODY_IS_TEXT,
     ATTR_CATEGORIES,
+    ATTR_END,
     ATTR_IS_ALL_DAY,
     ATTR_IS_REMINDER_ON,
     ATTR_LOCATION,
@@ -26,6 +27,8 @@ from .const_integration import (
     ATTR_RRULE,
     ATTR_SENSITIVITY,
     ATTR_SHOW_AS,
+    ATTR_START,
+    ATTR_SUBJECT,
     CALENDAR_ENTITY_ID_FORMAT,
     DAYS,
     INDEXES,
@@ -102,21 +105,19 @@ def get_start_date(obj):
 
 def add_call_data_to_event(event, subject, start, end, **kwargs):
     """Add the call data."""
-    event.subject = _add_attribute(subject, event.subject)
-    _add_body(kwargs.get(ATTR_BODY), kwargs.get(ATTR_BODY_IS_TEXT, False), event)
-    _add_location(kwargs.get(ATTR_LOCATION), event)
-    event.categories = _add_attribute(kwargs.get(ATTR_CATEGORIES), event.categories)
-    event.show_as = _add_attribute(kwargs.get(ATTR_SHOW_AS), event.show_as)
-    event.start = _add_attribute(start, event.start)
-    event.end = _add_attribute(end, event.end)
-    event.is_reminder_on = _add_attribute(
-        kwargs.get(ATTR_IS_REMINDER_ON), event.is_reminder_on
-    )
+    _add_attribute(event, ATTR_SUBJECT, subject)
+    _add_body(event, kwargs.get(ATTR_BODY), kwargs.get(ATTR_BODY_IS_TEXT, False))
+    _add_location(event, kwargs.get(ATTR_LOCATION))
+    _add_attribute(event, ATTR_CATEGORIES, kwargs.get(ATTR_CATEGORIES))
+    _add_attribute(event, ATTR_SHOW_AS, kwargs.get(ATTR_SHOW_AS))
+    _add_attribute(event, ATTR_START, start)
+    _add_attribute(event, ATTR_END, end)
+    _add_attribute(event, ATTR_IS_REMINDER_ON, kwargs.get(ATTR_IS_REMINDER_ON))
     if event.is_reminder_on:
-        event.remind_before_minutes = _add_attribute(
-            kwargs.get(ATTR_REMIND_BEFORE_MINUTES), event.remind_before_minutes
+        _add_attribute(
+            event, ATTR_REMIND_BEFORE_MINUTES, kwargs.get(ATTR_REMIND_BEFORE_MINUTES)
         )
-    event.sensitivity = _add_attribute(kwargs.get(ATTR_SENSITIVITY), event.sensitivity)
+    _add_attribute(event, ATTR_SENSITIVITY, kwargs.get(ATTR_SENSITIVITY))
     _add_attendees(kwargs.get(ATTR_ATTENDEES), event)
     _add_all_day(kwargs.get(ATTR_IS_ALL_DAY), event)
 
@@ -125,8 +126,10 @@ def add_call_data_to_event(event, subject, start, end, **kwargs):
     return event
 
 
-def _add_attribute(attribute, event_attribute):
-    return attribute if attribute is not None else event_attribute
+def _add_attribute(event, name, value):
+
+    if value is not None:
+        setattr(event, name, value)
 
 
 def _add_attendees(attendees, event):
@@ -164,7 +167,7 @@ def _add_all_day(is_all_day, event):
             )
 
 
-def _add_body(body, body_is_text, event):
+def _add_body(event, body, body_is_text):
     if body is None:
         return
     if body_is_text:
@@ -176,7 +179,10 @@ def _add_body(body, body_is_text, event):
     event.body = body
 
 
-def _add_location(location, event):
+def _add_location(
+    event,
+    location,
+):
     # Only a name can be given, and Graph replaces the whole location (and any other
     # locations, such as a room) when it is set, so an unchanged name is not sent
     if location is not None and location != event.location.get("displayName"):
