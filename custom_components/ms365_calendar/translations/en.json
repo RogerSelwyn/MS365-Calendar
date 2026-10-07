@@ -89,10 +89,14 @@
           "name": "Calendar friendly name",
           "end_offset": "Hours to offset the end time",
           "start_offset": "Hours to offset the start time",
-          "max_results": "Max number of events to retrieve"
+          "max_results": "Max number of events to retrieve",
+          "sensitivity_exclude": "Sensitivities to exclude from retrieval"
         },
         "description": "Setup options for {entity_name} - calendar device_id {device_id}"
       }
+    },
+    "abort": {
+      "no_calendars": "No calendars have been found for this account yet. Make sure the integration has set up successfully, then try again."
     }
   },
   "issues": {

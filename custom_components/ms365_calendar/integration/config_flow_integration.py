@@ -11,6 +11,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import section
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.selector import BooleanSelector
+from O365.calendar import EventSensitivity  # pylint: disable=no-name-in-module
 
 from ..classes.config_entry import MS365ConfigEntry
 from ..const import CONF_ENABLE_UPDATE, CONF_ENTITY_NAME, CONF_SHARED_MAILBOX
@@ -33,6 +34,8 @@ from .const_integration import (
     CONF_UPDATE_INTERVAL,
     DEFAULT_DAYS_BACKWARD,
     DEFAULT_DAYS_FORWARD,
+    DEFAULT_HOURS_BACKWARD_TO_GET,
+    DEFAULT_HOURS_FORWARD_TO_GET,
     DEFAULT_UPDATE_INTERVAL,
     YAML_CALENDARS_FILENAME,
 )
@@ -115,6 +118,9 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
             read_calendar_yaml_file,
             self._yaml_filepath,
         )
+
+        if not self._calendars:
+            return self.async_abort(reason="no_calendars")
 
         for calendar in self._calendars:
             for entity in calendar.get(CONF_ENTITIES):
@@ -216,6 +222,7 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
 
         calendar_item = self._get_calendar_item()
         last_step = self._calendar_no == len(self._calendar_list_selected)
+        sensitivities = {i.value: i.name for i in EventSensitivity}
         return self.async_show_form(
             step_id="calendar_config",
             description_placeholders={
@@ -228,13 +235,17 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
                         CONF_NAME,
                         default=calendar_item[CONF_NAME],
                     ): cv.string,
-                    vol.Required(
+                    vol.Optional(
                         CONF_HOURS_FORWARD_TO_GET,
-                        default=calendar_item[CONF_HOURS_FORWARD_TO_GET],
+                        default=calendar_item.get(
+                            CONF_HOURS_FORWARD_TO_GET, DEFAULT_HOURS_FORWARD_TO_GET
+                        ),
                     ): int,
-                    vol.Required(
+                    vol.Optional(
                         CONF_HOURS_BACKWARD_TO_GET,
-                        default=calendar_item[CONF_HOURS_BACKWARD_TO_GET],
+                        default=calendar_item.get(
+                            CONF_HOURS_BACKWARD_TO_GET, DEFAULT_HOURS_BACKWARD_TO_GET
+                        ),
                     ): int,
                     vol.Optional(
                         CONF_MAX_RESULTS,
@@ -242,6 +253,10 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
                             "suggested_value": calendar_item.get(CONF_MAX_RESULTS)
                         },
                     ): cv.positive_int,
+                    vol.Optional(
+                        CONF_SENSITIVITY_EXCLUDE,
+                        default=calendar_item.get(CONF_SENSITIVITY_EXCLUDE),
+                    ): vol.Any(cv.multi_select(sensitivities), None),
                 }
             ),
             last_step=last_step,

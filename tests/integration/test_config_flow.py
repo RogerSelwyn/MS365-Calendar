@@ -26,6 +26,7 @@ from custom_components.ms365_calendar.integration.const_integration import (
     DEFAULT_UPDATE_INTERVAL,
 )
 
+from .helpers_integration.utils_integration import yaml_setup
 from ..helpers.mock_config_entry import MS365MockConfigEntry
 from ..helpers.utils import build_token_url, get_schema_default, mock_token
 from .const_integration import (
@@ -195,6 +196,20 @@ async def test_shared_email_invalid(
         f"Login email address '{email}' should not be entered as shared email address, config attribute removed"
         in caplog.text
     )
+
+async def test_options_flow_no_calendars(
+    tmp_path,
+    hass: HomeAssistant,
+    setup_base_integration,
+    base_config_entry: MS365MockConfigEntry,
+) -> None:
+    """Test the options flow when the calendars yaml file is empty."""
+    yaml_setup(tmp_path, "ms365_calendars_empty")
+
+    result = await hass.config_entries.options.async_init(base_config_entry.entry_id)
+
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "no_calendars"
 
 
 def mock_account(email):

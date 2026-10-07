@@ -14,8 +14,9 @@ from ..const import (
 
 def add_attribute_to_item(item, user_input, attribute):
     """Add an attribute to an item."""
-    if user_input.get(attribute) is not None:
-        item[attribute] = user_input[attribute]
+    value = user_input.get(attribute)
+    if value is not None and value != []:
+        item[attribute] = value
     elif attribute in item:
         del item[attribute]
 
