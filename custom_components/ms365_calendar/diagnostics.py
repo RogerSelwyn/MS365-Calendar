@@ -5,10 +5,10 @@ from homeassistant.const import CONF_CLIENT_ID, CONF_CLIENT_SECRET
 from homeassistant.core import HomeAssistant
 
 from .classes.config_entry import MS365ConfigEntry
-from .const import CONF_SHARED_MAILBOX
+from .const import CONF_SHARED_MAILBOX, CONF_TENANT_ID
 from .integration.diagnostics_integration import async_integration_diagnostics
 
-TO_REDACT = {CONF_CLIENT_ID, CONF_CLIENT_SECRET, CONF_SHARED_MAILBOX}
+TO_REDACT = {CONF_CLIENT_ID, CONF_CLIENT_SECRET, CONF_SHARED_MAILBOX, CONF_TENANT_ID}
 
 
 async def async_get_config_entry_diagnostics(
