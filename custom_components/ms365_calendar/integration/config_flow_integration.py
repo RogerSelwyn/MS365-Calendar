@@ -19,6 +19,7 @@ from ..helpers.utils import add_attribute_to_item
 from .const_integration import (
     CONF_ADVANCED_OPTIONS,
     CONF_BASIC_CALENDAR,
+    CONF_CAL_ID,
     CONF_CALENDAR_LIST,
     CONF_DAYS_BACKWARD,
     CONF_DAYS_FORWARD,
@@ -279,10 +280,20 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
         )
         for calendar in self._calendar_list_selected_original:
             if calendar not in self._calendar_list_selected:
-                await async_delete_calendar(self.hass, self.config_entry, calendar)
+                await self._async_delete_entity(calendar)
         update = self.async_create_entry(title="", data=user_input)
         if user_input == dict(self.config_entry.options):
             # Only the yaml changed, so the update listener will not reload
             self.hass.config_entries.async_schedule_reload(self._config_entry_id)
 
         return update
+
+    async def _async_delete_entity(self, device_id):
+        # The entity is found by its unique id, which holds the calendar id
+        for calendar in self._calendars:
+            for entity in calendar[CONF_ENTITIES]:
+                if entity[CONF_DEVICE_ID] == device_id:
+                    await async_delete_calendar(
+                        self.hass, self.config_entry, entity, calendar[CONF_CAL_ID]
+                    )
+                    break

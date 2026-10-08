@@ -72,7 +72,7 @@ async def _async_delete_calendar_entities(
 ):
     for calendar in deleted_calendars:
         for entity in calendar.get(CONF_ENTITIES):
-            await async_delete_calendar(hass, entry, entity[CONF_DEVICE_ID])
+            await async_delete_calendar(hass, entry, entity, calendar[CONF_CAL_ID])
 
 
 async def _async_setup_coordinators(

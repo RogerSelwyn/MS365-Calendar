@@ -60,6 +60,7 @@ from .schema_integration import (
     CALENDAR_SERVICE_RESPOND_SCHEMA,
 )
 from .utils_integration import (
+    build_calendar_unique_id,
     clean_html,
     format_event_data,
     get_end_date,
@@ -97,7 +98,9 @@ async def async_integration_setup_entry(
             can_edit = key[CONF_CAN_EDIT]
             update_supported = config_update_supported and can_edit
             device_id = entity[CONF_DEVICE_ID]
-            unique_id = f"{calendar_id}_{entry.data[CONF_ENTITY_NAME]}_{device_id}"
+            unique_id = build_calendar_unique_id(
+                calendar_id, entry.data[CONF_ENTITY_NAME], device_id
+            )
             cal = MS365CalendarEntity(
                 coordinator.sync.api,
                 coordinator,
