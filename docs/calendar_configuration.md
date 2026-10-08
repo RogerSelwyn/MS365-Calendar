@@ -43,7 +43,7 @@ Key | Type | Required | Description
 
 Key | Type | Required | Description
 -- | -- | -- | --
-`device_id` | `string` | `True` | The entity_id will be "calendar.{device_id}"
+`device_id` | `string` | `True` | The entity_id will be `calendar.{entity_name}_(device_id)`
 `name` | `string` | `True` | The name of your sensor that you’ll see in the frontend.
 `track` | `boolean` | `True` | **True**=Create calendar entity. False=Don't create entity
 `search` | `string` | `False` | Only get events if subject contains this string. Enter it as it appears in the subject; an apostrophe does not need to be doubled
