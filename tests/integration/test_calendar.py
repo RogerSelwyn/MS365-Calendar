@@ -12,7 +12,7 @@ from homeassistant.components.calendar import DOMAIN as CALENDAR_DOMAIN
 from homeassistant.components.calendar import SERVICE_GET_EVENTS
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
-from requests.exceptions import HTTPError
+from requests.exceptions import HTTPError, ReadTimeout
 from requests_mock import Mocker
 from zoneinfo import ZoneInfo
 
@@ -346,6 +346,24 @@ async def test_exclude_plain_text(
 
     check_entity_state(hass, "calendar.test_calendar1", "on", data_length=2)
 
+async def test_first_sync_error(
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    base_token,
+    base_config_entry: MS365MockConfigEntry,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test an unexpected error on the first sync makes the calendar unavailable."""
+    MS365MOCKS.standard_mocks(requests_mock)
+
+    base_config_entry.add_to_hass(hass)
+    with patch("O365.calendar.Calendar.get_events", side_effect=ReadTimeout()):
+        await hass.config_entries.async_setup(base_config_entry.entry_id)
+        await hass.async_block_till_done()
+
+    check_entity_state(hass, "calendar.test_calendar1", "unavailable")
+
+    assert "No current event found for group:calendar2" in caplog.text
 
 def _adjust_date(data, adddays_start=0, adddays_end=0):
     new_data = deepcopy(data)
