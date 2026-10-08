@@ -85,7 +85,7 @@ create_calendar_event:
             - label: "Out of Office"
               value: "oof"
             - label: "Working Elsewhere"
-              value: "workingElsewhere"
+              value: "working_elsewhere"
             - label: "Unknown"
               value: "unknown"
     is_all_day:
