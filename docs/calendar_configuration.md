@@ -46,7 +46,7 @@ Key | Type | Required | Description
 `device_id` | `string` | `True` | The entity_id will be "calendar.{device_id}"
 `name` | `string` | `True` | The name of your sensor that you’ll see in the frontend.
 `track` | `boolean` | `True` | **True**=Create calendar entity. False=Don't create entity
-`search` | `string` | `False` | Only get events if subject contains this string
+`search` | `string` | `False` | Only get events if subject contains this string. Enter it as it appears in the subject; an apostrophe does not need to be doubled
 `exclude` | `list[string/regex]` | `False` | Exclude events where the subject contains any one of items in the list of strings
 `start_offset` | `integer` | `False` | Number of hours to offset the start time to search for events for (negative numbers to offset into the past).
 `end_offset` | `integer` | `False` | Number of hours to offset the end time to search for events for (negative numbers to offset into the past).

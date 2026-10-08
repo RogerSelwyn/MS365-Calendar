@@ -17,8 +17,8 @@ from requests_mock import Mocker
 from zoneinfo import ZoneInfo
 
 from ..helpers.mock_config_entry import MS365MockConfigEntry
-from ..helpers.utils import check_entity_state, utcnow
-from .const_integration import DOMAIN, FULL_INIT_ENTITY_NO
+from ..helpers.utils import check_entity_state, utcnow, mock_call
+from .const_integration import DOMAIN, FULL_INIT_ENTITY_NO, URL
 from .data_integration.state import BASE_STATE_CAL1, BASE_STATE_CAL2
 from .helpers_integration.mocks import MS365MOCKS
 from .helpers_integration.utils_integration import update_options, yaml_setup
@@ -292,6 +292,59 @@ async def test_not_started_event(
         "off",
         attributes={"message": "Test not started"},
     )
+
+
+async def test_search_with_quote(
+    tmp_path,
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    base_token,
+    base_config_entry: MS365MockConfigEntry,
+) -> None:
+    """Test searching for text with a quote in it."""
+    MS365MOCKS.standard_mocks(requests_mock)
+    yaml_setup(tmp_path, "ms365_calendars_search_quote")
+
+    base_config_entry.add_to_hass(hass)
+    with patch("O365.calendar.Calendar.get_events") as get_events:
+        await hass.config_entries.async_setup(base_config_entry.entry_id)
+        await hass.async_block_till_done()
+
+    filters = [
+        call.kwargs["query"].as_params().get("$filter", "")
+        for call in get_events.call_args_list
+    ]
+    assert any("contains(subject, 'Mum''s birthday')" in item for item in filters)
+
+
+async def test_exclude_plain_text(
+    tmp_path,
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    base_token,
+    base_config_entry: MS365MockConfigEntry,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test an exclude that is not a valid regex, with an event without a title."""
+    MS365MOCKS.standard_mocks(requests_mock)
+    mock_call(
+        requests_mock,
+        URL.CALENDARS,
+        "calendar1_calendar_view_exclude",
+        "calendar1/calendarView",
+        start=(utcnow() - timedelta(days=1)).strftime("%Y-%m-%d"),
+        end=(utcnow() + timedelta(days=1)).strftime("%Y-%m-%d"),
+    )
+
+    yaml_setup(tmp_path, "ms365_calendars_exclude_text")
+    # yaml_setup(tmp_path, "ms365_calendars_exclude")
+
+    base_config_entry.add_to_hass(hass)
+
+    await hass.config_entries.async_setup(base_config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    check_entity_state(hass, "calendar.test_calendar1", "on", data_length=2)
 
 
 def _adjust_date(data, adddays_start=0, adddays_end=0):

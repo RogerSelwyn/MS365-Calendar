@@ -174,10 +174,10 @@ def check_entity_state(
 ):
     """Check entity state."""
     state = hass.states.get(entity_name)
-    # print("*************************** State")
-    # print(state)
-    # print("--- State Attributes")
-    # print(state.attributes)
+    print("*************************** State")
+    print(state)
+    print("--- State Attributes")
+    print(state.attributes)
     assert state.state == entity_state
     if entity_attributes:
         if "data" in state.attributes:

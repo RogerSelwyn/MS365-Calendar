@@ -113,7 +113,9 @@ class MS365CalendarService:
         )
 
         if self._search is not None:
-            query = query & self._builder.contains("subject", self._search)
+            # OData needs a quote in a string doubled, which O365 does not do
+            search = self._search.replace("'", "''")
+            query = query & self._builder.contains("subject", search)
         # As at March 2023 not contains is not supported by Graph API
         # if self._exclude is not None:
         #     query.chain("and").on_attribute("subject").negate().contains(self._exclude)
