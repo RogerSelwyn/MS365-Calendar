@@ -30,8 +30,8 @@ data:
   end: 2023-01-01T12:30:00+0000
   body: Remember to also clean out the gutters
   location: 1600 Pennsylvania Ave Nw, Washington, DC 20500
-  sensitivity: Normal
-  show_as: Busy
+  sensitivity: normal
+  show_as: busy
   attendees:
     - email: test@example.com
       type: Required
