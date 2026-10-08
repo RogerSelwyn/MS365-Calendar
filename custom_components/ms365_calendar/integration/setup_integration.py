@@ -109,6 +109,7 @@ async def _async_setup_coordinators(
 
             keys.append(
                 {
+                    CONF_CAL_ID: cal_id,
                     CONF_ENTITY: entity,
                     CONF_ENTITY_ID: entity_id,
                     CONF_CAN_EDIT: can_edit,
@@ -124,7 +125,7 @@ async def _async_setup_coordinators(
                     entity_id,
                 )
                 if await api.async_calendar_init():
-                    unique_id = f"{entity.get(CONF_NAME)}"
+                    unique_id = f"{entity.get(CONF_DEVICE_ID)}_{cal_id}"
                     sync_manager = MS365CalendarEventSyncManager(
                         api,
                         cal_id,

@@ -34,6 +34,7 @@ from .const_integration import (
     ATTR_EVENT_ID,
     ATTR_HEX_COLOR,
     ATTR_SYNC_STATE,
+    CONF_CAL_ID,
     CONF_CAN_EDIT,
     CONF_DEVICE_ID,
     CONF_ENTITY,
@@ -83,11 +84,13 @@ async def async_integration_setup_entry(
     )
 
     for key in entry.runtime_data.sensors:
+        cal_id = key[CONF_CAL_ID]
         entity_id = key[CONF_ENTITY_ID]
         entity = key[CONF_ENTITY]
         name = entity[CONF_NAME]
+        device_id = entity[CONF_DEVICE_ID]
         for coordinator in entry.runtime_data.coordinator:
-            if name != coordinator.name:
+            if f"{device_id}_{cal_id}" != coordinator.name:
                 continue
 
             calendar_id = coordinator.sync.calendar_id
