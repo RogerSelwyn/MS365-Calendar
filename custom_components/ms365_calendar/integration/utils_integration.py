@@ -63,7 +63,7 @@ def format_event_data(event):
     """Format the event data."""
     attendees = event.attendees._Attendees__attendees  # noqa: SLF001
     return {
-        "summary": event.subject or "",
+        "summary": event.subject,
         "start": get_hass_date(event.start, event.is_all_day),
         "end": get_hass_date(get_end_date(event), event.is_all_day),
         "all_day": event.is_all_day,

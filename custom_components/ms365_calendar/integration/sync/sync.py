@@ -48,14 +48,11 @@ class MS365CalendarEventSyncManager:
         if not events or not self._exclude:
             return events
 
-        rtn_events = []
-        for event in events:
-            # Graph sends a null subject for an event without a title
-            subject = event.subject or ""
-            if not any(exclude.search(subject) for exclude in self._exclude):
-                rtn_events.append(event)
-
-        return rtn_events
+        return [
+            event
+            for event in events
+            if not any(exclude.search(event.subject) for exclude in self._exclude)
+        ]
 
     async def run(self, start_date, end_date) -> None:
         """Run the event sync manager."""
