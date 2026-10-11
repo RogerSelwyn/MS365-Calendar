@@ -23,6 +23,7 @@ class MS365Mocks:
             end=(utcnow() + timedelta(days=1)).strftime("%Y-%m-%d"),
         )
         mock_call(requests_mock, URL.CALENDARS, "calendar2", "group:calendar2")
+        mock_call(requests_mock, URL.GROUP_CALENDARS, "calendar2", "calendar2/calendar")
         mock_call(
             requests_mock,
             URL.GROUP_CALENDARS,
@@ -56,6 +57,9 @@ class MS365Mocks:
         mock_call(requests_mock, CN21VURL.ME, "me")
         mock_call(requests_mock, CN21VURL.CALENDARS, "calendars")
         mock_call(requests_mock, CN21VURL.CALENDARS, "calendar1", "calendar1")
+        mock_call(
+            requests_mock, CN21VURL.GROUP_CALENDARS, "calendar2", "calendar2/calendar"
+        )
         mock_call(requests_mock, CN21VURL.CALENDARS, "calendar3", "calendar3")
 
     def shared_mocks(self, requests_mock):
@@ -73,6 +77,7 @@ class MS365Mocks:
             end=(utcnow() + timedelta(days=1)).strftime("%Y-%m-%d"),
         )
         mock_call(requests_mock, URL.CALENDARS, "calendar2", "group:calendar2")
+        mock_call(requests_mock, URL.GROUP_CALENDARS, "calendar2", "calendar2/calendar")
         mock_call(
             requests_mock,
             URL.GROUP_CALENDARS,
