@@ -181,11 +181,15 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
 
         self._update_supported = update_supported
         if self._update_supported:
-            self._attr_supported_features = (
-                CalendarEntityFeature.CREATE_EVENT
-                | CalendarEntityFeature.DELETE_EVENT
-                | CalendarEntityFeature.UPDATE_EVENT
-            )
+            if self.api.group_calendar:
+                # O365 can only create events in a group calendar
+                self._attr_supported_features = CalendarEntityFeature.CREATE_EVENT
+            else:
+                self._attr_supported_features = (
+                    CalendarEntityFeature.CREATE_EVENT
+                    | CalendarEntityFeature.DELETE_EVENT
+                    | CalendarEntityFeature.UPDATE_EVENT
+                )
         self._max_results = entity.get(CONF_MAX_RESULTS)
         self._error = None
         self.exclude = entity.get(CONF_EXCLUDE)
@@ -250,7 +254,7 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
         event = CalendarEvent(
             get_hass_date(vevent.start, vevent.is_all_day),
             get_hass_date(get_end_date(vevent), vevent.is_all_day),
-            vevent.subject or "",
+            vevent.subject,
             clean_html(vevent.body),
             vevent.location["displayName"],
             uid=vevent.object_id,
