@@ -16,7 +16,6 @@ from homeassistant.config_entries import (
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import section
-from homeassistant.helpers import issue_registry as ir
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.network import get_url
 
@@ -42,13 +41,9 @@ from .const import (
     ERROR_INVALID_SHARED_MAILBOX,
     OAUTH_REDIRECT_URL,
     TOKEN_ERROR_FILE,
-    TOKEN_FILE_CORRUPTED,
-    TOKEN_FILE_EXPIRED,
-    TOKEN_FILE_MISSING,
-    TOKEN_FILE_PERMISSIONS,
     CountryOptions,
 )
-from .helpers.utils import get_country, get_tenant_id
+from .helpers.utils import delete_token_issues, get_country, get_tenant_id
 from .integration.config_flow_integration import (
     MS365OptionsFlowHandler,
     async_integration_imports,
@@ -203,13 +198,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def _async_create_update_entry(self):
         if self._reconfigure:
-            for error in [
-                TOKEN_FILE_CORRUPTED,
-                TOKEN_FILE_MISSING,
-                TOKEN_FILE_PERMISSIONS,
-                TOKEN_FILE_EXPIRED,
-            ]:
-                ir.async_delete_issue(self.hass, DOMAIN, error)
+            delete_token_issues(self.hass, self._entry.entry_id)
             return self.async_update_and_abort(
                 self._entry, data=self._user_input, reason="reconfigure_successful"
             )

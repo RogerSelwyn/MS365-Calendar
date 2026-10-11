@@ -22,6 +22,7 @@ from .const import (
     TOKEN_FILE_EXPIRED,
     TOKEN_FILE_MISSING,
 )
+from .helpers.utils import create_issue_id, delete_token_issues
 from .integration import setup_integration
 from .integration.const_integration import DOMAIN, PLATFORMS
 from .integration.permissions_integration import Permissions
@@ -80,7 +81,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
     ir.async_create_issue(
         hass,
         DOMAIN,
-        error,
+        create_issue_id(error, entry.entry_id),
         is_fixable=False,
         severity=ir.IssueSeverity.ERROR,
         translation_key=error,
@@ -141,6 +142,7 @@ async def async_reload_entry(hass: HomeAssistant, entry: MS365ConfigEntry) -> No
 
 async def async_remove_entry(hass: HomeAssistant, entry: MS365ConfigEntry) -> None:
     """Handle removal of an entry."""
+    delete_token_issues(hass, entry.entry_id)
     token_backend = MS365Token(hass, entry.data)
     await hass.async_add_executor_job(token_backend.delete_token)
     if not hasattr(setup_integration, "async_integration_remove_entry"):
