@@ -208,11 +208,12 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
     async def _async_validate_response(self, user_input):
         errors = {}
         alt_auth_method = self._user_input.get(CONF_ALT_AUTH_METHOD)
+        error_key = "base" if alt_auth_method else CONF_URL
         url = self._callback_view.token_url if alt_auth_method else user_input[CONF_URL]
         if url[:5].lower() == "http:":
             url = f"https:{url[5:]}"
         if "code" not in url:
-            errors[CONF_URL] = "invalid_url"
+            errors[error_key] = "invalid_url"
             return errors
 
         if self._ms365account.account.username:
