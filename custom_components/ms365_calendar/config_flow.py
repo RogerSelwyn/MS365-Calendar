@@ -41,6 +41,7 @@ from .const import (
     ERROR_INVALID_SHARED_MAILBOX,
     OAUTH_REDIRECT_URL,
     TOKEN_ERROR_FILE,
+    TOKEN_FILE_CORRUPTED,
     CountryOptions,
 )
 from .helpers.utils import delete_token_issues, get_country, get_tenant_id
@@ -113,6 +114,9 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
                 credentials,
                 main_resource,
                 self.entity_name,
+            )
+            auth_error = await self._async_delete_unreadable_token(
+                auth_error, token_backend
             )
             if not auth_error and (
                 not self._ms365account.is_authenticated or self._reconfigure
@@ -341,6 +345,17 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
         return any(
             config_entry.title == self.entity_name for config_entry in config_entries
         )
+
+    async def _async_delete_unreadable_token(self, auth_error, token_backend):
+        # A reconfigure replaces the token, so one that cannot be read is deleted
+        if (
+            auth_error == TOKEN_FILE_CORRUPTED
+            and self._reconfigure
+            and self._ms365account.account
+        ):
+            await self.hass.async_add_executor_job(token_backend.delete_token)
+            return False
+        return auth_error
 
 
 def get_callback_url(hass: HomeAssistant, alt_config, user_input):
