@@ -95,7 +95,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
         if user_input and not errors:
             self._user_input = user_input
 
-            if not self.entity_name:
+            if not self._reconfigure:
                 self.entity_name = user_input.get(CONF_ENTITY_NAME)
             else:
                 user_input[CONF_ENTITY_NAME] = self.entity_name
