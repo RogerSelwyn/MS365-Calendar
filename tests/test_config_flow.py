@@ -360,10 +360,9 @@ async def test_json_decode_error(
     )
 
     assert result["type"] is FlowResultType.FORM
-    assert result["step_id"] == "user"
+    assert result["step_id"] == "client_secret"
     assert "errors" in result
-    assert "entity_name" in result["errors"]
-    assert result["errors"]["entity_name"] == "error_authenticating"
+    assert result["errors"]["base"] == "error_authenticating"
 
 
 async def test_already_configured(
@@ -397,10 +396,9 @@ async def test_already_configured(
         user_input=BASE_CONFIG_ENTRY,
     )
     assert result["type"] is FlowResultType.FORM
-    assert result["step_id"] == "user"
+    assert result["step_id"] == "client_secret"
     assert "errors" in result
-    assert "entity_name" in result["errors"]
-    assert result["errors"]["entity_name"] == "already_configured"
+    assert result["errors"]["base"] == "already_configured"
 
 
 async def test_reconfigure_flow(

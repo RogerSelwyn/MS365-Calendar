@@ -59,6 +59,18 @@
           "url": "Returned URL"
         }
       },
+      "client_secret": {
+        "title": "Client secret",
+        "description": "Provide the client secret using the source selected in the previous step.",
+        "data": {
+          "client_secret_env_var": "Client secret environment variable",
+          "client_secret": "Client Secret"
+        },
+        "data_description": {
+          "client_secret_env_var": "Name of the environment variable injected into the Home Assistant process, for example MS365_CLIENT_SECRET.",
+          "client_secret": "This value is stored in the Home Assistant configuration."
+        }
+      },
       "request_alt": {
         "title": "Authorization Required - {entity_name}",
         "description": "To link your MS365 account, click the link, login, and authorize:\n\n[Link MS365 account]({auth_url}){failed_permissions}",

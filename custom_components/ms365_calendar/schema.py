@@ -27,10 +27,6 @@ CONFIG_SCHEMA = {
     vol.Required(
         CONF_CLIENT_SECRET_SOURCE, default=CLIENT_SECRET_SOURCE_ENVIRONMENT
     ): vol.In((CLIENT_SECRET_SOURCE_ENVIRONMENT, CLIENT_SECRET_SOURCE_MANUAL)),
-    vol.Optional(CONF_CLIENT_SECRET_ENV_VAR, default="MS365_CLIENT_SECRET"): vol.All(
-        cv.string, vol.Strip
-    ),
-    vol.Optional(CONF_CLIENT_SECRET, default=""): vol.All(cv.string, vol.Strip),
     vol.Optional(CONF_ALT_AUTH_METHOD, default=False): cv.boolean,
     vol.Required(CONF_API_OPTIONS): section(
         vol.Schema(
@@ -43,6 +39,16 @@ CONFIG_SCHEMA = {
         ),
         {"collapsed": True},
     ),
+}
+
+CLIENT_SECRET_ENVIRONMENT_SCHEMA = {
+    vol.Optional(CONF_CLIENT_SECRET_ENV_VAR, default="MS365_CLIENT_SECRET"): vol.All(
+        cv.string, vol.Strip
+    ),
+}
+
+CLIENT_SECRET_MANUAL_SCHEMA = {
+    vol.Optional(CONF_CLIENT_SECRET, default=""): vol.All(cv.string, vol.Strip),
 }
 
 REQUEST_AUTHORIZATION_DEFAULT_SCHEMA = {vol.Required(CONF_URL): cv.string}
