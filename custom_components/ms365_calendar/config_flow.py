@@ -41,6 +41,7 @@ from .const import (
     DEFAULT_TENANT_ID,
     ERROR_IMPORTED_DUPLICATE,
     ERROR_INVALID_SHARED_MAILBOX,
+    ERROR_INVALID_TENANT,
     ERROR_INVALID_URL,
     OAUTH_REDIRECT_URL,
     TOKEN_ERROR_FILE,
@@ -121,20 +122,11 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
             auth_error = await self._async_delete_unreadable_token(
                 auth_error, token_backend
             )
-            if not auth_error and (
-                not self._ms365account.is_authenticated or self._reconfigure
+            if (
+                not auth_error
+                and (not self._ms365account.is_authenticated or self._reconfigure)
+                and await self._async_get_authorization_url(alt_auth_method, user_input)
             ):
-                scope = self._permissions.requested_permissions
-                self._url, self._flow = await self.hass.async_add_executor_job(
-                    ft.partial(
-                        self._ms365account.account.get_authorization_url,
-                        requested_scopes=scope,
-                        redirect_uri=get_callback_url(
-                            self.hass, alt_auth_method, user_input
-                        ),
-                    )
-                )
-
                 if alt_auth_method:
                     return await self.async_step_request_alt()
 
@@ -150,6 +142,23 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="user", data_schema=vol.Schema(data), errors=errors
         )
+
+    async def _async_get_authorization_url(self, alt_auth_method, user_input):
+        scope = self._permissions.requested_permissions
+        try:
+            self._url, self._flow = await self.hass.async_add_executor_job(
+                ft.partial(
+                    self._ms365account.account.get_authorization_url,
+                    requested_scopes=scope,
+                    redirect_uri=get_callback_url(
+                        self.hass, alt_auth_method, user_input
+                    ),
+                )
+            )
+        except ValueError as err:
+            _LOGGER.warning(ERROR_INVALID_TENANT, err)
+            return False
+        return True
 
     async def async_step_request_default(
         self, user_input: dict[str, str] | None = None
