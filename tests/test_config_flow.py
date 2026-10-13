@@ -230,8 +230,8 @@ async def test_missing_permissions_alt_flow(
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "request_alt"
     assert "errors" in result
-    assert "url" in result["errors"]
-    assert result["errors"]["url"] == "permissions"
+    assert "base" in result["errors"]
+    assert result["errors"]["base"] == "permissions"
     assert (
         result["description_placeholders"]["failed_permissions"]
         == f"\n\nMissing - {BASE_MISSING_PERMS}"
