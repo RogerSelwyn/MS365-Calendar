@@ -170,7 +170,10 @@ def _add_work_location_calendar(
     calendars: dict,
 ) -> None:
     shared_mailbox = entry.data.get(CONF_SHARED_MAILBOX)
-    work_location = entry.data.get(CONF_WORK_LOCATION, False)
+    work_location = entry.options.get(
+        CONF_WORK_LOCATION,
+        entry.data.get(CONF_WORK_LOCATION, False),
+    )
     country = get_country(entry.data)
     if shared_mailbox or not work_location or country != CountryOptions.DEFAULT:
         return

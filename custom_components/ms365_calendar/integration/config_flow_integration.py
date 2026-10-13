@@ -14,8 +14,8 @@ from homeassistant.helpers.selector import BooleanSelector
 from O365.calendar import EventSensitivity  # pylint: disable=no-name-in-module
 
 from ..classes.config_entry import MS365ConfigEntry
-from ..const import CONF_ENABLE_UPDATE, CONF_ENTITY_NAME, CONF_SHARED_MAILBOX
-from ..helpers.utils import add_attribute_to_item
+from ..const import CONF_ENABLE_UPDATE, CONF_ENTITY_NAME, CONF_SHARED_MAILBOX, CountryOptions
+from ..helpers.utils import add_attribute_to_item, get_country
 from .const_integration import (
     CONF_ADVANCED_OPTIONS,
     CONF_BASIC_CALENDAR,
@@ -40,6 +40,8 @@ from .const_integration import (
     DEFAULT_HOURS_FORWARD_TO_GET,
     DEFAULT_UPDATE_INTERVAL,
     DEFAULT_WORK_LOCATION,
+    WORK_LOCATION_CAL_ID,
+    WORK_LOCATION_DEVICE_ID,
     YAML_CALENDARS_FILENAME,
 )
 from .filemgmt_integration import (
@@ -68,10 +70,6 @@ def integration_reconfigure_schema(entry_data):
             CONF_SHARED_MAILBOX,
             description={"suggested_value": entry_data.get(CONF_SHARED_MAILBOX, None)},
         ): cv.string,
-        vol.Optional(
-            CONF_WORK_LOCATION,
-            default=entry_data.get(CONF_WORK_LOCATION, DEFAULT_WORK_LOCATION),
-        ): cv.boolean,
     }
 
 
@@ -83,8 +81,6 @@ def integration_validate_schema(user_input):  # pylint: disable=unused-argument
         return {CONF_BASIC_CALENDAR: "cannot_have_basic_update"}
     if user_input.get(CONF_GROUPS) and user_input.get(CONF_SHARED_MAILBOX):
         return {CONF_GROUPS: "cannot_have_groups_shared"}
-    if user_input.get(CONF_WORK_LOCATION) and user_input.get(CONF_SHARED_MAILBOX):
-        return {CONF_WORK_LOCATION: "cannot_have_work_location_shared"}
     return {}
 
 
@@ -107,9 +103,18 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
         """Initialize MS365 options flow."""
 
         self._track_new_calendar = entry.options.get(CONF_TRACK_NEW_CALENDAR, True)
+        self._work_location = entry.options.get(
+            CONF_WORK_LOCATION,
+            entry.data.get(CONF_WORK_LOCATION, DEFAULT_WORK_LOCATION),
+        )
+        self._show_work_location = (
+            not entry.data.get(CONF_SHARED_MAILBOX)
+            and get_country(entry.data) == CountryOptions.DEFAULT
+        )
         self._calendars = []
         self._calendar_list = []
         self._calendar_list_selected = []
+        self._calendar_list_selected_config = []
         self._calendar_list_selected_original = []
         self._yaml_filename = build_yaml_filename(entry, YAML_CALENDARS_FILENAME)
         self._yaml_filepath = None
@@ -136,6 +141,22 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
                 self._calendar_list.append(entity[CONF_DEVICE_ID])
                 if entity[CONF_TRACK]:
                     self._calendar_list_selected.append(entity[CONF_DEVICE_ID])
+        if self._show_work_location:
+            self._calendars.append(
+                {
+                    CONF_CAL_ID: WORK_LOCATION_CAL_ID,
+                    CONF_ENTITIES: [
+                        {
+                            CONF_DEVICE_ID: WORK_LOCATION_DEVICE_ID,
+                            CONF_NAME: "Work Location",
+                            CONF_TRACK: self._work_location,
+                        }
+                    ],
+                }
+            )
+            self._calendar_list.append(WORK_LOCATION_DEVICE_ID)
+            if self._work_location:
+                self._calendar_list_selected.append(WORK_LOCATION_DEVICE_ID)
 
         self._calendar_list_selected_original = deepcopy(self._calendar_list_selected)
         return await self.async_step_user()
@@ -148,6 +169,13 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
             self._user_input = user_input
             self._track_new_calendar = user_input[CONF_TRACK_NEW_CALENDAR]
             self._calendar_list_selected = user_input[CONF_CALENDAR_LIST]
+            self._work_location = WORK_LOCATION_DEVICE_ID in self._calendar_list_selected
+            self._calendar_list_selected_config = [
+                device_id
+                for device_id in self._calendar_list_selected
+                if device_id != WORK_LOCATION_DEVICE_ID
+            ]
+            self._user_input[CONF_WORK_LOCATION] = self._work_location
 
             for calendar in self._calendars:
                 for entity in calendar[CONF_ENTITIES]:
@@ -226,11 +254,11 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
                         )
                         return await self.async_step_calendar_config()
 
-        if self._calendar_no == len(self._calendar_list_selected):
+        if self._calendar_no == len(self._calendar_list_selected_config):
             return await self._async_tidy_up(self._user_input)
 
         calendar_item = self._get_calendar_item()
-        last_step = self._calendar_no == len(self._calendar_list_selected)
+        last_step = self._calendar_no == len(self._calendar_list_selected_config)
         sensitivities = {i.value: i.name for i in EventSensitivity}
         return self.async_show_form(
             step_id="calendar_config",
@@ -277,7 +305,7 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
             for entity in calendar[CONF_ENTITIES]:
                 if (
                     entity[CONF_DEVICE_ID]
-                    == self._calendar_list_selected[self._calendar_no - 1]
+                    == self._calendar_list_selected_config[self._calendar_no - 1]
                 ):
                     return entity
         return None  # pragma: no cover

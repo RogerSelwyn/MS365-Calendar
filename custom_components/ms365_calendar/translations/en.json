@@ -13,8 +13,7 @@
       "token_file_error": "Token file retrieval error, check log for errors from O365. Ensure token has not expired and you are using secret value not secret id.",
       "cannot_have_basic_shared": "Basic Calendar cannot be enabled when configuring access to a shared calendar.",
       "cannot_have_basic_update": "Basic Calendar cannot be enabled when enable update is enabled.",
-      "cannot_have_groups_shared": "Groups cannot be enabled when configuring access to a shared calendar.",
-      "cannot_have_work_location_shared": "Work location cannot be enabled when configuring access to a shared calendar."
+      "cannot_have_groups_shared": "Groups cannot be enabled when configuring access to a shared calendar."
     },
     "step": {
       "user": {
@@ -26,8 +25,7 @@
           "enable_update": "Enable update services",
           "basic_calendar": "Enable read only basic calendar",
           "groups": "Enable support for group calendars",
-          "shared_mailbox": "Email address/ID of 'shared' mailbox",
-          "work_location": "Enable work location calendar"
+          "shared_mailbox": "Email address/ID of 'shared' mailbox"
         },
         "data_description": {
           "shared_mailbox": "Do not put your own email address in this box"
@@ -67,7 +65,8 @@
       "user": {
         "data": {
           "track_new_calendar": "Enable new calendars",
-          "calendar_list": "Enabled calendars"
+          "calendar_list": "Enabled calendars",
+          "work_location": "Enable work location calendar"
         },
         "description": "Setup options for {entity_name}",
         "sections": {

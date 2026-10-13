@@ -27,7 +27,6 @@ BASE_CONFIG_ENTRY = {
     "basic_calendar": False,
     "groups": False,
     "shared_mailbox": "",
-    "work_location": False,
     "api_options": {"country": "Default"},
 }
 BASE_TOKEN_PERMS = "Calendars.Read"

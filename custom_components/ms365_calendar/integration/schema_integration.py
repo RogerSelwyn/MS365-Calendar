@@ -50,10 +50,8 @@ from .const_integration import (
     CONF_SEARCH,
     CONF_SENSITIVITY_EXCLUDE,
     CONF_TRACK,
-    CONF_WORK_LOCATION,
     DEFAULT_HOURS_BACKWARD_TO_GET,
     DEFAULT_HOURS_FORWARD_TO_GET,
-    DEFAULT_WORK_LOCATION,
     EventResponse,
 )
 
@@ -93,7 +91,6 @@ CONFIG_SCHEMA_INTEGRATION = {
     vol.Optional(CONF_BASIC_CALENDAR, default=False): cv.boolean,
     vol.Optional(CONF_GROUPS, default=False): cv.boolean,
     vol.Optional(CONF_SHARED_MAILBOX, default=""): cv.string,
-    vol.Optional(CONF_WORK_LOCATION, default=DEFAULT_WORK_LOCATION): cv.boolean,
 }
 
 CALENDAR_SERVICE_RESPOND_SCHEMA = {

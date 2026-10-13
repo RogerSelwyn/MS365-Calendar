@@ -21,9 +21,11 @@ from custom_components.ms365_calendar.integration.const_integration import (
     CONF_MAX_RESULTS,
     CONF_TRACK_NEW_CALENDAR,
     CONF_UPDATE_INTERVAL,
+    CONF_WORK_LOCATION,
     DEFAULT_DAYS_BACKWARD,
     DEFAULT_DAYS_FORWARD,
     DEFAULT_UPDATE_INTERVAL,
+    WORK_LOCATION_DEVICE_ID,
 )
 
 from .helpers_integration.utils_integration import (
@@ -64,12 +66,11 @@ async def test_options_flow(
         "Calendar2",
         "Calendar3",
     ]
-
     result = await hass.config_entries.options.async_configure(
         result["flow_id"],
         user_input={
             CONF_TRACK_NEW_CALENDAR: False,
-            CONF_CALENDAR_LIST: UPDATE_CALENDAR_LIST,
+            CONF_CALENDAR_LIST: UPDATE_CALENDAR_LIST + [WORK_LOCATION_DEVICE_ID],
             CONF_ADVANCED_OPTIONS: {
                 CONF_UPDATE_INTERVAL: DEFAULT_UPDATE_INTERVAL,
                 CONF_DAYS_BACKWARD: DEFAULT_DAYS_BACKWARD,
@@ -101,7 +102,10 @@ async def test_options_flow(
 
     assert result["data"][CONF_TRACK_NEW_CALENDAR] is False
 
-    assert result["data"][CONF_CALENDAR_LIST] == UPDATE_CALENDAR_LIST
+    assert result["data"][CONF_CALENDAR_LIST] == (
+        UPDATE_CALENDAR_LIST + [WORK_LOCATION_DEVICE_ID]
+    )
+    assert result["data"][CONF_WORK_LOCATION] is True
 
 async def test_options_flow_reload(
     tmp_path,
