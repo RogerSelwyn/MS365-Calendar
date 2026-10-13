@@ -27,6 +27,7 @@ BASE_CONFIG_ENTRY = {
     "basic_calendar": False,
     "groups": False,
     "shared_mailbox": "",
+    "work_location": False,
     "api_options": {"country": "Default"},
 }
 BASE_TOKEN_PERMS = "Calendars.Read"
@@ -88,6 +89,7 @@ class URL(Enum):
     )
     ME = "https://graph.microsoft.com/v1.0/me"
     CALENDARS = "https://graph.microsoft.com/v1.0/me/calendars"
+    WORK_LOCATION = "https://graph.microsoft.com/v1.0/me/settings/workHoursAndLocations"
     GROUP_CALENDARS = "https://graph.microsoft.com/v1.0/groups"
     SHARED_CALENDARS = (
         "https://graph.microsoft.com/v1.0/users/jane.doe@nomail.com/calendars"

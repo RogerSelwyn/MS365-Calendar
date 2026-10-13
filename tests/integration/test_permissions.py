@@ -164,6 +164,33 @@ async def test_basic_permissions(
 
 @pytest.mark.parametrize(
     "base_config_entry",
+    [{"basic_calendar": True, "work_location": True}],
+    indirect=True,
+)
+async def test_work_location_permissions_upgrade_basic(
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    base_token,
+    base_config_entry: MS365MockConfigEntry,
+) -> None:
+    """Test work-location upgrades basic calendar scope to Calendars.Read."""
+    MS365MOCKS.standard_mocks(requests_mock)
+    base_config_entry.add_to_hass(hass)
+    await hass.config_entries.async_setup(base_config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    assert (
+        "Calendars.Read"
+        in base_config_entry.runtime_data.permissions.requested_permissions
+    )
+    assert (
+        "Calendars.ReadBasic"
+        not in base_config_entry.runtime_data.permissions.requested_permissions
+    )
+
+
+@pytest.mark.parametrize(
+    "base_config_entry",
     [{"shared_mailbox": "jane.doe@nomail.com"}],
     indirect=True,
 )

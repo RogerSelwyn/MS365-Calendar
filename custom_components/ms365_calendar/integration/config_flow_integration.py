@@ -33,11 +33,13 @@ from .const_integration import (
     CONF_TRACK,
     CONF_TRACK_NEW_CALENDAR,
     CONF_UPDATE_INTERVAL,
+    CONF_WORK_LOCATION,
     DEFAULT_DAYS_BACKWARD,
     DEFAULT_DAYS_FORWARD,
     DEFAULT_HOURS_BACKWARD_TO_GET,
     DEFAULT_HOURS_FORWARD_TO_GET,
     DEFAULT_UPDATE_INTERVAL,
+    DEFAULT_WORK_LOCATION,
     YAML_CALENDARS_FILENAME,
 )
 from .filemgmt_integration import (
@@ -66,6 +68,10 @@ def integration_reconfigure_schema(entry_data):
             CONF_SHARED_MAILBOX,
             description={"suggested_value": entry_data.get(CONF_SHARED_MAILBOX, None)},
         ): cv.string,
+        vol.Optional(
+            CONF_WORK_LOCATION,
+            default=entry_data.get(CONF_WORK_LOCATION, DEFAULT_WORK_LOCATION),
+        ): cv.boolean,
     }
 
 
@@ -77,6 +83,8 @@ def integration_validate_schema(user_input):  # pylint: disable=unused-argument
         return {CONF_BASIC_CALENDAR: "cannot_have_basic_update"}
     if user_input.get(CONF_GROUPS) and user_input.get(CONF_SHARED_MAILBOX):
         return {CONF_GROUPS: "cannot_have_groups_shared"}
+    if user_input.get(CONF_WORK_LOCATION) and user_input.get(CONF_SHARED_MAILBOX):
+        return {CONF_WORK_LOCATION: "cannot_have_work_location_shared"}
     return {}
 
 

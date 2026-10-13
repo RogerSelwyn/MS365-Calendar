@@ -15,6 +15,8 @@ class EventResponse(Enum):
 
 PLATFORMS: list[Platform] = [Platform.CALENDAR]
 DOMAIN = "ms365_calendar"
+WORK_LOCATION_CAL_ID = "__work_location__"
+WORK_LOCATION_DEVICE_ID = "WorkLocation"
 
 ATTR_ALL_DAY = "all_day"
 ATTR_ATTENDEES = "attendees"
@@ -66,6 +68,7 @@ CONF_SENSITIVITY_EXCLUDE = "sensitivity_exclude"
 CONF_TRACK = "track"
 CONF_TRACK_NEW_CALENDAR = "track_new_calendar"
 CONF_UPDATE_INTERVAL = "update_interval"
+CONF_WORK_LOCATION = "work_location"
 
 
 CONST_GROUP = "group:"
@@ -85,6 +88,7 @@ DEFAULT_DAYS_FORWARD = 8
 DEFAULT_HOURS_BACKWARD_TO_GET = 0
 DEFAULT_HOURS_FORWARD_TO_GET = 24
 DEFAULT_UPDATE_INTERVAL = 60
+DEFAULT_WORK_LOCATION = False
 
 EVENT_CREATE_CALENDAR_EVENT = "create_calendar_event"
 EVENT_MODIFY_CALENDAR_EVENT = "modify_calendar_event"
