@@ -1,12 +1,16 @@
 """Items that relate to gcal_sync.api."""
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import functools as ft
 import logging
 from typing import Any, cast
 
 from dateutil import parser, tz
-from requests.exceptions import HTTPError, RetryError
+from requests.exceptions import (
+    ConnectionError as RequestConnectionError,
+    HTTPError,
+    RetryError,
+)
 
 from homeassistant.core import HomeAssistant
 from homeassistant.util import dt as dt_util
@@ -31,6 +35,37 @@ from .store import CalendarStore
 from .timeline import MS365Timeline, calendar_timeline
 
 _LOGGER = logging.getLogger(__name__)
+WINDOWS_TZ_TO_IANA = {
+    "UTC": "UTC",
+    "GMT Standard Time": "Europe/London",
+    "W. Europe Standard Time": "Europe/Berlin",
+    "Romance Standard Time": "Europe/Paris",
+    "Central Europe Standard Time": "Europe/Budapest",
+    "E. Europe Standard Time": "Europe/Chisinau",
+    "GTB Standard Time": "Europe/Bucharest",
+    "Turkey Standard Time": "Europe/Istanbul",
+    "Russian Standard Time": "Europe/Moscow",
+    "Pacific Standard Time": "America/Los_Angeles",
+    "Mountain Standard Time": "America/Denver",
+    "Central Standard Time": "America/Chicago",
+    "Eastern Standard Time": "America/New_York",
+    "Atlantic Standard Time": "America/Halifax",
+    "Newfoundland Standard Time": "America/St_Johns",
+    "Greenland Standard Time": "America/Godthab",
+    "Argentina Standard Time": "America/Argentina/Buenos_Aires",
+    "E. South America Standard Time": "America/Sao_Paulo",
+    "South Africa Standard Time": "Africa/Johannesburg",
+    "Egypt Standard Time": "Africa/Cairo",
+    "Arabian Standard Time": "Asia/Dubai",
+    "India Standard Time": "Asia/Kolkata",
+    "SE Asia Standard Time": "Asia/Bangkok",
+    "China Standard Time": "Asia/Shanghai",
+    "Tokyo Standard Time": "Asia/Tokyo",
+    "Korea Standard Time": "Asia/Seoul",
+    "AUS Eastern Standard Time": "Australia/Sydney",
+    "AUS Central Standard Time": "Australia/Adelaide",
+    "New Zealand Standard Time": "Pacific/Auckland",
+}
 
 
 class MS365CalendarService:
@@ -253,7 +288,20 @@ class MS365WorkLocationService:
         self.calendar_id = "work_location"
 
     async def async_calendar_init(self) -> bool:
-        """Async init method for service compatibility."""
+        """Probe endpoint access to avoid creating unusable entities."""
+        try:
+            start = dt_util.utcnow()
+            end = start + timedelta(hours=24)
+            await self.async_list_events(start, end)
+        except (HTTPError, RetryError, RequestConnectionError) as err:
+            _LOGGER.warning(
+                "Work location calendar not enabled: /me/settings/workHoursAndLocations "
+                "is unavailable or not permitted for this account/tenant (%s). "
+                "Disable WorkLocation in Enabled calendars, or verify Graph support "
+                "and permissions for this tenant.",
+                err,
+            )
+            return False
         return True
 
     async def async_list_events(self, start_date, end_date):
@@ -307,6 +355,10 @@ def _parse_graph_datetime(value: dict[str, Any]) -> datetime | None:
 
     tz_name = value.get("timeZone")
     tzinfo = tz.gettz(tz_name) if tz_name else None
+    if tzinfo is None and tz_name:
+        iana_name = WINDOWS_TZ_TO_IANA.get(tz_name)
+        if iana_name:
+            tzinfo = tz.gettz(iana_name)
     if tzinfo is None:
         tzinfo = dt_util.get_default_time_zone()
     return parsed.replace(tzinfo=tzinfo)

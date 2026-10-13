@@ -11,3 +11,5 @@ The `data` attribute provides an array of events for the period defined by the `
 
 ## Work location calendar
 When **Enable work location calendar** is enabled for a primary mailbox account, an extra read-only calendar entity is created for Microsoft Graph work-location occurrences (`/me/settings/workHoursAndLocations/occurrencesView`). It exposes office-hours based events with summaries such as `Work location: Office` and normal `start`/`end` times.
+
+This endpoint is currently available only in the Microsoft Graph global cloud. If a non-default country cloud is configured, the work location calendar is not added.

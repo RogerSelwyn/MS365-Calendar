@@ -175,7 +175,15 @@ def _add_work_location_calendar(
         entry.data.get(CONF_WORK_LOCATION, False),
     )
     country = get_country(entry.data)
-    if shared_mailbox or not work_location or country != CountryOptions.DEFAULT:
+    if shared_mailbox or not work_location:
+        return
+    if country != CountryOptions.DEFAULT:
+        _LOGGER.warning(
+            "Work location calendar is enabled but not added for country '%s'. "
+            "Graph workHoursAndLocations occurrencesView is supported only in "
+            "the global cloud.",
+            country,
+        )
         return
 
     entity = {
