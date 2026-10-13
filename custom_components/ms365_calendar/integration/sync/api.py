@@ -1,12 +1,15 @@
 """Items that relate to gcal_sync.api."""
 
+from datetime import datetime
 import functools as ft
 import logging
 from typing import Any, cast
 
+from dateutil import parser, tz
 from requests.exceptions import HTTPError, RetryError
 
 from homeassistant.core import HomeAssistant
+from homeassistant.util import dt as dt_util
 from O365.calendar import Event  # pylint: disable=no-name-in-module
 from O365.utils.query import (  # pylint: disable=no-name-in-module, import-error
     QueryBuilder,
@@ -198,6 +201,130 @@ class MS365CalendarService:
             )
 
 
+class MS365WorkLocationOccurrence:
+    """Minimal event-like shape for work-location occurrences."""
+
+    class _EnumLike:
+        def __init__(self, name: str) -> None:
+            self.name = name
+
+    class _Organizer:
+        address: str | None = None
+
+    class _Attendees:
+        _Attendees__attendees: list = []  # noqa: N815, SLF001
+
+    def __init__(
+        self,
+        object_id: str,
+        subject: str,
+        start: datetime,
+        end: datetime,
+        location: str,
+        recurrence_id: str | None = None,
+        work_location_type: str = "unknown",
+    ) -> None:
+        self.object_id = object_id
+        self.subject = subject
+        self.start = start
+        self.end = end
+        self.is_all_day = False
+        self.location = {"displayName": location}
+        self.body = f"Work location type: {work_location_type}"
+        self.categories = []
+        self.sensitivity = self._EnumLike("normal")
+        self.show_as = self._EnumLike("workingElsewhere")
+        self.remind_before_minutes = 0
+        self.is_reminder_on = False
+        self.organizer = self._Organizer()
+        self.attendees = self._Attendees()
+        self.series_master_id = recurrence_id
+
+
+class MS365WorkLocationService:
+    """Work-location service interface to MS365."""
+
+    def __init__(self, hass: HomeAssistant, account) -> None:
+        """Init the MS365 Work Location service."""
+        self.hass = hass
+        self._account = account
+        self.group_calendar = False
+        self.calendar = None
+        self.calendar_id = "work_location"
+
+    async def async_calendar_init(self) -> bool:
+        """Async init method for service compatibility."""
+        return True
+
+    async def async_list_events(self, start_date, end_date):
+        """Get work-location occurrences for the user."""
+        return await self.hass.async_add_executor_job(
+            ft.partial(self._list_work_location_occurrences, start_date, end_date)
+        )
+
+    def _list_work_location_occurrences(self, start_date, end_date):
+        start = dt_util.as_utc(start_date).strftime("%Y-%m-%dT%H:%M:%SZ")
+        end = dt_util.as_utc(end_date).strftime("%Y-%m-%dT%H:%M:%SZ")
+        base_url = self._account.protocol.service_url
+        url = (
+            f"{base_url}me/settings/workHoursAndLocations/occurrencesView("
+            f"startDateTime='{start}',endDateTime='{end}')"
+        )
+        response = self._account.con.get(url)
+        response.raise_for_status()
+        payload = response.json()
+        occurrences = payload.get("value", [])
+        events = []
+        for occurrence in occurrences:
+            start_dt = _parse_graph_datetime(occurrence.get("start", {}))
+            end_dt = _parse_graph_datetime(occurrence.get("end", {}))
+            if start_dt is None or end_dt is None:
+                continue
+            work_location_type = occurrence.get("workLocationType", "unknown")
+            location = _friendly_work_location(work_location_type, occurrence.get("location"))
+            events.append(
+                MS365WorkLocationOccurrence(
+                    object_id=occurrence.get("id", f"{start_dt}_{end_dt}_{location}"),
+                    subject=f"Work location: {location}",
+                    start=start_dt,
+                    end=end_dt,
+                    location=location,
+                    recurrence_id=occurrence.get("recurrenceId"),
+                    work_location_type=work_location_type,
+                )
+            )
+        return events
+
+
+def _parse_graph_datetime(value: dict[str, Any]) -> datetime | None:
+    date_time = value.get("dateTime")
+    if not date_time:
+        return None
+
+    parsed = parser.isoparse(date_time)
+    if parsed.tzinfo is not None:
+        return parsed
+
+    tz_name = value.get("timeZone")
+    tzinfo = tz.gettz(tz_name) if tz_name else None
+    if tzinfo is None:
+        tzinfo = dt_util.get_default_time_zone()
+    return parsed.replace(tzinfo=tzinfo)
+
+
+def _friendly_work_location(work_location_type: str, location: Any) -> str:
+    if isinstance(location, dict) and location.get("displayName"):
+        return location["displayName"]
+    mapped = {
+        "office": "Office",
+        "remote": "Remote",
+        "home": "Home",
+        "onsite": "On site",
+        "unknown": "Unknown",
+    }
+    return mapped.get(work_location_type, work_location_type.replace("_", " ").title())
+
+
 class MS365CalendarEventStoreService:
     """Performs event lookups from the local store.
 
@@ -210,7 +337,7 @@ class MS365CalendarEventStoreService:
         self,
         store: CalendarStore,
         calendar_id: str,
-        api: MS365CalendarService,
+        api: Any,
     ) -> None:
         """Initialize CalendarEventStoreService."""
         self._store = store
