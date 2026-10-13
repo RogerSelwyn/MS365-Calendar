@@ -1,7 +1,8 @@
 """Mock setup."""
 from datetime import timedelta
+import re
 
-from ...helpers.utils import mock_call, utcnow, load_json
+from ...helpers.utils import load_json, mock_call, utcnow
 from ..const_integration import CN21VURL, URL
 
 
@@ -40,6 +41,21 @@ class MS365Mocks:
             "calendar3/calendarView",
             start=utcnow().strftime("%Y-%m-%d"),
             end=(utcnow() + timedelta(days=1)).strftime("%Y-%m-%d"),
+        )
+        work_location_data = load_json("O365/work_location_occurrences.json")
+        now = utcnow()
+        work_location_data = work_location_data.replace(
+            "2020-01-01",
+            now.strftime("%Y-%m-%d"),
+        ).replace(
+            "2020-01-02",
+            (now + timedelta(days=1)).strftime("%Y-%m-%d"),
+        )
+        requests_mock.get(
+            re.compile(
+                rf"{URL.WORK_LOCATION.value}/occurrencesView\(startDateTime='[^']+',endDateTime='[^']+'\)"
+            ),
+            text=work_location_data,
         )
 
     def cn21v_mocks(self, requests_mock, tenant_id="common"):

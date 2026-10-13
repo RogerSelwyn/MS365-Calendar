@@ -102,6 +102,33 @@ async def test_sync_fetch_error(
     assert "Error syncing calendar events from MS Graph" in caplog.text
 
 
+@pytest.mark.parametrize("base_config_entry", [{"work_location": True}], indirect=True)
+async def test_work_location_calendar(
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    base_token,
+    base_config_entry: MS365MockConfigEntry,
+    entity_registry: er.EntityRegistry,
+) -> None:
+    """Test work-location calendar is created and populated."""
+    MS365MOCKS.standard_mocks(requests_mock)
+    base_config_entry.add_to_hass(hass)
+    await hass.config_entries.async_setup(base_config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    state = hass.states.get("calendar.test_worklocation")
+    assert state is not None
+    assert state.attributes["friendly_name"] == "Work Location"
+    assert [event["summary"] for event in state.attributes["data"]] == [
+        "Work location: Main Office",
+        "Work location: Remote",
+    ]
+    assert (
+        entity_registry.async_get("calendar.test_worklocation").unique_id
+        == "__work_location___test_WorkLocation"
+    )
+
+
 async def test_get_events_fetch_error(
     hass: HomeAssistant,
     setup_base_integration,
