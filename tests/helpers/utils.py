@@ -5,7 +5,7 @@ import json
 import re
 import shutil
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from pathlib import Path
 
 from ..const import (
@@ -198,7 +198,7 @@ def check_entity_state(
 
 def utcnow():
     """Get UTC Now."""
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def token_setup(tmp_path, infile):
