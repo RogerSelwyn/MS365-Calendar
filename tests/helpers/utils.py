@@ -5,7 +5,7 @@ import json
 import re
 import shutil
 import time
-from datetime import datetime, timezone, UTC
+from datetime import datetime, UTC
 from pathlib import Path
 
 from ..const import (

@@ -26,6 +26,9 @@ from .const import (
     AUTH_CALLBACK_DATA,
     AUTH_CALLBACK_NAME,
     AUTH_CALLBACK_PATH_ALT,
+    AUTH_ERROR_ALREADY_CONFIGURED,
+    AUTH_ERROR_AUTHENTICATING,
+    AUTH_ERROR_INVALID_TENANT,
     CONF_ALT_AUTH_METHOD,
     CONF_API_COUNTRY,
     CONF_API_OPTIONS,
@@ -95,7 +98,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_user(self, user_input=None):
         """Handle the initial step."""
-        errors = integration_validate_schema(user_input) if user_input else {}
+        errors = self._validate_user_input(user_input) if user_input else {}
         if user_input and not errors:
             self._user_input = user_input
 
@@ -122,21 +125,24 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
             auth_error = await self._async_delete_unreadable_token(
                 auth_error, token_backend
             )
-            if (
-                not auth_error
-                and (not self._ms365account.is_authenticated or self._reconfigure)
-                and await self._async_get_authorization_url(alt_auth_method, user_input)
+            if not auth_error and (
+                not self._ms365account.is_authenticated or self._reconfigure
             ):
-                if alt_auth_method:
-                    return await self.async_step_request_alt()
+                auth_error = await self._async_get_authorization_url(
+                    alt_auth_method, user_input
+                )
+                if not auth_error:
+                    if alt_auth_method:
+                        return await self.async_step_request_alt()
 
-                return await self.async_step_request_default()
+                    return await self.async_step_request_default()
 
             attr_name = CONF_CLIENT_ID if self._reconfigure else CONF_ENTITY_NAME
-            if auth_error:
-                errors[attr_name] = "error_authenticating"
-            else:
-                errors[attr_name] = "already_configured"
+
+            if auth_error == AUTH_ERROR_INVALID_TENANT:
+                errors[CONF_API_OPTIONS] = auth_error
+            elif auth_error:
+                errors[attr_name] = AUTH_ERROR_AUTHENTICATING
 
         data = self._config_schema or CONFIG_SCHEMA | CONFIG_SCHEMA_INTEGRATION
         return self.async_show_form(
@@ -157,8 +163,8 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
             )
         except ValueError as err:
             _LOGGER.warning(ERROR_INVALID_TENANT, err)
-            return False
-        return True
+            return AUTH_ERROR_INVALID_TENANT
+        return False
 
     async def async_step_request_default(
         self, user_input: dict[str, str] | None = None
@@ -352,19 +358,27 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
         data = import_data["data"]
         options = import_data["options"]
         self.entity_name = data[CONF_ENTITY_NAME]
-        if self._check_existing():
+        if self._check_existing(self.entity_name):
             _LOGGER.info(ERROR_IMPORTED_DUPLICATE, DOMAIN, self.entity_name)
-            return self.async_abort(reason="already_configured")
+            return self.async_abort(reason=AUTH_ERROR_ALREADY_CONFIGURED)
         await async_integration_imports(self.hass, import_data)
         return self.async_create_entry(
             title=self.entity_name, data=data, options=options
         )
 
-    def _check_existing(self):
+    def _check_existing(self, entity_name):
         config_entries = self.hass.config_entries.async_entries(DOMAIN)
         return any(
-            config_entry.title == self.entity_name for config_entry in config_entries
+            config_entry.data.get(CONF_ENTITY_NAME) == entity_name
+            for config_entry in config_entries
         )
+
+    def _validate_user_input(self, user_input):
+        if not self._reconfigure and self._check_existing(
+            user_input.get(CONF_ENTITY_NAME)
+        ):
+            return {CONF_ENTITY_NAME: AUTH_ERROR_ALREADY_CONFIGURED}
+        return integration_validate_schema(user_input)
 
     async def _async_delete_unreadable_token(self, auth_error, token_backend):
         # A reconfigure replaces the token, so one that cannot be read is deleted

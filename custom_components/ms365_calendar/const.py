@@ -10,6 +10,11 @@ AUTH_CALLBACK_DATA = "ms365_auth_callback"
 AUTH_CALLBACK_NAME = "api:ms365"
 AUTH_CALLBACK_PATH_ALT = "/api/ms365"
 
+AUTH_ERROR_ALREADY_CONFIGURED = "already_configured"
+AUTH_ERROR_AUTHENTICATING = "error_authenticating"
+AUTH_ERROR_INVALID_TENANT = "invalid_tenant"
+
+
 CONF_ENTITY_NAME = "entity_name"
 CONF_ALT_AUTH_METHOD = "alt_auth_method"
 CONF_API_COUNTRY = "country"
