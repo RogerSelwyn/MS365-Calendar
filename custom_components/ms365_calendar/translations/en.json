@@ -6,6 +6,7 @@
     "error": {
       "already_configured": "This account name has already been used. Use re-configure.",
       "error_authenticating": "Error authenticating, token invalid, check log for errors",
+      "missing_client_secret": "The selected client secret source did not provide a value",
       "invalid_url": "Error, the originating url does not seem to be a valid microsoft redirect",
       "permissions": "Minimum permissions not granted for account: {entity_name}",
       "corrupted": "Token file is corrupted after successful authentication, check log for file system errors",
@@ -20,6 +21,8 @@
         "data": {
           "entity_name": "Uniquely identifying name for the entities",
           "client_id": "Client ID",
+          "client_secret_source": "Client secret source",
+          "client_secret_env_var": "Client secret environment variable",
           "client_secret": "Client Secret",
           "alt_auth_method": "Use alternate (more complex) authentication",
           "enable_update": "Enable update services",
@@ -28,9 +31,12 @@
           "shared_mailbox": "Email address/ID of 'shared' mailbox"
         },
         "data_description": {
-          "shared_mailbox": "Do not put your own email address in this box"
+          "shared_mailbox": "Do not put your own email address in this box",
+          "client_secret_source": "Choose Environment variable for Docker, Podman, or Kubernetes deployments. Manual entry stores the secret in the Home Assistant configuration.",
+          "client_secret_env_var": "Name of the environment variable injected into the Home Assistant process, for example MS365_CLIENT_SECRET.",
+          "client_secret": "Only used when Client secret source is Manual entry."
         },
-        "description": "Enter previously created Entra ID App Registration credentials",
+        "description": "Enter your Entra ID App Registration client ID and select how to provide its client secret. Environment-variable mode stores only the variable name in Home Assistant.",
         "sections": {
           "api_options": {
             "name": "Advanced API options",
@@ -119,6 +125,10 @@
     "permissions": {
       "title": "Re-authentication required - {domain} - {entity_name}",
       "description": "Permissions missing. Please [Reconfigure]({url}) the integration and re-authenticate to re-create the token file."
+    },
+    "client_secret_missing": {
+      "title": "Client secret unavailable - {domain} - {entity_name}",
+      "description": "The configured client secret source did not provide a value. Update the secret source, restart Home Assistant if using an environment variable, then [Reconfigure]({url}) the integration."
     }
   },
   "exceptions": {

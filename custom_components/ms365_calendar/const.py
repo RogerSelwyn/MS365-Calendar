@@ -17,6 +17,8 @@ CONF_TENANT_ID = "tenant_id"
 CONF_AUTH_URL = "auth_url"
 CONF_CLIENT_ID = "client_id"
 CONF_CLIENT_SECRET = "client_secret"  # nosec
+CONF_CLIENT_SECRET_SOURCE = "client_secret_source"
+CONF_CLIENT_SECRET_ENV_VAR = "client_secret_env_var"
 CONF_ENABLE_UPDATE = "enable_update"
 CONF_ENTITY_KEY = "entity_key"
 CONF_ENTITY_TYPE = "entity_type"
@@ -61,6 +63,7 @@ TOKEN_ERROR_FILE = (
     "Token file retrieval error, check log for errors from O365. "
     "Ensure token has not expired and you are using secret value not secret id."
 )
+TOKEN_ERROR_MISSING_CLIENT_SECRET = "client_secret_missing"
 TOKEN_ERROR_LEGACY = (
     "Token no longer valid for integration '%s', unique identifier '%s', "
     "please delete token, re-configure and re-authenticate - %s"
@@ -81,6 +84,9 @@ TOKEN_FILE_MISSING = "missing"
 TOKEN_FILE_OUTDATED = "outdated"
 TOKEN_FILE_PERMISSIONS = "permissions"
 TOKEN_INVALID = "The token you are trying to load is not valid anymore"
+
+CLIENT_SECRET_SOURCE_ENVIRONMENT = "environment"
+CLIENT_SECRET_SOURCE_MANUAL = "manual"
 
 
 class CountryOptions(StrEnum):

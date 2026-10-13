@@ -19,9 +19,11 @@ from homeassistant.data_entry_flow import section
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.network import get_url
 
-from .classes.api import MS365Account, MS365Token
+from .classes.api import MS365Account, MS365Token, get_credentials
 from .classes.config_entry import MS365ConfigEntry
 from .const import (
+    CLIENT_SECRET_SOURCE_ENVIRONMENT,
+    CLIENT_SECRET_SOURCE_MANUAL,
     AUTH_CALLBACK_NAME,
     AUTH_CALLBACK_PATH_ALT,
     CONF_ALT_AUTH_METHOD,
@@ -30,6 +32,8 @@ from .const import (
     CONF_AUTH_URL,
     CONF_CLIENT_ID,
     CONF_CLIENT_SECRET,
+    CONF_CLIENT_SECRET_ENV_VAR,
+    CONF_CLIENT_SECRET_SOURCE,
     CONF_ENTITY_NAME,
     CONF_FAILED_PERMISSIONS,
     CONF_SHARED_MAILBOX,
@@ -92,22 +96,32 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
         """Handle the initial step."""
         errors = integration_validate_schema(user_input) if user_input else {}
         if user_input and not errors:
-            self._user_input = user_input
+            credentials = get_credentials(user_input)
+            if not credentials[1]:
+                secret_key = (
+                    CONF_CLIENT_SECRET_ENV_VAR
+                    if user_input.get(CONF_CLIENT_SECRET_SOURCE)
+                    == CLIENT_SECRET_SOURCE_ENVIRONMENT
+                    else CONF_CLIENT_SECRET
+                )
+                errors[secret_key] = "missing_client_secret"
+        if user_input and not errors:
+            self._user_input = dict(user_input)
+            if (
+                self._user_input.get(CONF_CLIENT_SECRET_SOURCE)
+                == CLIENT_SECRET_SOURCE_ENVIRONMENT
+            ):
+                self._user_input.pop(CONF_CLIENT_SECRET, None)
 
             if not self.entity_name:
-                self.entity_name = user_input.get(CONF_ENTITY_NAME)
+                self.entity_name = self._user_input.get(CONF_ENTITY_NAME)
             else:
-                user_input[CONF_ENTITY_NAME] = self.entity_name
-            credentials = (
-                user_input.get(CONF_CLIENT_ID),
-                user_input.get(CONF_CLIENT_SECRET),
-            )
-
-            main_resource = user_input.get(CONF_SHARED_MAILBOX)
+                self._user_input[CONF_ENTITY_NAME] = self.entity_name
+            main_resource = self._user_input.get(CONF_SHARED_MAILBOX)
             alt_auth_method = self._user_input.get(CONF_ALT_AUTH_METHOD)
-            token_backend = MS365Token(self.hass, user_input)
-            self._permissions = Permissions(self.hass, user_input, token_backend)
-            self._ms365account = MS365Account(self._permissions, user_input)
+            token_backend = MS365Token(self.hass, self._user_input)
+            self._permissions = Permissions(self.hass, self._user_input, token_backend)
+            self._ms365account = MS365Account(self._permissions, self._user_input)
             auth_error = await self.hass.async_add_executor_job(
                 self._ms365account.try_authentication,
                 credentials,
@@ -123,7 +137,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
                         self._ms365account.account.get_authorization_url,
                         requested_scopes=scope,
                         redirect_uri=get_callback_url(
-                            self.hass, alt_auth_method, user_input
+                            self.hass, alt_auth_method, self._user_input
                         ),
                     )
                 )
@@ -222,10 +236,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
                     username=self._ms365account.account.username,
                 )
             )
-        credentials = (
-            self._user_input.get(CONF_CLIENT_ID),
-            self._user_input.get(CONF_CLIENT_SECRET),
-        )
+        credentials = get_credentials(self._user_input)
 
         main_resource = self._user_input.get(CONF_SHARED_MAILBOX)
 
@@ -292,7 +303,22 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
                 cv.string, vol.Strip
             ),
             vol.Required(
-                CONF_CLIENT_SECRET, default=entry_data[CONF_CLIENT_SECRET]
+                CONF_CLIENT_SECRET_SOURCE,
+                default=entry_data.get(
+                    CONF_CLIENT_SECRET_SOURCE, CLIENT_SECRET_SOURCE_MANUAL
+                ),
+            ): vol.In(
+                (CLIENT_SECRET_SOURCE_ENVIRONMENT, CLIENT_SECRET_SOURCE_MANUAL)
+            ),
+            vol.Optional(
+                CONF_CLIENT_SECRET_ENV_VAR,
+                default=entry_data.get(
+                    CONF_CLIENT_SECRET_ENV_VAR, "MS365_CLIENT_SECRET"
+                ),
+            ): vol.All(cv.string, vol.Strip),
+            vol.Optional(
+                CONF_CLIENT_SECRET,
+                default=entry_data.get(CONF_CLIENT_SECRET, ""),
             ): vol.All(cv.string, vol.Strip),
             vol.Optional(
                 CONF_ALT_AUTH_METHOD, default=entry_data[CONF_ALT_AUTH_METHOD]
