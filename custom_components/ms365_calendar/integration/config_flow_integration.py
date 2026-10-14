@@ -257,7 +257,7 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
                     vol.Optional(
                         CONF_SENSITIVITY_EXCLUDE,
                         default=calendar_item.get(CONF_SENSITIVITY_EXCLUDE),
-                    ): vol.Any(cv.multi_select(sensitivities), None),
+                    ): vol.Any(None, cv.multi_select(sensitivities), None),
                 }
             ),
             last_step=last_step,
