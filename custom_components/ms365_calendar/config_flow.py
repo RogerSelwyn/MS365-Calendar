@@ -126,13 +126,9 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
             )
             auth_error = await self._async_delete_unreadable_token(
                 auth_error, token_backend
-            )
+            ) or await self._async_get_authorization_url(alt_auth_method, user_input)
+
             if not auth_error:
-                auth_error = await self._async_get_authorization_url(
-                    alt_auth_method, user_input
-                )
-            if not auth_error:
-                # if not auth_error:
                 if alt_auth_method:
                     return await self.async_step_request_alt()
 
@@ -140,6 +136,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
 
             attr_name = CONF_CLIENT_ID if self._reconfigure else CONF_ENTITY_NAME
 
+            # sourcery skip
             if auth_error == AUTH_ERROR_INVALID_TENANT:
                 errors[CONF_API_OPTIONS] = auth_error
             elif auth_error:
