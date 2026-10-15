@@ -25,7 +25,7 @@ from .schema_integration import YAML_CALENDAR_DEVICE_SCHEMA
 _LOGGER = logging.getLogger(__name__)
 
 
-def load_yaml_file(path, item_id, display_error=False):
+def load_yaml_file(path, item_id, display_error=False, raw=False):
     """Load the ms365 yaml file."""
     items = {}
     try:
@@ -35,7 +35,8 @@ def load_yaml_file(path, item_id, display_error=False):
                 return {}
             for item in data:
                 try:
-                    items[item[item_id]] = YAML_CALENDAR_DEVICE_SCHEMA(item)
+                    valid_item = YAML_CALENDAR_DEVICE_SCHEMA(item)
+                    items[item[item_id]] = item if raw else valid_item
                 except VoluptuousError as exception:
                     # keep going
                     if display_error:
@@ -101,7 +102,7 @@ async def async_check_for_deleted_calendars(
     yaml_filepath = build_yaml_file_path(hass, path)
 
     existing_calendars = await hass.async_add_executor_job(
-        load_yaml_file, yaml_filepath, CONF_CAL_ID, True
+        load_yaml_file, yaml_filepath, CONF_CAL_ID, True, True
     )
     updated_calendars = []
     deleted_calendars = []
