@@ -5,7 +5,7 @@ from copy import deepcopy
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.config_entries import ConfigFlowResult
+from homeassistant.config_entries import ConfigEntryState, ConfigFlowResult
 from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import section
@@ -282,8 +282,10 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
             if calendar not in self._calendar_list_selected:
                 await self._async_delete_entity(calendar)
         update = self.async_create_entry(title="", data=user_input)
-        if user_input == dict(self.config_entry.options):
-            # Only the yaml changed, so the update listener will not reload
+        # The update listener of a loaded entry reloads it when the options change
+        loaded = self.config_entry.state is ConfigEntryState.LOADED
+        changed = user_input != dict(self.config_entry.options)
+        if not (loaded and changed):
             self.hass.config_entries.async_schedule_reload(self._config_entry_id)
 
         return update
