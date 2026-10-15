@@ -74,6 +74,7 @@ def check_yaml_file_contents(tmp_path, filename):
         compare_yaml = file.read()
     assert created_yaml == compare_yaml
 
+
 def read_yaml_file(tmp_path):
     """Read the calendars yaml file."""
     path = tmp_path / STORAGE_LOCATION / f"{DOMAIN}s_test.yaml"
