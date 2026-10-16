@@ -3,7 +3,10 @@
 
 import pytest
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
 from requests_mock import Mocker
+
+from .const_integration import FULL_INIT_ENTITY_NO
 
 from ..helpers.mock_config_entry import MS365MockConfigEntry
 from .helpers_integration.mocks import MS365MOCKS
@@ -59,6 +62,34 @@ async def test_corrupt_file(
     await hass.async_block_till_done()
 
     assert "Invalid Data - duplicate entries may be created" in caplog.text
+
+
+async def test_corrupt_file_2(
+    tmp_path,
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    base_token,
+    base_config_entry: MS365MockConfigEntry,
+    caplog: pytest.LogCaptureFixture,
+    entity_registry: er.EntityRegistry,
+) -> None:
+    """Test for corrupt yaml content."""
+    # logging.disable(logging.WARNING)
+    MS365MOCKS.standard_mocks(requests_mock)
+    yaml_setup(tmp_path, "ms365_calendars_corrupt2")
+
+    base_config_entry.add_to_hass(hass)
+
+    await hass.config_entries.async_setup(base_config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    assert "Invalid Data - duplicate entries may be created" in caplog.text
+
+    entities = er.async_entries_for_config_entry(
+        entity_registry, base_config_entry.entry_id
+    )
+    assert len(entities) == FULL_INIT_ENTITY_NO
+
 
 async def test_deleted_file(
     tmp_path,

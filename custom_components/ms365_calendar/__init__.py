@@ -32,6 +32,7 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
     """Set up a config entry."""
 
+    delete_token_issues(hass, entry.entry_id)
     credentials = get_credentials(entry.data)
     entity_name = entry.data.get(CONF_ENTITY_NAME)
     main_resource = entry.data.get(CONF_SHARED_MAILBOX)

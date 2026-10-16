@@ -5,7 +5,7 @@ import json
 import re
 import shutil
 import time
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 
 from ..const import (
@@ -118,11 +118,14 @@ def build_token_url(result, token_url):
 
     return f"{token_url}?{TOKEN_PARAMS.format(state)}"
 
+def token_filename(tmp_path):
+    """Return the path of the token file."""
+    return tmp_path / TOKEN_LOCATION / f"{DOMAIN}_{ENTITY_NAME}.token"
 
 def build_token_file(tmp_path, scope):
     """Build a token file."""
     token = _build_file_token(scope)
-    filename = tmp_path / TOKEN_LOCATION / f"{DOMAIN}_{ENTITY_NAME}.token"
+    filename = token_filename(tmp_path)
     with open(filename, "w", encoding="UTF8") as f:
         json.dump(token, f, ensure_ascii=False, indent=1)
 
@@ -198,7 +201,7 @@ def check_entity_state(
 
 def utcnow():
     """Get UTC Now."""
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def token_setup(tmp_path, infile):

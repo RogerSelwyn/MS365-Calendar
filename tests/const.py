@@ -10,6 +10,8 @@ LEGACY_TOKEN = {
     "access_token": "fakelegacytoken",
 }
 
+TENANT_OPTIONS = {"api_options": {"country": "Default", "tenant_id": ""}}
+
 TOKEN_PARAMS = "code=fake.code&state={0}&session_state=fakesessionstate"
 TOKEN_URL_ASSERT = (
     "https://login.microsoftonline.com/common/oauth2/v2.0/" + "authorize?client_id="

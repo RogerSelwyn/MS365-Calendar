@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from homeassistant import config_entries
+from homeassistant.config_entries import ConfigEntryState
 from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
@@ -32,7 +33,12 @@ from .helpers_integration.utils_integration import (
     read_yaml_file,
 )
 from ..helpers.mock_config_entry import MS365MockConfigEntry
-from ..helpers.utils import build_token_url, get_schema_default, mock_token
+from ..helpers.utils import (
+    build_token_file,
+    build_token_url,
+    get_schema_default,
+    mock_token,
+)
 from .const_integration import (
     AUTH_CALLBACK_PATH_DEFAULT,
     RECONFIGURE_CONFIG_ENTRY,
@@ -151,6 +157,29 @@ async def test_options_flow_reload(
     assert result["type"] is FlowResultType.CREATE_ENTRY
     state = hass.states.get("calendar.test_calendar1")
     assert state.attributes["friendly_name"] == "Calendar1_Renamed"
+
+
+async def test_options_flow_reload_failed_entry(
+    tmp_path,
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    base_config_entry: MS365MockConfigEntry,
+) -> None:
+    """Test the options flow reloads an entry that failed to set up."""
+    yaml_setup(tmp_path, "ms365_calendars_base")
+    MS365MOCKS.standard_mocks(requests_mock)
+    base_config_entry.add_to_hass(hass)
+    await hass.config_entries.async_setup(base_config_entry.entry_id)
+    await hass.async_block_till_done()
+    assert base_config_entry.state is ConfigEntryState.SETUP_ERROR
+
+    # The options change, but a failed entry has no update listener
+    build_token_file(tmp_path, BASE_TOKEN_PERMS)
+    await update_options(hass, base_config_entry)
+    await hass.async_block_till_done()
+
+    assert base_config_entry.state is ConfigEntryState.LOADED
+
 
 async def test_invalid_combinations(
     hass: HomeAssistant,

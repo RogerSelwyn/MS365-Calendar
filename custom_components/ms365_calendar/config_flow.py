@@ -4,6 +4,7 @@ from collections.abc import Mapping
 import functools as ft
 import logging
 from typing import Any, Self
+from urllib.parse import parse_qs, urlparse
 
 from aiohttp import web_response
 import voluptuous as vol
@@ -11,6 +12,7 @@ import voluptuous as vol
 from homeassistant.components.http import HomeAssistantView
 from homeassistant.config_entries import (
     CONN_CLASS_CLOUD_POLL,
+    ConfigEntryState,
     ConfigFlow,
     ConfigFlowResult,
 )
@@ -22,10 +24,12 @@ from homeassistant.helpers.network import get_url
 from .classes.api import MS365Account, MS365Token, get_credentials
 from .classes.config_entry import MS365ConfigEntry
 from .const import (
-    CLIENT_SECRET_SOURCE_ENVIRONMENT,
-    CLIENT_SECRET_SOURCE_MANUAL,
+    AUTH_CALLBACK_DATA,
     AUTH_CALLBACK_NAME,
     AUTH_CALLBACK_PATH_ALT,
+    AUTH_ERROR_ALREADY_CONFIGURED,
+    AUTH_ERROR_AUTHENTICATING,
+    AUTH_ERROR_INVALID_TENANT,
     CONF_ALT_AUTH_METHOD,
     CONF_API_COUNTRY,
     CONF_API_OPTIONS,
@@ -39,12 +43,18 @@ from .const import (
     CONF_SHARED_MAILBOX,
     CONF_TENANT_ID,
     CONF_URL,
+    CLIENT_SECRET_SOURCE_ENVIRONMENT,
+    CLIENT_SECRET_SOURCE_MANUAL,
     COUNTRY_URLS,
     DEFAULT_TENANT_ID,
     ERROR_IMPORTED_DUPLICATE,
     ERROR_INVALID_SHARED_MAILBOX,
+    ERROR_INVALID_TENANT,
+    ERROR_INVALID_URL,
     OAUTH_REDIRECT_URL,
     TOKEN_ERROR_FILE,
+    TOKEN_FILE_CORRUPTED,
+    TOKEN_FILE_OUTDATED,
     CountryOptions,
 )
 from .helpers.utils import delete_token_issues, get_country, get_tenant_id
@@ -81,7 +91,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
         self.entity_name = None
         self._url = None
         self._flow = None
-        self._callback_view = None
+        self._callback_urls = None
         self._user_input = {}
         self._config_schema: dict[vol.Required, type[str | int]] | None = None
         self._reconfigure = False
@@ -99,10 +109,10 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_user(self, user_input=None):
         """Handle the initial step."""
-        errors = integration_validate_schema(user_input) if user_input else {}
+        errors = self._validate_user_input(user_input) if user_input else {}
         if user_input and not errors:
             self._user_input = dict(user_input)
-            if not self.entity_name:
+            if not self._reconfigure:
                 self.entity_name = self._user_input.get(CONF_ENTITY_NAME)
             else:
                 self._user_input[CONF_ENTITY_NAME] = self.entity_name
@@ -192,38 +202,54 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
             main_resource,
             self.entity_name,
         )
-        if auth_error or (
-            self._ms365account.is_authenticated and not self._reconfigure
-        ):
-            return self.async_show_form(
-                step_id="client_secret",
-                data_schema=vol.Schema(
+        auth_error = await self._async_delete_unreadable_token(
+            auth_error, token_backend
+        ) or await self._async_get_authorization_url(alt_auth_method)
+
+        if auth_error:
+            if auth_error == AUTH_ERROR_INVALID_TENANT:
+                errors = {CONF_API_OPTIONS: auth_error}
+                step_id, schema = (
+                    "user",
+                    vol.Schema(
+                        self._config_schema
+                        or CONFIG_SCHEMA | CONFIG_SCHEMA_INTEGRATION,
+                        extra=vol.ALLOW_EXTRA,
+                    ),
+                )
+            else:
+                errors = {"base": AUTH_ERROR_AUTHENTICATING}
+                step_id = "client_secret"
+                schema = vol.Schema(
                     self._get_client_secret_schema(
                         self._user_input[CONF_CLIENT_SECRET_SOURCE]
                     )
-                ),
-                errors={
-                    "base": (
-                        "error_authenticating" if auth_error else "already_configured"
-                    )
-                },
+                )
+            return self.async_show_form(
+                step_id=step_id, data_schema=schema, errors=errors
             )
-
-        scope = self._permissions.requested_permissions
-        self._url, self._flow = await self.hass.async_add_executor_job(
-            ft.partial(
-                self._ms365account.account.get_authorization_url,
-                requested_scopes=scope,
-                redirect_uri=get_callback_url(
-                    self.hass, alt_auth_method, self._user_input
-                ),
-            )
-        )
 
         if alt_auth_method:
             return await self.async_step_request_alt()
 
         return await self.async_step_request_default()
+
+    async def _async_get_authorization_url(self, alt_auth_method):
+        scope = self._permissions.requested_permissions
+        try:
+            self._url, self._flow = await self.hass.async_add_executor_job(
+                ft.partial(
+                    self._ms365account.account.get_authorization_url,
+                    requested_scopes=scope,
+                    redirect_uri=get_callback_url(
+                        self.hass, alt_auth_method, self._user_input
+                    ),
+                )
+            )
+        except ValueError as err:
+            _LOGGER.warning(ERROR_INVALID_TENANT, err)
+            return AUTH_ERROR_INVALID_TENANT
+        return False
 
     async def async_step_request_default(
         self, user_input: dict[str, str] | None = None
@@ -256,9 +282,9 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
             if not errors:
                 return await self._async_create_update_entry()
 
-        if not self._callback_view:
-            self._callback_view = MS365AuthCallbackView()
-            self.hass.http.register_view(self._callback_view)
+        if self._callback_urls is None:
+            self._callback_urls = _async_get_callback_urls(self.hass)
+            self._callback_urls[self._flow["state"]] = ""
 
         return self.async_show_form(
             step_id="request_alt",
@@ -280,20 +306,31 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
     async def _async_create_update_entry(self):
         if self._reconfigure:
             delete_token_issues(self.hass, self._entry.entry_id)
-            return self.async_update_and_abort(
-                self._entry, data=self._user_input, reason="reconfigure_successful"
+            # The update listener of a loaded entry reloads it when the data changes
+            loaded = self._entry.state is ConfigEntryState.LOADED
+            changed = self.hass.config_entries.async_update_entry(
+                self._entry, data=self._user_input
             )
+            if not (loaded and changed):
+                self.hass.config_entries.async_schedule_reload(self._entry.entry_id)
+            return self.async_abort(reason="reconfigure_successful")
 
         return self.async_create_entry(title=self.entity_name, data=self._user_input)
 
     async def _async_validate_response(self, user_input):
         errors = {}
         alt_auth_method = self._user_input.get(CONF_ALT_AUTH_METHOD)
-        url = self._callback_view.token_url if alt_auth_method else user_input[CONF_URL]
+        error_key = "base" if alt_auth_method else CONF_URL
+        url = (
+            self._callback_urls.get(self._flow["state"], "")
+            if alt_auth_method
+            else user_input[CONF_URL]
+        )
         if url[:5].lower() == "http:":
             url = f"https:{url[5:]}"
-        if "code" not in url:
-            errors[CONF_URL] = "invalid_url"
+        query = parse_qs(urlparse(url).query)
+        if "code" not in query and "error" not in query:
+            errors[error_key] = "invalid_url"
             return errors
 
         if self._ms365account.account.username:
@@ -307,25 +344,28 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
 
         main_resource = self._user_input.get(CONF_SHARED_MAILBOX)
 
-        result = await self.hass.async_add_executor_job(
-            ft.partial(
-                self._ms365account.account.request_token,
-                url,
-                flow=self._flow,
-                redirect_uri=get_callback_url(
-                    self.hass, alt_auth_method, self._user_input
-                ),
+        try:
+            result = await self.hass.async_add_executor_job(
+                ft.partial(
+                    self._ms365account.account.request_token,
+                    url,
+                    flow=self._flow,
+                    redirect_uri=get_callback_url(
+                        self.hass, alt_auth_method, self._user_input
+                    ),
+                )
             )
-        )
+        except ValueError as err:
+            _LOGGER.warning(ERROR_INVALID_URL, err)
+            errors[error_key] = "invalid_url"
+            return errors
 
         if result is not True:
             _LOGGER.error(TOKEN_ERROR_FILE)
-            errors[CONF_URL] = "token_file_error"
+            errors[error_key] = "token_file_error"
             return errors
 
-        (
-            auth_error  # pylint: disable=unused-variable  # noqa: F841
-        ) = await self.hass.async_add_executor_job(
+        __ = await self.hass.async_add_executor_job(
             self._ms365account.try_authentication,
             credentials,
             main_resource,
@@ -342,7 +382,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
 
         error = await self._permissions.async_check_authorizations()
         if error:
-            errors[CONF_URL] = error
+            errors[error_key] = error
 
         return errors
 
@@ -374,9 +414,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
                 default=entry_data.get(
                     CONF_CLIENT_SECRET_SOURCE, CLIENT_SECRET_SOURCE_MANUAL
                 ),
-            ): vol.In(
-                (CLIENT_SECRET_SOURCE_ENVIRONMENT, CLIENT_SECRET_SOURCE_MANUAL)
-            ),
+            ): vol.In((CLIENT_SECRET_SOURCE_ENVIRONMENT, CLIENT_SECRET_SOURCE_MANUAL)),
             vol.Optional(
                 CONF_ALT_AUTH_METHOD, default=entry_data[CONF_ALT_AUTH_METHOD]
             ): cv.boolean,
@@ -405,19 +443,44 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
         data = import_data["data"]
         options = import_data["options"]
         self.entity_name = data[CONF_ENTITY_NAME]
-        if self._check_existing():
+        if self._check_existing(self.entity_name):
             _LOGGER.info(ERROR_IMPORTED_DUPLICATE, DOMAIN, self.entity_name)
-            return self.async_abort(reason="already_configured")
+            return self.async_abort(reason=AUTH_ERROR_ALREADY_CONFIGURED)
         await async_integration_imports(self.hass, import_data)
         return self.async_create_entry(
             title=self.entity_name, data=data, options=options
         )
 
-    def _check_existing(self):
+    def _check_existing(self, entity_name):
         config_entries = self.hass.config_entries.async_entries(DOMAIN)
         return any(
-            config_entry.title == self.entity_name for config_entry in config_entries
+            config_entry.data.get(CONF_ENTITY_NAME) == entity_name
+            for config_entry in config_entries
         )
+
+    def _validate_user_input(self, user_input):
+        if not self._reconfigure and self._check_existing(
+            user_input.get(CONF_ENTITY_NAME)
+        ):
+            return {CONF_ENTITY_NAME: AUTH_ERROR_ALREADY_CONFIGURED}
+        return integration_validate_schema(user_input)
+
+    async def _async_delete_unreadable_token(self, auth_error, token_backend):
+        # A reconfigure replaces the token, so one that cannot be read is deleted
+        if (
+            auth_error in [TOKEN_FILE_CORRUPTED, TOKEN_FILE_OUTDATED]
+            and self._reconfigure
+            and self._ms365account.account
+        ):
+            await self.hass.async_add_executor_job(token_backend.delete_token)
+            return False
+        return auth_error
+
+    @callback
+    def async_remove(self) -> None:
+        """Remove the flow from the authorization callbacks."""
+        if self._callback_urls is not None:
+            self._callback_urls.pop(self._flow["state"], None)
 
 
 def get_callback_url(hass: HomeAssistant, alt_config, user_input):
@@ -429,6 +492,15 @@ def get_callback_url(hass: HomeAssistant, alt_config, user_input):
     return COUNTRY_URLS[country][OAUTH_REDIRECT_URL]
 
 
+@callback
+def _async_get_callback_urls(hass: HomeAssistant):
+    """Get the returned urls and register the callback view for this flow."""
+    token_urls = hass.data.setdefault(AUTH_CALLBACK_DATA, {})
+    # A view registered later at this path takes it over, so register for every flow
+    hass.http.register_view(MS365AuthCallbackView(token_urls))
+    return token_urls
+
+
 class MS365AuthCallbackView(HomeAssistantView):
     """MS365 Authorization Callback View."""
 
@@ -436,15 +508,21 @@ class MS365AuthCallbackView(HomeAssistantView):
     url = AUTH_CALLBACK_PATH_ALT
     name = AUTH_CALLBACK_NAME
 
-    def __init__(self) -> None:
+    def __init__(self, token_urls) -> None:
         """Initialize."""
-        self.token_url = ""
+        self.token_urls = token_urls
 
     async def get(self, request):
         """Receive authorization token."""
-        self.token_url = str(request.url)
+        state = request.query.get("state")
+        if state in self.token_urls:
+            self.token_urls[state] = str(request.url)
+            return web_response.Response(
+                headers={"content-type": "text/html"},
+                text="<script>window.close()</script>This window can be closed",
+            )
 
         return web_response.Response(
             headers={"content-type": "text/html"},
-            text="<script>window.close()</script>This window can be closed",
+            text="<script>window.close()</script>Invalid call to /api/ms365",
         )
