@@ -176,11 +176,10 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
                 if source == CLIENT_SECRET_SOURCE_ENVIRONMENT
                 else CONF_CLIENT_SECRET
             )
-            default_value = self._entry.data.get(
-                default_key,
+            default_value = self._entry.data.get(default_key) or (
                 "MS365_CLIENT_SECRET"
                 if source == CLIENT_SECRET_SOURCE_ENVIRONMENT
-                else "",
+                else ""
             )
             schema = {
                 vol.Required(default_key, default=default_value): vol.All(
