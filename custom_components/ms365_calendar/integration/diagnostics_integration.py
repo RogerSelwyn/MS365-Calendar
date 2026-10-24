@@ -18,9 +18,7 @@ async def async_integration_diagnostics(hass: HomeAssistant, entry: MS365ConfigE
     """Get integration specific diagnostics."""
     yaml_filename = build_yaml_filename(entry, YAML_CALENDARS_FILENAME)
     yaml_filepath = build_yaml_file_path(hass, yaml_filename)
-    calendars = await hass.async_add_executor_job(
-        load_yaml_file, yaml_filepath, CONF_CAL_ID
-    )
+    calendars = await hass.async_add_executor_job(load_yaml_file, yaml_filepath)
 
     redacted_calendars = {}
     for i, key in enumerate(calendars.keys(), start=1):

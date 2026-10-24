@@ -2,6 +2,7 @@
 """Test file management."""
 
 import pytest
+from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from requests_mock import Mocker
@@ -10,7 +11,11 @@ from .const_integration import FULL_INIT_ENTITY_NO
 
 from ..helpers.mock_config_entry import MS365MockConfigEntry
 from .helpers_integration.mocks import MS365MOCKS
-from .helpers_integration.utils_integration import check_yaml_file_contents, yaml_setup
+from .helpers_integration.utils_integration import (
+    check_yaml_file_contents,
+    read_yaml_file,
+    yaml_setup,
+)
 
 
 async def test_base_filemgmt(
@@ -112,3 +117,30 @@ async def test_deleted_file(
     check_yaml_file_contents(tmp_path, "ms365_calendars_base")
 
     assert "Calendar deleted from" in caplog.text
+
+
+async def test_deleted_file_sensitivity(
+    tmp_path,
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    base_token,
+    base_config_entry: MS365MockConfigEntry,
+) -> None:
+    """Test deleting yaml content keeps sensitivity_exclude as plain text."""
+    MS365MOCKS.standard_mocks(requests_mock)
+    yaml_setup(tmp_path, "ms365_calendars_delete_sensitivity")
+
+    base_config_entry.add_to_hass(hass)
+
+    await hass.config_entries.async_setup(base_config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    calendars = read_yaml_file(tmp_path)
+    assert [calendar["cal_id"] for calendar in calendars] == [
+        "calendar1",
+        "group:calendar2",
+        "calendar3",
+    ]
+    assert calendars[0]["entities"][0]["sensitivity_exclude"] == ["private"]
+
+    assert base_config_entry.state is ConfigEntryState.LOADED

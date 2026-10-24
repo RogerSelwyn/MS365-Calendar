@@ -82,9 +82,7 @@ async def _async_setup_coordinators(
 ):
     yaml_filename = build_yaml_filename(entry, YAML_CALENDARS_FILENAME)
     yaml_filepath = build_yaml_file_path(hass, yaml_filename)
-    calendars = await hass.async_add_executor_job(
-        load_yaml_file, yaml_filepath, CONF_CAL_ID
-    )
+    calendars = await hass.async_add_executor_job(load_yaml_file, yaml_filepath, True)
 
     local_store = LocalCalendarStore(hass, entry.entry_id)
 
