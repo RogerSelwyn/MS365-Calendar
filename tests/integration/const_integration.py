@@ -81,15 +81,11 @@ UPDATE_CALENDAR_LIST = ["Calendar1"]
 class URL(Enum):
     """List of URLs."""
 
-    OPENID = (
-        "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration"
-    )
+    OPENID = "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration"
     ME = "https://graph.microsoft.com/v1.0/me"
     CALENDARS = "https://graph.microsoft.com/v1.0/me/calendars"
     GROUP_CALENDARS = "https://graph.microsoft.com/v1.0/groups"
-    SHARED_CALENDARS = (
-        "https://graph.microsoft.com/v1.0/users/jane.doe@nomail.com/calendars"
-    )
+    SHARED_CALENDARS = "https://graph.microsoft.com/v1.0/users/jane.doe@nomail.com/calendars"
 
 
 class CN21VURL(Enum):

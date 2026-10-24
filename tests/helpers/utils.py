@@ -1,12 +1,12 @@
 # pylint: disable=line-too-long
 """Utilities for MS365 testing."""
 
+from datetime import UTC, datetime
 import json
+from pathlib import Path
 import re
 import shutil
 import time
-from datetime import datetime, UTC
-from pathlib import Path
 
 from ..const import (
     CLIENT_ID,
@@ -30,6 +30,7 @@ def mock_token(requests_mock, scope, tenant_id="common"):
     )
     mock_call(requests_mock, URL.OPENID, "openid")
 
+
 def mock_cn21v_token(requests_mock, scope):
     """Mock up the token response based on scope."""
     # Mock the token endpoint that MSAL will use (from the openid config)
@@ -38,6 +39,7 @@ def mock_cn21v_token(requests_mock, scope):
         "https://login.partner.microsoftonline.cn/common/oauth2/v2.0/token",
         text=token,
     )
+
 
 def _build_file_token(scope):
     """Build a token."""
@@ -118,9 +120,11 @@ def build_token_url(result, token_url):
 
     return f"{token_url}?{TOKEN_PARAMS.format(state)}"
 
+
 def token_filename(tmp_path):
     """Return the path of the token file."""
     return tmp_path / TOKEN_LOCATION / f"{DOMAIN}_{ENTITY_NAME}.token"
+
 
 def build_token_file(tmp_path, scope):
     """Build a token file."""
