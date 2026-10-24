@@ -423,6 +423,7 @@ ignore = [
   "D407",     # Section name underlining
   "D417",     # Missing argument descriptions in docstring - to allow documenting only non-obvious parameters
   "E501",     # line too long
+  "I001",
 
   "PLC1901", # {existing} can be simplified to {replacement} as an empty string is falsey; too many false positives
   "PLR0911", # Too many return statements ({returns} > {max_returns})
@@ -497,7 +498,6 @@ mark-parentheses = false
 [tool.ruff.lint.isort]
 force-sort-within-sections = true
 known-first-party = [
-    "custom_components",
     "homeassistant",
     "pyhomelink",
     "O365",

@@ -3,18 +3,22 @@
 
 from unittest.mock import patch
 
-from oauthlib.oauth2.rfc6749.errors import InvalidClientError
 import pytest
-from requests_mock import Mocker
-
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import entity_registry as er, issue_registry as ir
+from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers import issue_registry as ir
+from oauthlib.oauth2.rfc6749.errors import InvalidClientError
+from requests_mock import Mocker
 
 from .const import ENTITY_NAME, TOKEN_LOCATION
 from .helpers.mock_config_entry import MS365MockConfigEntry
 from .helpers.utils import build_token_file
-from .integration.const_integration import BASE_TOKEN_PERMS, DOMAIN, FULL_INIT_ENTITY_NO
+from .integration.const_integration import (
+    BASE_TOKEN_PERMS,
+    DOMAIN,
+    FULL_INIT_ENTITY_NO,
+)
 from .integration.helpers_integration.mocks import MS365MOCKS
 
 

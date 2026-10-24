@@ -2,7 +2,6 @@
 """Test permission handling."""
 
 import pytest
-
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import issue_registry as ir
 

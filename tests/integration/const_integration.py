@@ -11,7 +11,9 @@ from custom_components.ms365_calendar.const import (  # noqa: F401
     OAUTH_REDIRECT_URL,
     CountryOptions,
 )
-from custom_components.ms365_calendar.integration.const_integration import DOMAIN  # noqa: F401
+from custom_components.ms365_calendar.integration.const_integration import (
+    DOMAIN,  # noqa: F401
+)
 
 from ..const import CLIENT_ID, CLIENT_SECRET, ENTITY_NAME
 

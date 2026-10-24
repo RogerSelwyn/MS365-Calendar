@@ -6,16 +6,16 @@ from dataclasses import dataclass
 from typing import Any
 from unittest.mock import Mock, patch
 
+import pytest
 from aiohttp import ClientWebSocketResponse
 from aiohttp.test_utils import TestClient
-import pytest
+from homeassistant.core import Event, HomeAssistant
 from pytest_homeassistant_custom_component.typing import (
     ClientSessionGenerator,
     WebSocketGenerator,
 )
 
 from custom_components.ms365_calendar.integration import filemgmt_integration
-from homeassistant.core import Event, HomeAssistant
 
 from ..const import STORAGE_LOCATION
 from .const_integration import DOMAIN

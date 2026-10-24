@@ -1,15 +1,14 @@
 # pylint: disable=protected-access,redefined-outer-name, unused-argument, line-too-long, unused-import
 """Global fixtures for integration."""
 
-from copy import deepcopy
 import json
 import sys
+from copy import deepcopy
 from unittest.mock import patch
 
 import pytest
-from requests_mock import Mocker
-
 from homeassistant.core import HomeAssistant
+from requests_mock import Mocker
 
 from .const import ENTITY_NAME, LEGACY_TOKEN, TOKEN_LOCATION
 from .helpers.mock_config_entry import MS365MockConfigEntry

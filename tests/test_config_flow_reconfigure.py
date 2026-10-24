@@ -8,14 +8,25 @@ import pytest
 from requests_mock import Mocker
 
 from homeassistant import config_entries
-from homeassistant.config_entries import ConfigEntryState
-from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
+from homeassistant.config_entries import ConfigEntryState
 from homeassistant.helpers import issue_registry as ir
+from homeassistant.core import HomeAssistant
+from .integration.helpers_integration.mocks import MS365MOCKS
 
-from .const import CLIENT_ID, ENTITY_NAME, TENANT_OPTIONS, TOKEN_URL_ASSERT
+from .const import (
+    CLIENT_ID,
+    ENTITY_NAME,
+    TOKEN_URL_ASSERT,
+    TENANT_OPTIONS,
+)
 from .helpers.mock_config_entry import MS365MockConfigEntry
-from .helpers.utils import build_token_url, mock_token, token_filename, token_setup
+from .helpers.utils import (
+    build_token_url,
+    mock_token,
+    token_setup,
+    token_filename,
+)
 from .integration.const_integration import (
     AUTH_CALLBACK_PATH_DEFAULT,
     BASE_CONFIG_ENTRY,
@@ -24,7 +35,6 @@ from .integration.const_integration import (
     RECONFIGURE_CONFIG_ENTRY,
     MS365ConfigFlow,
 )
-from .integration.helpers_integration.mocks import MS365MOCKS
 
 
 async def test_reconfigure_flow(

@@ -1,26 +1,23 @@
 # pylint: disable=unused-argument,line-too-long,wrong-import-order
 """Test main calendar testing."""
 
+import logging
 from copy import deepcopy
 from datetime import date, datetime, timedelta
-import logging
 from unittest.mock import patch
-from zoneinfo import ZoneInfo
-
 import pytest
-from requests.exceptions import HTTPError, ReadTimeout
-from requests_mock import Mocker
 
-from homeassistant.components.calendar import (
-    DOMAIN as CALENDAR_DOMAIN,
-    SERVICE_GET_EVENTS,
-)
+from homeassistant.util import dt as dt_util
+from homeassistant.components.calendar import DOMAIN as CALENDAR_DOMAIN
+from homeassistant.components.calendar import SERVICE_GET_EVENTS
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
-from homeassistant.util import dt as dt_util
+from requests.exceptions import HTTPError, ReadTimeout
+from requests_mock import Mocker
+from zoneinfo import ZoneInfo
 
 from ..helpers.mock_config_entry import MS365MockConfigEntry
-from ..helpers.utils import check_entity_state, mock_call, utcnow
+from ..helpers.utils import check_entity_state, utcnow, mock_call
 from .const_integration import DOMAIN, FULL_INIT_ENTITY_NO, URL
 from .data_integration.state import BASE_STATE_CAL1, BASE_STATE_CAL2
 from .helpers_integration.mocks import MS365MOCKS

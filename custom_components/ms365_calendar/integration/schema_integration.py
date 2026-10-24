@@ -1,7 +1,7 @@
 """Schema for MS365 Integration."""
 
 from collections.abc import Callable
-import datetime as dt
+import datetime
 from itertools import groupby
 from typing import Any
 
@@ -79,7 +79,7 @@ def _as_local_timezone(*keys: Any) -> Callable[[dict[str, Any]], dict[str, Any]]
     def validate(obj: dict[str, Any]) -> dict[str, Any]:
         """Convert all keys that are datetime values to local timezone."""
         for k in keys:
-            if (value := obj.get(k)) and isinstance(value, dt.datetime):
+            if (value := obj.get(k)) and isinstance(value, datetime.datetime):
                 obj[k] = dt_util.as_local(value)
         return obj
 

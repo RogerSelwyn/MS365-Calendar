@@ -2,14 +2,14 @@
 """Test file management."""
 
 import pytest
-from requests_mock import Mocker
-
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
+from requests_mock import Mocker
+
+from .const_integration import FULL_INIT_ENTITY_NO
 
 from ..helpers.mock_config_entry import MS365MockConfigEntry
-from .const_integration import FULL_INIT_ENTITY_NO
 from .helpers_integration.mocks import MS365MOCKS
 from .helpers_integration.utils_integration import (
     check_yaml_file_contents,

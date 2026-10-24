@@ -1,7 +1,6 @@
 # pylint: disable=unused-argument, line-too-long
 """Test the diagnostics."""
 from copy import deepcopy
-
 from homeassistant.core import HomeAssistant
 
 from .const import ENTITY_NAME
