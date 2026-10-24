@@ -57,8 +57,6 @@ def load_yaml_file(path, validate=False):
         # When YAML file could not be loaded/did not contain a dict
         return {}
 
-    return items
-
 
 def write_yaml_file(yaml_filepath, cal):
     """Write to the calendar file."""

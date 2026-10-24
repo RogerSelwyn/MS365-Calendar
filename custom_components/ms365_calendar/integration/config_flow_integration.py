@@ -35,8 +35,6 @@ from .const_integration import (
     CONF_UPDATE_INTERVAL,
     DEFAULT_DAYS_BACKWARD,
     DEFAULT_DAYS_FORWARD,
-    DEFAULT_HOURS_BACKWARD_TO_GET,
-    DEFAULT_HOURS_FORWARD_TO_GET,
     DEFAULT_UPDATE_INTERVAL,
     YAML_CALENDARS_FILENAME,
 )
@@ -238,16 +236,12 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
                     ): cv.string,
                     vol.Optional(
                         CONF_HOURS_FORWARD_TO_GET,
-                        default=calendar_item.get(
-                            CONF_HOURS_FORWARD_TO_GET, DEFAULT_HOURS_FORWARD_TO_GET
-                        ),
-                    ): int,
+                        default=calendar_item.get(CONF_HOURS_FORWARD_TO_GET),
+                    ): vol.Any(None, int),
                     vol.Optional(
                         CONF_HOURS_BACKWARD_TO_GET,
-                        default=calendar_item.get(
-                            CONF_HOURS_BACKWARD_TO_GET, DEFAULT_HOURS_BACKWARD_TO_GET
-                        ),
-                    ): int,
+                        default=calendar_item.get(CONF_HOURS_BACKWARD_TO_GET),
+                    ): vol.Any(None, int),
                     vol.Optional(
                         CONF_MAX_RESULTS,
                         description={
