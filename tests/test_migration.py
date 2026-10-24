@@ -4,10 +4,11 @@
 from copy import deepcopy
 
 import pytest
+from requests_mock import Mocker
+
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
-from requests_mock import Mocker
 
 from .const import ENTITY_NAME
 from .helpers.mock_config_entry import MS365MockConfigEntry
