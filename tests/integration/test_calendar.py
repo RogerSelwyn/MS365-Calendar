@@ -1,23 +1,26 @@
 # pylint: disable=unused-argument,line-too-long,wrong-import-order
 """Test main calendar testing."""
 
-import logging
 from copy import deepcopy
 from datetime import date, datetime, timedelta
+import logging
 from unittest.mock import patch
-import pytest
-
-from homeassistant.util import dt as dt_util
-from homeassistant.components.calendar import DOMAIN as CALENDAR_DOMAIN
-from homeassistant.components.calendar import SERVICE_GET_EVENTS
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers import entity_registry as er
-from requests.exceptions import HTTPError, ReadTimeout
-from requests_mock import Mocker
 from zoneinfo import ZoneInfo
 
+import pytest
+from requests.exceptions import HTTPError, ReadTimeout
+from requests_mock import Mocker
+
+from homeassistant.components.calendar import (
+    DOMAIN as CALENDAR_DOMAIN,
+    SERVICE_GET_EVENTS,
+)
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
+from homeassistant.util import dt as dt_util
+
 from ..helpers.mock_config_entry import MS365MockConfigEntry
-from ..helpers.utils import check_entity_state, utcnow, mock_call
+from ..helpers.utils import check_entity_state, mock_call, utcnow
 from .const_integration import DOMAIN, FULL_INIT_ENTITY_NO, URL
 from .data_integration.state import BASE_STATE_CAL1, BASE_STATE_CAL2
 from .helpers_integration.mocks import MS365MOCKS
@@ -346,6 +349,7 @@ async def test_exclude_plain_text(
 
     check_entity_state(hass, "calendar.test_calendar1", "on", data_length=2)
 
+
 async def test_first_sync_error(
     hass: HomeAssistant,
     requests_mock: Mocker,
@@ -364,6 +368,7 @@ async def test_first_sync_error(
     check_entity_state(hass, "calendar.test_calendar1", "unavailable")
 
     assert "No current event found for group:calendar2" in caplog.text
+
 
 def _adjust_date(data, adddays_start=0, adddays_end=0):
     new_data = deepcopy(data)

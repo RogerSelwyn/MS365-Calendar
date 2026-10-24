@@ -4,9 +4,10 @@
 from unittest.mock import patch
 
 import pytest
+from requests_mock import Mocker
+
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
-from requests_mock import Mocker
 
 from ..helpers.mock_config_entry import MS365MockConfigEntry
 from ..helpers.utils import build_token_file

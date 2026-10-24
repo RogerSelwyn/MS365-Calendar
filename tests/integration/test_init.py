@@ -3,9 +3,6 @@
 
 from unittest.mock import patch
 
-from homeassistant.const import CONF_NAME
-from homeassistant.core import HomeAssistant
-
 from custom_components.ms365_calendar.integration.const_integration import (
     CONF_ADVANCED_OPTIONS,
     CONF_CALENDAR_LIST,
@@ -19,6 +16,8 @@ from custom_components.ms365_calendar.integration.const_integration import (
     DEFAULT_DAYS_FORWARD,
     DEFAULT_UPDATE_INTERVAL,
 )
+from homeassistant.const import CONF_NAME
+from homeassistant.core import HomeAssistant
 
 from ..helpers.mock_config_entry import MS365MockConfigEntry
 from .const_integration import UPDATE_CALENDAR_LIST

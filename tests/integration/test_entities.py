@@ -131,7 +131,9 @@ async def test_deleted_renamed_calendar(
         "delete_calendar_test_Delete calendar",
         config_entry=base_config_entry,
     )
-    entity_registry.async_update_entity(entry.entity_id, new_entity_id="calendar.renamed")
+    entity_registry.async_update_entity(
+        entry.entity_id, new_entity_id="calendar.renamed"
+    )
 
     await hass.config_entries.async_setup(base_config_entry.entry_id)
     await hass.async_block_till_done()
@@ -183,7 +185,9 @@ async def test_group_calendar_features(
 ) -> None:
     """Test a group calendar only offers to create events."""
     state = hass.states.get("calendar.test_calendar2")
-    assert state.attributes[ATTR_SUPPORTED_FEATURES] == CalendarEntityFeature.CREATE_EVENT
+    assert (
+        state.attributes[ATTR_SUPPORTED_FEATURES] == CalendarEntityFeature.CREATE_EVENT
+    )
 
     state = hass.states.get("calendar.test_calendar1")
     assert state.attributes[ATTR_SUPPORTED_FEATURES] == (
@@ -191,4 +195,3 @@ async def test_group_calendar_features(
         | CalendarEntityFeature.DELETE_EVENT
         | CalendarEntityFeature.UPDATE_EVENT
     )
-
