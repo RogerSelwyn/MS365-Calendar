@@ -1,12 +1,12 @@
 # pylint: disable=line-too-long
 """Utilities for MS365 testing."""
 
+from datetime import UTC, datetime
 import json
+from pathlib import Path
 import re
 import shutil
 import time
-from datetime import datetime, UTC
-from pathlib import Path
 
 from ..const import (
     CLIENT_ID,

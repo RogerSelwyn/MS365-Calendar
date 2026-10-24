@@ -3,21 +3,21 @@
 
 from datetime import datetime, timedelta
 from unittest.mock import patch
+from zoneinfo import ZoneInfo
 
 import pytest
+from requests_mock import Mocker
+from voluptuous.error import MultipleInvalid
+
+from custom_components.ms365_calendar.const import CONF_ENABLE_UPDATE
 from homeassistant.components.calendar import (
     CREATE_EVENT_SERVICE,
+    DOMAIN as CALENDAR_DOMAIN,
     SERVICE_GET_EVENTS,
 )
-from homeassistant.components.calendar import DOMAIN as CALENDAR_DOMAIN
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.util import dt as dt_util
-from requests_mock import Mocker
-from voluptuous.error import MultipleInvalid
-from zoneinfo import ZoneInfo
-
-from custom_components.ms365_calendar.const import CONF_ENABLE_UPDATE
 
 from ..conftest import MS365MockConfigEntry
 from ..helpers.utils import mock_call

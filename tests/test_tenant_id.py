@@ -4,19 +4,15 @@
 from copy import deepcopy
 from enum import Enum
 
+from requests_mock import Mocker
+
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
-from requests_mock import Mocker
 
 from .const import CLIENT_ID, TOKEN_URL_ASSERT
 from .helpers.mock_config_entry import MS365MockConfigEntry
-from .helpers.utils import (
-    build_token_url,
-    mock_call,
-    mock_token,
-    mock_cn21v_token,
-)
+from .helpers.utils import build_token_url, mock_call, mock_cn21v_token, mock_token
 from .integration import get_tenant_id
 from .integration.const_integration import (
     AUTH_CALLBACK_PATH_DEFAULT,

@@ -1,34 +1,33 @@
 # pylint: disable=line-too-long, unused-argument
 """Test the config flow."""
 
-from aiohttp import web_response
 from copy import deepcopy
 
+from aiohttp import web_response
 import pytest
 from pytest_homeassistant_custom_component.typing import ClientSessionGenerator
 from requests_mock import Mocker
 
 from homeassistant import config_entries
 from homeassistant.components.http import HomeAssistantView
+from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
-from homeassistant.config_entries import ConfigEntryState
-
 
 from .const import (
     CLIENT_ID,
     ENTITY_NAME,
+    TOKEN_PARAMS,
     TOKEN_URL_ASSERT,
     TOKEN_URL_CN21V_ASSERT,
-    TOKEN_PARAMS,
 )
 from .helpers.mock_config_entry import MS365MockConfigEntry
 from .helpers.utils import (
     build_token_url,
     mock_call,
+    mock_cn21v_token,
     mock_token,
     token_setup,
-    mock_cn21v_token,
 )
 from .integration.const_integration import (
     ALT_CONFIG_ENTRY,

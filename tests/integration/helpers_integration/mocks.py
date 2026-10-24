@@ -1,7 +1,7 @@
 """Mock setup."""
 from datetime import timedelta
 
-from ...helpers.utils import mock_call, utcnow, load_json
+from ...helpers.utils import load_json, mock_call, utcnow
 from ..const_integration import CN21VURL, URL
 
 
