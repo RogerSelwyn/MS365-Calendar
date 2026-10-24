@@ -9,10 +9,7 @@ from unittest.mock import Mock, patch
 from aiohttp import ClientWebSocketResponse
 from aiohttp.test_utils import TestClient
 import pytest
-from pytest_homeassistant_custom_component.typing import (
-    ClientSessionGenerator,
-    WebSocketGenerator,
-)
+from pytest_homeassistant_custom_component.typing import ClientSessionGenerator, WebSocketGenerator
 
 from custom_components.ms365_calendar.integration import filemgmt_integration
 from homeassistant.core import Event, HomeAssistant
@@ -75,9 +72,7 @@ class Client:
         self.client = client
         self.id = 0
 
-    async def cmd(
-        self, cmd: str, payload: dict[str, Any] | None = None
-    ) -> dict[str, Any]:
+    async def cmd(self, cmd: str, payload: dict[str, Any] | None = None) -> dict[str, Any]:
         """Send a command and receive the json result."""
         self.id += 1
         await self.client.send_json(
@@ -91,9 +86,7 @@ class Client:
         assert resp.get("id") == self.id
         return resp
 
-    async def cmd_result(
-        self, cmd: str, payload: dict[str, Any] | None = None
-    ) -> dict[str, Any] | None:
+    async def cmd_result(self, cmd: str, payload: dict[str, Any] | None = None) -> dict[str, Any] | None:
         """Send a command and parse the result."""
         resp = await self.cmd(cmd, payload)
         assert resp.get("success")

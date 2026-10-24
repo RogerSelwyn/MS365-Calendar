@@ -4,10 +4,7 @@
 import pytest
 from requests_mock import Mocker
 
-from homeassistant.components.calendar import (
-    DOMAIN as CALENDAR_DOMAIN,
-    CalendarEntityFeature,
-)
+from homeassistant.components.calendar import DOMAIN as CALENDAR_DOMAIN, CalendarEntityFeature
 from homeassistant.const import ATTR_SUPPORTED_FEATURES
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
@@ -41,14 +38,8 @@ async def test_same_name(
     await hass.config_entries.async_setup(base_config_entry.entry_id)
     await hass.async_block_till_done()
 
-    assert (
-        entity_registry.async_get("calendar.test_calendar1").unique_id
-        == "calendar1_test_Calendar1"
-    )
-    assert (
-        entity_registry.async_get("calendar.test_calendar3").unique_id
-        == "calendar3_test_Calendar3"
-    )
+    assert entity_registry.async_get("calendar.test_calendar1").unique_id == "calendar1_test_Calendar1"
+    assert entity_registry.async_get("calendar.test_calendar3").unique_id == "calendar3_test_Calendar3"
 
     state = hass.states.get("calendar.test_calendar1")
     assert state.attributes["friendly_name"] == "Calendar"
@@ -58,9 +49,7 @@ async def test_same_name(
     ]
     state = hass.states.get("calendar.test_calendar3")
     assert state.attributes["friendly_name"] == "Calendar"
-    assert [event["summary"] for event in state.attributes["data"]] == [
-        "Test event 1 calendar3"
-    ]
+    assert [event["summary"] for event in state.attributes["data"]] == ["Test event 1 calendar3"]
 
 
 async def test_same_name_calendar_error(
@@ -73,9 +62,7 @@ async def test_same_name_calendar_error(
 ) -> None:
     """Test a failed calendar does not show another calendar with the same name."""
     MS365MOCKS.standard_mocks(requests_mock)
-    requests_mock.get(
-        f"{URL.CALENDARS.value}/calendar3", status_code=404, json=NOT_FOUND
-    )
+    requests_mock.get(f"{URL.CALENDARS.value}/calendar3", status_code=404, json=NOT_FOUND)
     yaml_setup(tmp_path, "ms365_calendars_same_name")
 
     base_config_entry.add_to_hass(hass)
@@ -98,18 +85,14 @@ async def test_deselect_renamed_calendar(
     entity_registry: er.EntityRegistry,
 ) -> None:
     """Test an entity the user renamed is removed when its calendar is deselected."""
-    entity_registry.async_update_entity(
-        "calendar.test_calendar2", new_entity_id="calendar.renamed"
-    )
+    entity_registry.async_update_entity("calendar.test_calendar2", new_entity_id="calendar.renamed")
     await hass.async_block_till_done()
 
     await update_options(hass, base_config_entry)
     await hass.async_block_till_done()
 
     assert entity_registry.async_get("calendar.renamed") is None
-    entities = er.async_entries_for_config_entry(
-        entity_registry, base_config_entry.entry_id
-    )
+    entities = er.async_entries_for_config_entry(entity_registry, base_config_entry.entry_id)
     assert [entity.entity_id for entity in entities] == ["calendar.test_calendar1"]
 
 
@@ -131,17 +114,13 @@ async def test_deleted_renamed_calendar(
         "delete_calendar_test_Delete calendar",
         config_entry=base_config_entry,
     )
-    entity_registry.async_update_entity(
-        entry.entity_id, new_entity_id="calendar.renamed"
-    )
+    entity_registry.async_update_entity(entry.entity_id, new_entity_id="calendar.renamed")
 
     await hass.config_entries.async_setup(base_config_entry.entry_id)
     await hass.async_block_till_done()
 
     assert entity_registry.async_get("calendar.renamed") is None
-    entities = er.async_entries_for_config_entry(
-        entity_registry, base_config_entry.entry_id
-    )
+    entities = er.async_entries_for_config_entry(entity_registry, base_config_entry.entry_id)
     assert len(entities) == FULL_INIT_ENTITY_NO
 
 
@@ -164,18 +143,11 @@ async def test_group_calendar_error(
     await hass.config_entries.async_setup(base_config_entry.entry_id)
     await hass.async_block_till_done()
 
-    assert (
-        caplog.text.count(
-            "Error getting group calendar - group:calendar2 - calendar.test_calendar2"
-        )
-        == 1
-    )
+    assert caplog.text.count("Error getting group calendar - group:calendar2 - calendar.test_calendar2") == 1
     assert hass.states.get("calendar.test_calendar2") is None
     assert hass.states.get("calendar.test_calendar1") is not None
     assert not [
-        request
-        for request in requests_mock.request_history
-        if "/groups/calendar2/calendar/calendarView" in request.url
+        request for request in requests_mock.request_history if "/groups/calendar2/calendar/calendarView" in request.url
     ]
 
 
@@ -185,13 +157,9 @@ async def test_group_calendar_features(
 ) -> None:
     """Test a group calendar only offers to create events."""
     state = hass.states.get("calendar.test_calendar2")
-    assert (
-        state.attributes[ATTR_SUPPORTED_FEATURES] == CalendarEntityFeature.CREATE_EVENT
-    )
+    assert state.attributes[ATTR_SUPPORTED_FEATURES] == CalendarEntityFeature.CREATE_EVENT
 
     state = hass.states.get("calendar.test_calendar1")
     assert state.attributes[ATTR_SUPPORTED_FEATURES] == (
-        CalendarEntityFeature.CREATE_EVENT
-        | CalendarEntityFeature.DELETE_EVENT
-        | CalendarEntityFeature.UPDATE_EVENT
+        CalendarEntityFeature.CREATE_EVENT | CalendarEntityFeature.DELETE_EVENT | CalendarEntityFeature.UPDATE_EVENT
     )

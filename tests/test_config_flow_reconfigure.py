@@ -52,9 +52,7 @@ async def test_reconfigure_flow(
 
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "request_default"
-    assert result["description_placeholders"]["auth_url"].startswith(
-        f"{TOKEN_URL_ASSERT}{CLIENT_ID}"
-    )
+    assert result["description_placeholders"]["auth_url"].startswith(f"{TOKEN_URL_ASSERT}{CLIENT_ID}")
     assert result["description_placeholders"]["entity_name"] == ENTITY_NAME
     assert result["description_placeholders"]["failed_permissions"] is None
 
@@ -130,9 +128,7 @@ async def test_reconfigure_reloads_once(
         assert reload.call_count == 1
         assert base_config_entry.state is ConfigEntryState.LOADED
 
-        await _async_reconfigure(
-            hass, requests_mock, base_config_entry, user_input=changed_input
-        )
+        await _async_reconfigure(hass, requests_mock, base_config_entry, user_input=changed_input)
         assert reload.call_count == 2
 
     assert base_config_entry.state is ConfigEntryState.LOADED
@@ -149,15 +145,11 @@ async def test_reconfigure_corrupt_token(
     """Test reconfigure replaces a token that cannot be read."""
     token_setup(tmp_path, "corrupt2")
     await _async_setup_failed_entry(hass, requests_mock, base_config_entry)
-    assert [issue.translation_key for issue in issue_registry.issues.values()] == [
-        "corrupted"
-    ]
+    assert [issue.translation_key for issue in issue_registry.issues.values()] == ["corrupted"]
     token_file = token_filename(tmp_path)
     assert token_file.is_file()
 
-    await _async_reconfigure(
-        hass, requests_mock, base_config_entry, token_file=token_file
-    )
+    await _async_reconfigure(hass, requests_mock, base_config_entry, token_file=token_file)
 
     assert base_config_entry.state is ConfigEntryState.LOADED
     assert not issue_registry.issues
@@ -173,15 +165,11 @@ async def test_reconfigure_outdated_token(
 ) -> None:
     """Test reconfigure replaces an outdated token and clears its repair issue."""
     await _async_setup_failed_entry(hass, requests_mock, base_config_entry)
-    assert [issue.translation_key for issue in issue_registry.issues.values()] == [
-        "outdated"
-    ]
+    assert [issue.translation_key for issue in issue_registry.issues.values()] == ["outdated"]
     token_file = token_filename(tmp_path)
     assert token_file.is_file()
 
-    await _async_reconfigure(
-        hass, requests_mock, base_config_entry, token_file=token_file
-    )
+    await _async_reconfigure(hass, requests_mock, base_config_entry, token_file=token_file)
 
     assert base_config_entry.state is ConfigEntryState.LOADED
     assert not issue_registry.issues
@@ -212,9 +200,7 @@ async def test_repair_issues_per_entry(
     assert list(issue_registry.issues) == [(DOMAIN, f"missing_{other_entry.entry_id}")]
 
 
-async def _async_reconfigure(
-    hass, requests_mock, entry, user_input=RECONFIGURE_CONFIG_ENTRY, token_file=None
-):
+async def _async_reconfigure(hass, requests_mock, entry, user_input=RECONFIGURE_CONFIG_ENTRY, token_file=None):
     """Run a successful reconfigure flow."""
     mock_token(requests_mock, BASE_TOKEN_PERMS)
     result = await hass.config_entries.flow.async_init(

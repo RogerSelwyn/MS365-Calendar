@@ -28,12 +28,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 
 from ..helpers.mock_config_entry import MS365MockConfigEntry
-from ..helpers.utils import (
-    build_token_file,
-    build_token_url,
-    get_schema_default,
-    mock_token,
-)
+from ..helpers.utils import build_token_file, build_token_url, get_schema_default, mock_token
 from .const_integration import (
     AUTH_CALLBACK_PATH_DEFAULT,
     BASE_CONFIG_ENTRY,
@@ -44,11 +39,7 @@ from .const_integration import (
     UPDATE_CALENDAR_LIST,
 )
 from .helpers_integration.mocks import MS365MOCKS
-from .helpers_integration.utils_integration import (
-    read_yaml_file,
-    update_options,
-    yaml_setup,
-)
+from .helpers_integration.utils_integration import read_yaml_file, update_options, yaml_setup
 
 
 async def test_options_flow(
@@ -249,9 +240,7 @@ async def test_shared_email_invalid(
     mock_token(requests_mock, SHARED_TOKEN_PERMS)
     MS365MOCKS.standard_mocks(requests_mock)
 
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
 
     user_input = deepcopy(BASE_CONFIG_ENTRY)
     email = "john@nomail.com"

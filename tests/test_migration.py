@@ -38,10 +38,7 @@ async def test_default_flow(
         context={"source": config_entries.SOURCE_IMPORT},
         data=MIGRATION_CONFIG_ENTRY,
     )
-    assert (
-        f"Could not locate token at {tmp_path}/storage/tokens/{DOMAIN}_test.token"
-        in caplog.text
-    )
+    assert f"Could not locate token at {tmp_path}/storage/tokens/{DOMAIN}_test.token" in caplog.text
 
 
 async def test_duplicate_migration(

@@ -43,9 +43,7 @@ async def test_reload(
             },
         },
     )
-    with patch(
-        "homeassistant.config_entries.ConfigEntries.async_reload"
-    ) as mock_async_reload:
+    with patch("homeassistant.config_entries.ConfigEntries.async_reload") as mock_async_reload:
         await hass.config_entries.options.async_configure(
             result["flow_id"],
             user_input={

@@ -11,11 +11,7 @@ from homeassistant.helpers import entity_registry as er
 from ..helpers.mock_config_entry import MS365MockConfigEntry
 from .const_integration import FULL_INIT_ENTITY_NO
 from .helpers_integration.mocks import MS365MOCKS
-from .helpers_integration.utils_integration import (
-    check_yaml_file_contents,
-    read_yaml_file,
-    yaml_setup,
-)
+from .helpers_integration.utils_integration import check_yaml_file_contents, read_yaml_file, yaml_setup
 
 
 async def test_base_filemgmt(
@@ -90,9 +86,7 @@ async def test_corrupt_file_2(
 
     assert "Invalid Data - duplicate entries may be created" in caplog.text
 
-    entities = er.async_entries_for_config_entry(
-        entity_registry, base_config_entry.entry_id
-    )
+    entities = er.async_entries_for_config_entry(entity_registry, base_config_entry.entry_id)
     assert len(entities) == FULL_INIT_ENTITY_NO
 
 

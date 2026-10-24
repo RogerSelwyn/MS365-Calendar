@@ -73,9 +73,7 @@ class TestGetTenantId:
 # --- Integration tests for config flow with tenant_id ---
 
 TENANT_ID = "11111111-2222-3333-4444-555555555555"
-TENANT_TOKEN_URL_ASSERT = (
-    f"https://login.microsoftonline.com/{TENANT_ID}/oauth2/v2.0/authorize?client_id="
-)
+TENANT_TOKEN_URL_ASSERT = f"https://login.microsoftonline.com/{TENANT_ID}/oauth2/v2.0/authorize?client_id="
 
 
 def _config_entry_with_tenant(tenant_id):
@@ -106,9 +104,7 @@ async def test_flow_with_tenant_id(
     _mock_tenant_urls(requests_mock, BASE_TOKEN_PERMS)
     MS365MOCKS.standard_mocks(requests_mock)
 
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     assert result.get("type") is FlowResultType.FORM
     assert result["step_id"] == "user"
 
@@ -145,9 +141,7 @@ async def test_flow_without_tenant_id_uses_common(
 
     mock_call(requests_mock, URL.OPENID, "openid")
 
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     assert result.get("type") is FlowResultType.FORM
 
     result = await hass.config_entries.flow.async_configure(
@@ -158,9 +152,7 @@ async def test_flow_without_tenant_id_uses_common(
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "request_default"
     auth_url = result["description_placeholders"]["auth_url"]
-    assert auth_url.startswith(f"{TOKEN_URL_ASSERT}{CLIENT_ID}"), (
-        f"Expected auth URL to use /common/, got: {auth_url}"
-    )
+    assert auth_url.startswith(f"{TOKEN_URL_ASSERT}{CLIENT_ID}"), f"Expected auth URL to use /common/, got: {auth_url}"
 
 
 async def test_reconfigure_preserves_tenant_id(
@@ -221,9 +213,7 @@ async def test_flow_cn21v_with_tenant_id(
     mock_cn21v_token(requests_mock, BASE_TOKEN_PERMS)
     MS365MOCKS.cn21v_mocks(requests_mock, TENANT_ID)
 
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     assert result.get("type") is FlowResultType.FORM
     assert result["step_id"] == "user"
 
@@ -239,9 +229,7 @@ async def test_flow_cn21v_with_tenant_id(
     assert result["step_id"] == "request_default"
     auth_url = result["description_placeholders"]["auth_url"]
     # Verify the CN21V domain is used (not the default login.microsoftonline.com)
-    assert "login.partner.microsoftonline.cn" in auth_url, (
-        f"Expected CN21V auth URL, got: {auth_url}"
-    )
+    assert "login.partner.microsoftonline.cn" in auth_url, f"Expected CN21V auth URL, got: {auth_url}"
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
@@ -269,9 +257,7 @@ async def test_flow_with_unknown_tenant_id(
         json={"error": "invalid_tenant"},
     )
 
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         user_input=_config_entry_with_tenant("unknown-tenant"),
