@@ -472,8 +472,8 @@ ignore = [
   "ISC004",
   "LOG004",
 
-  # RWJS - OK in dev
-  "PERF203",
+  "PERF203",  # RWJS - OK in dev
+  "I001",     # RWJS - Matching Ruff CLI formatting to VS Code Ruff formatting seems a challenge
 ]
 
 [tool.ruff.lint.flake8-import-conventions.extend-aliases]
