@@ -37,6 +37,7 @@
 - [Sourcery validations](https://github.com/RogerSelwyn/MS365-Calendar/commit/200b7a650526c14ba28ed61c4edaf2359013498b) - @RogerSelwyn
 - [Make hours foward/backward optional in line with docs](https://github.com/RogerSelwyn/MS365-Calendar/commit/1f807694fd72c4f1c65e91f39891a2b9334ffa63) - @RogerSelwyn
 - [Ruff recommended changes](https://github.com/RogerSelwyn/MS365-Calendar/commit/c93045523230b6bdd3a63ca5edc1071ec6f15c90) - @RogerSelwyn
+- [Revert "maint: Ruff recommended changes"](https://github.com/RogerSelwyn/MS365-Calendar/commit/7c1896915d5f0cd2b421d4dc55ea6ce36090ac9a) - @RogerSelwyn
 - [Ruff import sorting](https://github.com/RogerSelwyn/MS365-Calendar/commit/138a69d3bfa87a83739f835ca7886b9139b032fa) - @RogerSelwyn
 - [Ruff import sorting](https://github.com/RogerSelwyn/MS365-Calendar/commit/c676b54ade58e739fbd02e43b682cea499f5cfe4) - @RogerSelwyn
 - [Ruff import sorting](https://github.com/RogerSelwyn/MS365-Calendar/commit/6cb4de916e2094d7ec019358d596c5d219245af3) - @RogerSelwyn
@@ -69,10 +70,6 @@
 
 ### 🔖 Release
 - [Release v1.13.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/4d4a6172b426b758336ff9b76e852edaed1b9a43) - @RogerSelwyn
-
-### Other
-- [Revert "maint: Ruff recommended changes"](https://github.com/RogerSelwyn/MS365-Calendar/commit/7c1896915d5f0cd2b421d4dc55ea6ce36090ac9a) - @RogerSelwyn
-
 
 
 
