@@ -48,7 +48,7 @@ def load_yaml_file(path, validate=False):
                 return items
 
         return (
-            {item[CONF_CAL_ID]: item for item in data if item and CONF_CAL_ID in item}
+            {item[CONF_CAL_ID]: item for item in data if item and item.get(CONF_CAL_ID)}
             if data
             else {}
         )
