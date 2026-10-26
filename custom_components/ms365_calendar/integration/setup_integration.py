@@ -70,8 +70,14 @@ async def _async_delete_calendar_entities(
     hass: HomeAssistant, entry: MS365ConfigEntry, deleted_calendars
 ):
     for calendar in deleted_calendars:
-        for entity in calendar.get(CONF_ENTITIES):
-            await async_delete_calendar(hass, entry, entity, calendar[CONF_CAL_ID])
+        try:
+            for entity in calendar.get(CONF_ENTITIES):
+                await async_delete_calendar(hass, entry, entity, calendar[CONF_CAL_ID])
+        except TypeError:
+            _LOGGER.warning(
+                "Invalid Data - calendars may be incorrectly deleted for cal_id %s",
+                calendar[CONF_CAL_ID],
+            )
 
 
 async def _async_setup_coordinators(

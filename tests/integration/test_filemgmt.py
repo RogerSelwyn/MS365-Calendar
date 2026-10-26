@@ -115,6 +115,31 @@ async def test_corrupt_file_3(
     assert len(entities) == FULL_INIT_ENTITY_NO
 
 
+async def test_corrupt_file_4(
+    tmp_path,
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    base_token,
+    base_config_entry: MS365MockConfigEntry,
+    caplog: pytest.LogCaptureFixture,
+    entity_registry: er.EntityRegistry,
+) -> None:
+    """Test for corrupt yaml content (corrupt entry on delete)."""
+    # logging.disable(logging.WARNING)
+    MS365MOCKS.standard_mocks(requests_mock)
+    yaml_setup(tmp_path, "ms365_calendars_corrupt4")
+
+    base_config_entry.add_to_hass(hass)
+
+    await hass.config_entries.async_setup(base_config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    assert "Invalid Data - calendars may be incorrectly deleted" in caplog.text
+
+    entities = er.async_entries_for_config_entry(entity_registry, base_config_entry.entry_id)
+    assert len(entities) == FULL_INIT_ENTITY_NO
+
+
 async def test_deleted_file(
     tmp_path,
     hass: HomeAssistant,

@@ -1,0 +1,14 @@
+- cal_id: calendar1
+  entities:
+    - device_id: Calendar1
+      end_offset: 24
+      name: Calendar1
+      start_offset: 0
+      track: true
+- cal_id: deleted
+  entitys:
+    - device_id: Deleted
+      end_offset: 24
+      name: Deleted
+      start_offset: 0
+      track: true
