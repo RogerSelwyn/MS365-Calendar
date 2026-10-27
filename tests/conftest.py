@@ -1,14 +1,15 @@
 # pylint: disable=protected-access,redefined-outer-name, unused-argument, line-too-long, unused-import
 """Global fixtures for integration."""
 
+from copy import deepcopy
 import json
 import sys
-from copy import deepcopy
 from unittest.mock import patch
 
 import pytest
-from homeassistant.core import HomeAssistant
 from requests_mock import Mocker
+
+from homeassistant.core import HomeAssistant
 
 from .const import ENTITY_NAME, LEGACY_TOKEN, TOKEN_LOCATION
 from .helpers.mock_config_entry import MS365MockConfigEntry
@@ -70,8 +71,9 @@ async def request_setup(current_request_with_host: None) -> None:  # pylint: dis
 @pytest.fixture(name="skip_notifications", autouse=True)
 def skip_notifications_fixture():
     """Skip notification calls."""
-    with patch("homeassistant.components.persistent_notification.async_create"), patch(
-        "homeassistant.components.persistent_notification.async_dismiss"
+    with (
+        patch("homeassistant.components.persistent_notification.async_create"),
+        patch("homeassistant.components.persistent_notification.async_dismiss"),
     ):
         yield
 

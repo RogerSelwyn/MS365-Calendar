@@ -2,15 +2,16 @@
 """Test file management."""
 
 import pytest
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers import entity_registry as er
 from requests_mock import Mocker
 
-from .const_integration import FULL_INIT_ENTITY_NO
+from homeassistant.config_entries import ConfigEntryState
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
 
 from ..helpers.mock_config_entry import MS365MockConfigEntry
+from .const_integration import FULL_INIT_ENTITY_NO
 from .helpers_integration.mocks import MS365MOCKS
-from .helpers_integration.utils_integration import check_yaml_file_contents, yaml_setup
+from .helpers_integration.utils_integration import check_yaml_file_contents, read_yaml_file, yaml_setup
 
 
 async def test_base_filemgmt(
@@ -51,7 +52,7 @@ async def test_corrupt_file(
     base_config_entry: MS365MockConfigEntry,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
-    """Test for corrupt yaml content."""
+    """Test for corrupt yaml content (missing name)."""
     # logging.disable(logging.WARNING)
     MS365MOCKS.standard_mocks(requests_mock)
     yaml_setup(tmp_path, "ms365_calendars_corrupt")
@@ -73,7 +74,7 @@ async def test_corrupt_file_2(
     caplog: pytest.LogCaptureFixture,
     entity_registry: er.EntityRegistry,
 ) -> None:
-    """Test for corrupt yaml content."""
+    """Test for corrupt yaml content (hanging hyphen)."""
     # logging.disable(logging.WARNING)
     MS365MOCKS.standard_mocks(requests_mock)
     yaml_setup(tmp_path, "ms365_calendars_corrupt2")
@@ -85,9 +86,57 @@ async def test_corrupt_file_2(
 
     assert "Invalid Data - duplicate entries may be created" in caplog.text
 
-    entities = er.async_entries_for_config_entry(
-        entity_registry, base_config_entry.entry_id
-    )
+    entities = er.async_entries_for_config_entry(entity_registry, base_config_entry.entry_id)
+    assert len(entities) == FULL_INIT_ENTITY_NO
+
+
+async def test_corrupt_file_3(
+    tmp_path,
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    base_token,
+    base_config_entry: MS365MockConfigEntry,
+    caplog: pytest.LogCaptureFixture,
+    entity_registry: er.EntityRegistry,
+) -> None:
+    """Test for corrupt yaml content (empty cal_id)."""
+    # logging.disable(logging.WARNING)
+    MS365MOCKS.standard_mocks(requests_mock)
+    yaml_setup(tmp_path, "ms365_calendars_corrupt3")
+
+    base_config_entry.add_to_hass(hass)
+
+    await hass.config_entries.async_setup(base_config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    assert "Invalid Data - duplicate entries may be created" in caplog.text
+
+    entities = er.async_entries_for_config_entry(entity_registry, base_config_entry.entry_id)
+    assert len(entities) == FULL_INIT_ENTITY_NO
+
+
+async def test_corrupt_file_4(
+    tmp_path,
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    base_token,
+    base_config_entry: MS365MockConfigEntry,
+    caplog: pytest.LogCaptureFixture,
+    entity_registry: er.EntityRegistry,
+) -> None:
+    """Test for corrupt yaml content (corrupt entry on delete)."""
+    # logging.disable(logging.WARNING)
+    MS365MOCKS.standard_mocks(requests_mock)
+    yaml_setup(tmp_path, "ms365_calendars_corrupt4")
+
+    base_config_entry.add_to_hass(hass)
+
+    await hass.config_entries.async_setup(base_config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    assert "Invalid Data - calendars may be incorrectly deleted" in caplog.text
+
+    entities = er.async_entries_for_config_entry(entity_registry, base_config_entry.entry_id)
     assert len(entities) == FULL_INIT_ENTITY_NO
 
 
@@ -112,3 +161,30 @@ async def test_deleted_file(
     check_yaml_file_contents(tmp_path, "ms365_calendars_base")
 
     assert "Calendar deleted from" in caplog.text
+
+
+async def test_deleted_file_sensitivity(
+    tmp_path,
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    base_token,
+    base_config_entry: MS365MockConfigEntry,
+) -> None:
+    """Test deleting yaml content keeps sensitivity_exclude as plain text."""
+    MS365MOCKS.standard_mocks(requests_mock)
+    yaml_setup(tmp_path, "ms365_calendars_delete_sensitivity")
+
+    base_config_entry.add_to_hass(hass)
+
+    await hass.config_entries.async_setup(base_config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    calendars = read_yaml_file(tmp_path)
+    assert [calendar["cal_id"] for calendar in calendars] == [
+        "calendar1",
+        "group:calendar2",
+        "calendar3",
+    ]
+    assert calendars[0]["entities"][0]["sensitivity_exclude"] == ["private"]
+
+    assert base_config_entry.state is ConfigEntryState.LOADED

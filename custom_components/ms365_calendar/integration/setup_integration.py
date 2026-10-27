@@ -70,8 +70,14 @@ async def _async_delete_calendar_entities(
     hass: HomeAssistant, entry: MS365ConfigEntry, deleted_calendars
 ):
     for calendar in deleted_calendars:
-        for entity in calendar.get(CONF_ENTITIES):
-            await async_delete_calendar(hass, entry, entity, calendar[CONF_CAL_ID])
+        try:
+            for entity in calendar.get(CONF_ENTITIES):
+                await async_delete_calendar(hass, entry, entity, calendar[CONF_CAL_ID])
+        except TypeError:
+            _LOGGER.warning(
+                "Invalid Data - calendars may be incorrectly deleted for cal_id %s",
+                calendar[CONF_CAL_ID],
+            )
 
 
 async def _async_setup_coordinators(
@@ -82,9 +88,7 @@ async def _async_setup_coordinators(
 ):
     yaml_filename = build_yaml_filename(entry, YAML_CALENDARS_FILENAME)
     yaml_filepath = build_yaml_file_path(hass, yaml_filename)
-    calendars = await hass.async_add_executor_job(
-        load_yaml_file, yaml_filepath, CONF_CAL_ID
-    )
+    calendars = await hass.async_add_executor_job(load_yaml_file, yaml_filepath, True)
 
     local_store = LocalCalendarStore(hass, entry.entry_id)
 

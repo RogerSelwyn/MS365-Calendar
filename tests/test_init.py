@@ -3,22 +3,18 @@
 
 from unittest.mock import patch
 
+from oauthlib.oauth2.rfc6749.errors import InvalidClientError
 import pytest
+from requests_mock import Mocker
+
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import entity_registry as er
-from homeassistant.helpers import issue_registry as ir
-from oauthlib.oauth2.rfc6749.errors import InvalidClientError
-from requests_mock import Mocker
+from homeassistant.helpers import entity_registry as er, issue_registry as ir
 
 from .const import ENTITY_NAME, TOKEN_LOCATION
 from .helpers.mock_config_entry import MS365MockConfigEntry
 from .helpers.utils import build_token_file
-from .integration.const_integration import (
-    BASE_TOKEN_PERMS,
-    DOMAIN,
-    FULL_INIT_ENTITY_NO,
-)
+from .integration.const_integration import BASE_TOKEN_PERMS, DOMAIN, FULL_INIT_ENTITY_NO
 from .integration.helpers_integration.mocks import MS365MOCKS
 
 
@@ -36,9 +32,7 @@ async def test_full_init(
     await hass.config_entries.async_setup(base_config_entry.entry_id)
     assert hasattr(base_config_entry.runtime_data, "options")
 
-    entities = er.async_entries_for_config_entry(
-        entity_registry, base_config_entry.entry_id
-    )
+    entities = er.async_entries_for_config_entry(entity_registry, base_config_entry.entry_id)
     assert len(entities) == FULL_INIT_ENTITY_NO
 
 
@@ -132,10 +126,7 @@ async def test_expired_token(
     ):
         await hass.config_entries.async_setup(base_config_entry.entry_id)
     await hass.async_block_till_done()
-    assert (
-        "Token has expired for account: 'test'. Please re-configure and re-authenticate."
-        in caplog.text
-    )
+    assert "Token has expired for account: 'test'. Please re-configure and re-authenticate." in caplog.text
 
 
 async def test_other_runtime_error(

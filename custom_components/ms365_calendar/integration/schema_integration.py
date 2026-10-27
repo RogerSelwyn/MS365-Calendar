@@ -1,7 +1,7 @@
 """Schema for MS365 Integration."""
 
 from collections.abc import Callable
-import datetime
+import datetime as dt
 from itertools import groupby
 from typing import Any
 
@@ -79,7 +79,7 @@ def _as_local_timezone(*keys: Any) -> Callable[[dict[str, Any]], dict[str, Any]]
     def validate(obj: dict[str, Any]) -> dict[str, Any]:
         """Convert all keys that are datetime values to local timezone."""
         for k in keys:
-            if (value := obj.get(k)) and isinstance(value, datetime.datetime):
+            if (value := obj.get(k)) and isinstance(value, dt.datetime):
                 obj[k] = dt_util.as_local(value)
         return obj
 
@@ -170,10 +170,10 @@ YAML_CALENDAR_ENTITY_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_NAME): cv.string,
         vol.Required(CONF_DEVICE_ID): cv.string,
-        vol.Required(
+        vol.Optional(
             CONF_HOURS_FORWARD_TO_GET, default=DEFAULT_HOURS_FORWARD_TO_GET
         ): int,
-        vol.Required(
+        vol.Optional(
             CONF_HOURS_BACKWARD_TO_GET, default=DEFAULT_HOURS_BACKWARD_TO_GET
         ): int,
         vol.Required(CONF_TRACK): cv.boolean,

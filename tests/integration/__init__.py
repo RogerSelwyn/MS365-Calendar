@@ -3,10 +3,6 @@
 """Tests for MS365 Calendar."""
 
 from custom_components.ms365_calendar.classes import api  # noqa: F401
-from custom_components.ms365_calendar.diagnostics import (
-    async_get_config_entry_diagnostics,  # noqa: F401
-)
-from custom_components.ms365_calendar.helpers.config_entry import (
-    MS365ConfigEntry,  # noqa: F401
-)
+from custom_components.ms365_calendar.diagnostics import async_get_config_entry_diagnostics  # noqa: F401
+from custom_components.ms365_calendar.helpers.config_entry import MS365ConfigEntry  # noqa: F401
 from custom_components.ms365_calendar.helpers.utils import get_tenant_id  # noqa: F401

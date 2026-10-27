@@ -1,35 +1,22 @@
 # pylint: disable=line-too-long, unused-argument
 """Test the config flow."""
 
-from aiohttp import web_response
 from copy import deepcopy
 
+from aiohttp import web_response
 import pytest
 from pytest_homeassistant_custom_component.typing import ClientSessionGenerator
 from requests_mock import Mocker
 
 from homeassistant import config_entries
 from homeassistant.components.http import HomeAssistantView
+from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
-from homeassistant.config_entries import ConfigEntryState
 
-
-from .const import (
-    CLIENT_ID,
-    ENTITY_NAME,
-    TOKEN_URL_ASSERT,
-    TOKEN_URL_CN21V_ASSERT,
-    TOKEN_PARAMS,
-)
+from .const import CLIENT_ID, ENTITY_NAME, TOKEN_PARAMS, TOKEN_URL_ASSERT, TOKEN_URL_CN21V_ASSERT
 from .helpers.mock_config_entry import MS365MockConfigEntry
-from .helpers.utils import (
-    build_token_url,
-    mock_call,
-    mock_token,
-    token_setup,
-    mock_cn21v_token,
-)
+from .helpers.utils import build_token_url, mock_call, mock_cn21v_token, mock_token, token_setup
 from .integration.const_integration import (
     ALT_CONFIG_ENTRY,
     AUTH_CALLBACK_PATH_ALT,
@@ -160,9 +147,7 @@ async def test_default_flow(
     mock_token(requests_mock, BASE_TOKEN_PERMS)
     MS365MOCKS.standard_mocks(requests_mock)
 
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     assert result.get("type") is FlowResultType.FORM
     assert result["step_id"] == "user"
 
@@ -173,9 +158,7 @@ async def test_default_flow(
 
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "request_default"
-    assert result["description_placeholders"]["auth_url"].startswith(
-        f"{TOKEN_URL_ASSERT}{CLIENT_ID}"
-    )
+    assert result["description_placeholders"]["auth_url"].startswith(f"{TOKEN_URL_ASSERT}{CLIENT_ID}")
     assert result["description_placeholders"]["entity_name"] == ENTITY_NAME
     assert result["description_placeholders"]["failed_permissions"] is None
 
@@ -200,9 +183,7 @@ async def test_alt_flow(
     mock_token(requests_mock, BASE_TOKEN_PERMS)
     MS365MOCKS.standard_mocks(requests_mock)
 
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     assert result.get("type") is FlowResultType.FORM
     assert result["step_id"] == "user"
 
@@ -213,9 +194,7 @@ async def test_alt_flow(
 
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "request_alt"
-    assert result["description_placeholders"]["auth_url"].startswith(
-        f"{TOKEN_URL_ASSERT}{CLIENT_ID}"
-    )
+    assert result["description_placeholders"]["auth_url"].startswith(f"{TOKEN_URL_ASSERT}{CLIENT_ID}")
     assert result["description_placeholders"]["entity_name"] == ENTITY_NAME
     assert result["description_placeholders"]["failed_permissions"] is None
 
@@ -240,9 +219,7 @@ async def test_non_default_country(
     mock_cn21v_token(requests_mock, BASE_TOKEN_PERMS)
     MS365MOCKS.cn21v_mocks(requests_mock)
 
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     assert result.get("type") is FlowResultType.FORM
     assert result["step_id"] == "user"
 
@@ -253,9 +230,7 @@ async def test_non_default_country(
 
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "request_default"
-    assert result["description_placeholders"]["auth_url"].startswith(
-        f"{TOKEN_URL_CN21V_ASSERT}{CLIENT_ID}"
-    )
+    assert result["description_placeholders"]["auth_url"].startswith(f"{TOKEN_URL_CN21V_ASSERT}{CLIENT_ID}")
     assert result["description_placeholders"]["entity_name"] == ENTITY_NAME
     assert result["description_placeholders"]["failed_permissions"] is None
 
@@ -278,9 +253,7 @@ async def test_missing_permissions(
     """Test missing permissions."""
     mock_token(requests_mock, "")
 
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     assert result.get("type") is FlowResultType.FORM
     assert result["step_id"] == "user"
 
@@ -291,9 +264,7 @@ async def test_missing_permissions(
 
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "request_default"
-    assert result["description_placeholders"]["auth_url"].startswith(
-        f"{TOKEN_URL_ASSERT}{CLIENT_ID}"
-    )
+    assert result["description_placeholders"]["auth_url"].startswith(f"{TOKEN_URL_ASSERT}{CLIENT_ID}")
     assert result["description_placeholders"]["entity_name"] == ENTITY_NAME
     assert result["description_placeholders"]["failed_permissions"] is None
 
@@ -308,10 +279,7 @@ async def test_missing_permissions(
     assert "errors" in result
     assert "url" in result["errors"]
     assert result["errors"]["url"] == "permissions"
-    assert (
-        result["description_placeholders"]["failed_permissions"]
-        == f"\n\nMissing - {BASE_MISSING_PERMS}"
-    )
+    assert result["description_placeholders"]["failed_permissions"] == f"\n\nMissing - {BASE_MISSING_PERMS}"
 
 
 async def test_missing_permissions_alt_flow(
@@ -322,9 +290,7 @@ async def test_missing_permissions_alt_flow(
     """Test missing permissions on the alternate flow."""
     mock_token(requests_mock, "")
 
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     assert result.get("type") is FlowResultType.FORM
     assert result["step_id"] == "user"
 
@@ -335,9 +301,7 @@ async def test_missing_permissions_alt_flow(
 
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "request_alt"
-    assert result["description_placeholders"]["auth_url"].startswith(
-        f"{TOKEN_URL_ASSERT}{CLIENT_ID}"
-    )
+    assert result["description_placeholders"]["auth_url"].startswith(f"{TOKEN_URL_ASSERT}{CLIENT_ID}")
     assert result["description_placeholders"]["entity_name"] == ENTITY_NAME
     assert result["description_placeholders"]["failed_permissions"] is None
 
@@ -352,10 +316,7 @@ async def test_missing_permissions_alt_flow(
     assert "errors" in result
     assert "base" in result["errors"]
     assert result["errors"]["base"] == "permissions"
-    assert (
-        result["description_placeholders"]["failed_permissions"]
-        == f"\n\nMissing - {BASE_MISSING_PERMS}"
-    )
+    assert result["description_placeholders"]["failed_permissions"] == f"\n\nMissing - {BASE_MISSING_PERMS}"
 
 
 async def test_invalid_token_url(
@@ -364,9 +325,7 @@ async def test_invalid_token_url(
 ) -> None:
     """Test invalid token url."""
     mock_call(requests_mock, URL.OPENID, "openid")
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
@@ -399,9 +358,7 @@ async def test_invalid_token(
         text='{"corrupted": "token"}',
     )
 
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
@@ -431,9 +388,7 @@ async def test_json_decode_error(
     """Test error decoding the token."""
     token_setup(tmp_path, "corrupt2")
 
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
@@ -453,9 +408,7 @@ async def test_already_configured(
     """Test already configured entity name."""
     mock_token(requests_mock, BASE_TOKEN_PERMS)
 
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         user_input=BASE_CONFIG_ENTRY,
@@ -468,9 +421,7 @@ async def test_already_configured(
         },
     )
 
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
@@ -489,9 +440,7 @@ async def test_change_entity_name(
     """Test a new name can be entered after the first one was already used."""
     mock_token(requests_mock, BASE_TOKEN_PERMS)
 
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         user_input=deepcopy(BASE_CONFIG_ENTRY),
@@ -518,9 +467,7 @@ async def test_token_without_entry(
     mock_token(requests_mock, BASE_TOKEN_PERMS)
     MS365MOCKS.standard_mocks(requests_mock)
 
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         user_input=BASE_CONFIG_ENTRY,
@@ -546,9 +493,7 @@ async def test_already_configured_without_token(
     mock_call(requests_mock, URL.OPENID, "openid")
     base_config_entry.add_to_hass(hass)
 
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         user_input=BASE_CONFIG_ENTRY,
@@ -578,9 +523,7 @@ async def test_alt_flow_after_abandoned_flow(
     mock_token(requests_mock, BASE_TOKEN_PERMS)
     MS365MOCKS.standard_mocks(requests_mock)
 
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         user_input=ALT_CONFIG_ENTRY,
@@ -592,9 +535,7 @@ async def test_alt_flow_after_abandoned_flow(
     # An integration on an older shared core takes over the callback path
     hass.http.register_view(OtherCallbackView())
 
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         user_input=ALT_CONFIG_ENTRY,
@@ -622,9 +563,7 @@ async def test_alt_flow_no_callback(
     """Test the alternate flow shows an error when no callback was received."""
     mock_call(requests_mock, URL.OPENID, "openid")
 
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         user_input=ALT_CONFIG_ENTRY,
@@ -647,9 +586,7 @@ async def test_unusable_returned_url(
     mock_token(requests_mock, BASE_TOKEN_PERMS)
     MS365MOCKS.standard_mocks(requests_mock)
 
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         user_input=BASE_CONFIG_ENTRY,
@@ -665,9 +602,7 @@ async def test_unusable_returned_url(
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
-        user_input={
-            "url": f"{AUTH_CALLBACK_PATH_DEFAULT}?{TOKEN_PARAMS.format('stale')}"
-        },
+        user_input={"url": f"{AUTH_CALLBACK_PATH_DEFAULT}?{TOKEN_PARAMS.format('stale')}"},
     )
     assert result["step_id"] == "request_default"
     assert result["errors"] == {"url": "invalid_url"}

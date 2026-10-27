@@ -10,12 +10,7 @@ from aiohttp import web_response
 import voluptuous as vol
 
 from homeassistant.components.http import HomeAssistantView
-from homeassistant.config_entries import (
-    CONN_CLASS_CLOUD_POLL,
-    ConfigEntryState,
-    ConfigFlow,
-    ConfigFlowResult,
-)
+from homeassistant.config_entries import ConfigEntryState, ConfigFlow, ConfigFlowResult
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import section
 import homeassistant.helpers.config_validation as cv
@@ -82,7 +77,6 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
 
     VERSION = 2
     MINOR_VERSION = 0
-    CONNECTION_CLASS = CONN_CLASS_CLOUD_POLL
 
     def __init__(self) -> None:
         """Initialise the configuration flow."""

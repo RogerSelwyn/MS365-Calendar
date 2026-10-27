@@ -3,21 +3,17 @@
 
 from datetime import datetime, timedelta
 from unittest.mock import patch
+from zoneinfo import ZoneInfo
 
 import pytest
-from homeassistant.components.calendar import (
-    CREATE_EVENT_SERVICE,
-    SERVICE_GET_EVENTS,
-)
-from homeassistant.components.calendar import DOMAIN as CALENDAR_DOMAIN
+from requests_mock import Mocker
+from voluptuous.error import MultipleInvalid
+
+from custom_components.ms365_calendar.const import CONF_ENABLE_UPDATE
+from homeassistant.components.calendar import CREATE_EVENT_SERVICE, DOMAIN as CALENDAR_DOMAIN, SERVICE_GET_EVENTS
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.util import dt as dt_util
-from requests_mock import Mocker
-from voluptuous.error import MultipleInvalid
-from zoneinfo import ZoneInfo
-
-from custom_components.ms365_calendar.const import CONF_ENABLE_UPDATE
 
 from ..conftest import MS365MockConfigEntry
 from ..helpers.utils import mock_call
@@ -119,9 +115,7 @@ async def test_get_calendar_events_inside_range(
     with_attendees = [event for event in events if event["attendees"]]
     assert len(with_attendees) == 1
     event = with_attendees[0]
-    assert event["attendees"] == [
-        {"email": "jane@nomail.com", "type": "required", "status": "not_responded"}
-    ]
+    assert event["attendees"] == [{"email": "jane@nomail.com", "type": "required", "status": "not_responded"}]
     assert event["organizer"] == "john@nomail.com"
     assert isinstance(event["start"], str)
     assert isinstance(event["end"], str)
@@ -191,6 +185,7 @@ async def test_get_calendar_events_end_before_start(
             return_response=True,
         )
 
+
 async def test_get_events_too_quick(
     hass: HomeAssistant,
     setup_base_integration,
@@ -213,15 +208,10 @@ async def test_get_events_too_quick(
             blocking=True,
             return_response=True,
         )
-    assert (
-        str(exc_info.value)
-        == "Unable to get events: Sync from server has not completed"
-    )
+    assert str(exc_info.value) == "Unable to get events: Sync from server has not completed"
 
 
-@pytest.mark.parametrize(
-    "setup_base_integration", [{"method_name": "no_events_mocks"}], indirect=True
-)
+@pytest.mark.parametrize("setup_base_integration", [{"method_name": "no_events_mocks"}], indirect=True)
 async def test_get_events_no_events(
     hass: HomeAssistant,
     setup_base_integration,

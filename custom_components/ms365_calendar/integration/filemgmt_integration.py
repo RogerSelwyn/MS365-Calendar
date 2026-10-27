@@ -25,31 +25,37 @@ from .schema_integration import YAML_CALENDAR_DEVICE_SCHEMA
 _LOGGER = logging.getLogger(__name__)
 
 
-def load_yaml_file(path, item_id, display_error=False):
+def load_yaml_file(path, validate=False):
     """Load the ms365 yaml file."""
-    items = {}
+
     try:
         with open(path, encoding="utf8") as file:
             data = yaml.safe_load(file)
-            if data is None:
-                return {}
-            for item in data:
-                try:
-                    items[item[item_id]] = YAML_CALENDAR_DEVICE_SCHEMA(item)
-                except VoluptuousError as exception:
-                    # keep going
-                    if display_error:
+
+            if validate:
+                items = {}
+                for item in data:
+                    try:
+                        items[item[CONF_CAL_ID]] = YAML_CALENDAR_DEVICE_SCHEMA(item)
+                    except VoluptuousError as exception:
+                        # keep going
                         _LOGGER.warning(
                             "Invalid Data - duplicate entries may be created in file %s - for item %s: %s",
                             path,
                             item,
                             exception,
                         )
+                return items
+
+        return (
+            {item[CONF_CAL_ID]: item for item in data if item and item.get(CONF_CAL_ID)}
+            if data
+            else {}
+        )
+
     except FileNotFoundError:
         # When YAML file could not be loaded/did not contain a dict
         return {}
-
-    return items
 
 
 def write_yaml_file(yaml_filepath, cal):
@@ -85,7 +91,7 @@ async def async_update_calendar_file(
     path = build_yaml_filename(entry, YAML_CALENDARS_FILENAME)
     yaml_filepath = build_yaml_file_path(hass, path)
     existing_calendars = await hass.async_add_executor_job(
-        load_yaml_file, yaml_filepath, CONF_CAL_ID
+        load_yaml_file, yaml_filepath
     )
     cal = _get_calendar_info(calendar, track_new_devices)
     if cal[CONF_CAL_ID] in existing_calendars:
@@ -101,7 +107,7 @@ async def async_check_for_deleted_calendars(
     yaml_filepath = build_yaml_file_path(hass, path)
 
     existing_calendars = await hass.async_add_executor_job(
-        load_yaml_file, yaml_filepath, CONF_CAL_ID, True
+        load_yaml_file, yaml_filepath
     )
     updated_calendars = []
     deleted_calendars = []

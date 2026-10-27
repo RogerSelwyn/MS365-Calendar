@@ -4,10 +4,11 @@
 from copy import deepcopy
 
 import pytest
+from requests_mock import Mocker
+
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
-from requests_mock import Mocker
 
 from .const import ENTITY_NAME
 from .helpers.mock_config_entry import MS365MockConfigEntry
@@ -37,10 +38,7 @@ async def test_default_flow(
         context={"source": config_entries.SOURCE_IMPORT},
         data=MIGRATION_CONFIG_ENTRY,
     )
-    assert (
-        f"Could not locate token at {tmp_path}/storage/tokens/{DOMAIN}_test.token"
-        in caplog.text
-    )
+    assert f"Could not locate token at {tmp_path}/storage/tokens/{DOMAIN}_test.token" in caplog.text
 
 
 async def test_duplicate_migration(

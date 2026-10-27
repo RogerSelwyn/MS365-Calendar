@@ -1,5 +1,5 @@
 [project]
-name = "MS365_calendar"
+name = "ms365_calendar"
 version = "0.0.1"
 requires-python = ">=3.14.2"
 
@@ -21,7 +21,6 @@ init-hook = """\
 load-plugins = [
     "pylint.extensions.code_style",
     "pylint.extensions.typing",
-    "pylint_per_file_ignores",
 ]
 persistent = false
 extension-pkg-allow-list = [
@@ -304,12 +303,6 @@ enable = [
     #"useless-suppression",  # temporarily every now and then to clean them up
     "use-symbolic-message-instead",
 ]
-per-file-ignores = [
-    # redefined-outer-name: Tests reference fixtures in the test function
-    # use-implicit-booleaness-not-comparison: Tests need to validate that a list
-    # or a dict is returned
-    "/tests/:redefined-outer-name,use-implicit-booleaness-not-comparison",
-]
 
 [tool.pylint.REPORTS]
 score = false
@@ -339,6 +332,7 @@ max-line-length-suggestions = 72
 
 [tool.ruff]
 required-version = ">=0.15.4"
+line-length = 120
 
 [tool.ruff.lint]
 select = [
@@ -423,7 +417,6 @@ ignore = [
   "D407",     # Section name underlining
   "D417",     # Missing argument descriptions in docstring - to allow documenting only non-obvious parameters
   "E501",     # line too long
-  "I001",
 
   "PLC1901", # {existing} can be simplified to {replacement} as an empty string is falsey; too many false positives
   "PLR0911", # Too many return statements ({returns} > {max_returns})
@@ -479,8 +472,8 @@ ignore = [
   "ISC004",
   "LOG004",
 
-  # RWJS - OK in dev
-  "PERF203",
+  "PERF203",  # RWJS - OK in dev
+  "I001",     # RWJS - Matching Ruff CLI formatting to VS Code Ruff formatting seems a challenge
 ]
 
 [tool.ruff.lint.flake8-import-conventions.extend-aliases]

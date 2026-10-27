@@ -5,11 +5,6 @@ from copy import deepcopy
 from unittest.mock import MagicMock, patch
 
 import pytest
-from homeassistant import config_entries
-from homeassistant.config_entries import ConfigEntryState
-from homeassistant.const import CONF_NAME
-from homeassistant.core import HomeAssistant
-from homeassistant.data_entry_flow import FlowResultType
 from requests_mock import Mocker
 
 from custom_components.ms365_calendar.integration.const_integration import (
@@ -26,29 +21,25 @@ from custom_components.ms365_calendar.integration.const_integration import (
     DEFAULT_DAYS_FORWARD,
     DEFAULT_UPDATE_INTERVAL,
 )
+from homeassistant import config_entries
+from homeassistant.config_entries import ConfigEntryState
+from homeassistant.const import CONF_NAME
+from homeassistant.core import HomeAssistant
+from homeassistant.data_entry_flow import FlowResultType
 
-from .helpers_integration.utils_integration import (
-    yaml_setup,
-    update_options,
-    read_yaml_file,
-)
 from ..helpers.mock_config_entry import MS365MockConfigEntry
-from ..helpers.utils import (
-    build_token_file,
-    build_token_url,
-    get_schema_default,
-    mock_token,
-)
+from ..helpers.utils import build_token_file, build_token_url, get_schema_default, mock_token
 from .const_integration import (
     AUTH_CALLBACK_PATH_DEFAULT,
-    RECONFIGURE_CONFIG_ENTRY,
     BASE_CONFIG_ENTRY,
     BASE_TOKEN_PERMS,
     DOMAIN,
+    RECONFIGURE_CONFIG_ENTRY,
     SHARED_TOKEN_PERMS,
     UPDATE_CALENDAR_LIST,
 )
 from .helpers_integration.mocks import MS365MOCKS
+from .helpers_integration.utils_integration import read_yaml_file, update_options, yaml_setup
 
 
 async def test_options_flow(
@@ -108,6 +99,7 @@ async def test_options_flow(
     assert result["data"][CONF_TRACK_NEW_CALENDAR] is False
 
     assert result["data"][CONF_CALENDAR_LIST] == UPDATE_CALENDAR_LIST
+
 
 async def test_options_flow_reload(
     tmp_path,
@@ -248,9 +240,7 @@ async def test_shared_email_invalid(
     mock_token(requests_mock, SHARED_TOKEN_PERMS)
     MS365MOCKS.standard_mocks(requests_mock)
 
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
 
     user_input = deepcopy(BASE_CONFIG_ENTRY)
     email = "john@nomail.com"
@@ -277,6 +267,7 @@ async def test_shared_email_invalid(
         f"Login email address '{email}' should not be entered as shared email address, config attribute removed"
         in caplog.text
     )
+
 
 async def test_options_flow_no_calendars(
     tmp_path,

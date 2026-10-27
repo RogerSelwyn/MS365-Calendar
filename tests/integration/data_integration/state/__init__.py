@@ -1,18 +1,13 @@
 """Tests for MS365 Calendar."""
 
-import datetime
-
+import datetime as dt
 import zoneinfo
 
 BASE_STATE_CAL1 = [
     {
         "summary": "Test event 1 calendar1",
-        "start": datetime.datetime(
-            2020, 1, 1, 0, 0, tzinfo=zoneinfo.ZoneInfo(key="UTC")
-        ),
-        "end": datetime.datetime(
-            2020, 1, 2, 23, 59, 59, tzinfo=zoneinfo.ZoneInfo(key="UTC")
-        ),
+        "start": dt.datetime(2020, 1, 1, 0, 0, tzinfo=zoneinfo.ZoneInfo(key="UTC")),
+        "end": dt.datetime(2020, 1, 2, 23, 59, 59, tzinfo=zoneinfo.ZoneInfo(key="UTC")),
         "all_day": False,
         "description": "Test",
         "location": "Test Location",
@@ -28,8 +23,8 @@ BASE_STATE_CAL1 = [
     },
     {
         "summary": "Test event 2 calendar1",
-        "start": datetime.date(2020, 1, 1),
-        "end": datetime.date(2020, 1, 2),
+        "start": dt.date(2020, 1, 1),
+        "end": dt.date(2020, 1, 2),
         "all_day": True,
         "description": "Plain Text",
         "location": "Test Location",
@@ -46,12 +41,8 @@ BASE_STATE_CAL1 = [
 BASE_STATE_CAL2 = [
     {
         "summary": "Test event calendar2",
-        "start": datetime.datetime(
-            2020, 1, 1, 0, 0, tzinfo=zoneinfo.ZoneInfo(key="UTC")
-        ),
-        "end": datetime.datetime(
-            2020, 1, 2, 23, 59, 59, tzinfo=zoneinfo.ZoneInfo(key="UTC")
-        ),
+        "start": dt.datetime(2020, 1, 1, 0, 0, tzinfo=zoneinfo.ZoneInfo(key="UTC")),
+        "end": dt.datetime(2020, 1, 2, 23, 59, 59, tzinfo=zoneinfo.ZoneInfo(key="UTC")),
         "all_day": False,
         "description": "Test",
         "location": "Test Location",
