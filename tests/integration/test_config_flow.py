@@ -107,6 +107,19 @@ async def test_options_flow(
     )
     assert result["data"][CONF_WORK_LOCATION] is True
 
+@pytest.mark.parametrize("base_config_entry", [{"work_location": True}], indirect=True)
+async def test_options_flow_work_location_selected(
+    hass: HomeAssistant,
+    setup_base_integration,
+    base_config_entry: MS365MockConfigEntry,
+) -> None:
+    """Test work location is pre-selected when enabled."""
+    result = await hass.config_entries.options.async_init(base_config_entry.entry_id)
+    await hass.async_block_till_done()
+    schema = result["data_schema"].schema
+    assert WORK_LOCATION_DEVICE_ID in get_schema_default(schema, CONF_CALENDAR_LIST)
+
+
 async def test_options_flow_reload(
     tmp_path,
     hass: HomeAssistant,
