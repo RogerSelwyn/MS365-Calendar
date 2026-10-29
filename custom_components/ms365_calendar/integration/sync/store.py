@@ -1,5 +1,6 @@
 """Library for local storage of calendar data. Direct copy of gcal_sync.store."""
 
+import asyncio
 from abc import ABC
 import logging
 from typing import Any
@@ -47,6 +48,9 @@ class ScopedCalendarStore(CalendarStore):
         """Initialize ScopedCalendarStore."""
         self._store = store
         self._key = key
+        if not hasattr(store, "_ms365_scoped_save_lock"):
+            store._ms365_scoped_save_lock = asyncio.Lock()
+        self._save_lock = store._ms365_scoped_save_lock
 
     async def async_load(self) -> dict[str, Any]:
         """Load data from the store."""
@@ -56,7 +60,7 @@ class ScopedCalendarStore(CalendarStore):
 
     async def async_save(self, data: dict[str, Any]) -> None:
         """Save data to the store, performing a read/modify/write."""
-
-        store_data = await self._store.async_load() or {}
-        store_data[self._key] = data
-        return await self._store.async_save(store_data)
+        async with self._save_lock:
+            store_data = dict(await self._store.async_load() or {})
+            store_data[self._key] = data
+            return await self._store.async_save(store_data)

@@ -61,22 +61,48 @@ def clean_html(html):
 
 def format_event_data(event):
     """Format the event data."""
-    attendees = event.attendees._Attendees__attendees  # noqa: SLF001
-    return {
+    attendees_obj = getattr(event, "attendees", None)
+    attendees = (
+        attendees_obj._Attendees__attendees  # noqa: SLF001
+        if attendees_obj is not None
+        and hasattr(attendees_obj, "_Attendees__attendees")
+        else []
+    )
+    location = getattr(event, "location", {})
+    if isinstance(location, dict):
+        location_name = location.get("displayName")
+    else:
+        location_name = location
+    sensitivity = getattr(event, "sensitivity", None)
+    sensitivity_name = (
+        sensitivity.name
+        if sensitivity is not None and hasattr(sensitivity, "name")
+        else sensitivity
+    )
+    show_as = getattr(event, "show_as", None)
+    show_as_name = show_as.name if show_as is not None and hasattr(show_as, "name") else show_as
+    organizer = getattr(event, "organizer", None)
+    organizer_address = (
+        organizer.address
+        if organizer is not None and hasattr(organizer, "address")
+        else None
+    )
+    work_location_type = getattr(event, "work_location_type", None)
+    data = {
         "summary": event.subject,
         "start": get_hass_date(event.start, event.is_all_day),
         "end": get_hass_date(get_end_date(event), event.is_all_day),
         "all_day": event.is_all_day,
-        "description": clean_html(event.body),
-        "location": event.location["displayName"],
-        "categories": event.categories,
-        "sensitivity": event.sensitivity.name,
-        "show_as": event.show_as.name,
+        "description": clean_html(getattr(event, "body", "")),
+        "location": location_name,
+        "categories": getattr(event, "categories", []),
+        "sensitivity": sensitivity_name,
+        "show_as": show_as_name,
         "reminder": {
-            "minutes": event.remind_before_minutes,
-            "is_on": event.is_reminder_on,
+            "minutes": getattr(event, "remind_before_minutes", 0),
+            "is_on": getattr(event, "is_reminder_on", False),
         },
-        "organizer": event.organizer.address,
+        "organizer": organizer_address,
         "attendees": [
             {
                 "email": x.address,
@@ -87,8 +113,11 @@ def format_event_data(event):
             }
             for x in attendees
         ],
-        "uid": event.object_id,
+        "uid": getattr(event, "object_id", None),
     }
+    if work_location_type:
+        data["work_location_type"] = work_location_type
+    return data
 
 
 def get_hass_date(obj, is_all_day):

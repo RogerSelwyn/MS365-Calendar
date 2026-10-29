@@ -84,6 +84,7 @@ class URL(Enum):
     OPENID = "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration"
     ME = "https://graph.microsoft.com/v1.0/me"
     CALENDARS = "https://graph.microsoft.com/v1.0/me/calendars"
+    WORK_LOCATION = "https://graph.microsoft.com/v1.0/me/settings/workHoursAndLocations"
     GROUP_CALENDARS = "https://graph.microsoft.com/v1.0/groups"
     SHARED_CALENDARS = "https://graph.microsoft.com/v1.0/users/jane.doe@nomail.com/calendars"
 

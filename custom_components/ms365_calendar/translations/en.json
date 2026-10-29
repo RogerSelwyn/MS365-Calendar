@@ -66,7 +66,8 @@
       "user": {
         "data": {
           "track_new_calendar": "Enable new calendars",
-          "calendar_list": "Enabled calendars"
+          "calendar_list": "Enabled calendars",
+          "work_location": "Enable work location calendar"
         },
         "description": "Setup options for {entity_name}",
         "sections": {

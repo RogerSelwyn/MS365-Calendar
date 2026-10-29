@@ -1,0 +1,16 @@
+"""Sensor processing."""
+
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
+from .classes.config_entry import MS365ConfigEntry
+from .integration.sensor_integration import async_integration_setup_entry
+
+
+async def async_setup_entry(
+    hass: HomeAssistant,  # pylint: disable=unused-argument
+    entry: MS365ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
+    """Set up the MS365 sensor platform."""
+    return await async_integration_setup_entry(hass, entry, async_add_entities)

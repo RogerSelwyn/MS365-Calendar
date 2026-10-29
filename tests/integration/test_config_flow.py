@@ -17,9 +17,11 @@ from custom_components.ms365_calendar.integration.const_integration import (
     CONF_MAX_RESULTS,
     CONF_TRACK_NEW_CALENDAR,
     CONF_UPDATE_INTERVAL,
+    CONF_WORK_LOCATION,
     DEFAULT_DAYS_BACKWARD,
     DEFAULT_DAYS_FORWARD,
     DEFAULT_UPDATE_INTERVAL,
+    WORK_LOCATION_DEVICE_ID,
 )
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntryState
@@ -61,12 +63,11 @@ async def test_options_flow(
         "Calendar2",
         "Calendar3",
     ]
-
     result = await hass.config_entries.options.async_configure(
         result["flow_id"],
         user_input={
             CONF_TRACK_NEW_CALENDAR: False,
-            CONF_CALENDAR_LIST: UPDATE_CALENDAR_LIST,
+            CONF_CALENDAR_LIST: UPDATE_CALENDAR_LIST + [WORK_LOCATION_DEVICE_ID],
             CONF_ADVANCED_OPTIONS: {
                 CONF_UPDATE_INTERVAL: DEFAULT_UPDATE_INTERVAL,
                 CONF_DAYS_BACKWARD: DEFAULT_DAYS_BACKWARD,
@@ -98,7 +99,23 @@ async def test_options_flow(
 
     assert result["data"][CONF_TRACK_NEW_CALENDAR] is False
 
-    assert result["data"][CONF_CALENDAR_LIST] == UPDATE_CALENDAR_LIST
+    assert result["data"][CONF_CALENDAR_LIST] == (
+        UPDATE_CALENDAR_LIST + [WORK_LOCATION_DEVICE_ID]
+    )
+    assert result["data"][CONF_WORK_LOCATION] is True
+
+@pytest.mark.parametrize("base_config_entry", [{"work_location": True}], indirect=True)
+async def test_options_flow_work_location_selected(
+    hass: HomeAssistant,
+    setup_base_integration,
+    base_config_entry: MS365MockConfigEntry,
+) -> None:
+    """Test work location is pre-selected when enabled."""
+    result = await hass.config_entries.options.async_init(base_config_entry.entry_id)
+    await hass.async_block_till_done()
+    schema = result["data_schema"].schema
+    assert WORK_LOCATION_DEVICE_ID in get_schema_default(schema, CONF_CALENDAR_LIST)
+
 
 
 async def test_options_flow_reload(
@@ -134,7 +151,12 @@ async def test_options_flow_reload(
     # Same options, so only the yaml changes
     result = await hass.config_entries.options.async_init(base_config_entry.entry_id)
     result = await hass.config_entries.options.async_configure(
-        result["flow_id"], user_input=dict(base_config_entry.options)
+        result["flow_id"],
+        user_input={
+            key: value
+            for key, value in base_config_entry.options.items()
+            if key != CONF_WORK_LOCATION
+        },
     )
     result = await hass.config_entries.options.async_configure(
         result["flow_id"],

@@ -10,18 +10,27 @@ from homeassistant.const import CONF_ENTITY_ID, CONF_NAME
 from homeassistant.core import HomeAssistant
 
 from ..classes.config_entry import MS365ConfigEntry
-from ..const import CONF_ENTITY_NAME
+from ..const import CONF_ENTITY_NAME, CONF_SHARED_MAILBOX, CountryOptions
+from ..helpers.utils import get_country
 from .const_integration import (
     CONF_CAL_ID,
     CONF_CAN_EDIT,
+    CONF_HOURS_BACKWARD_TO_GET,
+    CONF_HOURS_FORWARD_TO_GET,
     CONF_DEVICE_ID,
     CONF_ENTITIES,
     CONF_ENTITY,
     CONF_EXCLUDE,
+    CONF_MAX_RESULTS,
     CONF_SEARCH,
     CONF_SENSITIVITY_EXCLUDE,
     CONF_TRACK,
+    CONF_WORK_LOCATION,
+    DEFAULT_HOURS_BACKWARD_TO_GET,
+    DEFAULT_HOURS_FORWARD_TO_GET,
     PLATFORMS,
+    WORK_LOCATION_CAL_ID,
+    WORK_LOCATION_DEVICE_ID,
     YAML_CALENDARS_FILENAME,
 )
 from .coordinator_integration import MS365CalendarSyncCoordinator
@@ -31,7 +40,11 @@ from .filemgmt_integration import (
     load_yaml_file,
 )
 from .store_integration import LocalCalendarStore
-from .sync.api import MS365CalendarService, async_scan_for_calendars
+from .sync.api import (
+    MS365CalendarService,
+    MS365WorkLocationService,
+    async_scan_for_calendars,
+)
 from .sync.store import ScopedCalendarStore
 from .sync.sync import MS365CalendarEventSyncManager
 from .utils_integration import async_delete_calendar, build_calendar_entity_id
@@ -89,6 +102,7 @@ async def _async_setup_coordinators(
     yaml_filename = build_yaml_filename(entry, YAML_CALENDARS_FILENAME)
     yaml_filepath = build_yaml_file_path(hass, yaml_filename)
     calendars = await hass.async_add_executor_job(load_yaml_file, yaml_filepath, True)
+    _add_work_location_calendar(entry, calendars)
 
     local_store = LocalCalendarStore(hass, entry.entry_id)
 
@@ -98,7 +112,7 @@ async def _async_setup_coordinators(
         for entity in calendar.get(CONF_ENTITIES):
             if not entity[CONF_TRACK]:
                 continue
-            can_edit = next(
+            can_edit = False if cal_id == WORK_LOCATION_CAL_ID else next(
                 (
                     scanned_calendar.can_edit
                     for scanned_calendar in scanned_calendars
@@ -119,14 +133,17 @@ async def _async_setup_coordinators(
                 }
             )
             try:
-                api = MS365CalendarService(
-                    hass,
-                    account,
-                    cal_id,
-                    entity.get(CONF_SENSITIVITY_EXCLUDE),
-                    entity.get(CONF_SEARCH),
-                    entity_id,
-                )
+                if cal_id == WORK_LOCATION_CAL_ID:
+                    api = MS365WorkLocationService(hass, account)
+                else:
+                    api = MS365CalendarService(
+                        hass,
+                        account,
+                        cal_id,
+                        entity.get(CONF_SENSITIVITY_EXCLUDE),
+                        entity.get(CONF_SEARCH),
+                        entity_id,
+                    )
                 if await api.async_calendar_init():
                     unique_id = f"{entity.get(CONF_DEVICE_ID)}_{cal_id}"
                     sync_manager = MS365CalendarEventSyncManager(
@@ -149,3 +166,38 @@ async def _async_setup_coordinators(
                 continue
 
     return coordinators, keys
+
+
+def _add_work_location_calendar(
+    entry: MS365ConfigEntry,
+    calendars: dict,
+) -> None:
+    shared_mailbox = entry.data.get(CONF_SHARED_MAILBOX)
+    work_location = entry.options.get(
+        CONF_WORK_LOCATION,
+        entry.data.get(CONF_WORK_LOCATION, False),
+    )
+    country = get_country(entry.data)
+    if shared_mailbox or not work_location:
+        return
+    if country != CountryOptions.DEFAULT:
+        _LOGGER.warning(
+            "Work location calendar is enabled but not added for country '%s'. "
+            "Graph workHoursAndLocations occurrencesView is supported only in "
+            "the global cloud.",
+            country,
+        )
+        return
+
+    entity = {
+        CONF_NAME: "Work Location",
+        CONF_DEVICE_ID: WORK_LOCATION_DEVICE_ID,
+        CONF_TRACK: True,
+        CONF_HOURS_FORWARD_TO_GET: DEFAULT_HOURS_FORWARD_TO_GET,
+        CONF_HOURS_BACKWARD_TO_GET: DEFAULT_HOURS_BACKWARD_TO_GET,
+        CONF_MAX_RESULTS: 50,
+    }
+    calendars[WORK_LOCATION_CAL_ID] = {
+        CONF_CAL_ID: WORK_LOCATION_CAL_ID,
+        CONF_ENTITIES: [entity],
+    }
