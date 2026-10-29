@@ -5,10 +5,6 @@ from copy import deepcopy
 from unittest.mock import MagicMock, patch
 
 import pytest
-from homeassistant import config_entries
-from homeassistant.const import CONF_NAME
-from homeassistant.core import HomeAssistant
-from homeassistant.data_entry_flow import FlowResultType
 from requests_mock import Mocker
 
 from custom_components.ms365_calendar.integration.const_integration import (
@@ -27,24 +23,25 @@ from custom_components.ms365_calendar.integration.const_integration import (
     DEFAULT_UPDATE_INTERVAL,
     WORK_LOCATION_DEVICE_ID,
 )
+from homeassistant import config_entries
+from homeassistant.config_entries import ConfigEntryState
+from homeassistant.const import CONF_NAME
+from homeassistant.core import HomeAssistant
+from homeassistant.data_entry_flow import FlowResultType
 
-from .helpers_integration.utils_integration import (
-    yaml_setup,
-    update_options,
-    read_yaml_file,
-)
 from ..helpers.mock_config_entry import MS365MockConfigEntry
-from ..helpers.utils import build_token_url, get_schema_default, mock_token
+from ..helpers.utils import build_token_file, build_token_url, get_schema_default, mock_token
 from .const_integration import (
     AUTH_CALLBACK_PATH_DEFAULT,
-    RECONFIGURE_CONFIG_ENTRY,
     BASE_CONFIG_ENTRY,
     BASE_TOKEN_PERMS,
     DOMAIN,
+    RECONFIGURE_CONFIG_ENTRY,
     SHARED_TOKEN_PERMS,
     UPDATE_CALENDAR_LIST,
 )
 from .helpers_integration.mocks import MS365MOCKS
+from .helpers_integration.utils_integration import read_yaml_file, update_options, yaml_setup
 
 
 async def test_options_flow(
@@ -120,6 +117,7 @@ async def test_options_flow_work_location_selected(
     assert WORK_LOCATION_DEVICE_ID in get_schema_default(schema, CONF_CALENDAR_LIST)
 
 
+
 async def test_options_flow_reload(
     tmp_path,
     hass: HomeAssistant,
@@ -173,6 +171,29 @@ async def test_options_flow_reload(
     assert result["type"] is FlowResultType.CREATE_ENTRY
     state = hass.states.get("calendar.test_calendar1")
     assert state.attributes["friendly_name"] == "Calendar1_Renamed"
+
+
+async def test_options_flow_reload_failed_entry(
+    tmp_path,
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    base_config_entry: MS365MockConfigEntry,
+) -> None:
+    """Test the options flow reloads an entry that failed to set up."""
+    yaml_setup(tmp_path, "ms365_calendars_base")
+    MS365MOCKS.standard_mocks(requests_mock)
+    base_config_entry.add_to_hass(hass)
+    await hass.config_entries.async_setup(base_config_entry.entry_id)
+    await hass.async_block_till_done()
+    assert base_config_entry.state is ConfigEntryState.SETUP_ERROR
+
+    # The options change, but a failed entry has no update listener
+    build_token_file(tmp_path, BASE_TOKEN_PERMS)
+    await update_options(hass, base_config_entry)
+    await hass.async_block_till_done()
+
+    assert base_config_entry.state is ConfigEntryState.LOADED
+
 
 async def test_invalid_combinations(
     hass: HomeAssistant,
@@ -241,9 +262,7 @@ async def test_shared_email_invalid(
     mock_token(requests_mock, SHARED_TOKEN_PERMS)
     MS365MOCKS.standard_mocks(requests_mock)
 
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
 
     user_input = deepcopy(BASE_CONFIG_ENTRY)
     email = "john@nomail.com"
@@ -270,6 +289,7 @@ async def test_shared_email_invalid(
         f"Login email address '{email}' should not be entered as shared email address, config attribute removed"
         in caplog.text
     )
+
 
 async def test_options_flow_no_calendars(
     tmp_path,

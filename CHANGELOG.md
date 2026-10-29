@@ -1,5 +1,78 @@
 # Changelog
 
+## v1.13.0 (2026/10/26)
+### 🐛 Fixes
+- [Fixes various update issues](https://github.com/RogerSelwyn/MS365-Calendar/commit/c046dfc436b2c490b508d42c5b703be3e0a5127f) - @RogerSelwyn
+- [Fix various issues relating to config flow](https://github.com/RogerSelwyn/MS365-Calendar/commit/8620186a030905f170d4fec67093727a513045c9) - @RogerSelwyn
+- [Fix unnecessary multiple reload in config_flow](https://github.com/RogerSelwyn/MS365-Calendar/commit/3e426e4f8b9036159705ba51e0680e0244421167) - @RogerSelwyn
+- [Fix potential search/exclude filter issues](https://github.com/RogerSelwyn/MS365-Calendar/commit/426454991707d36df8588f8172d74b85f1c6e6f9) - @RogerSelwyn
+- [Fix first sync failure (e.g. ReadTimeout)](https://github.com/RogerSelwyn/MS365-Calendar/commit/008e52073ee55bd201fc461c400f05663f2ce7fd) - @RogerSelwyn
+- [Fix working_elsewhere in services.yaml](https://github.com/RogerSelwyn/MS365-Calendar/commit/2a610faf758dfd75dcf2d9295d28b14d0e11bc88) - @RogerSelwyn
+- [Redact tenant_id in advanced api_options](https://github.com/RogerSelwyn/MS365-Calendar/commit/f304aa790c802a951d35273ef86b8932d59ae138) - @RogerSelwyn
+- [Ensure coordinator names are unique by cal_id and device_id](https://github.com/RogerSelwyn/MS365-Calendar/commit/ae3c9126d6849eb7e41178aa1badb4c9752cbc5d) - @RogerSelwyn
+- [Ensure calendar is deleted using unique_id rather than entity_id](https://github.com/RogerSelwyn/MS365-Calendar/commit/838c0be86832023f90c9d9c2a8f4bd201cf1a41d) - @RogerSelwyn
+- [Ensure only the right features are enabled for Group Calendar](https://github.com/RogerSelwyn/MS365-Calendar/commit/0d35d30a7ebe9e27e995ab56e23d048dba0ece53) - @RogerSelwyn
+- [Fix repair shared across integration instances](https://github.com/RogerSelwyn/MS365-Calendar/commit/68dd5049871ae7bab72e01051fd22557901e1a91) - @RogerSelwyn
+- [Fix errors on alteernate_auth flow were not displayed](https://github.com/RogerSelwyn/MS365-Calendar/commit/d2ed78cb1f472fe0136c023230e47661db4ddbe4) - @RogerSelwyn
+- [Fix repair not being cleared after successful reconfigure](https://github.com/RogerSelwyn/MS365-Calendar/commit/ae374be46f7d9ae84954bf7feb4f3748cce5600b) - @RogerSelwyn
+- [Fix corrupted token failing the reconfigure flow](https://github.com/RogerSelwyn/MS365-Calendar/commit/0b1f878cac23e14db3b9bf3a70ace65deff083bb) - @RogerSelwyn
+- [Fix updated `entity_name` not used after failure](https://github.com/RogerSelwyn/MS365-Calendar/commit/816b9264f6c5756fc19eaa69b1f67055460d55fe) - @RogerSelwyn
+- [Fix alternate auth method to handle parallel auth requests](https://github.com/RogerSelwyn/MS365-Calendar/commit/2e25337e6e23e246fda31bdc93f0228ca67c5221) - @RogerSelwyn
+- [Return more helpful error for invalid tenant id](https://github.com/RogerSelwyn/MS365-Calendar/commit/308468c16dd576988e883dbc791b4cd2bf5de2a2) - @RogerSelwyn
+- [Fix handling of comparison to existing entries for duplicates](https://github.com/RogerSelwyn/MS365-Calendar/commit/f5ea540f2b9d059431a45dbeb8590dba3c16bbd3) - @RogerSelwyn
+- [Fixes from testing](https://github.com/RogerSelwyn/MS365-Calendar/commit/1289d8b8bdd89080a3235dd76c538f1c7fb2a375) - @RogerSelwyn
+- [Error in config of sensitivities](https://github.com/RogerSelwyn/MS365-Calendar/commit/6cc78980d8749df49aedf7adfd71f5ee601e6154) - @RogerSelwyn
+- [Keep sensitivity selector to two options for older HA](https://github.com/RogerSelwyn/MS365-Calendar/commit/93bfc729a6cac238234a1471ea3d026f82b559d1) - @buhito81
+- [Fix working_elsewhere in modify_calendar_event](https://github.com/RogerSelwyn/MS365-Calendar/commit/b9fd78386100ab9c9d7626dde092a83623595247) - @buhito81
+- [Fix Configure not reloading an entry that failed to set up](https://github.com/RogerSelwyn/MS365-Calendar/commit/81de5b099521d1c79567702cb6c89ec751dc70ec) - @buhito81
+- [Fix one bad calendars yaml entry makes the whole account fail to set up](https://github.com/RogerSelwyn/MS365-Calendar/commit/afb09dd80a017dbb55d25b2ee527ed75d2b36579) - @RogerSelwyn
+- [Fix validation handling of invalid yaml file](https://github.com/RogerSelwyn/MS365-Calendar/commit/d1c39c68ccb7213863c4beb995546b3de983d325) - @RogerSelwyn
+- [Fix handling of empty cal_id in yaml](https://github.com/RogerSelwyn/MS365-Calendar/commit/a046efcec8a4acc947d9ffbcb39dee874d7bcd9a) - @RogerSelwyn
+- [Fix handling of corrupt yaml entry on delete](https://github.com/RogerSelwyn/MS365-Calendar/commit/7ddc4c6f82728c258381ea177ac48b78c874dc11) - @RogerSelwyn
+
+### 🧰 Maintenance
+- [Only send data that is submitted from gui](https://github.com/RogerSelwyn/MS365-Calendar/commit/6653f7f2a5c7b065d4788ea85cfd2dad3e4ca445) - @RogerSelwyn
+- [Improve exclude filter logic](https://github.com/RogerSelwyn/MS365-Calendar/commit/893fee650e42119f1fcb1aa1f8d604b43e1ed5fa) - @RogerSelwyn
+- [Add warning logging if group calendar is invalid](https://github.com/RogerSelwyn/MS365-Calendar/commit/f2c90c4c5ddfb85937e6bf68343dc48ad8818376) - @RogerSelwyn
+- [Sourcery validations](https://github.com/RogerSelwyn/MS365-Calendar/commit/200b7a650526c14ba28ed61c4edaf2359013498b) - @RogerSelwyn
+- [Make hours foward/backward optional in line with docs](https://github.com/RogerSelwyn/MS365-Calendar/commit/1f807694fd72c4f1c65e91f39891a2b9334ffa63) - @RogerSelwyn
+- [Ruff recommended changes](https://github.com/RogerSelwyn/MS365-Calendar/commit/c93045523230b6bdd3a63ca5edc1071ec6f15c90) - @RogerSelwyn
+- [Revert "maint: Ruff recommended changes"](https://github.com/RogerSelwyn/MS365-Calendar/commit/7c1896915d5f0cd2b421d4dc55ea6ce36090ac9a) - @RogerSelwyn
+- [Ruff import sorting](https://github.com/RogerSelwyn/MS365-Calendar/commit/138a69d3bfa87a83739f835ca7886b9139b032fa) - @RogerSelwyn
+- [Ruff import sorting](https://github.com/RogerSelwyn/MS365-Calendar/commit/c676b54ade58e739fbd02e43b682cea499f5cfe4) - @RogerSelwyn
+- [Ruff import sorting](https://github.com/RogerSelwyn/MS365-Calendar/commit/6cb4de916e2094d7ec019358d596c5d219245af3) - @RogerSelwyn
+- [Remove unsupported pylint options](https://github.com/RogerSelwyn/MS365-Calendar/commit/6619cfa2576f9fe860d73f2aae69ed4bac3e69e1) - @RogerSelwyn
+- [Ruff format suggestions](https://github.com/RogerSelwyn/MS365-Calendar/commit/10f00c6e61c562060ee55c00c204cb83d84b0138) - @RogerSelwyn
+- [Set the ruff line length](https://github.com/RogerSelwyn/MS365-Calendar/commit/3d587db23bbd19144e3330b7a1b52563d995d0b1) - @RogerSelwyn
+- [Tweaking ruff config](https://github.com/RogerSelwyn/MS365-Calendar/commit/5336414131140d84649b7fd108b6b4222a89cf64) - @RogerSelwyn
+- [Correct project name](https://github.com/RogerSelwyn/MS365-Calendar/commit/d406281aaca922d5c8e33b15ce6ced106499b7ec) - @RogerSelwyn
+- [Remove deprecated attribute](https://github.com/RogerSelwyn/MS365-Calendar/commit/d566f4f2e0b9def20bfc03275d10266cf0faf2b7) - @RogerSelwyn
+
+### ⬆️ Dependencies
+- [Bump HA core to 2025.6.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/920882a0f612e5818b86efacc8d9b331b304136f) - @RogerSelwyn
+- [Update pytest-homeassistant-custom-component requirement](https://github.com/RogerSelwyn/MS365-Calendar/commit/62fde43df5077952e96750c81632470e524e1546) - @dependabot[bot]
+- [Bump ruff from 0.16.10 to 0.17.1](https://github.com/RogerSelwyn/MS365-Calendar/commit/39ed182835c6fbbbefa53253531eee36c41ce755) - @dependabot[bot]
+- [Bump astral-sh/setup-uv from 10.2.0 to 10.3.2](https://github.com/RogerSelwyn/MS365-Calendar/commit/ab9168ce8b4d13caeea05638da224db010175aad) - @dependabot[bot]
+
+### 📚 Documentation
+- [Correct example to show lower case values](https://github.com/RogerSelwyn/MS365-Calendar/commit/ef63bd2ca96d0733952b41905d67c73107080804) - @RogerSelwyn
+- [Correct entity naming in docs](https://github.com/RogerSelwyn/MS365-Calendar/commit/b091a19e075db829259013bc71b9b80134127e2a) - @RogerSelwyn
+- [Docs corrections](https://github.com/RogerSelwyn/MS365-Calendar/commit/7af6821d60531046514e8b20b2de1a790364c570) - @RogerSelwyn
+- [Lint fix](https://github.com/RogerSelwyn/MS365-Calendar/commit/4d7e5d58d4dbddfd9ec01ec4b5ab73c1ce66331e) - @RogerSelwyn
+
+### ✅ Test
+- [Add testing for recent changes](https://github.com/RogerSelwyn/MS365-Calendar/commit/30b7507384b942676bd97cc7a63bdaed8c296b8f) - @RogerSelwyn
+- [Remove warning at test time](https://github.com/RogerSelwyn/MS365-Calendar/commit/d82f8d6040031c54f6895707abc52c6899318a87) - @RogerSelwyn
+- [Tests to support config flow changes](https://github.com/RogerSelwyn/MS365-Calendar/commit/004d1569bf53778c45b073952c594497ff24a5ad) - @RogerSelwyn
+- [Add extra test for corrupt yaml file](https://github.com/RogerSelwyn/MS365-Calendar/commit/7403c1c54aa7602191224f49b1e6884eedfddb1d) - @RogerSelwyn
+- [Add extra assert to validate entities still created for non-corrupted entries](https://github.com/RogerSelwyn/MS365-Calendar/commit/a42a5a44b9bf9dffbb6f5e5a279cce54bab2e74d) - @RogerSelwyn
+- [Tidy up test formatting](https://github.com/RogerSelwyn/MS365-Calendar/commit/229c09874b44860e3ea5f83db8eaa1459565dcae) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.13.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/4d4a6172b426b758336ff9b76e852edaed1b9a43) - @RogerSelwyn
+
+
+
 ## v1.12.0 (2026/10/06)
 ### ✨ Enhancements
 - [Add get_calendar_events service returning attendees and organizer](https://github.com/RogerSelwyn/MS365-Calendar/pull/232) - @buhito81

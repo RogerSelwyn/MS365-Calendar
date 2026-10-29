@@ -34,6 +34,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
     """Set up a config entry."""
     config = {**entry.data, **entry.options}
 
+    delete_token_issues(hass, entry.entry_id)
     credentials = (
         entry.data.get(CONF_CLIENT_ID),
         entry.data.get(CONF_CLIENT_SECRET),

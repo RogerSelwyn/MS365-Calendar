@@ -1,4 +1,5 @@
 """Mock setup."""
+
 from datetime import timedelta
 import re
 

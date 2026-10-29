@@ -7,6 +7,7 @@
       "already_configured": "This account name has already been used. Use re-configure.",
       "error_authenticating": "Error authenticating, token invalid, check log for errors",
       "invalid_url": "Error, the originating url does not seem to be a valid microsoft redirect",
+      "invalid_tenant": "Error, the sign-in details for the tenant could not be retrieved, check the Tenant ID in the advanced API options",
       "permissions": "Minimum permissions not granted for account: {entity_name}",
       "corrupted": "Token file is corrupted after successful authentication, check log for file system errors",
       "missing": "Token file is missing after successful authentication, check log for file system errors",

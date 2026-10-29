@@ -1,23 +1,23 @@
 # pylint: disable=unused-argument,line-too-long,wrong-import-order
 """Test main calendar testing."""
 
-import logging
 from copy import deepcopy
 from datetime import date, datetime, timedelta
+import logging
 from unittest.mock import patch
-import pytest
-
-from homeassistant.util import dt as dt_util
-from homeassistant.components.calendar import DOMAIN as CALENDAR_DOMAIN
-from homeassistant.components.calendar import SERVICE_GET_EVENTS
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers import entity_registry as er
-from requests.exceptions import HTTPError, ReadTimeout
-from requests_mock import Mocker
 from zoneinfo import ZoneInfo
 
+import pytest
+from requests.exceptions import HTTPError, ReadTimeout
+from requests_mock import Mocker
+
+from homeassistant.components.calendar import DOMAIN as CALENDAR_DOMAIN, SERVICE_GET_EVENTS
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
+from homeassistant.util import dt as dt_util
+
 from ..helpers.mock_config_entry import MS365MockConfigEntry
-from ..helpers.utils import check_entity_state, utcnow, mock_call
+from ..helpers.utils import check_entity_state, mock_call, utcnow
 from .const_integration import DOMAIN, FULL_INIT_ENTITY_NO, URL
 from .data_integration.state import BASE_STATE_CAL1, BASE_STATE_CAL2
 from .helpers_integration.mocks import MS365MOCKS
@@ -37,17 +37,11 @@ async def test_get_data(
 ) -> None:
     """Test get data."""
     logging.disable(logging.WARNING)
-    entities = er.async_entries_for_config_entry(
-        entity_registry, base_config_entry.entry_id
-    )
+    entities = er.async_entries_for_config_entry(entity_registry, base_config_entry.entry_id)
     assert len(entities) == FULL_INIT_ENTITY_NO
 
-    check_entity_state(
-        hass, "calendar.test_calendar1", "on", _adjust_date(BASE_STATE_CAL1, -1, 0)
-    )
-    check_entity_state(
-        hass, "calendar.test_calendar2", "off", _adjust_date(BASE_STATE_CAL2, 1, 1)
-    )
+    check_entity_state(hass, "calendar.test_calendar1", "on", _adjust_date(BASE_STATE_CAL1, -1, 0))
+    check_entity_state(hass, "calendar.test_calendar2", "off", _adjust_date(BASE_STATE_CAL2, 1, 1))
 
 
 async def test_one_not_tracked(
@@ -60,9 +54,7 @@ async def test_one_not_tracked(
 
     await update_options(hass, base_config_entry)
 
-    entities = er.async_entries_for_config_entry(
-        entity_registry, base_config_entry.entry_id
-    )
+    entities = er.async_entries_for_config_entry(entity_registry, base_config_entry.entry_id)
     await hass.async_block_till_done()
     assert len(entities) == 1
 
@@ -283,23 +275,17 @@ async def test_sensitivity_exclude(
     # assert "sensitivity ne 'private'" in str(get_events.call_args_list)
 
 
-@pytest.mark.parametrize(
-    "setup_base_integration", [{"method_name": "all_day_event_mocks"}], indirect=True
-)
+@pytest.mark.parametrize("setup_base_integration", [{"method_name": "all_day_event_mocks"}], indirect=True)
 async def test_all_day_event(
     hass: HomeAssistant,
     setup_base_integration,
     base_config_entry: MS365MockConfigEntry,
 ) -> None:
     """Test all day event."""
-    check_entity_state(
-        hass, "calendar.test_calendar1", "on", attributes={"message": "Test all day"}
-    )
+    check_entity_state(hass, "calendar.test_calendar1", "on", attributes={"message": "Test all day"})
 
 
-@pytest.mark.parametrize(
-    "setup_base_integration", [{"method_name": "started_event_mocks"}], indirect=True
-)
+@pytest.mark.parametrize("setup_base_integration", [{"method_name": "started_event_mocks"}], indirect=True)
 async def test_started_event(
     hass: HomeAssistant,
     setup_base_integration,
@@ -307,9 +293,7 @@ async def test_started_event(
 ) -> None:
     """Test started event."""
 
-    check_entity_state(
-        hass, "calendar.test_calendar1", "on", attributes={"message": "Test started"}
-    )
+    check_entity_state(hass, "calendar.test_calendar1", "on", attributes={"message": "Test started"})
 
 
 @pytest.mark.parametrize(
@@ -348,10 +332,7 @@ async def test_search_with_quote(
         await hass.config_entries.async_setup(base_config_entry.entry_id)
         await hass.async_block_till_done()
 
-    filters = [
-        call.kwargs["query"].as_params().get("$filter", "")
-        for call in get_events.call_args_list
-    ]
+    filters = [call.kwargs["query"].as_params().get("$filter", "") for call in get_events.call_args_list]
     assert any("contains(subject, 'Mum''s birthday')" in item for item in filters)
 
 
@@ -384,6 +365,7 @@ async def test_exclude_plain_text(
 
     check_entity_state(hass, "calendar.test_calendar1", "on", data_length=2)
 
+
 async def test_first_sync_error(
     hass: HomeAssistant,
     requests_mock: Mocker,
@@ -403,14 +385,11 @@ async def test_first_sync_error(
 
     assert "No current event found for group:calendar2" in caplog.text
 
+
 def _adjust_date(data, adddays_start=0, adddays_end=0):
     new_data = deepcopy(data)
-    start = (utcnow() + timedelta(days=adddays_start)).replace(
-        hour=0, minute=0, second=0, microsecond=0
-    )
-    end = (utcnow() + timedelta(days=1 + adddays_end)).replace(
-        hour=23, minute=59, second=59, microsecond=0
-    )
+    start = (utcnow() + timedelta(days=adddays_start)).replace(hour=0, minute=0, second=0, microsecond=0)
+    end = (utcnow() + timedelta(days=1 + adddays_end)).replace(hour=23, minute=59, second=59, microsecond=0)
     start_all_day = start.date()
     end_all_day = end.date()
     for item in new_data:

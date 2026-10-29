@@ -4,9 +4,10 @@
 from unittest.mock import patch
 
 import pytest
+from requests_mock import Mocker
+
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
-from requests_mock import Mocker
 
 from ..helpers.mock_config_entry import MS365MockConfigEntry
 from ..helpers.utils import build_token_file
@@ -44,9 +45,7 @@ async def test_shared_permissions(
     await hass.config_entries.async_setup(base_config_entry.entry_id)
     await hass.async_block_till_done()
 
-    entities = er.async_entries_for_config_entry(
-        entity_registry, base_config_entry.entry_id
-    )
+    entities = er.async_entries_for_config_entry(entity_registry, base_config_entry.entry_id)
     assert len(entities) == FULL_INIT_ENTITY_NO
 
 
@@ -69,9 +68,7 @@ async def test_update_shared_permissions(
     await hass.config_entries.async_setup(base_config_entry.entry_id)
     await hass.async_block_till_done()
 
-    entities = er.async_entries_for_config_entry(
-        entity_registry, base_config_entry.entry_id
-    )
+    entities = er.async_entries_for_config_entry(entity_registry, base_config_entry.entry_id)
     assert len(entities) == FULL_INIT_ENTITY_NO
     assert hass.services.has_service(DOMAIN, "create_calendar_event")
     assert hass.services.has_service(DOMAIN, "modify_calendar_event")
@@ -89,9 +86,7 @@ async def test_missing_permissions(
     build_token_file(tmp_path, "")
 
     base_config_entry.add_to_hass(hass)
-    with patch(
-        "homeassistant.helpers.issue_registry.async_create_issue"
-    ) as mock_async_create_issue:
+    with patch("homeassistant.helpers.issue_registry.async_create_issue") as mock_async_create_issue:
         await hass.config_entries.async_setup(base_config_entry.entry_id)
 
     assert "Minimum required permissions: 'Calendars.Read'" in caplog.text
@@ -112,9 +107,7 @@ async def test_higher_permissions(
     await hass.config_entries.async_setup(base_config_entry.entry_id)
     await hass.async_block_till_done()
 
-    entities = er.async_entries_for_config_entry(
-        entity_registry, base_config_entry.entry_id
-    )
+    entities = er.async_entries_for_config_entry(entity_registry, base_config_entry.entry_id)
     assert len(entities) == FULL_INIT_ENTITY_NO
 
 
@@ -132,9 +125,7 @@ async def test_shared_higher_permissions(
     await hass.config_entries.async_setup(base_config_entry.entry_id)
     await hass.async_block_till_done()
 
-    entities = er.async_entries_for_config_entry(
-        entity_registry, base_config_entry.entry_id
-    )
+    entities = er.async_entries_for_config_entry(entity_registry, base_config_entry.entry_id)
     assert len(entities) == FULL_INIT_ENTITY_NO
 
 
@@ -156,9 +147,7 @@ async def test_basic_permissions(
     await hass.config_entries.async_setup(base_config_entry.entry_id)
     await hass.async_block_till_done()
 
-    entities = er.async_entries_for_config_entry(
-        entity_registry, base_config_entry.entry_id
-    )
+    entities = er.async_entries_for_config_entry(entity_registry, base_config_entry.entry_id)
     assert len(entities) == FULL_INIT_ENTITY_NO
 
 
@@ -225,18 +214,12 @@ async def test_groups(
     await hass.config_entries.async_setup(base_config_entry.entry_id)
     await hass.async_block_till_done()
 
-    entities = er.async_entries_for_config_entry(
-        entity_registry, base_config_entry.entry_id
-    )
+    entities = er.async_entries_for_config_entry(entity_registry, base_config_entry.entry_id)
     assert len(entities) == FULL_INIT_ENTITY_NO
 
 
-@pytest.mark.parametrize(
-    "base_config_entry", [{"groups": True, "enable_update": True}], indirect=True
-)
-@pytest.mark.parametrize(
-    "base_token", ["Calendars.ReadWrite Group.ReadWrite.All"], indirect=True
-)
+@pytest.mark.parametrize("base_config_entry", [{"groups": True, "enable_update": True}], indirect=True)
+@pytest.mark.parametrize("base_token", ["Calendars.ReadWrite Group.ReadWrite.All"], indirect=True)
 async def test_update_groups(
     hass: HomeAssistant,
     requests_mock: Mocker,
@@ -250,7 +233,5 @@ async def test_update_groups(
     await hass.config_entries.async_setup(base_config_entry.entry_id)
     await hass.async_block_till_done()
 
-    entities = er.async_entries_for_config_entry(
-        entity_registry, base_config_entry.entry_id
-    )
+    entities = er.async_entries_for_config_entry(entity_registry, base_config_entry.entry_id)
     assert len(entities) == FULL_INIT_ENTITY_NO

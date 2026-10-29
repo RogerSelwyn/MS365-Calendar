@@ -1,10 +1,8 @@
 """Utilities for MS365 testing."""
 
 import shutil
-import yaml
 
-from homeassistant.const import CONF_NAME
-from homeassistant.core import HomeAssistant
+import yaml
 
 from custom_components.ms365_calendar.integration.const_integration import (
     CONF_ADVANCED_OPTIONS,
@@ -21,6 +19,8 @@ from custom_components.ms365_calendar.integration.const_integration import (
     DEFAULT_UPDATE_INTERVAL,
     DOMAIN,
 )
+from homeassistant.const import CONF_NAME
+from homeassistant.core import HomeAssistant
 
 from ...const import STORAGE_LOCATION, TEST_DATA_INTEGRATION_LOCATION
 from ...helpers.mock_config_entry import MS365MockConfigEntry
@@ -73,6 +73,7 @@ def check_yaml_file_contents(tmp_path, filename):
     with open(path, encoding="utf8") as file:
         compare_yaml = file.read()
     assert created_yaml == compare_yaml
+
 
 def read_yaml_file(tmp_path):
     """Read the calendars yaml file."""

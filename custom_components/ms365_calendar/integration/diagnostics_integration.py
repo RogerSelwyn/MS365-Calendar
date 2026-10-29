@@ -10,7 +10,6 @@ from .filemgmt_integration import (
     build_yaml_filename,
     load_yaml_file,
 )
-from .schema_integration import YAML_CALENDAR_DEVICE_SCHEMA
 
 TO_REDACT = {CONF_CAL_ID}
 
@@ -19,9 +18,7 @@ async def async_integration_diagnostics(hass: HomeAssistant, entry: MS365ConfigE
     """Get integration specific diagnostics."""
     yaml_filename = build_yaml_filename(entry, YAML_CALENDARS_FILENAME)
     yaml_filepath = build_yaml_file_path(hass, yaml_filename)
-    calendars = await hass.async_add_executor_job(
-        load_yaml_file, yaml_filepath, CONF_CAL_ID, YAML_CALENDAR_DEVICE_SCHEMA
-    )
+    calendars = await hass.async_add_executor_job(load_yaml_file, yaml_filepath)
 
     redacted_calendars = {}
     for i, key in enumerate(calendars.keys(), start=1):
