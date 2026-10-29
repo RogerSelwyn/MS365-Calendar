@@ -21,7 +21,6 @@ PLATFORMS: list[Platform] = [
 DOMAIN = "ms365_calendar"
 WORK_LOCATION_CAL_ID = "__work_location__"
 WORK_LOCATION_DEVICE_ID = "WorkLocation"
-WORK_LOCATION_PATH = "/me/settings/workHoursAndLocations"
 
 ATTR_ALL_DAY = "all_day"
 ATTR_ATTENDEES = "attendees"

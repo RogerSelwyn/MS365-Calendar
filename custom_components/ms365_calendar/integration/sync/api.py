@@ -23,7 +23,6 @@ from ..const_integration import (
     CONF_TRACK_NEW_CALENDAR,
     CONST_GROUP,
     ITEMS,
-    WORK_LOCATION_PATH,
     EventResponse,
 )
 from ..filemgmt_integration import (
@@ -252,12 +251,16 @@ class MS365WorkLocationService:
         """Init the MS365 Work Location service."""
         self.hass = hass
         self._account = account
+        self._work_hours_and_locations = None
         self.group_calendar = False
         self.calendar = None
         self.calendar_id = "work_location"
 
     async def async_calendar_init(self) -> bool:
         """Initialise API and probe endpoint access."""
+        self._work_hours_and_locations = await self.hass.async_add_executor_job(
+            self._account.work_hours_and_locations
+        )
         try:
             start = dt_util.utcnow()
             end = start + timedelta(hours=24)
@@ -295,24 +298,12 @@ class MS365WorkLocationService:
         )
 
     def _list_work_location_occurrences(self, start_date, end_date):
-        start = dt_util.as_utc(start_date).strftime("%Y-%m-%dT%H:%M:%SZ")
-        end = dt_util.as_utc(end_date).strftime("%Y-%m-%dT%H:%M:%SZ")
-        con = self._account.connection
-        base_url = self._account.protocol.service_url.rstrip("/")
-        url = (
-            f"{base_url}{WORK_LOCATION_PATH}"
-            f"/occurrencesView(startDateTime='{start}',endDateTime='{end}')"
+        if self._work_hours_and_locations is None:
+            raise RuntimeError("Work hours and locations API has not been initialised")
+        occurrences = self._work_hours_and_locations.occurrences_view(
+            dt_util.as_utc(start_date),
+            dt_util.as_utc(end_date),
         )
-        occurrences = []
-        while url:
-            response = con.get(url)
-            if not response:
-                response.raise_for_status()
-                break
-            data = response.json()
-            occurrences.extend(data.get("value", []))
-            url = data.get("@odata.nextLink")
-
         events = []
         for occurrence in occurrences:
             start_dt = _occurrence_datetime(occurrence, "start")
@@ -320,7 +311,7 @@ class MS365WorkLocationService:
             if start_dt is None or end_dt is None:
                 continue
             work_location_type = _normalise_work_location_type(
-                _occurrence_value(occurrence, "workLocationType")
+                _occurrence_value(occurrence, "work_location_type")
             )
             location = _friendly_work_location(
                 work_location_type,
@@ -328,41 +319,26 @@ class MS365WorkLocationService:
             )
             events.append(
                 MS365WorkLocationOccurrence(
-                    object_id=_occurrence_value(occurrence, "id")
+                    object_id=_occurrence_value(occurrence, "object_id")
                     or f"{start_dt}_{end_dt}_{location}",
                     subject=f"Work location: {location}",
                     start=start_dt,
                     end=end_dt,
                     location=location,
-                    recurrence_id=_occurrence_value(occurrence, "recurrenceId"),
+                    recurrence_id=_occurrence_value(occurrence, "recurrence_id"),
                     work_location_type=work_location_type,
                 )
             )
         return events
 
 
-def _occurrence_value(occurrence, *keys: str):
-    for key in keys:
-        if isinstance(occurrence, dict) and key in occurrence:
-            return occurrence.get(key)
-        if hasattr(occurrence, key):
-            return getattr(occurrence, key)
-    return None
+def _occurrence_value(occurrence, key: str):
+    return getattr(occurrence, key, None)
 
 
 def _occurrence_datetime(occurrence, key: str) -> datetime | None:
     value = _occurrence_value(occurrence, key)
-    if isinstance(value, datetime):
-        return value
-    if isinstance(value, dict) and value.get("dateTime"):
-        parsed = dt_util.parse_datetime(value["dateTime"])
-        if parsed is None:
-            return None
-        if parsed.tzinfo is None:
-            tz = dt_util.get_time_zone(value.get("timeZone") or "UTC")
-            parsed = parsed.replace(tzinfo=tz or dt_util.UTC)
-        return parsed
-    return None
+    return value if isinstance(value, datetime) else None
 
 
 def _normalise_work_location_type(value) -> str:
