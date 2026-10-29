@@ -119,14 +119,25 @@ async def test_work_location_calendar(
     state = hass.states.get("calendar.test_worklocation")
     assert state is not None
     assert state.attributes["friendly_name"] == "Work Location"
-    assert [event["summary"] for event in state.attributes["data"]] == [
-        "Work location: Main Office",
-        "Work location: Remote",
-    ]
+    # The entity data only covers the next 24 hours, so tomorrow's event may fall outside it
+    assert state.attributes["data"][0]["summary"] == "Work location: Main Office"
     assert (
         entity_registry.async_get("calendar.test_worklocation").unique_id
         == "__work_location___test_WorkLocation"
     )
+    today_location = hass.states.get("sensor.test_worklocation_today_location")
+    tomorrow_location = hass.states.get("sensor.test_worklocation_tomorrow_location")
+    office_today = hass.states.get("binary_sensor.test_worklocation_office_today")
+    office_tomorrow = hass.states.get("binary_sensor.test_worklocation_office_tomorrow")
+
+    assert today_location is not None
+    assert tomorrow_location is not None
+    assert office_today is not None
+    assert office_tomorrow is not None
+    assert today_location.state == "office"
+    assert tomorrow_location.state == "remote"
+    assert office_today.state == "on"
+    assert office_tomorrow.state == "off"
 
 
 async def test_get_events_fetch_error(

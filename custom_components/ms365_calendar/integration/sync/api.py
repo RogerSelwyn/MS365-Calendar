@@ -5,7 +5,6 @@ import functools as ft
 import logging
 from typing import Any, cast
 
-from dateutil import parser, tz
 from requests.exceptions import (
     ConnectionError as RequestConnectionError,
     HTTPError,
@@ -24,6 +23,7 @@ from ..const_integration import (
     CONF_TRACK_NEW_CALENDAR,
     CONST_GROUP,
     ITEMS,
+    WORK_LOCATION_PATH,
     EventResponse,
 )
 from ..filemgmt_integration import (
@@ -35,37 +35,6 @@ from .store import CalendarStore
 from .timeline import MS365Timeline, calendar_timeline
 
 _LOGGER = logging.getLogger(__name__)
-WINDOWS_TZ_TO_IANA = {
-    "UTC": "UTC",
-    "GMT Standard Time": "Europe/London",
-    "W. Europe Standard Time": "Europe/Berlin",
-    "Romance Standard Time": "Europe/Paris",
-    "Central Europe Standard Time": "Europe/Budapest",
-    "E. Europe Standard Time": "Europe/Chisinau",
-    "GTB Standard Time": "Europe/Bucharest",
-    "Turkey Standard Time": "Europe/Istanbul",
-    "Russian Standard Time": "Europe/Moscow",
-    "Pacific Standard Time": "America/Los_Angeles",
-    "Mountain Standard Time": "America/Denver",
-    "Central Standard Time": "America/Chicago",
-    "Eastern Standard Time": "America/New_York",
-    "Atlantic Standard Time": "America/Halifax",
-    "Newfoundland Standard Time": "America/St_Johns",
-    "Greenland Standard Time": "America/Godthab",
-    "Argentina Standard Time": "America/Argentina/Buenos_Aires",
-    "E. South America Standard Time": "America/Sao_Paulo",
-    "South Africa Standard Time": "Africa/Johannesburg",
-    "Egypt Standard Time": "Africa/Cairo",
-    "Arabian Standard Time": "Asia/Dubai",
-    "India Standard Time": "Asia/Kolkata",
-    "SE Asia Standard Time": "Asia/Bangkok",
-    "China Standard Time": "Asia/Shanghai",
-    "Tokyo Standard Time": "Asia/Tokyo",
-    "Korea Standard Time": "Asia/Seoul",
-    "AUS Eastern Standard Time": "Australia/Sydney",
-    "AUS Central Standard Time": "Australia/Adelaide",
-    "New Zealand Standard Time": "Pacific/Auckland",
-}
 
 
 class MS365CalendarService:
@@ -288,20 +257,35 @@ class MS365WorkLocationService:
         self.calendar_id = "work_location"
 
     async def async_calendar_init(self) -> bool:
-        """Probe endpoint access to avoid creating unusable entities."""
+        """Initialise API and probe endpoint access."""
         try:
             start = dt_util.utcnow()
             end = start + timedelta(hours=24)
             await self.async_list_events(start, end)
-        except (HTTPError, RetryError, RequestConnectionError) as err:
+        except HTTPError as err:
+            status_code = getattr(getattr(err, "response", None), "status_code", None)
+            if status_code in (403, 404):
+                _LOGGER.warning(
+                    "Work location calendar not enabled: /me/settings/workHoursAndLocations "
+                    "is unavailable or not permitted for this account/tenant (%s). "
+                    "Disable WorkLocation in Enabled calendars, or verify Graph support "
+                    "and permissions for this tenant.",
+                    err,
+                )
+                return False
             _LOGGER.warning(
-                "Work location calendar not enabled: /me/settings/workHoursAndLocations "
-                "is unavailable or not permitted for this account/tenant (%s). "
-                "Disable WorkLocation in Enabled calendars, or verify Graph support "
-                "and permissions for this tenant.",
+                "Work location endpoint probe failed with transient error (%s). "
+                "Entity will be created and retried during normal sync.",
                 err,
             )
-            return False
+            return True
+        except (RetryError, RequestConnectionError) as err:
+            _LOGGER.warning(
+                "Work location endpoint probe failed with transient error (%s). "
+                "Entity will be created and retried during normal sync.",
+                err,
+            )
+            return True
         return True
 
     async def async_list_events(self, start_date, end_date):
@@ -313,55 +297,80 @@ class MS365WorkLocationService:
     def _list_work_location_occurrences(self, start_date, end_date):
         start = dt_util.as_utc(start_date).strftime("%Y-%m-%dT%H:%M:%SZ")
         end = dt_util.as_utc(end_date).strftime("%Y-%m-%dT%H:%M:%SZ")
-        base_url = self._account.protocol.service_url
+        con = self._account.connection
+        base_url = self._account.protocol.service_url.rstrip("/")
         url = (
-            f"{base_url}me/settings/workHoursAndLocations/occurrencesView("
-            f"startDateTime='{start}',endDateTime='{end}')"
+            f"{base_url}{WORK_LOCATION_PATH}"
+            f"/occurrencesView(startDateTime='{start}',endDateTime='{end}')"
         )
-        response = self._account.con.get(url)
-        response.raise_for_status()
-        payload = response.json()
-        occurrences = payload.get("value", [])
+        occurrences = []
+        while url:
+            response = con.get(url)
+            if not response:
+                response.raise_for_status()
+                break
+            data = response.json()
+            occurrences.extend(data.get("value", []))
+            url = data.get("@odata.nextLink")
+
         events = []
         for occurrence in occurrences:
-            start_dt = _parse_graph_datetime(occurrence.get("start", {}))
-            end_dt = _parse_graph_datetime(occurrence.get("end", {}))
+            start_dt = _occurrence_datetime(occurrence, "start")
+            end_dt = _occurrence_datetime(occurrence, "end")
             if start_dt is None or end_dt is None:
                 continue
-            work_location_type = occurrence.get("workLocationType", "unknown")
-            location = _friendly_work_location(work_location_type, occurrence.get("location"))
+            work_location_type = _normalise_work_location_type(
+                _occurrence_value(occurrence, "workLocationType")
+            )
+            location = _friendly_work_location(
+                work_location_type,
+                _occurrence_value(occurrence, "location"),
+            )
             events.append(
                 MS365WorkLocationOccurrence(
-                    object_id=occurrence.get("id", f"{start_dt}_{end_dt}_{location}"),
+                    object_id=_occurrence_value(occurrence, "id")
+                    or f"{start_dt}_{end_dt}_{location}",
                     subject=f"Work location: {location}",
                     start=start_dt,
                     end=end_dt,
                     location=location,
-                    recurrence_id=occurrence.get("recurrenceId"),
+                    recurrence_id=_occurrence_value(occurrence, "recurrenceId"),
                     work_location_type=work_location_type,
                 )
             )
         return events
 
 
-def _parse_graph_datetime(value: dict[str, Any]) -> datetime | None:
-    date_time = value.get("dateTime")
-    if not date_time:
-        return None
+def _occurrence_value(occurrence, *keys: str):
+    for key in keys:
+        if isinstance(occurrence, dict) and key in occurrence:
+            return occurrence.get(key)
+        if hasattr(occurrence, key):
+            return getattr(occurrence, key)
+    return None
 
-    parsed = parser.isoparse(date_time)
-    if parsed.tzinfo is not None:
+
+def _occurrence_datetime(occurrence, key: str) -> datetime | None:
+    value = _occurrence_value(occurrence, key)
+    if isinstance(value, datetime):
+        return value
+    if isinstance(value, dict) and value.get("dateTime"):
+        parsed = dt_util.parse_datetime(value["dateTime"])
+        if parsed is None:
+            return None
+        if parsed.tzinfo is None:
+            tz = dt_util.get_time_zone(value.get("timeZone") or "UTC")
+            parsed = parsed.replace(tzinfo=tz or dt_util.UTC)
         return parsed
+    return None
 
-    tz_name = value.get("timeZone")
-    tzinfo = tz.gettz(tz_name) if tz_name else None
-    if tzinfo is None and tz_name:
-        iana_name = WINDOWS_TZ_TO_IANA.get(tz_name)
-        if iana_name:
-            tzinfo = tz.gettz(iana_name)
-    if tzinfo is None:
-        tzinfo = dt_util.get_default_time_zone()
-    return parsed.replace(tzinfo=tzinfo)
+
+def _normalise_work_location_type(value) -> str:
+    if value is None:
+        return "unknown"
+    if hasattr(value, "value"):
+        value = value.value
+    return str(value)
 
 
 def _friendly_work_location(work_location_type: str, location: Any) -> str:
@@ -370,6 +379,8 @@ def _friendly_work_location(work_location_type: str, location: Any) -> str:
     mapped = {
         "office": "Office",
         "remote": "Remote",
+        "timeoff": "TimeOff",
+        "timeOff": "TimeOff",
         "home": "Home",
         "onsite": "On site",
         "unknown": "Unknown",

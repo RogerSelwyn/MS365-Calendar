@@ -87,7 +87,8 @@ def format_event_data(event):
         if organizer is not None and hasattr(organizer, "address")
         else None
     )
-    return {
+    work_location_type = getattr(event, "work_location_type", None)
+    data = {
         "summary": event.subject,
         "start": get_hass_date(event.start, event.is_all_day),
         "end": get_hass_date(get_end_date(event), event.is_all_day),
@@ -114,6 +115,9 @@ def format_event_data(event):
         ],
         "uid": getattr(event, "object_id", None),
     }
+    if work_location_type:
+        data["work_location_type"] = work_location_type
+    return data
 
 
 def get_hass_date(obj, is_all_day):

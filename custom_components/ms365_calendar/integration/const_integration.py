@@ -13,10 +13,15 @@ class EventResponse(Enum):
     Decline = "decline"  # pylint: disable=invalid-name
 
 
-PLATFORMS: list[Platform] = [Platform.CALENDAR]
+PLATFORMS: list[Platform] = [
+    Platform.CALENDAR,
+    Platform.SENSOR,
+    Platform.BINARY_SENSOR,
+]
 DOMAIN = "ms365_calendar"
 WORK_LOCATION_CAL_ID = "__work_location__"
 WORK_LOCATION_DEVICE_ID = "WorkLocation"
+WORK_LOCATION_PATH = "/me/settings/workHoursAndLocations"
 
 ATTR_ALL_DAY = "all_day"
 ATTR_ATTENDEES = "attendees"

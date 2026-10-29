@@ -140,7 +140,12 @@ async def test_options_flow_reload(
     # Same options, so only the yaml changes
     result = await hass.config_entries.options.async_init(base_config_entry.entry_id)
     result = await hass.config_entries.options.async_configure(
-        result["flow_id"], user_input=dict(base_config_entry.options)
+        result["flow_id"],
+        user_input={
+            key: value
+            for key, value in base_config_entry.options.items()
+            if key != CONF_WORK_LOCATION
+        },
     )
     result = await hass.config_entries.options.async_configure(
         result["flow_id"],
