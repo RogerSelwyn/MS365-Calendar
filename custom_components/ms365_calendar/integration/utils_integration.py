@@ -12,6 +12,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from homeassistant.util import dt as dt_util, slugify
 from O365.calendar import Attendee  # pylint: disable=no-name-in-module)
+from O365.utils import to_snake_case  # pylint: disable=no-name-in-module
 
 from ..classes.config_entry import MS365ConfigEntry
 from ..const import CONF_ENTITY_NAME
@@ -35,6 +36,7 @@ from .const_integration import (
     DAYS,
     DOMAIN,
     INDEXES,
+    LOCATION_ADDRESS,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -69,6 +71,9 @@ def format_event_data(event):
         "all_day": event.is_all_day,
         "description": clean_html(event.body),
         "location": event.location["displayName"],
+        "location_details": _location_details(event.location),
+        "locations": _locations(event.locations),
+        "online_meeting": _online_meeting(event),
         "categories": event.categories,
         "sensitivity": event.sensitivity.name,
         "show_as": event.show_as.name,
@@ -88,6 +93,63 @@ def format_event_data(event):
             for x in attendees
         ],
         "uid": event.object_id,
+        "web_link": event.web_link,
+    }
+
+
+def _location_details(location):
+    """Get what MS Graph has on a place beyond its name, leaving out empty parts."""
+    # A place typed in as text has the default type, which tells nothing more
+    location_type = to_snake_case(location.get("locationType") or "default")
+    details = {
+        "address": _location_address(location.get("address") or {}),
+        "coordinates": _location_coordinates(location.get("coordinates") or {}),
+        "type": None if location_type == "default" else location_type,
+        "email": location.get("locationEmailAddress"),
+        "uri": location.get("locationUri"),
+    }
+    return {key: value for key, value in details.items() if value} or None
+
+
+def _location_address(address):
+    return {key: address[graph_key] for key, graph_key in LOCATION_ADDRESS.items() if address.get(graph_key)}
+
+
+def _location_coordinates(coordinates):
+    latitude = coordinates.get("latitude")
+    longitude = coordinates.get("longitude")
+    # A place without coordinates can come with 0, 0, which is not a real place
+    if latitude is None or longitude is None or latitude == longitude == 0:
+        return None
+    return {"latitude": latitude, "longitude": longitude}
+
+
+def _locations(locations):
+    """Get each place of an event held in several.
+
+    The location of such an event is only their names joined, while for one place
+    the location and its details already say it all.
+    """
+    if len(locations or []) < 2:
+        return None
+    return [{"name": place.get("displayName", ""), **(_location_details(place) or {})} for place in locations]
+
+
+def _online_meeting(event):
+    """Get the service of an online meeting, such as Teams, and the link to join it.
+
+    The join link is in onlineMeeting. onlineMeetingUrl is deprecated, so it is only
+    used when there is no join link, as for some older Skype meetings.
+    """
+    join_url = (event.online_meeting or {}).get("joinUrl") or event.online_meeting_url
+    if not event.is_online_meeting and not join_url:
+        return None
+    # MS Graph says unknown for a service it does not name, and O365 has no value
+    # for a service it does not know
+    provider = getattr(event.online_meeting_provider, "value", "unknown")
+    return {
+        "provider": None if provider == "unknown" else provider,
+        "join_url": join_url,
     }
 
 

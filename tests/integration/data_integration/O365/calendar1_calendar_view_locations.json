@@ -1,0 +1,269 @@
+{
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('fake-user-id')/calendars('calendar1')/calendarView(subject,body,attendees,categories,sensitivity,start,seriesMasterId,isAllDay,end,showAs,location,locations)",
+    "value": [
+        {
+            "@odata.etag": "W/\"qIkRKy24jUSQwhcjI6uJIQAIopRuag==\"",
+            "id": "address",
+            "categories": [],
+            "reminderMinutesBeforeStart": 0,
+            "isReminderOn": false,
+            "subject": "Coffee at a place with an address",
+            "sensitivity": "normal",
+            "isAllDay": false,
+            "seriesMasterId": null,
+            "showAs": "busy",
+            "body": {
+                "contentType": "text",
+                "content": "Plain Text"
+            },
+            "start": {
+                "dateTime": "2020-01-01T00:00:00.0000000",
+                "timeZone": "UTC"
+            },
+            "end": {
+                "dateTime": "2020-01-02T23:59:59.0000000",
+                "timeZone": "UTC"
+            },
+            "location": {
+                "displayName": "Fourth Coffee",
+                "locationUri": "https://www.bingapis.com/api/v6/localbusinesses/fourthcoffee",
+                "locationType": "localBusiness",
+                "uniqueId": "https://www.bingapis.com/api/v6/localbusinesses/fourthcoffee",
+                "uniqueIdType": "bing",
+                "address": {
+                    "street": "4567 Main St",
+                    "city": "Redmond",
+                    "state": "WA",
+                    "countryOrRegion": "United States",
+                    "postalCode": "98052"
+                },
+                "coordinates": {
+                    "latitude": 47.672,
+                    "longitude": -122.103
+                }
+            },
+            "locations": [
+                {
+                    "displayName": "Fourth Coffee",
+                    "locationUri": "https://www.bingapis.com/api/v6/localbusinesses/fourthcoffee",
+                    "locationType": "localBusiness",
+                    "uniqueId": "https://www.bingapis.com/api/v6/localbusinesses/fourthcoffee",
+                    "uniqueIdType": "bing",
+                    "address": {
+                        "street": "4567 Main St",
+                        "city": "Redmond",
+                        "state": "WA",
+                        "countryOrRegion": "United States",
+                        "postalCode": "98052"
+                    },
+                    "coordinates": {
+                        "latitude": 47.672,
+                        "longitude": -122.103
+                    }
+                }
+            ],
+            "attendees": []
+        },
+        {
+            "@odata.etag": "W/\"qIkRKy24jUSQwhcjI6uJIQAIopRuag==\"",
+            "id": "room",
+            "categories": [],
+            "reminderMinutesBeforeStart": 0,
+            "isReminderOn": false,
+            "subject": "Meeting in a room",
+            "sensitivity": "normal",
+            "isAllDay": false,
+            "seriesMasterId": null,
+            "showAs": "busy",
+            "body": {
+                "contentType": "text",
+                "content": "Plain Text"
+            },
+            "start": {
+                "dateTime": "2020-01-01T00:00:00.0000000",
+                "timeZone": "UTC"
+            },
+            "end": {
+                "dateTime": "2020-01-02T23:59:59.0000000",
+                "timeZone": "UTC"
+            },
+            "location": {
+                "displayName": "Room 1",
+                "locationType": "conferenceRoom",
+                "locationEmailAddress": "room1@nomail.com",
+                "uniqueId": "room1@nomail.com",
+                "uniqueIdType": "directory",
+                "address": {
+                    "street": "",
+                    "city": "Utrecht",
+                    "state": "",
+                    "countryOrRegion": "",
+                    "postalCode": ""
+                },
+                "coordinates": {}
+            },
+            "locations": [
+                {
+                    "displayName": "Room 1",
+                    "locationType": "conferenceRoom",
+                    "locationEmailAddress": "room1@nomail.com",
+                    "uniqueId": "room1@nomail.com",
+                    "uniqueIdType": "directory",
+                    "address": {
+                        "street": "",
+                        "city": "Utrecht",
+                        "state": "",
+                        "countryOrRegion": "",
+                        "postalCode": ""
+                    },
+                    "coordinates": {}
+                }
+            ],
+            "attendees": []
+        },
+        {
+            "@odata.etag": "W/\"qIkRKy24jUSQwhcjI6uJIQAIopRuag==\"",
+            "id": "several",
+            "categories": [],
+            "reminderMinutesBeforeStart": 0,
+            "isReminderOn": false,
+            "subject": "Meeting in several places",
+            "sensitivity": "normal",
+            "isAllDay": false,
+            "seriesMasterId": null,
+            "showAs": "busy",
+            "body": {
+                "contentType": "text",
+                "content": "Plain Text"
+            },
+            "start": {
+                "dateTime": "2020-01-01T00:00:00.0000000",
+                "timeZone": "UTC"
+            },
+            "end": {
+                "dateTime": "2020-01-02T23:59:59.0000000",
+                "timeZone": "UTC"
+            },
+            "location": {
+                "displayName": "Room 1; Head office; Home office",
+                "locationType": "default",
+                "uniqueId": "Room 1; Head office; Home office",
+                "uniqueIdType": "private"
+            },
+            "locations": [
+                {
+                    "displayName": "Room 1",
+                    "locationType": "conferenceRoom",
+                    "locationEmailAddress": "room1@nomail.com",
+                    "uniqueId": "room1@nomail.com",
+                    "uniqueIdType": "directory"
+                },
+                {
+                    "displayName": "Head office",
+                    "locationType": "businessAddress",
+                    "uniqueId": "Head office",
+                    "uniqueIdType": "private",
+                    "address": {
+                        "street": "1 Station Square",
+                        "city": "Utrecht",
+                        "countryOrRegion": "Netherlands",
+                        "postalCode": "3511 ED"
+                    },
+                    "coordinates": {
+                        "latitude": 52.089,
+                        "longitude": 5.11
+                    }
+                },
+                {
+                    "displayName": "Home office",
+                    "locationType": "default",
+                    "uniqueIdType": "unknown"
+                }
+            ],
+            "attendees": []
+        },
+        {
+            "@odata.etag": "W/\"qIkRKy24jUSQwhcjI6uJIQAIopRuag==\"",
+            "id": "name_only",
+            "categories": [],
+            "reminderMinutesBeforeStart": 0,
+            "isReminderOn": false,
+            "subject": "Dentist with only a name",
+            "sensitivity": "normal",
+            "isAllDay": false,
+            "seriesMasterId": null,
+            "showAs": "busy",
+            "body": {
+                "contentType": "text",
+                "content": "Plain Text"
+            },
+            "start": {
+                "dateTime": "2020-01-01T00:00:00.0000000",
+                "timeZone": "UTC"
+            },
+            "end": {
+                "dateTime": "2020-01-02T23:59:59.0000000",
+                "timeZone": "UTC"
+            },
+            "location": {
+                "displayName": "Dentist",
+                "locationUri": "",
+                "locationType": "default",
+                "uniqueId": "Dentist",
+                "uniqueIdType": "private",
+                "address": {
+                    "street": "",
+                    "city": "",
+                    "state": "",
+                    "countryOrRegion": "",
+                    "postalCode": ""
+                },
+                "coordinates": {
+                    "latitude": 0,
+                    "longitude": 0
+                }
+            },
+            "locations": [
+                {
+                    "displayName": "Dentist",
+                    "locationType": "default",
+                    "uniqueIdType": "unknown"
+                }
+            ],
+            "attendees": []
+        },
+        {
+            "@odata.etag": "W/\"qIkRKy24jUSQwhcjI6uJIQAIopRuag==\"",
+            "id": "no_location",
+            "categories": [],
+            "reminderMinutesBeforeStart": 0,
+            "isReminderOn": false,
+            "subject": "Call without a location",
+            "sensitivity": "normal",
+            "isAllDay": false,
+            "seriesMasterId": null,
+            "showAs": "busy",
+            "body": {
+                "contentType": "text",
+                "content": "Plain Text"
+            },
+            "start": {
+                "dateTime": "2020-01-01T00:00:00.0000000",
+                "timeZone": "UTC"
+            },
+            "end": {
+                "dateTime": "2020-01-02T23:59:59.0000000",
+                "timeZone": "UTC"
+            },
+            "location": {
+                "displayName": "",
+                "locationType": "default",
+                "uniqueIdType": "unknown",
+                "address": {},
+                "coordinates": {}
+            },
+            "locations": [],
+            "attendees": []
+        }
+    ]
+}
