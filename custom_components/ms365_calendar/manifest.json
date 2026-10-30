@@ -8,6 +8,12 @@
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/RogerSelwyn/MS365-Calendar/issues",
   "loggers": ["custom_components.ms365_calendar", "O365"],
-  "requirements": ["O365>=2.1.4", "portalocker>=3.2.0", "oauthlib"],
+  "requirements": [
+    "O365>=2.1.4",
+    "BeautifulSoup4>=4.13.3",
+    "portalocker>=3.2.0",
+    "ical>=10.0.0",
+    "oauthlib"
+  ],
   "version": "v1.13.0"
 }
