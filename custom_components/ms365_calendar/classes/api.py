@@ -15,6 +15,11 @@ from O365.connection import (  # pylint: disable=import-error, no-name-in-module
 )
 
 from ..const import (
+    CLIENT_SECRET_SOURCE_ENVIRONMENT,
+    CONF_CLIENT_ID,
+    CONF_CLIENT_SECRET,
+    CONF_CLIENT_SECRET_ENV_VAR,
+    CONF_CLIENT_SECRET_SOURCE,
     CONF_ENTITY_NAME,
     CONST_UTC_TIMEZONE,
     COUNTRY_URLS,
@@ -39,6 +44,14 @@ from ..integration.const_integration import DOMAIN
 from .config_entry import MS365ConfigEntry
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def get_credentials(config):
+    """Return the configured client credentials."""
+    client_secret = config.get(CONF_CLIENT_SECRET)
+    if config.get(CONF_CLIENT_SECRET_SOURCE) == CLIENT_SECRET_SOURCE_ENVIRONMENT:
+        client_secret = os.environ.get(config.get(CONF_CLIENT_SECRET_ENV_VAR, ""))
+    return config.get(CONF_CLIENT_ID), client_secret
 
 
 class MS365Protocol(MSGraphProtocol):

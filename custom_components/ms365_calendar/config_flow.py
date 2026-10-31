@@ -16,7 +16,7 @@ from homeassistant.data_entry_flow import section
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.network import get_url
 
-from .classes.api import MS365Account, MS365Token
+from .classes.api import MS365Account, MS365Token, get_credentials
 from .classes.config_entry import MS365ConfigEntry
 from .const import (
     AUTH_CALLBACK_DATA,
@@ -31,11 +31,15 @@ from .const import (
     CONF_AUTH_URL,
     CONF_CLIENT_ID,
     CONF_CLIENT_SECRET,
+    CONF_CLIENT_SECRET_ENV_VAR,
+    CONF_CLIENT_SECRET_SOURCE,
     CONF_ENTITY_NAME,
     CONF_FAILED_PERMISSIONS,
     CONF_SHARED_MAILBOX,
     CONF_TENANT_ID,
     CONF_URL,
+    CLIENT_SECRET_SOURCE_ENVIRONMENT,
+    CLIENT_SECRET_SOURCE_MANUAL,
     COUNTRY_URLS,
     DEFAULT_TENANT_ID,
     ERROR_IMPORTED_DUPLICATE,
@@ -58,7 +62,12 @@ from .integration.config_flow_integration import (
 from .integration.const_integration import DOMAIN
 from .integration.permissions_integration import Permissions
 from .integration.schema_integration import CONFIG_SCHEMA_INTEGRATION
-from .schema import CONFIG_SCHEMA, REQUEST_AUTHORIZATION_DEFAULT_SCHEMA
+from .schema import (
+    CLIENT_SECRET_ENVIRONMENT_SCHEMA,
+    CLIENT_SECRET_MANUAL_SCHEMA,
+    CONFIG_SCHEMA,
+    REQUEST_AUTHORIZATION_DEFAULT_SCHEMA,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -96,52 +105,129 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
         """Handle the initial step."""
         errors = self._validate_user_input(user_input) if user_input else {}
         if user_input and not errors:
-            self._user_input = user_input
-
+            self._user_input = dict(user_input)
             if not self._reconfigure:
-                self.entity_name = user_input.get(CONF_ENTITY_NAME)
+                self.entity_name = self._user_input.get(CONF_ENTITY_NAME)
             else:
-                user_input[CONF_ENTITY_NAME] = self.entity_name
-            credentials = (
-                user_input.get(CONF_CLIENT_ID),
-                user_input.get(CONF_CLIENT_SECRET),
+                self._user_input[CONF_ENTITY_NAME] = self.entity_name
+            credential_key = (
+                CONF_CLIENT_SECRET_ENV_VAR
+                if self._user_input[CONF_CLIENT_SECRET_SOURCE]
+                == CLIENT_SECRET_SOURCE_ENVIRONMENT
+                else CONF_CLIENT_SECRET
             )
-
-            main_resource = user_input.get(CONF_SHARED_MAILBOX)
-            alt_auth_method = self._user_input.get(CONF_ALT_AUTH_METHOD)
-            token_backend = MS365Token(self.hass, user_input)
-            self._permissions = Permissions(self.hass, user_input, token_backend)
-            self._ms365account = MS365Account(self._permissions, user_input)
-            auth_error = await self.hass.async_add_executor_job(
-                self._ms365account.try_authentication,
-                credentials,
-                main_resource,
-                self.entity_name,
-            )
-            auth_error = await self._async_delete_unreadable_token(
-                auth_error, token_backend
-            ) or await self._async_get_authorization_url(alt_auth_method, user_input)
-
-            if not auth_error:
-                if alt_auth_method:
-                    return await self.async_step_request_alt()
-
-                return await self.async_step_request_default()
-
-            attr_name = CONF_CLIENT_ID if self._reconfigure else CONF_ENTITY_NAME
-
-            # sourcery skip
-            if auth_error == AUTH_ERROR_INVALID_TENANT:
-                errors[CONF_API_OPTIONS] = auth_error
-            elif auth_error:
-                errors[attr_name] = AUTH_ERROR_AUTHENTICATING
+            if credential_key in user_input:
+                return await self.async_step_client_secret(
+                    {credential_key: user_input[credential_key]}
+                )
+            return await self.async_step_client_secret()
 
         data = self._config_schema or CONFIG_SCHEMA | CONFIG_SCHEMA_INTEGRATION
         return self.async_show_form(
-            step_id="user", data_schema=vol.Schema(data), errors=errors
+            step_id="user",
+            data_schema=vol.Schema(data, extra=vol.ALLOW_EXTRA),
+            errors=errors,
         )
 
-    async def _async_get_authorization_url(self, alt_auth_method, user_input):
+    async def async_step_client_secret(self, user_input=None) -> ConfigFlowResult:
+        """Collect the selected client-secret source."""
+        source = self._user_input[CONF_CLIENT_SECRET_SOURCE]
+        schema = self._get_client_secret_schema(source)
+
+        errors = {}
+        if user_input is not None:
+            self._user_input |= user_input
+            credentials = get_credentials(self._user_input)
+            if not credentials[1]:
+                errors[
+                    CONF_CLIENT_SECRET_ENV_VAR
+                    if source == CLIENT_SECRET_SOURCE_ENVIRONMENT
+                    else CONF_CLIENT_SECRET
+                ] = "missing_client_secret"
+            else:
+                if source == CLIENT_SECRET_SOURCE_ENVIRONMENT:
+                    self._user_input.pop(CONF_CLIENT_SECRET, None)
+                else:
+                    self._user_input.pop(CONF_CLIENT_SECRET_ENV_VAR, None)
+                return await self._async_start_authorization(credentials)
+
+        return self.async_show_form(
+            step_id="client_secret",
+            data_schema=vol.Schema(schema),
+            errors=errors,
+        )
+
+    def _get_client_secret_schema(self, source):
+        """Return the schema for the selected client-secret source."""
+        schema = (
+            CLIENT_SECRET_ENVIRONMENT_SCHEMA
+            if source == CLIENT_SECRET_SOURCE_ENVIRONMENT
+            else CLIENT_SECRET_MANUAL_SCHEMA
+        )
+        if self._reconfigure:
+            default_key = (
+                CONF_CLIENT_SECRET_ENV_VAR
+                if source == CLIENT_SECRET_SOURCE_ENVIRONMENT
+                else CONF_CLIENT_SECRET
+            )
+            default_value = self._entry.data.get(default_key) or (
+                "MS365_CLIENT_SECRET"
+                if source == CLIENT_SECRET_SOURCE_ENVIRONMENT
+                else ""
+            )
+            schema = {
+                vol.Required(default_key, default=default_value): vol.All(
+                    cv.string, vol.Strip
+                )
+            }
+        return schema
+
+    async def _async_start_authorization(self, credentials) -> ConfigFlowResult:
+        """Start authorization with the supplied client credentials."""
+        main_resource = self._user_input.get(CONF_SHARED_MAILBOX)
+        alt_auth_method = self._user_input.get(CONF_ALT_AUTH_METHOD)
+        token_backend = MS365Token(self.hass, self._user_input)
+        self._permissions = Permissions(self.hass, self._user_input, token_backend)
+        self._ms365account = MS365Account(self._permissions, self._user_input)
+        auth_error = await self.hass.async_add_executor_job(
+            self._ms365account.try_authentication,
+            credentials,
+            main_resource,
+            self.entity_name,
+        )
+        auth_error = await self._async_delete_unreadable_token(
+            auth_error, token_backend
+        ) or await self._async_get_authorization_url(alt_auth_method)
+
+        if auth_error:
+            if auth_error == AUTH_ERROR_INVALID_TENANT:
+                errors = {CONF_API_OPTIONS: auth_error}
+                step_id, schema = (
+                    "user",
+                    vol.Schema(
+                        self._config_schema
+                        or CONFIG_SCHEMA | CONFIG_SCHEMA_INTEGRATION,
+                        extra=vol.ALLOW_EXTRA,
+                    ),
+                )
+            else:
+                errors = {"base": AUTH_ERROR_AUTHENTICATING}
+                step_id = "client_secret"
+                schema = vol.Schema(
+                    self._get_client_secret_schema(
+                        self._user_input[CONF_CLIENT_SECRET_SOURCE]
+                    )
+                )
+            return self.async_show_form(
+                step_id=step_id, data_schema=schema, errors=errors
+            )
+
+        if alt_auth_method:
+            return await self.async_step_request_alt()
+
+        return await self.async_step_request_default()
+
+    async def _async_get_authorization_url(self, alt_auth_method):
         scope = self._permissions.requested_permissions
         try:
             self._url, self._flow = await self.hass.async_add_executor_job(
@@ -149,7 +235,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
                     self._ms365account.account.get_authorization_url,
                     requested_scopes=scope,
                     redirect_uri=get_callback_url(
-                        self.hass, alt_auth_method, user_input
+                        self.hass, alt_auth_method, self._user_input
                     ),
                 )
             )
@@ -247,10 +333,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
                     username=self._ms365account.account.username,
                 )
             )
-        credentials = (
-            self._user_input.get(CONF_CLIENT_ID),
-            self._user_input.get(CONF_CLIENT_SECRET),
-        )
+        credentials = get_credentials(self._user_input)
 
         main_resource = self._user_input.get(CONF_SHARED_MAILBOX)
 
@@ -320,8 +403,11 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
                 cv.string, vol.Strip
             ),
             vol.Required(
-                CONF_CLIENT_SECRET, default=entry_data[CONF_CLIENT_SECRET]
-            ): vol.All(cv.string, vol.Strip),
+                CONF_CLIENT_SECRET_SOURCE,
+                default=entry_data.get(
+                    CONF_CLIENT_SECRET_SOURCE, CLIENT_SECRET_SOURCE_MANUAL
+                ),
+            ): vol.In((CLIENT_SECRET_SOURCE_ENVIRONMENT, CLIENT_SECRET_SOURCE_MANUAL)),
             vol.Optional(
                 CONF_ALT_AUTH_METHOD, default=entry_data[CONF_ALT_AUTH_METHOD]
             ): cv.boolean,

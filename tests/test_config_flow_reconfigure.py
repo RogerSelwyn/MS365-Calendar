@@ -200,6 +200,234 @@ async def test_repair_issues_per_entry(
     assert list(issue_registry.issues) == [(DOMAIN, f"missing_{other_entry.entry_id}")]
 
 
+ENV_VAR = "MS365_CLIENT_SECRET"
+ENVIRONMENT_ENTRY_SOURCE = {"client_secret_source": "environment"}
+ENVIRONMENT_ENTRY = {
+    "client_secret_source": "environment",
+    "client_secret_env_var": ENV_VAR,
+    "client_secret": "",
+}
+
+
+@pytest.fixture
+def environment_secret(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Provide the client secret through the environment."""
+    monkeypatch.setenv(ENV_VAR, "environment-secret")
+
+
+def _user_input(**overrides):
+    """Return the user step input without the client secret fields."""
+    user_input = deepcopy(RECONFIGURE_CONFIG_ENTRY)
+    del user_input["client_secret"]
+    del user_input["client_secret_env_var"]
+    return user_input | overrides
+
+
+async def _async_start_reconfigure(hass, entry, user_input):
+    """Start a reconfigure flow and submit the user step."""
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN,
+        context={
+            "source": config_entries.SOURCE_RECONFIGURE,
+            "entry_id": entry.entry_id,
+        },
+    )
+    assert result["step_id"] == "user"
+    return await hass.config_entries.flow.async_configure(
+        result["flow_id"], user_input=user_input
+    )
+
+
+async def _async_finish_reconfigure(hass, result):
+    """Authorize the flow and check the reconfigure completes."""
+    assert result["step_id"] == "request_default"
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        user_input={"url": build_token_url(result, AUTH_CALLBACK_PATH_DEFAULT)},
+    )
+    await hass.async_block_till_done()
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "reconfigure_successful"
+
+
+def _schema_default(result, key):
+    """Return the default of a field in the form schema."""
+    return next(k for k in result["data_schema"].schema if k == key).default()
+
+
+@pytest.mark.parametrize("base_config_entry", [ENVIRONMENT_ENTRY], indirect=True)
+async def test_reconfigure_environment_flow(
+    environment_secret,
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    setup_base_integration,
+    base_config_entry: MS365MockConfigEntry,
+) -> None:
+    """Test reconfigure of an entry using the environment secret."""
+    mock_token(requests_mock, BASE_TOKEN_PERMS)
+    result = await _async_start_reconfigure(
+        hass, base_config_entry, _user_input(**ENVIRONMENT_ENTRY_SOURCE)
+    )
+
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "client_secret"
+    assert not result["errors"]
+    assert _schema_default(result, "client_secret_env_var") == ENV_VAR
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], user_input={"client_secret_env_var": ENV_VAR}
+    )
+    await _async_finish_reconfigure(hass, result)
+
+    assert base_config_entry.state is ConfigEntryState.LOADED
+    assert base_config_entry.data["client_secret_source"] == "environment"
+    assert base_config_entry.data["client_secret_env_var"] == ENV_VAR
+    assert "client_secret" not in base_config_entry.data
+
+
+@pytest.mark.parametrize("base_config_entry", [ENVIRONMENT_ENTRY], indirect=True)
+async def test_reconfigure_environment_default_from_entry(
+    environment_secret,
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    monkeypatch: pytest.MonkeyPatch,
+    setup_base_integration,
+    base_config_entry: MS365MockConfigEntry,
+) -> None:
+    """Test the reconfigure form defaults to the variable already configured."""
+    monkeypatch.setenv("OTHER_SECRET", "other-secret")
+    hass.config_entries.async_update_entry(
+        base_config_entry,
+        data=base_config_entry.data | {"client_secret_env_var": "OTHER_SECRET"},
+    )
+    mock_token(requests_mock, BASE_TOKEN_PERMS)
+
+    result = await _async_start_reconfigure(
+        hass, base_config_entry, _user_input(**ENVIRONMENT_ENTRY_SOURCE)
+    )
+
+    assert result["step_id"] == "client_secret"
+    assert _schema_default(result, "client_secret_env_var") == "OTHER_SECRET"
+
+
+@pytest.mark.parametrize("base_config_entry", [ENVIRONMENT_ENTRY], indirect=True)
+async def test_reconfigure_environment_missing_variable(
+    environment_secret,
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    setup_base_integration,
+    base_config_entry: MS365MockConfigEntry,
+) -> None:
+    """Test reconfigure reports a variable that is not set, then accepts a valid one."""
+    mock_token(requests_mock, BASE_TOKEN_PERMS)
+    result = await _async_start_reconfigure(
+        hass, base_config_entry, _user_input(**ENVIRONMENT_ENTRY_SOURCE)
+    )
+    assert result["step_id"] == "client_secret"
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], user_input={"client_secret_env_var": "MS365_NOT_SET"}
+    )
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "client_secret"
+    assert result["errors"] == {"client_secret_env_var": "missing_client_secret"}
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], user_input={"client_secret_env_var": ENV_VAR}
+    )
+    await _async_finish_reconfigure(hass, result)
+    assert base_config_entry.data["client_secret_env_var"] == ENV_VAR
+
+
+async def test_reconfigure_manual_to_environment(
+    environment_secret,
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    setup_base_integration,
+    base_config_entry: MS365MockConfigEntry,
+) -> None:
+    """Test switching a manual entry to the environment secret."""
+    assert base_config_entry.data["client_secret"] == "5678"
+    mock_token(requests_mock, BASE_TOKEN_PERMS)
+
+    result = await _async_start_reconfigure(
+        hass, base_config_entry, _user_input(**ENVIRONMENT_ENTRY_SOURCE)
+    )
+    assert result["step_id"] == "client_secret"
+    assert _schema_default(result, "client_secret_env_var") == ENV_VAR
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], user_input={"client_secret_env_var": ENV_VAR}
+    )
+    await _async_finish_reconfigure(hass, result)
+
+    assert base_config_entry.data["client_secret_source"] == "environment"
+    assert base_config_entry.data["client_secret_env_var"] == ENV_VAR
+    assert "client_secret" not in base_config_entry.data
+
+
+@pytest.mark.parametrize("base_config_entry", [ENVIRONMENT_ENTRY], indirect=True)
+async def test_reconfigure_environment_to_manual(
+    environment_secret,
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    setup_base_integration,
+    base_config_entry: MS365MockConfigEntry,
+) -> None:
+    """Test switching an environment entry back to a manual secret."""
+    mock_token(requests_mock, BASE_TOKEN_PERMS)
+
+    result = await _async_start_reconfigure(
+        hass, base_config_entry, _user_input(client_secret_source="manual")
+    )
+    assert result["step_id"] == "client_secret"
+    assert "client_secret" in [str(key) for key in result["data_schema"].schema]
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], user_input={"client_secret": "9999"}
+    )
+    await _async_finish_reconfigure(hass, result)
+
+    assert base_config_entry.data["client_secret_source"] == "manual"
+    assert base_config_entry.data["client_secret"] == "9999"
+    assert "client_secret_env_var" not in base_config_entry.data
+
+
+async def test_reconfigure_manual_missing_secret(
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    setup_base_integration,
+    base_config_entry: MS365MockConfigEntry,
+) -> None:
+    """Test the manual secret step rejects an empty secret."""
+    mock_token(requests_mock, BASE_TOKEN_PERMS)
+    result = await _async_start_reconfigure(hass, base_config_entry, _user_input())
+    assert result["step_id"] == "client_secret"
+    assert _schema_default(result, "client_secret") == "5678"
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], user_input={"client_secret": ""}
+    )
+    assert result["step_id"] == "client_secret"
+    assert result["errors"] == {"client_secret": "missing_client_secret"}
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], user_input={"client_secret": "5678"}
+    )
+    await _async_finish_reconfigure(hass, result)
+
+
+@pytest.mark.parametrize("base_config_entry", [ENVIRONMENT_ENTRY], indirect=True)
+async def test_setup_uses_environment_secret(
+    environment_secret,
+    hass: HomeAssistant,
+    setup_base_integration,
+    base_config_entry: MS365MockConfigEntry,
+) -> None:
+    """Test an entry using the environment secret loads."""
+    assert base_config_entry.state is ConfigEntryState.LOADED
+
+
 async def _async_reconfigure(hass, requests_mock, entry, user_input=RECONFIGURE_CONFIG_ENTRY, token_file=None):
     """Run a successful reconfigure flow."""
     mock_token(requests_mock, BASE_TOKEN_PERMS)

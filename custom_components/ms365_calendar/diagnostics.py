@@ -5,10 +5,22 @@ from homeassistant.const import CONF_CLIENT_ID, CONF_CLIENT_SECRET
 from homeassistant.core import HomeAssistant
 
 from .classes.config_entry import MS365ConfigEntry
-from .const import CONF_SHARED_MAILBOX, CONF_TENANT_ID
+from .const import (
+    CLIENT_SECRET_SOURCE_MANUAL,
+    CONF_CLIENT_SECRET_ENV_VAR,
+    CONF_CLIENT_SECRET_SOURCE,
+    CONF_SHARED_MAILBOX,
+    CONF_TENANT_ID,
+)
 from .integration.diagnostics_integration import async_integration_diagnostics
 
-TO_REDACT = {CONF_CLIENT_ID, CONF_CLIENT_SECRET, CONF_SHARED_MAILBOX, CONF_TENANT_ID}
+TO_REDACT = {
+    CONF_CLIENT_ID,
+    CONF_CLIENT_SECRET,
+    CONF_CLIENT_SECRET_ENV_VAR,
+    CONF_SHARED_MAILBOX,
+    CONF_TENANT_ID,
+}
 
 
 async def async_get_config_entry_diagnostics(
@@ -18,6 +30,9 @@ async def async_get_config_entry_diagnostics(
     """Return diagnostics for a config entry."""
     response = {
         "config_entry_data": async_redact_data(dict(entry.data), TO_REDACT),
+        "config_client_secret_source": entry.data.get(
+            CONF_CLIENT_SECRET_SOURCE, CLIENT_SECRET_SOURCE_MANUAL
+        ),
         "config_entry_options": dict(entry.runtime_data.options),
         "config_granted_permissions": list(entry.runtime_data.permissions.permissions),
         "config_requested_permissions": list(

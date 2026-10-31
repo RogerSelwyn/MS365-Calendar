@@ -19,6 +19,8 @@ AUTH_CALLBACK_PATH_DEFAULT = COUNTRY_URLS[CountryOptions.DEFAULT][OAUTH_REDIRECT
 BASE_CONFIG_ENTRY = {
     "entity_name": ENTITY_NAME,
     "client_id": CLIENT_ID,
+    "client_secret_source": "manual",
+    "client_secret_env_var": "",
     "client_secret": CLIENT_SECRET,
     "alt_auth_method": False,
     "enable_update": False,

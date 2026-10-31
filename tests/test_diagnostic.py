@@ -27,6 +27,7 @@ async def test_diagnostics(
     assert "config_entry_data" in result
     assert result["config_entry_data"]["client_id"] == "**REDACTED**"
     assert result["config_entry_data"]["client_secret"] == "**REDACTED**"
+    assert result["config_client_secret_source"] == "manual"
     assert result["config_granted_permissions"] == DIAGNOSTIC_GRANTED_PERMISSIONS
     assert result["config_requested_permissions"] == DIAGNOSTIC_REQUESTED_PERMISSIONS
 

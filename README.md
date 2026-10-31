@@ -25,3 +25,11 @@ I work on this integration because I like things to work well for myself and oth
 The full documentation is available here - [MS365 Documentation](https://rogerselwyn.github.io/MS365-HomeAssistant/)
 
 Also @fixtse has produced a video on installing the integrations, which can be seen on [YouTube](https://youtu.be/_g5I2y-xzaM?si=snmBIGNtM45-4EoW)
+
+## Client-secret environment variables
+
+The setup flow defaults to loading the Entra application client secret from an environment variable, storing only its name in the Home Assistant config entry. Set `MS365_CLIENT_SECRET` (or enter a different name during setup) in the Home Assistant container environment, then complete the normal authorization flow. This works with Docker or Podman environment configuration and Kubernetes `env`/`envFrom` secret injection, including secrets maintained by External Secrets Operator.
+
+The client ID is not a secret and remains in the config entry. Existing entries that use manual client-secret entry continue to work; reconfigure an entry and select **Environment variable** to stop storing its client secret in Home Assistant.
+
+Kubernetes updates to a Secret do not update an already running container's environment. Restart or roll the Home Assistant workload after ESO updates the Secret so the new value is available for the next authorization or token refresh.

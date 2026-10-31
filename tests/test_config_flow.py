@@ -31,6 +31,114 @@ from .integration.const_integration import (
 from .integration.helpers_integration.mocks import MS365MOCKS
 
 
+async def test_environment_secret_flow(
+    hass: HomeAssistant,
+    monkeypatch: pytest.MonkeyPatch,
+    requests_mock: Mocker,
+) -> None:
+    """Test that the client secret is loaded from the environment."""
+    mock_token(requests_mock, BASE_TOKEN_PERMS)
+    MS365MOCKS.standard_mocks(requests_mock)
+    monkeypatch.setenv("MS365_CLIENT_SECRET", "environment-secret")
+
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    environment_config = {
+        **BASE_CONFIG_ENTRY,
+        "client_secret_source": "environment",
+        "client_secret_env_var": "MS365_CLIENT_SECRET",
+        "client_secret": "",
+    }
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        user_input=environment_config,
+    )
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "request_default"
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        user_input={
+            "url": build_token_url(result, AUTH_CALLBACK_PATH_DEFAULT),
+        },
+    )
+
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["result"].data["client_secret_source"] == "environment"
+    assert result["result"].data["client_secret_env_var"] == "MS365_CLIENT_SECRET"
+    assert "client_secret" not in result["result"].data
+
+
+async def test_environment_secret_step(
+    hass: HomeAssistant,
+    monkeypatch: pytest.MonkeyPatch,
+    requests_mock: Mocker,
+) -> None:
+    """Test the client secret step shown when the user step has no secret."""
+    mock_token(requests_mock, BASE_TOKEN_PERMS)
+    MS365MOCKS.standard_mocks(requests_mock)
+    monkeypatch.setenv("MS365_CUSTOM_SECRET", "environment-secret")
+
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    user_input = deepcopy(BASE_CONFIG_ENTRY) | {"client_secret_source": "environment"}
+    del user_input["client_secret"]
+    del user_input["client_secret_env_var"]
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], user_input=user_input
+    )
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "client_secret"
+    assert not result["errors"]
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], user_input={"client_secret_env_var": "MS365_NOT_SET"}
+    )
+    assert result["step_id"] == "client_secret"
+    assert result["errors"] == {"client_secret_env_var": "missing_client_secret"}
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], user_input={"client_secret_env_var": "MS365_CUSTOM_SECRET"}
+    )
+    assert result["step_id"] == "request_default"
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        user_input={"url": build_token_url(result, AUTH_CALLBACK_PATH_DEFAULT)},
+    )
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["result"].data["client_secret_source"] == "environment"
+    assert result["result"].data["client_secret_env_var"] == "MS365_CUSTOM_SECRET"
+    assert "client_secret" not in result["result"].data
+
+
+async def test_manual_secret_step_missing_secret(
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+) -> None:
+    """Test the manual secret step rejects an empty secret."""
+    mock_token(requests_mock, BASE_TOKEN_PERMS)
+    MS365MOCKS.standard_mocks(requests_mock)
+
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    user_input = deepcopy(BASE_CONFIG_ENTRY)
+    del user_input["client_secret"]
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], user_input=user_input
+    )
+    assert result["step_id"] == "client_secret"
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], user_input={"client_secret": ""}
+    )
+    assert result["step_id"] == "client_secret"
+    assert result["errors"] == {"client_secret": "missing_client_secret"}
+
+
 async def test_default_flow(
     hass: HomeAssistant,
     requests_mock: Mocker,
@@ -288,10 +396,9 @@ async def test_json_decode_error(
     )
 
     assert result["type"] is FlowResultType.FORM
-    assert result["step_id"] == "user"
+    assert result["step_id"] == "client_secret"
     assert "errors" in result
-    assert "entity_name" in result["errors"]
-    assert result["errors"]["entity_name"] == "error_authenticating"
+    assert result["errors"]["base"] == "error_authenticating"
 
 
 async def test_already_configured(
@@ -322,9 +429,7 @@ async def test_already_configured(
     )
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "user"
-    assert "errors" in result
-    assert "entity_name" in result["errors"]
-    assert result["errors"]["entity_name"] == "already_configured"
+    assert result["errors"] == {"entity_name": "already_configured"}
 
 
 async def test_change_entity_name(

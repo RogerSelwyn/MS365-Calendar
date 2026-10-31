@@ -8,11 +8,9 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.network import get_url
 
-from .classes.api import MS365Account, MS365Token
+from .classes.api import MS365Account, MS365Token, get_credentials
 from .classes.config_entry import MS365ConfigEntry, MS365Data
 from .const import (
-    CONF_CLIENT_ID,
-    CONF_CLIENT_SECRET,
     CONF_ENTITY_NAME,
     CONF_SHARED_MAILBOX,
     SECRET_EXPIRED,
@@ -21,6 +19,7 @@ from .const import (
     TOKEN_EXPIRED,
     TOKEN_FILE_EXPIRED,
     TOKEN_FILE_MISSING,
+    TOKEN_ERROR_MISSING_CLIENT_SECRET,
 )
 from .helpers.utils import create_issue_id, delete_token_issues
 from .integration import setup_integration
@@ -34,10 +33,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
     """Set up a config entry."""
 
     delete_token_issues(hass, entry.entry_id)
-    credentials = (
-        entry.data.get(CONF_CLIENT_ID),
-        entry.data.get(CONF_CLIENT_SECRET),
-    )
+    credentials = get_credentials(entry.data)
     entity_name = entry.data.get(CONF_ENTITY_NAME)
     main_resource = entry.data.get(CONF_SHARED_MAILBOX)
 
@@ -45,7 +41,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
     token_backend = MS365Token(hass, entry.data)
     perms = Permissions(hass, entry.data, token_backend)
     ha_account = MS365Account(perms, entry.data)
-    if token_backend.check_token_exists():
+    if not credentials[1]:
+        _LOGGER.error(
+            "Client secret is unavailable. Check the configured secret source and "
+            "restart Home Assistant after changing its environment."
+        )
+        error = TOKEN_ERROR_MISSING_CLIENT_SECRET
+    elif token_backend.check_token_exists():
         error = (
             await hass.async_add_executor_job(
                 ha_account.try_authentication, credentials, main_resource, entity_name
