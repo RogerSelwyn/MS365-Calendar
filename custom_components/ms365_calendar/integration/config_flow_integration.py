@@ -47,19 +47,17 @@ from .filemgmt_integration import (
 )
 from .utils_integration import async_delete_calendar
 
-BOOLEAN_SELECTOR = BooleanSelector()
-
 
 def integration_reconfigure_schema(entry_data):
     """Extend the scheme with integration specific attributes."""
     return {
         vol.Optional(
             CONF_ENABLE_UPDATE, default=entry_data[CONF_ENABLE_UPDATE]
-        ): cv.boolean,
+        ): BooleanSelector(),
         vol.Optional(
             CONF_BASIC_CALENDAR, default=entry_data[CONF_BASIC_CALENDAR]
-        ): cv.boolean,
-        vol.Optional(CONF_GROUPS, default=entry_data[CONF_GROUPS]): cv.boolean,
+        ): BooleanSelector(),
+        vol.Optional(CONF_GROUPS, default=entry_data[CONF_GROUPS]): BooleanSelector(),
         vol.Optional(
             CONF_SHARED_MAILBOX,
             description={"suggested_value": entry_data.get(CONF_SHARED_MAILBOX, None)},
@@ -160,7 +158,7 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
                     vol.Optional(
                         CONF_TRACK_NEW_CALENDAR,
                         default=self._track_new_calendar,
-                    ): BOOLEAN_SELECTOR,
+                    ): BooleanSelector(),
                     vol.Optional(CONF_ADVANCED_OPTIONS): section(
                         vol.Schema(
                             {
@@ -171,19 +169,28 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
                                     ).get(
                                         CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL
                                     ),
-                                ): vol.All(vol.Coerce(int), vol.Range(min=15, max=600)),
+                                ): vol.All(
+                                    vol.Coerce(int),
+                                    vol.Range(min=15, max=600),
+                                ),
                                 vol.Optional(
                                     CONF_DAYS_BACKWARD,
                                     default=self.config_entry.options.get(
                                         CONF_ADVANCED_OPTIONS, {}
                                     ).get(CONF_DAYS_BACKWARD, DEFAULT_DAYS_BACKWARD),
-                                ): vol.All(vol.Coerce(int), vol.Range(min=-90, max=90)),
+                                ): vol.All(
+                                    vol.Coerce(int),
+                                    vol.Range(min=-90, max=90),
+                                ),
                                 vol.Optional(
                                     CONF_DAYS_FORWARD,
                                     default=self.config_entry.options.get(
                                         CONF_ADVANCED_OPTIONS, {}
                                     ).get(CONF_DAYS_FORWARD, DEFAULT_DAYS_FORWARD),
-                                ): vol.All(vol.Coerce(int), vol.Range(min=-90, max=90)),
+                                ): vol.All(
+                                    vol.Coerce(int),
+                                    vol.Range(min=-90, max=90),
+                                ),
                             }
                         ),
                         {"collapsed": True},

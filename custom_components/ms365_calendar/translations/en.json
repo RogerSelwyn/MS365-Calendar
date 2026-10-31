@@ -5,6 +5,8 @@
     },
     "error": {
       "already_configured": "This account name has already been used. Use re-configure.",
+      "environment_variable_empty": "The specified variable is empty in the environment",
+      "environment_variable_invalid": "The specified variable does not exist in the environment",
       "error_authenticating": "Error authenticating, token invalid, check log for errors",
       "invalid_url": "Error, the originating url does not seem to be a valid microsoft redirect",
       "invalid_tenant": "Error, the sign-in details for the tenant could not be retrieved, check the Tenant ID in the advanced API options",
@@ -20,8 +22,10 @@
       "user": {
         "data": {
           "entity_name": "Uniquely identifying name for the entities",
+          "environment_secret": "Use client secret from environment (default False)",
           "client_id": "Client ID",
           "client_secret": "Client Secret",
+          "client_sec_environment_variable": "Client Secret environment variable",
           "alt_auth_method": "Use alternate (more complex) authentication",
           "enable_update": "Enable update services",
           "basic_calendar": "Enable read only basic calendar",
@@ -104,6 +108,14 @@
     "corrupted": {
       "title": "Re-authentication required - {domain} - {entity_name}",
       "description": "The token file is corrupted. Please [Reconfigure]({url}) the integration and re-authenticate to re-create the token file."
+    },
+    "environment_variable_empty": {
+      "title": "The specified client secret environment variable - {client_sec_variable} - is empty",
+      "description": "Please [Reconfigure]({url}) the integration with a valid environment variable."
+    },
+    "environment_variable_invalid": {
+      "title": "The specified client secret environment variable - {client_sec_variable} - does not exist",
+      "description": "Please [Reconfigure]({url}) the integration with a valid environment variable."
     },
     "expired": {
       "title": "Re-authentication required - {domain} - {entity_name}",

@@ -10,16 +10,10 @@ from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 
-from .const import ENTITY_NAME
+from .const import BASE_CONFIG_ENTRY, ENTITY_NAME, MIGRATION_CONFIG_ENTRY
 from .helpers.mock_config_entry import MS365MockConfigEntry
 from .helpers.utils import mock_token
-from .integration.const_integration import (
-    BASE_CONFIG_ENTRY,
-    BASE_TOKEN_PERMS,
-    DOMAIN,
-    MIGRATION_CONFIG_ENTRY,
-    MS365ConfigFlow,
-)
+from .integration.const_integration import BASE_TOKEN_PERMS, DOMAIN, MS365ConfigFlow
 from .integration.helpers_integration.mocks import MS365MOCKS
 
 

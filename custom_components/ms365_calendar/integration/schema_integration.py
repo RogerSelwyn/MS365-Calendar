@@ -9,12 +9,9 @@ import voluptuous as vol
 
 from homeassistant.const import CONF_NAME
 import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers.selector import BooleanSelector
 from homeassistant.util import dt as dt_util
-from O365.calendar import (  # pylint: disable=no-name-in-module
-    AttendeeType,
-    EventSensitivity,
-    EventShowAs,
-)
+from O365.calendar import AttendeeType, EventSensitivity, EventShowAs  # pylint: disable=no-name-in-module
 
 from ..const import CONF_ENABLE_UPDATE, CONF_SHARED_MAILBOX
 from .const_integration import (
@@ -87,9 +84,9 @@ def _as_local_timezone(*keys: Any) -> Callable[[dict[str, Any]], dict[str, Any]]
 
 
 CONFIG_SCHEMA_INTEGRATION = {
-    vol.Optional(CONF_ENABLE_UPDATE, default=False): cv.boolean,
-    vol.Optional(CONF_BASIC_CALENDAR, default=False): cv.boolean,
-    vol.Optional(CONF_GROUPS, default=False): cv.boolean,
+    vol.Optional(CONF_ENABLE_UPDATE, default=False): BooleanSelector(),
+    vol.Optional(CONF_BASIC_CALENDAR, default=False): BooleanSelector(),
+    vol.Optional(CONF_GROUPS, default=False): BooleanSelector(),
     vol.Optional(CONF_SHARED_MAILBOX, default=""): cv.string,
 }
 

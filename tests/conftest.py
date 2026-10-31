@@ -11,18 +11,11 @@ from requests_mock import Mocker
 
 from homeassistant.core import HomeAssistant
 
-from .const import ENTITY_NAME, LEGACY_TOKEN, TOKEN_LOCATION
+from .const import BASE_CONFIG_ENTRY, ENTITY_NAME, LEGACY_TOKEN, TOKEN_LOCATION
 from .helpers.mock_config_entry import MS365MockConfigEntry
 from .helpers.utils import build_token_file
 from .integration import api
-from .integration.const_integration import (
-    BASE_CONFIG_ENTRY,
-    BASE_TOKEN_PERMS,
-    DOMAIN,
-    UPDATE_OPTIONS,
-    UPDATE_TOKEN_PERMS,
-    MS365ConfigFlow,
-)
+from .integration.const_integration import BASE_TOKEN_PERMS, DOMAIN, UPDATE_OPTIONS, UPDATE_TOKEN_PERMS, MS365ConfigFlow
 from .integration.helpers_integration.mocks import MS365MOCKS
 
 pytest_plugins = ["tests.integration.fixtures"]

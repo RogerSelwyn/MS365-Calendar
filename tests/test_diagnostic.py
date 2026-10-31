@@ -5,15 +5,10 @@ from copy import deepcopy
 
 from homeassistant.core import HomeAssistant
 
-from .const import ENTITY_NAME
+from .const import BASE_CONFIG_ENTRY, ENTITY_NAME
 from .helpers.mock_config_entry import MS365MockConfigEntry
 from .integration import async_get_config_entry_diagnostics
-from .integration.const_integration import (
-    BASE_CONFIG_ENTRY,
-    DIAGNOSTIC_GRANTED_PERMISSIONS,
-    DIAGNOSTIC_REQUESTED_PERMISSIONS,
-    DOMAIN,
-)
+from .integration.const_integration import DIAGNOSTIC_GRANTED_PERMISSIONS, DIAGNOSTIC_REQUESTED_PERMISSIONS, DOMAIN
 
 
 async def test_diagnostics(

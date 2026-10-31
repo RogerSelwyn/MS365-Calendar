@@ -11,8 +11,7 @@ from homeassistant.helpers.network import get_url
 from .classes.api import MS365Account, MS365Token
 from .classes.config_entry import MS365ConfigEntry, MS365Data
 from .const import (
-    CONF_CLIENT_ID,
-    CONF_CLIENT_SECRET,
+    CONF_CLIENT_SECRET_VARIABLE,
     CONF_ENTITY_NAME,
     CONF_SHARED_MAILBOX,
     SECRET_EXPIRED,
@@ -22,7 +21,7 @@ from .const import (
     TOKEN_FILE_EXPIRED,
     TOKEN_FILE_MISSING,
 )
-from .helpers.utils import create_issue_id, delete_token_issues
+from .helpers.utils import create_issue_id, delete_issues, get_credentials
 from .integration import setup_integration
 from .integration.const_integration import DOMAIN, PLATFORMS
 from .integration.permissions_integration import Permissions
@@ -33,11 +32,7 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
     """Set up a config entry."""
 
-    delete_token_issues(hass, entry.entry_id)
-    credentials = (
-        entry.data.get(CONF_CLIENT_ID),
-        entry.data.get(CONF_CLIENT_SECRET),
-    )
+    delete_issues(hass, entry.entry_id)
     entity_name = entry.data.get(CONF_ENTITY_NAME)
     main_resource = entry.data.get(CONF_SHARED_MAILBOX)
 
@@ -46,12 +41,17 @@ async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
     perms = Permissions(hass, entry.data, token_backend)
     ha_account = MS365Account(perms, entry.data)
     if token_backend.check_token_exists():
-        error = (
-            await hass.async_add_executor_job(
-                ha_account.try_authentication, credentials, main_resource, entity_name
+        credentials, error = get_credentials(entry.data)
+        if not error:
+            error = (
+                await hass.async_add_executor_job(
+                    ha_account.try_authentication,
+                    credentials,
+                    main_resource,
+                    entity_name,
+                )
+                or await perms.async_check_authorizations()
             )
-            or await perms.async_check_authorizations()
-        )
     else:
         error = TOKEN_FILE_MISSING
 
@@ -89,6 +89,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
         translation_placeholders={
             "domain": DOMAIN,
             "url": url,
+            CONF_CLIENT_SECRET_VARIABLE: entry.data.get(CONF_CLIENT_SECRET_VARIABLE),
             CONF_ENTITY_NAME: entry.data.get(CONF_ENTITY_NAME),
         },
     )
@@ -143,7 +144,7 @@ async def async_reload_entry(hass: HomeAssistant, entry: MS365ConfigEntry) -> No
 
 async def async_remove_entry(hass: HomeAssistant, entry: MS365ConfigEntry) -> None:
     """Handle removal of an entry."""
-    delete_token_issues(hass, entry.entry_id)
+    delete_issues(hass, entry.entry_id)
     token_backend = MS365Token(hass, entry.data)
     await hass.async_add_executor_job(token_backend.delete_token)
     if not hasattr(setup_integration, "async_integration_remove_entry"):

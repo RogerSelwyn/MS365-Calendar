@@ -27,14 +27,13 @@ from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 
+from ..const import BASE_CONFIG_ENTRY, RECONFIGURE_CONFIG_ENTRY
 from ..helpers.mock_config_entry import MS365MockConfigEntry
 from ..helpers.utils import build_token_file, build_token_url, get_schema_default, mock_token
 from .const_integration import (
     AUTH_CALLBACK_PATH_DEFAULT,
-    BASE_CONFIG_ENTRY,
     BASE_TOKEN_PERMS,
     DOMAIN,
-    RECONFIGURE_CONFIG_ENTRY,
     SHARED_TOKEN_PERMS,
     UPDATE_CALENDAR_LIST,
 )

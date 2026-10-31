@@ -13,17 +13,10 @@ from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers import issue_registry as ir
 
-from .const import CLIENT_ID, ENTITY_NAME, TENANT_OPTIONS, TOKEN_URL_ASSERT
+from .const import BASE_CONFIG_ENTRY, CLIENT_ID, ENTITY_NAME, RECONFIGURE_CONFIG_ENTRY, TENANT_OPTIONS, TOKEN_URL_ASSERT
 from .helpers.mock_config_entry import MS365MockConfigEntry
 from .helpers.utils import build_token_url, mock_token, token_filename, token_setup
-from .integration.const_integration import (
-    AUTH_CALLBACK_PATH_DEFAULT,
-    BASE_CONFIG_ENTRY,
-    BASE_TOKEN_PERMS,
-    DOMAIN,
-    RECONFIGURE_CONFIG_ENTRY,
-    MS365ConfigFlow,
-)
+from .integration.const_integration import AUTH_CALLBACK_PATH_DEFAULT, BASE_TOKEN_PERMS, DOMAIN, MS365ConfigFlow
 from .integration.helpers_integration.mocks import MS365MOCKS
 
 

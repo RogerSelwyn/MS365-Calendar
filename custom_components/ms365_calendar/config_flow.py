@@ -9,12 +9,14 @@ from urllib.parse import parse_qs, urlparse
 from aiohttp import web_response
 import voluptuous as vol
 
+from homeassistant import data_entry_flow
 from homeassistant.components.http import HomeAssistantView
 from homeassistant.config_entries import ConfigEntryState, ConfigFlow, ConfigFlowResult
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import section
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.network import get_url
+from homeassistant.helpers.selector import BooleanSelector
 
 from .classes.api import MS365Account, MS365Token
 from .classes.config_entry import MS365ConfigEntry
@@ -31,7 +33,9 @@ from .const import (
     CONF_AUTH_URL,
     CONF_CLIENT_ID,
     CONF_CLIENT_SECRET,
+    CONF_CLIENT_SECRET_VARIABLE,
     CONF_ENTITY_NAME,
+    CONF_ENVIRONMENT_SECRET,
     CONF_FAILED_PERMISSIONS,
     CONF_SHARED_MAILBOX,
     CONF_TENANT_ID,
@@ -42,13 +46,14 @@ from .const import (
     ERROR_INVALID_SHARED_MAILBOX,
     ERROR_INVALID_TENANT,
     ERROR_INVALID_URL,
+    MS365_CLIENT_SECRET,
     OAUTH_REDIRECT_URL,
     TOKEN_ERROR_FILE,
     TOKEN_FILE_CORRUPTED,
     TOKEN_FILE_OUTDATED,
     CountryOptions,
 )
-from .helpers.utils import delete_token_issues, get_country, get_tenant_id
+from .helpers.utils import delete_issues, get_country, get_credentials, get_tenant_id
 from .integration.config_flow_integration import (
     MS365OptionsFlowHandler,
     async_integration_imports,
@@ -94,7 +99,9 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_user(self, user_input=None):
         """Handle the initial step."""
-        errors = self._validate_user_input(user_input) if user_input else {}
+        errors = (
+            self._validate_user_input_against_schema(user_input) if user_input else {}
+        )
         if user_input and not errors:
             self._user_input = user_input
 
@@ -102,44 +109,50 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
                 self.entity_name = user_input.get(CONF_ENTITY_NAME)
             else:
                 user_input[CONF_ENTITY_NAME] = self.entity_name
-            credentials = (
-                user_input.get(CONF_CLIENT_ID),
-                user_input.get(CONF_CLIENT_SECRET),
-            )
 
-            main_resource = user_input.get(CONF_SHARED_MAILBOX)
             alt_auth_method = self._user_input.get(CONF_ALT_AUTH_METHOD)
-            token_backend = MS365Token(self.hass, user_input)
-            self._permissions = Permissions(self.hass, user_input, token_backend)
-            self._ms365account = MS365Account(self._permissions, user_input)
-            auth_error = await self.hass.async_add_executor_job(
-                self._ms365account.try_authentication,
-                credentials,
-                main_resource,
-                self.entity_name,
+            errors = await self._validate_user_input_for_auth(
+                user_input, alt_auth_method
             )
-            auth_error = await self._async_delete_unreadable_token(
-                auth_error, token_backend
-            ) or await self._async_get_authorization_url(alt_auth_method, user_input)
 
-            if not auth_error:
+            if not errors:
                 if alt_auth_method:
                     return await self.async_step_request_alt()
 
                 return await self.async_step_request_default()
 
-            attr_name = CONF_CLIENT_ID if self._reconfigure else CONF_ENTITY_NAME
-
-            # sourcery skip
-            if auth_error == AUTH_ERROR_INVALID_TENANT:
-                errors[CONF_API_OPTIONS] = auth_error
-            elif auth_error:
-                errors[attr_name] = AUTH_ERROR_AUTHENTICATING
-
         data = self._config_schema or CONFIG_SCHEMA | CONFIG_SCHEMA_INTEGRATION
         return self.async_show_form(
             step_id="user", data_schema=vol.Schema(data), errors=errors
         )
+
+    async def _validate_user_input_for_auth(self, user_input, alt_auth_method):
+        credentials, error = get_credentials(user_input)
+        if error:
+            return {CONF_ENVIRONMENT_SECRET: error}
+
+        main_resource = user_input.get(CONF_SHARED_MAILBOX)
+        token_backend = MS365Token(self.hass, user_input)
+        self._permissions = Permissions(self.hass, user_input, token_backend)
+        self._ms365account = MS365Account(self._permissions, user_input)
+        auth_error = await self.hass.async_add_executor_job(
+            self._ms365account.try_authentication,
+            credentials,
+            main_resource,
+            self.entity_name,
+        )
+        auth_error = await self._async_delete_unreadable_token(
+            auth_error, token_backend
+        ) or await self._async_get_authorization_url(alt_auth_method, user_input)
+
+        if auth_error == AUTH_ERROR_INVALID_TENANT:
+            return {CONF_API_OPTIONS: auth_error}
+
+        if auth_error:
+            attr_name = CONF_CLIENT_ID if self._reconfigure else CONF_ENTITY_NAME
+            return {attr_name: AUTH_ERROR_AUTHENTICATING}
+
+        return {}
 
     async def _async_get_authorization_url(self, alt_auth_method, user_input):
         scope = self._permissions.requested_permissions
@@ -212,7 +225,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def _async_create_update_entry(self):
         if self._reconfigure:
-            delete_token_issues(self.hass, self._entry.entry_id)
+            delete_issues(self.hass, self._entry.entry_id)
             # The update listener of a loaded entry reloads it when the data changes
             loaded = self._entry.state is ConfigEntryState.LOADED
             changed = self.hass.config_entries.async_update_entry(
@@ -247,10 +260,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
                     username=self._ms365account.account.username,
                 )
             )
-        credentials = (
-            self._user_input.get(CONF_CLIENT_ID),
-            self._user_input.get(CONF_CLIENT_SECRET),
-        )
+        credentials, __ = get_credentials(self._user_input)
 
         main_resource = self._user_input.get(CONF_SHARED_MAILBOX)
 
@@ -320,11 +330,24 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
                 cv.string, vol.Strip
             ),
             vol.Required(
-                CONF_CLIENT_SECRET, default=entry_data[CONF_CLIENT_SECRET]
+                CONF_ENVIRONMENT_SECRET,
+                default=entry_data.get(CONF_ENVIRONMENT_SECRET, False),
+            ): BooleanSelector(),
+            data_entry_flow.Required(
+                CONF_CLIENT_SECRET,
+                default=entry_data.get(CONF_CLIENT_SECRET),
+                visible={"field": CONF_ENVIRONMENT_SECRET, "value": False},
+            ): vol.All(cv.string, vol.Strip),
+            data_entry_flow.Required(
+                CONF_CLIENT_SECRET_VARIABLE,
+                default=entry_data.get(
+                    CONF_CLIENT_SECRET_VARIABLE, MS365_CLIENT_SECRET
+                ),
+                visible={"field": CONF_ENVIRONMENT_SECRET, "value": True},
             ): vol.All(cv.string, vol.Strip),
             vol.Optional(
                 CONF_ALT_AUTH_METHOD, default=entry_data[CONF_ALT_AUTH_METHOD]
-            ): cv.boolean,
+            ): BooleanSelector(),
             vol.Required(CONF_API_OPTIONS): section(
                 vol.Schema(
                     {
@@ -365,7 +388,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
             for config_entry in config_entries
         )
 
-    def _validate_user_input(self, user_input):
+    def _validate_user_input_against_schema(self, user_input):
         if not self._reconfigure and self._check_existing(
             user_input.get(CONF_ENTITY_NAME)
         ):
