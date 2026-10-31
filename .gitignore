@@ -166,4 +166,3 @@ cython_debug/
 .vscode/ltex.disabledRules.en-GB.txt
 tests/whitelist.py
 
-tests/testing_config
