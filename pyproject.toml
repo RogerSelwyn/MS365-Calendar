@@ -514,3 +514,20 @@ split-on-trailing-comma = false
 
 [tool.ruff.lint.mccabe]
 max-complexity = 25
+
+[tool.pytest]
+testpaths = ["tests"]
+norecursedirs = [".git"]
+addopts = ["--strict-markers", "--cov=custom_components", "-p no:respx"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.coverage.report]
+exclude_also = [
+    'if not constraint and resource == "Presence"',
+    'def build_entity_id',
+    'def entity_key',
+    'elif attribute in item',
+    'if not hasattr\(setup_integration, "async_integration_remove_entry"\)',
+    'setup_integration.async_extra_platform_setup'
+]

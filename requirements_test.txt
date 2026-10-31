@@ -1,2 +1,4 @@
 -r requirements.txt
-pytest-homeassistant-custom-component>=0.13.373
+pytest-cov==7.1.0
+homeassistant==2026.11.0b0 
+pytest-home-assistant @ git+https://github.com/home-assistant/core@2026.11.0b0#subdirectory=packages/pytest-home-assistant

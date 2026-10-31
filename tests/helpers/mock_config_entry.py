@@ -1,6 +1,6 @@
 """Mock config entry."""
 
-from pytest_homeassistant_custom_component.common import MockConfigEntry
+from pytest_homeassistant.common import MockConfigEntry
 
 from ..integration import MS365ConfigEntry
 

@@ -26,7 +26,7 @@ from .integration.const_integration import (
 from .integration.helpers_integration.mocks import MS365MOCKS
 
 pytest_plugins = [
-    "pytest_homeassistant_custom_component",
+    "pytest_homeassistant",
     "tests.integration.fixtures",
 ]  # pylint: disable=invalid-name
 THIS_MODULE = sys.modules[__name__]
@@ -50,14 +50,6 @@ def token_storage_path_setup(tmp_path):
         return_value=tk_path,
     ):
         yield
-
-
-# This fixture enables loading custom integrations in all tests.
-# Remove to enable selective use of this fixture
-@pytest.fixture(autouse=True)
-def auto_enable_custom_integrations(enable_custom_integrations):  # pylint: disable=unused-argument
-    """Automatically enable loading custom integrations in all tests."""
-    return
 
 
 @pytest.fixture(autouse=True)
