@@ -25,9 +25,7 @@ from .integration.const_integration import (
 )
 from .integration.helpers_integration.mocks import MS365MOCKS
 
-pytest_plugins = [
-    "tests.integration.fixtures",
-]  # pylint: disable=invalid-name
+pytest_plugins = ["tests.integration.fixtures"]
 THIS_MODULE = sys.modules[__name__]
 
 
