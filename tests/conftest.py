@@ -26,7 +26,6 @@ from .integration.const_integration import (
 from .integration.helpers_integration.mocks import MS365MOCKS
 
 pytest_plugins = [
-    "pytest_homeassistant",
     "tests.integration.fixtures",
 ]  # pylint: disable=invalid-name
 THIS_MODULE = sys.modules[__name__]
