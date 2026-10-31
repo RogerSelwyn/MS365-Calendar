@@ -9,10 +9,7 @@ from portalocker.exceptions import LockException
 
 from homeassistant.core import HomeAssistant
 from O365 import Account, FileSystemTokenBackend
-from O365.connection import (  # pylint: disable=import-error, no-name-in-module
-    Connection,
-    MSGraphProtocol,
-)
+from O365.connection import Connection, MSGraphProtocol
 
 from ..const import (
     CONF_ENTITY_NAME,
