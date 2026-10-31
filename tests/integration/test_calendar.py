@@ -16,12 +16,28 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from homeassistant.util import dt as dt_util
 
+from custom_components.ms365_calendar.diagnostics import (
+    async_get_config_entry_diagnostics,
+)
+
 from ..helpers.mock_config_entry import MS365MockConfigEntry
 from ..helpers.utils import check_entity_state, mock_call, utcnow
 from .const_integration import DOMAIN, FULL_INIT_ENTITY_NO, URL
-from .data_integration.state import BASE_STATE_CAL1, BASE_STATE_CAL2
+from .data_integration.state import (
+    BASE_STATE_CAL1,
+    BASE_STATE_CAL2,
+    LOCATION_STATE,
+    MEETING_STATE,
+    TEAMS_JOIN_URL,
+    WEB_LINK,
+)
 from .helpers_integration.mocks import MS365MOCKS
-from .helpers_integration.utils_integration import update_options, yaml_setup
+from .helpers_integration.utils_integration import (
+    location_fields,
+    meeting_fields,
+    update_options,
+    yaml_setup,
+)
 
 START_BASE = datetime(2020, 1, 1, 0, 0, 0, tzinfo=ZoneInfo(key="UTC"))
 END_BASE = datetime(2020, 1, 2, 23, 59, 59, tzinfo=ZoneInfo(key="UTC"))
@@ -346,6 +362,48 @@ async def test_first_sync_error(
     check_entity_state(hass, "calendar.test_calendar1", "unavailable")
 
     assert "No current event found for group:calendar2" in caplog.text
+
+
+@pytest.mark.parametrize("setup_base_integration", [{"method_name": "location_event_mocks"}], indirect=True)
+async def test_location_details(
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    setup_base_integration,
+) -> None:
+    """Test the data attribute has the address, coordinates, room and each place."""
+    data = hass.states.get("calendar.test_calendar1").attributes["data"]
+    assert location_fields(data) == LOCATION_STATE
+
+    # MS Graph only sends the places of an event when asked for them
+    calendar_view = next(request for request in requests_mock.request_history if "calendarview" in request.url.lower())
+    assert "locations" in calendar_view.qs["$select"][0].split(",")
+
+
+@pytest.mark.parametrize("setup_base_integration", [{"method_name": "meeting_event_mocks"}], indirect=True)
+async def test_meeting_links(
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    setup_base_integration,
+    base_config_entry: MS365MockConfigEntry,
+) -> None:
+    """Test the data attribute has the join link of each meeting and the web link."""
+    data = hass.states.get("calendar.test_calendar1").attributes["data"]
+    assert meeting_fields(data) == MEETING_STATE
+
+    # MS Graph only sends the online meeting and web link when asked for them
+    calendar_view = next(request for request in requests_mock.request_history if "calendarview" in request.url.lower())
+    assert {
+        "isonlinemeeting",
+        "onlinemeetingprovider",
+        "onlinemeeting",
+        "onlinemeetingurl",
+        "weblink",
+    } <= set(calendar_view.qs["$select"][0].split(","))
+
+    # Diagnostics have no event data, so the links are not in them
+    diagnostics = str(await async_get_config_entry_diagnostics(hass, base_config_entry))
+    assert TEAMS_JOIN_URL not in diagnostics
+    assert WEB_LINK.format("teams") not in diagnostics
 
 
 def _adjust_date(data, adddays_start=0, adddays_end=0):

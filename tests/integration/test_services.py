@@ -18,7 +18,9 @@ from homeassistant.util import dt as dt_util
 from ..conftest import MS365MockConfigEntry
 from ..helpers.utils import mock_call
 from .const_integration import DOMAIN, URL
+from .data_integration.state import LOCATION_STATE, MEETING_STATE
 from .fixtures import ClientFixture, ListenerSetupData
+from .helpers_integration.utils_integration import location_fields, meeting_fields
 
 START_BASE = datetime(2020, 1, 1, 0, 0, 0, tzinfo=ZoneInfo(key="UTC"))
 END_BASE = datetime(2020, 1, 1, 23, 59, 59, tzinfo=ZoneInfo(key="UTC"))
@@ -142,6 +144,52 @@ async def test_get_calendar_events_outside_range(
     events = result[calendar_name]["events"]
     assert len(events) == 2
     assert all("attendees" in event and "organizer" in event for event in events)
+
+
+@pytest.mark.parametrize("setup_base_integration", [{"method_name": "location_event_mocks"}], indirect=True)
+async def test_get_calendar_events_location_details(
+    hass: HomeAssistant,
+    setup_base_integration,
+) -> None:
+    """Test get_calendar_events returns the address, coordinates, room and places."""
+    calendar_name = "calendar.test_calendar1"
+    start_date = dt_util.utcnow() + timedelta(hours=-24)
+    end_date = dt_util.utcnow() + timedelta(hours=24)
+    result = await hass.services.async_call(
+        DOMAIN,
+        "get_calendar_events",
+        {
+            "entity_id": calendar_name,
+            "start_date_time": start_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "end_date_time": end_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        },
+        blocking=True,
+        return_response=True,
+    )
+    assert location_fields(result[calendar_name]["events"]) == LOCATION_STATE
+
+
+@pytest.mark.parametrize("setup_base_integration", [{"method_name": "meeting_event_mocks"}], indirect=True)
+async def test_get_calendar_events_meeting_links(
+    hass: HomeAssistant,
+    setup_base_integration,
+) -> None:
+    """Test get_calendar_events returns the join link of each meeting and the web link."""
+    calendar_name = "calendar.test_calendar1"
+    start_date = dt_util.utcnow() + timedelta(hours=-24)
+    end_date = dt_util.utcnow() + timedelta(hours=24)
+    result = await hass.services.async_call(
+        DOMAIN,
+        "get_calendar_events",
+        {
+            "entity_id": calendar_name,
+            "start_date_time": start_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "end_date_time": end_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        },
+        blocking=True,
+        return_response=True,
+    )
+    assert meeting_fields(result[calendar_name]["events"]) == MEETING_STATE
 
 
 async def test_get_calendar_events_naive_datetimes(
