@@ -1,7 +1,6 @@
 # pylint: disable=protected-access,redefined-outer-name, unused-argument, line-too-long, unused-import
 """Global fixtures for integration."""
 
-from copy import deepcopy
 import json
 import sys
 from unittest.mock import patch
@@ -12,7 +11,7 @@ from requests_mock import Mocker
 from homeassistant.core import HomeAssistant
 
 from .const import BASE_CONFIG_ENTRY, ENTITY_NAME, LEGACY_TOKEN, TOKEN_LOCATION
-from .helpers.mock_config_entry import MS365MockConfigEntry
+from .helpers.mock_config_entry import MS365MockConfigEntry, config_entry_setup
 from .helpers.utils import build_token_file
 from .integration import api
 from .integration.const_integration import BASE_TOKEN_PERMS, DOMAIN, UPDATE_OPTIONS, UPDATE_TOKEN_PERMS, MS365ConfigFlow
@@ -63,7 +62,7 @@ def skip_notifications_fixture():
 @pytest.fixture
 def base_config_entry(request, hass: HomeAssistant) -> MS365MockConfigEntry:
     """Create MS365 entry in Home Assistant."""
-    data = deepcopy(BASE_CONFIG_ENTRY)
+    data = config_entry_setup(BASE_CONFIG_ENTRY)
     options = None
     if hasattr(request, "param"):
         for key, value in request.param.items():
@@ -87,7 +86,7 @@ def base_config_entry(request, hass: HomeAssistant) -> MS365MockConfigEntry:
 @pytest.fixture
 def v1_config_entry(request, hass: HomeAssistant) -> MS365MockConfigEntry:
     """Create MS365 entry in Home Assistant."""
-    data = deepcopy(BASE_CONFIG_ENTRY)
+    data = config_entry_setup(BASE_CONFIG_ENTRY)
     options = None
     if hasattr(request, "param"):
         for key, value in request.param.items():
@@ -158,9 +157,7 @@ async def setup_update_integration(
     build_token_file(tmp_path, UPDATE_TOKEN_PERMS)
     MS365MOCKS.standard_mocks(requests_mock)
     base_config_entry.add_to_hass(hass)
-    data = deepcopy(BASE_CONFIG_ENTRY)
-    for key, value in UPDATE_OPTIONS.items():
-        data[key] = value
+    data = config_entry_setup(BASE_CONFIG_ENTRY, base_attributes=UPDATE_OPTIONS)
     hass.config_entries.async_update_entry(base_config_entry, data=data)
 
     await hass.config_entries.async_setup(base_config_entry.entry_id)

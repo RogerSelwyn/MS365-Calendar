@@ -1,8 +1,6 @@
 # pylint: disable=line-too-long, unused-argument
 """Test the config flow."""
 
-from copy import deepcopy
-
 from aiohttp import web_response
 import pytest
 from pytest_homeassistant.typing import ClientSessionGenerator
@@ -25,7 +23,7 @@ from .const import (
     TOKEN_URL_ASSERT,
     TOKEN_URL_CN21V_ASSERT,
 )
-from .helpers.mock_config_entry import MS365MockConfigEntry
+from .helpers.mock_config_entry import MS365MockConfigEntry, config_entry_setup
 from .helpers.utils import build_token_url, mock_call, mock_cn21v_token, mock_token, token_setup
 from .integration.const_integration import (
     AUTH_CALLBACK_PATH_ALT,
@@ -345,13 +343,12 @@ async def test_change_entity_name(
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
-        user_input=deepcopy(BASE_CONFIG_ENTRY),
+        user_input=config_entry_setup(BASE_CONFIG_ENTRY),
     )
     assert result["step_id"] == "user"
     assert result["errors"] == {"entity_name": "already_configured"}
 
-    user_input = deepcopy(BASE_CONFIG_ENTRY)
-    user_input["entity_name"] = "test2"
+    user_input = config_entry_setup(BASE_CONFIG_ENTRY, base_attributes={"entity_name": "test2"})
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         user_input=user_input,

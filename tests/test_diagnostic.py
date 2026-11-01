@@ -1,12 +1,10 @@
 # pylint: disable=unused-argument, line-too-long
 """Test the diagnostics."""
 
-from copy import deepcopy
-
 from homeassistant.core import HomeAssistant
 
 from .const import BASE_CONFIG_ENTRY, ENTITY_NAME
-from .helpers.mock_config_entry import MS365MockConfigEntry
+from .helpers.mock_config_entry import MS365MockConfigEntry, config_entry_setup
 from .integration import async_get_config_entry_diagnostics
 from .integration.const_integration import DIAGNOSTIC_GRANTED_PERMISSIONS, DIAGNOSTIC_REQUESTED_PERMISSIONS, DOMAIN
 
@@ -32,8 +30,9 @@ async def test_diagnostics_tenant_id(
     base_config_entry: MS365MockConfigEntry,
 ):
     """Test Diagnostics redact the tenant id."""
-    data = deepcopy(BASE_CONFIG_ENTRY)
-    data["api_options"]["tenant_id"] = "11111111-2222-3333-4444-555555555555"
+    data = config_entry_setup(
+        BASE_CONFIG_ENTRY, api_option_attributes={"tenant_id": "11111111-2222-3333-4444-555555555555"}
+    )
     entry = MS365MockConfigEntry(domain=DOMAIN, title=ENTITY_NAME, data=data)
     entry.runtime_data = base_config_entry.runtime_data
 

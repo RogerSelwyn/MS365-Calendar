@@ -26,7 +26,7 @@ UPDATE_TOKEN_PERMS = "Calendars.ReadWrite"
 UPDATE_OPTIONS = {"enable_update": True}
 
 
-MIGRATION_CONFIG_ENTRY_INTEGRATION = {
+MIGRATION_CONFIG_ENTRY = {
     "options": {},
     "calendars": {
         "calendar1": {

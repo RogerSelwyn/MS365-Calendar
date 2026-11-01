@@ -1,7 +1,6 @@
 # pylint: disable=line-too-long, unused-argument
 """Test tenant_id functionality."""
 
-from copy import deepcopy
 from enum import Enum
 
 from requests_mock import Mocker
@@ -11,7 +10,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 
 from .const import BASE_CONFIG_ENTRY, CLIENT_ID, COUNTRY_CONFIG_ENTRY, TOKEN_URL_ASSERT
-from .helpers.mock_config_entry import MS365MockConfigEntry
+from .helpers.mock_config_entry import MS365MockConfigEntry, config_entry_setup
 from .helpers.utils import build_token_url, mock_call, mock_cn21v_token, mock_token
 from .integration import get_tenant_id
 from .integration.const_integration import AUTH_CALLBACK_PATH_DEFAULT, BASE_TOKEN_PERMS, DOMAIN, URL
@@ -71,9 +70,7 @@ TENANT_TOKEN_URL_ASSERT = f"https://login.microsoftonline.com/{TENANT_ID}/oauth2
 
 def _config_entry_with_tenant(tenant_id):
     """Build a config entry dict with a specific tenant_id."""
-    entry = deepcopy(BASE_CONFIG_ENTRY)
-    entry["api_options"]["tenant_id"] = tenant_id
-    return entry
+    return config_entry_setup(BASE_CONFIG_ENTRY, api_option_attributes={"tenant_id": tenant_id})
 
 
 class TenantURL(Enum):
@@ -169,9 +166,9 @@ async def test_reconfigure_preserves_tenant_id(
     assert result["step_id"] == "user"
 
     # Reconfigure with a tenant_id
-    reconfigure_input = deepcopy(BASE_CONFIG_ENTRY)
-    del reconfigure_input["entity_name"]
-    reconfigure_input["api_options"]["tenant_id"] = TENANT_ID
+    reconfigure_input = config_entry_setup(
+        BASE_CONFIG_ENTRY, api_option_attributes={"tenant_id": TENANT_ID}, delete_attributes=["entity_name"]
+    )
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
@@ -210,8 +207,7 @@ async def test_flow_cn21v_with_tenant_id(
     assert result.get("type") is FlowResultType.FORM
     assert result["step_id"] == "user"
 
-    cn21v_entry = deepcopy(COUNTRY_CONFIG_ENTRY)
-    cn21v_entry["api_options"]["tenant_id"] = TENANT_ID
+    cn21v_entry = config_entry_setup(COUNTRY_CONFIG_ENTRY, api_option_attributes={"tenant_id": TENANT_ID})
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],

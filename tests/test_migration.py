@@ -1,8 +1,6 @@
 # pylint: disable=unused-argument
 """Test migration."""
 
-from copy import deepcopy
-
 import pytest
 from requests_mock import Mocker
 
@@ -11,7 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 
 from .const import BASE_CONFIG_ENTRY, ENTITY_NAME, MIGRATION_CONFIG_ENTRY
-from .helpers.mock_config_entry import MS365MockConfigEntry
+from .helpers.mock_config_entry import MS365MockConfigEntry, config_entry_setup
 from .helpers.utils import mock_token
 from .integration.const_integration import BASE_TOKEN_PERMS, DOMAIN, MS365ConfigFlow
 from .integration.helpers_integration.mocks import MS365MOCKS
@@ -92,7 +90,7 @@ async def test_migration_title_only_match(
     other_entry = MS365MockConfigEntry(
         domain=DOMAIN,
         title=ENTITY_NAME,
-        data=deepcopy(BASE_CONFIG_ENTRY) | {"entity_name": "other"},
+        data=config_entry_setup(BASE_CONFIG_ENTRY, base_attributes={"entity_name": "other"}),
         version=MS365ConfigFlow.VERSION,
         minor_version=MS365ConfigFlow.MINOR_VERSION,
     )
