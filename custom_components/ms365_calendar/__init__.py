@@ -171,10 +171,7 @@ async def _async_auth_checks(
 
     _LOGGER.debug("Do setup")
     token_valid = await _async_check_token_valid(hass, ha_account.account, entity_name)
-    if not token_valid:
-        return TOKEN_FILE_EXPIRED
-
-    return False
+    return TOKEN_FILE_EXPIRED if not token_valid else False
 
 
 async def _async_check_token_valid(hass: HomeAssistant, account, entity_name):

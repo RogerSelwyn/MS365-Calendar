@@ -96,16 +96,6 @@ TOKEN_FILE_OUTDATED = "outdated"
 TOKEN_FILE_PERMISSIONS = "permissions"
 TOKEN_INVALID = "The token you are trying to load is not valid anymore"
 
-STARTUP_ISSUES = [
-    AUTH_ERROR_ENVIRONMENT_VARIABLE_EMPTY,
-    AUTH_ERROR_ENVIRONMENT_VARIABLE_INVALID,
-    TOKEN_FILE_CORRUPTED,
-    TOKEN_FILE_MISSING,
-    TOKEN_FILE_PERMISSIONS,
-    TOKEN_FILE_EXPIRED,
-    TOKEN_FILE_OUTDATED,
-]
-
 
 class CountryOptions(StrEnum):
     """Teams sensors enablement."""

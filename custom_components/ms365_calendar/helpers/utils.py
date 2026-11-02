@@ -3,7 +3,6 @@
 import os
 
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.entity import async_generate_entity_id
 
 from ..const import (
@@ -17,10 +16,8 @@ from ..const import (
     CONF_ENVIRONMENT_SECRET,
     CONF_TENANT_ID,
     DEFAULT_TENANT_ID,
-    STARTUP_ISSUES,
     CountryOptions,
 )
-from ..integration.const_integration import DOMAIN
 
 
 def add_attribute_to_item(item, user_input, attribute):
