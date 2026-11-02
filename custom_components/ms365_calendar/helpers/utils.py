@@ -63,12 +63,6 @@ def create_issue_id(error, entry_id):
     return f"{error}_{entry_id}"
 
 
-def delete_issues(hass: HomeAssistant, entry_id):
-    """Delete the token repair issues of a config entry."""
-    for error in STARTUP_ISSUES:
-        ir.async_delete_issue(hass, DOMAIN, create_issue_id(error, entry_id))
-
-
 def get_credentials(config):
     """Return the configured client credentials."""
     error = False

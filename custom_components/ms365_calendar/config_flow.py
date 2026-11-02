@@ -53,7 +53,7 @@ from .const import (
     TOKEN_FILE_OUTDATED,
     CountryOptions,
 )
-from .helpers.utils import delete_issues, get_country, get_credentials, get_tenant_id
+from .helpers.utils import get_country, get_credentials, get_tenant_id
 from .integration.config_flow_integration import (
     MS365OptionsFlowHandler,
     async_integration_imports,
@@ -225,7 +225,6 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def _async_create_update_entry(self):
         if self._reconfigure:
-            delete_issues(self.hass, self._entry.entry_id)
             # The update listener of a loaded entry reloads it when the data changes
             loaded = self._entry.state is ConfigEntryState.LOADED
             changed = self.hass.config_entries.async_update_entry(

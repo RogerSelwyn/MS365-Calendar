@@ -13,6 +13,7 @@ LEGACY_TOKEN = {
     "access_token": "fakelegacytoken",
 }
 
+ENVIRONMENT_OPTIONS = {"environment_secret": True, "client_sec_variable": "MS365_CLIENT_SECRET"}
 TENANT_OPTIONS = {"api_options": {"country": "Default", "tenant_id": ""}}
 
 TOKEN_PARAMS = "code=fake.code&state={0}&session_state=fakesessionstate"

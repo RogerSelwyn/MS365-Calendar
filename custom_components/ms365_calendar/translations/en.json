@@ -135,6 +135,27 @@
     }
   },
   "exceptions": {
+    "corrupted": {
+      "message": "The token file is corrupted. Please reconfigure the integration and re-authenticate to re-create the token file."
+    },
+    "environment_variable_empty": {
+      "message": "The specified client secret environment variable - {client_sec_variable} - is empty. Please reconfigure the integration with a valid environment variable."
+    },
+    "environment_variable_invalid": {
+      "message": "The specified client secret environment variable - {client_sec_variable} - does not exist. Please reconfigure the integration with a valid environment variable."
+    },
+    "expired": {
+      "message": "The token has expired. Please reconfigure the integration and re-authenticate to re-create the token file."
+    },
+    "missing": {
+      "message": "The token file is missing. Please reconfigure the integration and re-authenticate to re-create the token file."
+    },
+    "outdated": {
+      "message": "The token is outdated. Please delete the token, then reconfigure the integration and re-authenticate to re-create the token file."
+    },
+    "permissions": {
+      "message": "Permissions missing. Please reconfigure the integration and re-authenticate to re-create the token file."
+    },
     "calendar_not_editable": {
       "message": "Calendar - {name} - is not editable"
     },
