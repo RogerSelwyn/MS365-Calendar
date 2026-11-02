@@ -28,6 +28,7 @@ TEST_DATA_INTEGRATION_LOCATION = Path(__file__).parent.joinpath("integration/dat
 ROOT_CONFIG_ENTRY = {
     "entity_name": ENTITY_NAME,
     "client_id": CLIENT_ID,
+    "environment_secret": False,
     "client_secret": CLIENT_SECRET,
     "alt_auth_method": False,
     "api_options": {"country": "Default"},
