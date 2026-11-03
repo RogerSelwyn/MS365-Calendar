@@ -268,13 +268,53 @@ async def test_not_started_event(
     setup_base_integration,
     base_config_entry: MS365MockConfigEntry,
 ) -> None:
-    """Test not started event."""
+    """Test not started event - only non-all day event."""
 
     check_entity_state(
         hass,
         "calendar.test_calendar1",
         "off",
         attributes={"message": "Test not started"},
+    )
+
+
+@pytest.mark.parametrize(
+    "setup_base_integration",
+    [{"method_name": "not_started_event_all_day_mocks"}],
+    indirect=True,
+)
+async def test_not_started_event_all_day_event(
+    hass: HomeAssistant,
+    setup_base_integration,
+    base_config_entry: MS365MockConfigEntry,
+) -> None:
+    """Test not started event - non-all day event with all day as well."""
+
+    check_entity_state(
+        hass,
+        "calendar.test_calendar1",
+        "off",
+        attributes={"message": "Test not started - not all day event"},
+    )
+
+
+@pytest.mark.parametrize(
+    "setup_base_integration",
+    [{"method_name": "not_started_event_all_day_mocks2"}],
+    indirect=True,
+)
+async def test_not_started_event_all_day_event2(
+    hass: HomeAssistant,
+    setup_base_integration,
+    base_config_entry: MS365MockConfigEntry,
+) -> None:
+    """Test not started event - only all day event."""
+
+    check_entity_state(
+        hass,
+        "calendar.test_calendar1",
+        "off",
+        attributes={"message": "Test not started - all day event"},
     )
 
 
