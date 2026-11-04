@@ -81,7 +81,7 @@ LOCATION_STATE = {
                 "country": "United States",
             },
             "coordinates": {"latitude": 47.672, "longitude": -122.103},
-            "type": "local_business",
+            "type": "localBusiness",
             "uri": "https://www.bingapis.com/api/v6/localbusinesses/fourthcoffee",
         },
         "locations": None,
@@ -90,7 +90,7 @@ LOCATION_STATE = {
         "location": "Room 1",
         "location_details": {
             "address": {"city": "Utrecht"},
-            "type": "conference_room",
+            "type": "conferenceRoom",
             "email": "room1@nomail.com",
         },
         "locations": None,
@@ -99,7 +99,7 @@ LOCATION_STATE = {
         "location": "Room 1; Head office; Home office",
         "location_details": None,
         "locations": [
-            {"name": "Room 1", "type": "conference_room", "email": "room1@nomail.com"},
+            {"name": "Room 1", "type": "conferenceRoom", "email": "room1@nomail.com"},
             {
                 "name": "Head office",
                 "address": {
@@ -109,7 +109,7 @@ LOCATION_STATE = {
                     "country": "Netherlands",
                 },
                 "coordinates": {"latitude": 52.089, "longitude": 5.11},
-                "type": "business_address",
+                "type": "businessAddress",
             },
             {"name": "Home office"},
         ],
@@ -126,11 +126,6 @@ LOCATION_STATE = {
     },
 }
 
-TEAMS_JOIN_URL = (
-    "https://teams.microsoft.com/l/meetup-join/19%3ameeting_ZmFrZS1tZWV0aW5nLWlk"
-    "%40thread.v2/0?context=%7b%22Tid%22%3a%22fake-tenant-id%22%2c%22Oid%22%3a"
-    "%22fake-user-id%22%7d"
-)
 WEB_LINK = "https://outlook.office365.com/owa/?itemid={}&exvsurl=1&path=/calendar/item"
 
 # The online meeting and web link of each event in calendar1_calendar_view_meetings,
@@ -139,33 +134,18 @@ MEETING_STATE = {
     "teams": {
         "online_meeting": {
             "provider": "teams_for_business",
-            "join_url": TEAMS_JOIN_URL,
+            "join_url": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_"
+            "ZmFrZS1tZWV0aW5nLWlk%40thread.v2/0?context=%7b%22Tid%22%3a%22"
+            "fake-tenant-id%22%2c%22Oid%22%3a%22fake-user-id%22%7d",
         },
         "web_link": WEB_LINK.format("teams"),
     },
-    "skype": {
-        "online_meeting": {
-            "provider": "skype_for_business",
-            "join_url": "https://meet.lync.com/nomail/john/SKYPE123",
-        },
-        "web_link": WEB_LINK.format("skype"),
-    },
-    # The join link is used rather than the old link kept in onlineMeetingUrl
-    "moved_to_teams": {
+    "not_set_up": {
         "online_meeting": {
             "provider": "teams_for_business",
-            "join_url": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_"
-            "bW92ZWQtbWVldGluZy1pZA%40thread.v2/0?context=%7b%22Tid%22%3a%22"
-            "fake-tenant-id%22%2c%22Oid%22%3a%22fake-user-id%22%7d",
+            "join_url": None,
         },
-        "web_link": WEB_LINK.format("moved_to_teams"),
-    },
-    "link_only": {
-        "online_meeting": {
-            "provider": None,
-            "join_url": "https://meet.nomail.com/john/LINK123",
-        },
-        "web_link": WEB_LINK.format("link_only"),
+        "web_link": WEB_LINK.format("not_set_up"),
     },
     "in_person": {
         "online_meeting": None,

@@ -129,7 +129,6 @@ class MS365CalendarService:
             "is_online_meeting",
             "online_meeting_provider",
             "online_meeting",
-            "online_meeting_url",
             "web_link",
         )
 

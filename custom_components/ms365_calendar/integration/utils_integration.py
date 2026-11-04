@@ -12,7 +12,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from homeassistant.util import dt as dt_util, slugify
 from O365.calendar import Attendee  # pylint: disable=no-name-in-module)
-from O365.utils import to_snake_case  # pylint: disable=no-name-in-module
 
 from ..classes.config_entry import MS365ConfigEntry
 from ..const import CONF_ENTITY_NAME
@@ -99,11 +98,12 @@ def format_event_data(event):
 
 def _location_details(location):
     """Get what MS Graph has on a place beyond its name, leaving out empty parts."""
-    # A place typed in as text has the default type, which tells nothing more
-    location_type = to_snake_case(location.get("locationType") or "default")
+    # A place typed in as text, or no place at all, has the type default, which tells
+    # nothing more
+    location_type = location.get("locationType")
     details = {
-        "address": _location_address(location.get("address") or {}),
-        "coordinates": _location_coordinates(location.get("coordinates") or {}),
+        "address": _location_address(location.get("address", {})),
+        "coordinates": _location_coordinates(location.get("coordinates", {})),
         "type": None if location_type == "default" else location_type,
         "email": location.get("locationEmailAddress"),
         "uri": location.get("locationUri"),
@@ -130,20 +130,17 @@ def _locations(locations):
     The location of such an event is only their names joined, while for one place
     the location and its details already say it all.
     """
-    if len(locations or []) < 2:
+    if not locations or len(locations) < 2:
         return None
     return [{"name": place.get("displayName", ""), **(_location_details(place) or {})} for place in locations]
 
 
 def _online_meeting(event):
-    """Get the service of an online meeting, such as Teams, and the link to join it.
-
-    The join link is in onlineMeeting. onlineMeetingUrl is deprecated, so it is only
-    used when there is no join link, as for some older Skype meetings.
-    """
-    join_url = (event.online_meeting or {}).get("joinUrl") or event.online_meeting_url
-    if not event.is_online_meeting and not join_url:
+    """Get the service of an online meeting, such as Teams, and the link to join it."""
+    if not event.is_online_meeting:
         return None
+    # MS Graph leaves onlineMeeting null until it has set the meeting up
+    join_url = (event.online_meeting or {}).get("joinUrl")
     # MS Graph says unknown for a service it does not name, and O365 has no value
     # for a service it does not know
     provider = getattr(event.online_meeting_provider, "value", "unknown")
