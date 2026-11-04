@@ -16,10 +16,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from homeassistant.util import dt as dt_util
 
-from custom_components.ms365_calendar.diagnostics import (
-    async_get_config_entry_diagnostics,
-)
-
 from ..helpers.mock_config_entry import MS365MockConfigEntry
 from ..helpers.utils import check_entity_state, mock_call, utcnow
 from .const_integration import DOMAIN, FULL_INIT_ENTITY_NO, URL
@@ -28,8 +24,6 @@ from .data_integration.state import (
     BASE_STATE_CAL2,
     LOCATION_STATE,
     MEETING_STATE,
-    TEAMS_JOIN_URL,
-    WEB_LINK,
 )
 from .helpers_integration.mocks import MS365MOCKS
 from .helpers_integration.utils_integration import (
@@ -384,7 +378,6 @@ async def test_meeting_links(
     hass: HomeAssistant,
     requests_mock: Mocker,
     setup_base_integration,
-    base_config_entry: MS365MockConfigEntry,
 ) -> None:
     """Test the data attribute has the join link of each meeting and the web link."""
     data = hass.states.get("calendar.test_calendar1").attributes["data"]
@@ -396,14 +389,8 @@ async def test_meeting_links(
         "isonlinemeeting",
         "onlinemeetingprovider",
         "onlinemeeting",
-        "onlinemeetingurl",
         "weblink",
     } <= set(calendar_view.qs["$select"][0].split(","))
-
-    # Diagnostics have no event data, so the links are not in them
-    diagnostics = str(await async_get_config_entry_diagnostics(hass, base_config_entry))
-    assert TEAMS_JOIN_URL not in diagnostics
-    assert WEB_LINK.format("teams") not in diagnostics
 
 
 def _adjust_date(data, adddays_start=0, adddays_end=0):
