@@ -30,7 +30,7 @@ from .integration.permissions_integration import Permissions
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
+async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry) -> None:
     """Set up a config entry."""
 
     _LOGGER.debug("Permissions setup")
@@ -93,7 +93,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry):
 
 async def async_migrate_entry(
     hass: HomeAssistant, config_entry: MS365ConfigEntry
-) -> bool:
+) -> None:
     """Migrate old entry."""
     _LOGGER.debug(
         "Migrating configuration from version %s.%s",
@@ -125,7 +125,7 @@ async def async_migrate_entry(
     )
 
 
-async def async_unload_entry(hass: HomeAssistant, entry: MS365ConfigEntry) -> bool:
+async def async_unload_entry(hass: HomeAssistant, entry: MS365ConfigEntry) -> None:
     """Unload a config entry."""
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
@@ -171,7 +171,7 @@ async def _async_auth_checks(
 
     _LOGGER.debug("Do setup")
     token_valid = await _async_check_token_valid(hass, ha_account.account, entity_name)
-    return TOKEN_FILE_EXPIRED if not token_valid else False
+    return False if token_valid else TOKEN_FILE_EXPIRED
 
 
 async def _async_check_token_valid(hass: HomeAssistant, account, entity_name):
