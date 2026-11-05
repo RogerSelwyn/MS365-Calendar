@@ -127,7 +127,7 @@ async def async_migrate_entry(
 
 async def async_unload_entry(hass: HomeAssistant, entry: MS365ConfigEntry) -> None:
     """Unload a config entry."""
-    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
 
 async def async_reload_entry(hass: HomeAssistant, entry: MS365ConfigEntry) -> None:
