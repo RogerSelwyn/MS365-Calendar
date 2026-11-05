@@ -1,5 +1,44 @@
 # Changelog
 
+## v1.14.0 (2026/11/05)
+### ✨ Enhancements
+- [Add External Secret support](https://github.com/RogerSelwyn/MS365-Calendar/commit/b2f8bd61c39e2d466121a9bc2fc2d8dde8d72820) - @RogerSelwyn
+
+### 🧰 Maintenance
+- [Remove dependencies that exist in HA Core](https://github.com/RogerSelwyn/MS365-Calendar/commit/e2c311feec5b8e36e619dec19349659ac3d5874c) - @RogerSelwyn
+- [Remove unrequired imports](https://github.com/RogerSelwyn/MS365-Calendar/commit/886098c8dec9e6f5d3ccf1c0700ca8013c63db08) - @RogerSelwyn
+- [Remove unrequired method check](https://github.com/RogerSelwyn/MS365-Calendar/commit/95aa4859e94d1cf601d9433bac2fed7d022f3b12) - @RogerSelwyn
+- [Add categories and bump HA core to 2026.11.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/ef306e005b80da9aaa2b20083ac1a46373a2a11a) - @RogerSelwyn
+- [Remove redundant delete_issues](https://github.com/RogerSelwyn/MS365-Calendar/commit/8d515b8e0be192bfb52ccb3a95f7d42789f31ef7) - @RogerSelwyn
+- [Remove linting errors](https://github.com/RogerSelwyn/MS365-Calendar/commit/2de43b35e2e5087d0848ffccf7ca115ce0e5091b) - @RogerSelwyn
+- [Simplify identification of current event and add testing](https://github.com/RogerSelwyn/MS365-Calendar/commit/70c6c4d739687f7c1ef6272abf76c0b0eb17a4fe) - @RogerSelwyn
+- [Config entry methods now return None](https://github.com/RogerSelwyn/MS365-Calendar/commit/5b813b8d025a589871e1cb1213a08a0730e1efca) - @RogerSelwyn
+- [Config entry unload methods should return None](https://github.com/RogerSelwyn/MS365-Calendar/commit/fe4560b9f71a51e33f18376d4b5c57e14ae786f7) - @RogerSelwyn
+
+### ⬆️ Dependencies
+- [Auto update requirements.txt](https://github.com/RogerSelwyn/MS365-Calendar/commit/8f33b9bd1788fc49d51c16d3a377c2d5f53f1d14) - @actions-user
+- [Auto update requirements.txt](https://github.com/RogerSelwyn/MS365-Calendar/commit/bcbb30c83b6fa5d2f71875c5371a468feb4ff20c) - @actions-user
+- [Bump ruff from 0.17.1 to 0.17.3](https://github.com/RogerSelwyn/MS365-Calendar/commit/7c033bb5c98c291425fbe80f2f33ed7b876a3128) - @dependabot[bot]
+
+### ✅ Test
+- [Migrate to pytest_homeassistant](https://github.com/RogerSelwyn/MS365-Calendar/commit/7de66a82686bbb4133e065dde0d6b2e3b41ef447) - @RogerSelwyn
+- [Minor tweak](https://github.com/RogerSelwyn/MS365-Calendar/commit/f59b4ef9c05deb84c91f3ca1e1d76271ac5ff75a) - @RogerSelwyn
+- [Migrate to pytest_homeassistant](https://github.com/RogerSelwyn/MS365-Calendar/commit/aca770229de3a84f80dab86298a34d9ce1de7aeb) - @RogerSelwyn
+- [Remove unrequired item from .gitignore](https://github.com/RogerSelwyn/MS365-Calendar/commit/d4438f945fc269af61bc819a7a85f9696a01df7c) - @RogerSelwyn
+- [Improve config_entry setup handling](https://github.com/RogerSelwyn/MS365-Calendar/commit/49e45f7cfe66fdb2429583b04c83b6bc296d87ab) - @RogerSelwyn
+- [Update exclusions](https://github.com/RogerSelwyn/MS365-Calendar/commit/812d8c88624432380b3d71b075f803547ae626f0) - @RogerSelwyn
+- [Add environment secret default to tests](https://github.com/RogerSelwyn/MS365-Calendar/commit/3da86f845aeba98386ac18af5cb13e7729603818) - @RogerSelwyn
+
+### 🔖 Release
+- [Release v1.14.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/e6bb704f78a2993ceb80b375ece0f713be90706d) - @RogerSelwyn
+
+### Other
+- [Revert "maint: Remove dependencies that exist in HA Core"](https://github.com/RogerSelwyn/MS365-Calendar/commit/58d6cd09a29058fa71c0d3ac00e6798d1eda4417) - @RogerSelwyn
+- [Revert "maint: Remove unrequired method check"](https://github.com/RogerSelwyn/MS365-Calendar/commit/e27e5bc6752df93af3d77377552b59fa04e4ef84) - @RogerSelwyn
+
+
+
+
 ## v1.13.0 (2026/10/26)
 ### 🐛 Fixes
 - [Fixes various update issues](https://github.com/RogerSelwyn/MS365-Calendar/commit/c046dfc436b2c490b508d42c5b703be3e0a5127f) - @RogerSelwyn
