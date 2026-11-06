@@ -94,6 +94,44 @@ async def test_sync_fetch_error(
     assert "Error syncing calendar events from MS Graph" in caplog.text
 
 
+@pytest.mark.parametrize("base_config_entry", [{"work_location": True}], indirect=True)
+async def test_work_location_calendar(
+    hass: HomeAssistant,
+    requests_mock: Mocker,
+    base_token,
+    base_config_entry: MS365MockConfigEntry,
+    entity_registry: er.EntityRegistry,
+) -> None:
+    """Test work-location calendar is created and populated."""
+    MS365MOCKS.standard_mocks(requests_mock)
+    base_config_entry.add_to_hass(hass)
+    await hass.config_entries.async_setup(base_config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    state = hass.states.get("calendar.test_worklocation")
+    assert state is not None
+    assert state.attributes["friendly_name"] == "Work Location"
+    # The entity data only covers the next 24 hours, so tomorrow's event may fall outside it
+    assert state.attributes["data"][0]["summary"] == "Work location: Main Office"
+    assert (
+        entity_registry.async_get("calendar.test_worklocation").unique_id
+        == "__work_location___test_WorkLocation"
+    )
+    today_location = hass.states.get("sensor.test_worklocation_today_location")
+    tomorrow_location = hass.states.get("sensor.test_worklocation_tomorrow_location")
+    office_today = hass.states.get("binary_sensor.test_worklocation_office_today")
+    office_tomorrow = hass.states.get("binary_sensor.test_worklocation_office_tomorrow")
+
+    assert today_location is not None
+    assert tomorrow_location is not None
+    assert office_today is not None
+    assert office_tomorrow is not None
+    assert today_location.state == "office"
+    assert tomorrow_location.state == "remote"
+    assert office_today.state == "on"
+    assert office_tomorrow.state == "off"
+
+
 async def test_get_events_fetch_error(
     hass: HomeAssistant,
     setup_base_integration,

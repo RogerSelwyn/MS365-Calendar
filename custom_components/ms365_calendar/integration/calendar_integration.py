@@ -256,7 +256,7 @@ class MS365CalendarEntity(MS365Entity, CalendarEntity):
             get_hass_date(get_end_date(vevent), vevent.is_all_day),
             vevent.subject,
             clean_html(vevent.body),
-            vevent.location["displayName"],
+            vevent.location.get("displayName"),
             uid=vevent.object_id,
         )
         if vevent.series_master_id:

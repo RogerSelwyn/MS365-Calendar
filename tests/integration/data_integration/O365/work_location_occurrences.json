@@ -1,0 +1,35 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#Collection(microsoft.graph.workPlanOccurrence)",
+  "value": [
+    {
+      "id": "work-location-occurrence-1",
+      "recurrenceId": null,
+      "workLocationType": "office",
+      "start": {
+        "dateTime": "2020-01-01T09:00:00.0000000",
+        "timeZone": "UTC"
+      },
+      "end": {
+        "dateTime": "2020-01-01T17:00:00.0000000",
+        "timeZone": "UTC"
+      },
+      "location": {
+        "displayName": "Main Office"
+      }
+    },
+    {
+      "id": "work-location-occurrence-2",
+      "recurrenceId": null,
+      "workLocationType": "remote",
+      "start": {
+        "dateTime": "2020-01-02T09:00:00.0000000",
+        "timeZone": "UTC"
+      },
+      "end": {
+        "dateTime": "2020-01-02T17:00:00.0000000",
+        "timeZone": "UTC"
+      },
+      "location": {}
+    }
+  ]
+}
