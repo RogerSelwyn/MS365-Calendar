@@ -102,6 +102,14 @@ INDEXES = {
     "-1": "last",
 }
 ITEMS = "items"
+# The parts of an MS Graph address, by the names used in the event data
+LOCATION_ADDRESS = {
+    "street": "street",
+    "city": "city",
+    "state": "state",
+    "postal_code": "postalCode",
+    "country": "countryOrRegion",
+}
 
 PERM_CALENDARS_READ = "Calendars.Read"
 PERM_CALENDARS_READBASIC = "Calendars.ReadBasic"
