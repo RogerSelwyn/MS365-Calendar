@@ -31,7 +31,7 @@ from .const_integration import (
 )
 from .sync.sync import MS365CalendarEventSyncManager
 from .sync.timeline import MS365Timeline
-from .utils_integration import get_end_date, get_start_date
+from .utils_integration import get_start_date
 
 _LOGGER = logging.getLogger(__name__)
 # Maximum number of upcoming events to consider for state changes between
@@ -192,13 +192,6 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
         """Is it over."""
         return dt_util.utcnow() >= MS365CalendarSyncCoordinator.to_datetime(
             get_start_date(vevent)
-        )
-
-    @staticmethod
-    def is_finished(vevent):
-        """Is it over."""
-        return dt_util.utcnow() >= MS365CalendarSyncCoordinator.to_datetime(
-            get_end_date(vevent)
         )
 
     @staticmethod
