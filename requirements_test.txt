@@ -1,4 +1,4 @@
 -r requirements.txt
 pytest-cov==7.1.0
-homeassistant==2026.11.0b0 
-pytest-home-assistant @ git+https://github.com/home-assistant/core@2026.11.0b0#subdirectory=packages/pytest-home-assistant
+homeassistant>=2026.11.0
+pytest-homeassistant>=2026.11.0
