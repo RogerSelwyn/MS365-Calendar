@@ -2,7 +2,7 @@
 
 from copy import deepcopy
 
-import voluptuous as vol
+import probatio
 
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntryState, ConfigFlowResult
@@ -52,14 +52,16 @@ INRTEGRATION_CONFIG_MINOR_VERSION = 0
 def integration_reconfigure_schema(entry_data):
     """Extend the scheme with integration specific attributes."""
     return {
-        vol.Optional(
+        probatio.Optional(
             CONF_ENABLE_UPDATE, default=entry_data[CONF_ENABLE_UPDATE]
         ): BooleanSelector(),
-        vol.Optional(
+        probatio.Optional(
             CONF_BASIC_CALENDAR, default=entry_data[CONF_BASIC_CALENDAR]
         ): BooleanSelector(),
-        vol.Optional(CONF_GROUPS, default=entry_data[CONF_GROUPS]): BooleanSelector(),
-        vol.Optional(
+        probatio.Optional(
+            CONF_GROUPS, default=entry_data[CONF_GROUPS]
+        ): BooleanSelector(),
+        probatio.Optional(
             CONF_SHARED_MAILBOX,
             description={"suggested_value": entry_data.get(CONF_SHARED_MAILBOX, None)},
         ): cv.string,
@@ -139,46 +141,46 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
             description_placeholders={
                 CONF_ENTITY_NAME: self.config_entry.data[CONF_ENTITY_NAME]
             },
-            data_schema=vol.Schema(
+            data_schema=probatio.Schema(
                 {
-                    vol.Optional(
+                    probatio.Optional(
                         CONF_CALENDAR_LIST, default=self._calendar_list_selected
                     ): cv.multi_select(self._calendar_list),
-                    vol.Optional(
+                    probatio.Optional(
                         CONF_TRACK_NEW_CALENDAR,
                         default=self._track_new_calendar,
                     ): BooleanSelector(),
-                    vol.Optional(CONF_ADVANCED_OPTIONS): section(
-                        vol.Schema(
+                    probatio.Optional(CONF_ADVANCED_OPTIONS): section(
+                        probatio.Schema(
                             {
-                                vol.Optional(
+                                probatio.Optional(
                                     CONF_UPDATE_INTERVAL,
                                     default=self.config_entry.options.get(
                                         CONF_ADVANCED_OPTIONS, {}
                                     ).get(
                                         CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL
                                     ),
-                                ): vol.All(
-                                    vol.Coerce(int),
-                                    vol.Range(min=15, max=600),
+                                ): probatio.All(
+                                    probatio.Coerce(int),
+                                    probatio.Range(min=15, max=600),
                                 ),
-                                vol.Optional(
+                                probatio.Optional(
                                     CONF_DAYS_BACKWARD,
                                     default=self.config_entry.options.get(
                                         CONF_ADVANCED_OPTIONS, {}
                                     ).get(CONF_DAYS_BACKWARD, DEFAULT_DAYS_BACKWARD),
-                                ): vol.All(
-                                    vol.Coerce(int),
-                                    vol.Range(min=-90, max=90),
+                                ): probatio.All(
+                                    probatio.Coerce(int),
+                                    probatio.Range(min=-90, max=90),
                                 ),
-                                vol.Optional(
+                                probatio.Optional(
                                     CONF_DAYS_FORWARD,
                                     default=self.config_entry.options.get(
                                         CONF_ADVANCED_OPTIONS, {}
                                     ).get(CONF_DAYS_FORWARD, DEFAULT_DAYS_FORWARD),
-                                ): vol.All(
-                                    vol.Coerce(int),
-                                    vol.Range(min=-90, max=90),
+                                ): probatio.All(
+                                    probatio.Coerce(int),
+                                    probatio.Range(min=-90, max=90),
                                 ),
                             }
                         ),
@@ -224,30 +226,30 @@ class MS365OptionsFlowHandler(config_entries.OptionsFlow):
                 CONF_ENTITY_NAME: self.config_entry.data[CONF_ENTITY_NAME],
                 CONF_DEVICE_ID: calendar_item[CONF_DEVICE_ID],
             },
-            data_schema=vol.Schema(
+            data_schema=probatio.Schema(
                 {
-                    vol.Required(
+                    probatio.Required(
                         CONF_NAME,
                         default=calendar_item[CONF_NAME],
                     ): cv.string,
-                    vol.Optional(
+                    probatio.Optional(
                         CONF_HOURS_FORWARD_TO_GET,
                         default=calendar_item.get(CONF_HOURS_FORWARD_TO_GET),
-                    ): vol.Any(None, int),
-                    vol.Optional(
+                    ): probatio.Any(None, int),
+                    probatio.Optional(
                         CONF_HOURS_BACKWARD_TO_GET,
                         default=calendar_item.get(CONF_HOURS_BACKWARD_TO_GET),
-                    ): vol.Any(None, int),
-                    vol.Optional(
+                    ): probatio.Any(None, int),
+                    probatio.Optional(
                         CONF_MAX_RESULTS,
                         description={
                             "suggested_value": calendar_item.get(CONF_MAX_RESULTS)
                         },
                     ): cv.positive_int,
-                    vol.Optional(
+                    probatio.Optional(
                         CONF_SENSITIVITY_EXCLUDE,
                         default=calendar_item.get(CONF_SENSITIVITY_EXCLUDE),
-                    ): vol.Any(None, cv.multi_select(sensitivities)),
+                    ): probatio.Any(None, cv.multi_select(sensitivities)),
                 }
             ),
             last_step=last_step,

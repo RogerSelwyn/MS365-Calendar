@@ -1,6 +1,6 @@
 """Schema for MS365 Integration."""
 
-import voluptuous as vol
+import probatio
 
 from homeassistant import data_entry_flow
 from homeassistant.data_entry_flow import section
@@ -23,29 +23,31 @@ from .const import (
 )
 
 CONFIG_SCHEMA = {
-    vol.Required(CONF_ENTITY_NAME): vol.All(cv.string, vol.Strip),
-    vol.Required(CONF_CLIENT_ID): vol.All(cv.string, vol.Strip),
-    vol.Required(CONF_ENVIRONMENT_SECRET, default=False): BooleanSelector(),
+    probatio.Required(CONF_ENTITY_NAME): probatio.All(cv.string, probatio.Strip),
+    probatio.Required(CONF_CLIENT_ID): probatio.All(cv.string, probatio.Strip),
+    probatio.Required(CONF_ENVIRONMENT_SECRET, default=False): BooleanSelector(),
     data_entry_flow.Required(
         CONF_CLIENT_SECRET, visible={"field": CONF_ENVIRONMENT_SECRET, "value": False}
-    ): vol.All(cv.string, vol.Strip),
+    ): probatio.All(cv.string, probatio.Strip),
     data_entry_flow.Required(
         CONF_CLIENT_SECRET_VARIABLE,
         default=MS365_CLIENT_SECRET,
         visible={"field": CONF_ENVIRONMENT_SECRET, "value": True},
-    ): vol.All(cv.string, vol.Strip),
-    vol.Optional(CONF_ALT_AUTH_METHOD, default=False): BooleanSelector(),
-    vol.Required(CONF_API_OPTIONS): section(
-        vol.Schema(
+    ): probatio.All(cv.string, probatio.Strip),
+    probatio.Optional(CONF_ALT_AUTH_METHOD, default=False): BooleanSelector(),
+    probatio.Required(CONF_API_OPTIONS): section(
+        probatio.Schema(
             {
-                vol.Required(CONF_API_COUNTRY, default=CountryOptions.DEFAULT): vol.In(
-                    CountryOptions
+                probatio.Required(
+                    CONF_API_COUNTRY, default=CountryOptions.DEFAULT
+                ): probatio.In(CountryOptions),
+                probatio.Optional(CONF_TENANT_ID, default=""): probatio.All(
+                    cv.string, probatio.Strip
                 ),
-                vol.Optional(CONF_TENANT_ID, default=""): vol.All(cv.string, vol.Strip),
             }
         ),
         {"collapsed": True},
     ),
 }
 
-REQUEST_AUTHORIZATION_DEFAULT_SCHEMA = {vol.Required(CONF_URL): cv.string}
+REQUEST_AUTHORIZATION_DEFAULT_SCHEMA = {probatio.Required(CONF_URL): cv.string}

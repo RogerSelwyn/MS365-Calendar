@@ -3,7 +3,7 @@
 import logging
 import os
 
-from voluptuous.error import Error as VoluptuousError
+from probatio.error import Error as ProbatioError
 import yaml
 
 from homeassistant.const import CONF_NAME
@@ -37,7 +37,7 @@ def load_yaml_file(path, validate=False):
                 for item in data:
                     try:
                         items[item[CONF_CAL_ID]] = YAML_CALENDAR_DEVICE_SCHEMA(item)
-                    except VoluptuousError as exception:
+                    except ProbatioError as exception:
                         # keep going
                         _LOGGER.warning(
                             "Invalid Data - duplicate entries may be created in file %s - for item %s: %s",

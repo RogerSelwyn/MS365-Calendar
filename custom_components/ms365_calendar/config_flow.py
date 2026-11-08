@@ -7,7 +7,7 @@ from typing import Any, Self
 from urllib.parse import parse_qs, urlparse
 
 from aiohttp import web_response
-import voluptuous as vol
+import probatio
 
 from homeassistant import data_entry_flow
 from homeassistant.components.http import HomeAssistantView
@@ -90,7 +90,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
         self._flow = None
         self._callback_urls = None
         self._user_input = {}
-        self._config_schema: dict[vol.Required, type[str | int]] | None = None
+        self._config_schema: dict[probatio.Required, type[str | int]] | None = None
         self._reconfigure = False
         self._entry: MS365ConfigEntry | None = None
 
@@ -140,7 +140,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
 
         data = self._config_schema or CONFIG_SCHEMA | CONFIG_SCHEMA_INTEGRATION
         return self.async_show_form(
-            step_id="user", data_schema=vol.Schema(data), errors=errors
+            step_id="user", data_schema=probatio.Schema(data), errors=errors
         )
 
     async def _validate_user_input_for_auth(self, user_input, alt_auth_method):
@@ -200,7 +200,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="request_default",
-            data_schema=vol.Schema(REQUEST_AUTHORIZATION_DEFAULT_SCHEMA),
+            data_schema=probatio.Schema(REQUEST_AUTHORIZATION_DEFAULT_SCHEMA),
             description_placeholders={
                 CONF_AUTH_URL: self._url,
                 CONF_ENTITY_NAME: self.entity_name,
@@ -349,10 +349,10 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
         tenant_id = get_tenant_id(entry_data)
 
         self._config_schema = {
-            vol.Required(CONF_CLIENT_ID, default=entry_data[CONF_CLIENT_ID]): vol.All(
-                cv.string, vol.Strip
-            ),
-            vol.Required(
+            probatio.Required(
+                CONF_CLIENT_ID, default=entry_data[CONF_CLIENT_ID]
+            ): probatio.All(cv.string, probatio.Strip),
+            probatio.Required(
                 CONF_ENVIRONMENT_SECRET,
                 default=entry_data.get(CONF_ENVIRONMENT_SECRET, False),
             ): BooleanSelector(),
@@ -360,28 +360,28 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
                 CONF_CLIENT_SECRET,
                 default=entry_data.get(CONF_CLIENT_SECRET),
                 visible={"field": CONF_ENVIRONMENT_SECRET, "value": False},
-            ): vol.All(cv.string, vol.Strip),
+            ): probatio.All(cv.string, probatio.Strip),
             data_entry_flow.Required(
                 CONF_CLIENT_SECRET_VARIABLE,
                 default=entry_data.get(
                     CONF_CLIENT_SECRET_VARIABLE, MS365_CLIENT_SECRET
                 ),
                 visible={"field": CONF_ENVIRONMENT_SECRET, "value": True},
-            ): vol.All(cv.string, vol.Strip),
-            vol.Optional(
+            ): probatio.All(cv.string, probatio.Strip),
+            probatio.Optional(
                 CONF_ALT_AUTH_METHOD, default=entry_data[CONF_ALT_AUTH_METHOD]
             ): BooleanSelector(),
-            vol.Required(CONF_API_OPTIONS): section(
-                vol.Schema(
+            probatio.Required(CONF_API_OPTIONS): section(
+                probatio.Schema(
                     {
-                        vol.Required(
+                        probatio.Required(
                             CONF_API_COUNTRY,
                             default=country,
-                        ): vol.In(CountryOptions),
-                        vol.Optional(
+                        ): probatio.In(CountryOptions),
+                        probatio.Optional(
                             CONF_TENANT_ID,
                             default=tenant_id if tenant_id != DEFAULT_TENANT_ID else "",
-                        ): vol.All(cv.string, vol.Strip),
+                        ): probatio.All(cv.string, probatio.Strip),
                     }
                 ),
                 {"collapsed": True},
