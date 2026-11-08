@@ -7,7 +7,6 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntryState, ConfigFlowResult
 from homeassistant.const import CONF_NAME
-from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import section
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.selector import BooleanSelector
@@ -43,9 +42,11 @@ from .filemgmt_integration import (
     build_yaml_filename,
     read_calendar_yaml_file,
     write_calendar_yaml_file,
-    write_yaml_file,
 )
 from .utils_integration import async_delete_calendar
+
+INTEGRATION_CONFIG_VERSION = 2
+INRTEGRATION_CONFIG_MINOR_VERSION = 0
 
 
 def integration_reconfigure_schema(entry_data):
@@ -74,18 +75,6 @@ def integration_validate_schema(user_input):  # pylint: disable=unused-argument
     if user_input.get(CONF_GROUPS) and user_input.get(CONF_SHARED_MAILBOX):
         return {CONF_GROUPS: "cannot_have_groups_shared"}
     return {}
-
-
-async def async_integration_imports(hass: HomeAssistant, import_data):
-    """Do the integration  level import tasks."""
-    calendars = import_data["calendars"]
-    path = YAML_CALENDARS_FILENAME.format(
-        f"_{import_data['data'].get(CONF_ENTITY_NAME)}"
-    )
-    yaml_filepath = build_yaml_file_path(hass, path)
-
-    for calendar in calendars.values():
-        await hass.async_add_executor_job(write_yaml_file, yaml_filepath, calendar)
 
 
 class MS365OptionsFlowHandler(config_entries.OptionsFlow):

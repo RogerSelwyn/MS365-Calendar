@@ -118,6 +118,13 @@ async def async_migrate_entry(
             config_entry, data=new_data, minor_version=0, version=2
         )
 
+    if (
+        config_entry.version == 2
+        and config_entry.minor_version == 0
+        and hasattr(setup_integration, "async_migrate_entry")
+    ):
+        await setup_integration.async_migrate_entry(hass, config_entry)
+
     _LOGGER.debug(
         "Migration to configuration version %s.%s successful",
         config_entry.version,

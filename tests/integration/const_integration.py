@@ -26,25 +26,6 @@ UPDATE_TOKEN_PERMS = "Calendars.ReadWrite"
 UPDATE_OPTIONS = {"enable_update": True}
 
 
-MIGRATION_CONFIG_ENTRY = {
-    "options": {},
-    "calendars": {
-        "calendar1": {
-            "cal_id": "calendar1",
-            "entities": [
-                {
-                    "device_id": "Calendar",
-                    "end_offset": 6,
-                    "name": "Calendar",
-                    "start_offset": 0,
-                    "track": False,
-                }
-            ],
-        },
-    },
-}
-
-
 DIAGNOSTIC_GRANTED_PERMISSIONS = [
     "Calendars.Read",
     "User.Read",

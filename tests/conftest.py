@@ -15,6 +15,7 @@ from .helpers.mock_config_entry import MS365MockConfigEntry, config_entry_setup
 from .helpers.utils import build_token_file
 from .integration import api
 from .integration.const_integration import BASE_TOKEN_PERMS, DOMAIN, UPDATE_OPTIONS, UPDATE_TOKEN_PERMS, MS365ConfigFlow
+from .integration.helpers_integration import utils_integration
 from .integration.helpers_integration.mocks import MS365MOCKS
 
 pytest_plugins = ["tests.integration.fixtures"]
@@ -64,18 +65,28 @@ def base_config_entry(request, hass: HomeAssistant) -> MS365MockConfigEntry:
     """Create MS365 entry in Home Assistant."""
     data = config_entry_setup(BASE_CONFIG_ENTRY)
     options = None
+
+    subentry_items = {}
     if hasattr(request, "param"):
         for key, value in request.param.items():
             if key == "options":
                 options = value
+            elif key == "subentry":
+                subentry_items = value
             else:
                 data[key] = value
+
+    subentries = None
+    if hasattr(utils_integration, "create_subentries"):
+        subentries = utils_integration.create_subentries(subentry_items)
+
     entry = MS365MockConfigEntry(
         domain=DOMAIN,
         title=ENTITY_NAME,
         unique_id=DOMAIN,
         data=data,
         options=options,
+        subentries_data=subentries,
         version=MS365ConfigFlow.VERSION,
         minor_version=MS365ConfigFlow.MINOR_VERSION,
     )

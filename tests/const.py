@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from .helpers.mock_config_entry import config_entry_setup
-from .integration.const_integration import BASE_CONFIG_ENTRY_INTEGRATION, MIGRATION_CONFIG_ENTRY
+from .integration.const_integration import BASE_CONFIG_ENTRY_INTEGRATION
 
 CLIENT_ID = "1234"
 CLIENT_SECRET = "5678"
@@ -40,4 +40,3 @@ ALT_CONFIG_ENTRY = config_entry_setup(BASE_CONFIG_ENTRY, base_attributes={"alt_a
 COUNTRY_CONFIG_ENTRY = config_entry_setup(BASE_CONFIG_ENTRY, api_option_attributes={"country": "21Vianet (China)"})
 ENV_CONFIG_ENTRY = config_entry_setup(BASE_CONFIG_ENTRY, base_attributes={"environment_secret": True})
 RECONFIGURE_CONFIG_ENTRY = config_entry_setup(BASE_CONFIG_ENTRY, delete_attributes=["entity_name"])
-MIGRATION_CONFIG_ENTRY["data"] = BASE_CONFIG_ENTRY

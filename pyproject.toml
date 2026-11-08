@@ -528,5 +528,8 @@ exclude_also = [
     'def build_entity_id',
     'def entity_key',
     'if not hasattr\(setup_integration, "async_integration_remove_entry"\)',
-    'setup_integration.async_extra_platform_setup'
+    'setup_integration.async_extra_platform_setup',
+    'async_get_supported_subentry_types',
+    'config_flow_integration.subentry_setup',
+    'setup_integration.async_migrate_entry'
 ]

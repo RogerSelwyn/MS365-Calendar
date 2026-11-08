@@ -49,7 +49,6 @@ PERM_USER_READ = "User.Read"
 PERM_SHARED = ".Shared"
 PERM_BASE_PERMISSIONS = [PERM_USER_READ]
 
-ERROR_IMPORTED_DUPLICATE = "Entry already imported for '%s' - '%s'"
 ERROR_INVALID_SHARED_MAILBOX = (
     "Login email address '%s' should not be "
     "entered as shared email address, config attribute removed."

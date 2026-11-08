@@ -11,7 +11,13 @@ import voluptuous as vol
 
 from homeassistant import data_entry_flow
 from homeassistant.components.http import HomeAssistantView
-from homeassistant.config_entries import ConfigEntryState, ConfigFlow, ConfigFlowResult
+from homeassistant.config_entries import (
+    ConfigEntry,
+    ConfigEntryState,
+    ConfigFlow,
+    ConfigFlowResult,
+    ConfigSubentryFlow,
+)
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import section
 import homeassistant.helpers.config_validation as cv
@@ -42,7 +48,6 @@ from .const import (
     CONF_URL,
     COUNTRY_URLS,
     DEFAULT_TENANT_ID,
-    ERROR_IMPORTED_DUPLICATE,
     ERROR_INVALID_SHARED_MAILBOX,
     ERROR_INVALID_TENANT,
     ERROR_INVALID_URL,
@@ -54,9 +59,11 @@ from .const import (
     CountryOptions,
 )
 from .helpers.utils import get_country, get_credentials, get_tenant_id
+from .integration import config_flow_integration
 from .integration.config_flow_integration import (
+    INRTEGRATION_CONFIG_MINOR_VERSION,
+    INTEGRATION_CONFIG_VERSION,
     MS365OptionsFlowHandler,
-    async_integration_imports,
     integration_reconfigure_schema,
     integration_validate_schema,
 )
@@ -71,8 +78,8 @@ _LOGGER = logging.getLogger(__name__)
 class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
     """Example config flow."""
 
-    VERSION = 2
-    MINOR_VERSION = 0
+    VERSION = INTEGRATION_CONFIG_VERSION
+    MINOR_VERSION = INRTEGRATION_CONFIG_MINOR_VERSION
 
     def __init__(self) -> None:
         """Initialise the configuration flow."""
@@ -92,6 +99,16 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
     def async_get_options_flow(config_entry):
         """MS365 options callback."""
         return MS365OptionsFlowHandler(config_entry)
+
+    @classmethod
+    @callback
+    def async_get_supported_subentry_types(
+        cls, config_entry: ConfigEntry
+    ) -> dict[str, type[ConfigSubentryFlow]]:
+        """Return the subentry types."""
+        if hasattr(config_flow_integration, "integration_subentry_flows"):
+            return config_flow_integration.integration_subentry_flows()
+        return {}  # pragma: no cover
 
     def is_matching(self, other_flow: Self) -> bool:  # pragma: no cover
         """Return True if other_flow is matching this flow."""
@@ -234,7 +251,14 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
                 self.hass.config_entries.async_schedule_reload(self._entry.entry_id)
             return self.async_abort(reason="reconfigure_successful")
 
-        return self.async_create_entry(title=self.entity_name, data=self._user_input)
+        subentries = None
+        if hasattr(config_flow_integration, "subentry_setup"):
+            subentries = config_flow_integration.subentry_setup(
+                self._user_input[CONF_ENTITY_NAME]
+            )
+        return self.async_create_entry(
+            title=self.entity_name, data=self._user_input, subentries=subentries
+        )
 
     async def _async_validate_response(self, user_input):
         errors = {}
@@ -366,19 +390,6 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
         self._config_schema |= integration_reconfigure_schema(entry_data)
 
         return await self.async_step_user()
-
-    async def async_step_import(self, import_data: dict[str, Any]) -> ConfigFlowResult:
-        """Import a config entry."""
-        data = import_data["data"]
-        options = import_data["options"]
-        self.entity_name = data[CONF_ENTITY_NAME]
-        if self._check_existing(self.entity_name):
-            _LOGGER.info(ERROR_IMPORTED_DUPLICATE, DOMAIN, self.entity_name)
-            return self.async_abort(reason=AUTH_ERROR_ALREADY_CONFIGURED)
-        await async_integration_imports(self.hass, import_data)
-        return self.async_create_entry(
-            title=self.entity_name, data=data, options=options
-        )
 
     def _check_existing(self, entity_name):
         config_entries = self.hass.config_entries.async_entries(DOMAIN)
