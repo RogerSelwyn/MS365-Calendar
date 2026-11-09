@@ -32,10 +32,11 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry) -> None:
     """Set up a config entry."""
+    config = {**entry.data, **entry.options}
 
     _LOGGER.debug("Permissions setup")
     token_backend = MS365Token(hass, entry.data)
-    perms = Permissions(hass, entry.data, token_backend)
+    perms = Permissions(hass, config, token_backend)
     ha_account = MS365Account(perms, entry.data)
 
     with ir.async_refresh_issues(
