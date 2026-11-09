@@ -63,14 +63,13 @@ def clean_html(html):
 def format_event_data(event):
     """Format the event data."""
     attendees = event.attendees._Attendees__attendees  # noqa: SLF001
-    return {
+    data = {
         "summary": event.subject,
         "start": get_hass_date(event.start, event.is_all_day),
         "end": get_hass_date(get_end_date(event), event.is_all_day),
         "all_day": event.is_all_day,
         "description": clean_html(event.body),
         "location": event.location["displayName"],
-        "location_details": _location_details(event.location),
         "locations": _locations(event.locations),
         "online_meeting": _online_meeting(event),
         "categories": event.categories,
@@ -94,21 +93,11 @@ def format_event_data(event):
         "uid": event.object_id,
         "web_link": event.web_link,
     }
-
-
-def _location_details(location):
-    """Get what MS Graph has on a place beyond its name, leaving out empty parts."""
-    # A place typed in as text, or no place at all, has the type default, which tells
-    # nothing more
-    location_type = location.get("locationType")
-    details = {
-        "address": _location_address(location.get("address", {})),
-        "coordinates": _location_coordinates(location.get("coordinates", {})),
-        "type": None if location_type == "default" else location_type,
-        "email": location.get("locationEmailAddress"),
-        "uri": location.get("locationUri"),
-    }
-    return {key: value for key, value in details.items() if value} or None
+    # Leave out the places and the online meeting when the event has none
+    for key in ("locations", "online_meeting"):
+        if not data[key]:
+            del data[key]
+    return data
 
 
 def _location_address(address):
@@ -125,14 +114,23 @@ def _location_coordinates(coordinates):
 
 
 def _locations(locations):
-    """Get each place of an event held in several.
+    """Get each place of the event, one item for an event in one place."""
+    return [_location(place) for place in locations or []]
 
-    The location of such an event is only their names joined, while for one place
-    the location and its details already say it all.
-    """
-    if not locations or len(locations) < 2:
-        return None
-    return [{"name": place.get("displayName", ""), **(_location_details(place) or {})} for place in locations]
+
+def _location(place):
+    """Get the name of a place and what MS Graph has on it, leaving out empty parts."""
+    details = {
+        "type": place.get("locationType"),
+        "address": _location_address(place.get("address", {})),
+        "coordinates": _location_coordinates(place.get("coordinates", {})),
+        "email": place.get("locationEmailAddress"),
+        "uri": place.get("locationUri"),
+    }
+    return {
+        "name": place.get("displayName", ""),
+        **{key: value for key, value in details.items() if value},
+    }
 
 
 def _online_meeting(event):

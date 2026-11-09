@@ -11,9 +11,6 @@ BASE_STATE_CAL1 = [
         "all_day": False,
         "description": "Test",
         "location": "Test Location",
-        "location_details": None,
-        "locations": None,
-        "online_meeting": None,
         "categories": [],
         "sensitivity": "Normal",
         "show_as": "Busy",
@@ -32,9 +29,6 @@ BASE_STATE_CAL1 = [
         "all_day": True,
         "description": "Plain Text",
         "location": "Test Location",
-        "location_details": None,
-        "locations": None,
-        "online_meeting": None,
         "categories": [],
         "sensitivity": "Private",
         "show_as": "Busy",
@@ -54,9 +48,6 @@ BASE_STATE_CAL2 = [
         "all_day": False,
         "description": "Test",
         "location": "Test Location",
-        "location_details": None,
-        "locations": None,
-        "online_meeting": None,
         "categories": [],
         "sensitivity": "Normal",
         "show_as": "Busy",
@@ -72,36 +63,40 @@ BASE_STATE_CAL2 = [
 LOCATION_STATE = {
     "address": {
         "location": "Fourth Coffee",
-        "location_details": {
-            "address": {
-                "street": "4567 Main St",
-                "city": "Redmond",
-                "state": "WA",
-                "postal_code": "98052",
-                "country": "United States",
-            },
-            "coordinates": {"latitude": 47.672, "longitude": -122.103},
-            "type": "localBusiness",
-            "uri": "https://www.bingapis.com/api/v6/localbusinesses/fourthcoffee",
-        },
-        "locations": None,
+        "locations": [
+            {
+                "name": "Fourth Coffee",
+                "type": "localBusiness",
+                "address": {
+                    "street": "4567 Main St",
+                    "city": "Redmond",
+                    "state": "WA",
+                    "postal_code": "98052",
+                    "country": "United States",
+                },
+                "coordinates": {"latitude": 47.672, "longitude": -122.103},
+                "uri": "https://www.bingapis.com/api/v6/localbusinesses/fourthcoffee",
+            }
+        ],
     },
     "room": {
         "location": "Room 1",
-        "location_details": {
-            "address": {"city": "Utrecht"},
-            "type": "conferenceRoom",
-            "email": "room1@nomail.com",
-        },
-        "locations": None,
+        "locations": [
+            {
+                "name": "Room 1",
+                "type": "conferenceRoom",
+                "address": {"city": "Utrecht"},
+                "email": "room1@nomail.com",
+            }
+        ],
     },
     "several": {
         "location": "Room 1; Head office; Home office",
-        "location_details": None,
         "locations": [
             {"name": "Room 1", "type": "conferenceRoom", "email": "room1@nomail.com"},
             {
                 "name": "Head office",
+                "type": "businessAddress",
                 "address": {
                     "street": "1 Station Square",
                     "city": "Utrecht",
@@ -109,20 +104,16 @@ LOCATION_STATE = {
                     "country": "Netherlands",
                 },
                 "coordinates": {"latitude": 52.089, "longitude": 5.11},
-                "type": "businessAddress",
             },
-            {"name": "Home office"},
+            {"name": "Home office", "type": "default"},
         ],
     },
     "name_only": {
         "location": "Dentist",
-        "location_details": None,
-        "locations": None,
+        "locations": [{"name": "Dentist", "type": "default"}],
     },
     "no_location": {
         "location": "",
-        "location_details": None,
-        "locations": None,
     },
 }
 
@@ -148,7 +139,6 @@ MEETING_STATE = {
         "web_link": WEB_LINK.format("not_set_up"),
     },
     "in_person": {
-        "online_meeting": None,
         "web_link": WEB_LINK.format("in_person"),
     },
 }

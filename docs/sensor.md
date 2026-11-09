@@ -11,7 +11,6 @@ The `data` attribute provides an array of events for the period defined by the `
 
 Each event in `data` also has these read-only fields from MS Graph. What their values mean is in the Microsoft Graph documentation of the [location](https://learn.microsoft.com/en-us/graph/api/resources/location) and [event](https://learn.microsoft.com/en-us/graph/api/resources/event) resources:
 
-- `location_details` - the `address`, `coordinates`, `type`, `email` and `uri` of the location, with only the parts that are filled in, or `null` when there is nothing beyond its name
-- `locations` - each place of an event held in several, with its `name` and the same details, or `null` for an event in one place or none
-- `online_meeting` - the `provider` and `join_url` of an online meeting, such as a Teams meeting, or `null` for any other event
+- `locations` - each place of the event, one item for an event in one place, with its `name` and MS Graph's `type`, plus the `address`, `coordinates`, `email` and `uri` when they are filled in; left out for an event without a place
+- `online_meeting` - the `provider` and `join_url` of an online meeting, such as a Teams meeting; left out for any other event
 - `web_link` - the link that opens the event in Outlook on the web

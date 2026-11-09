@@ -147,7 +147,7 @@ async def test_get_calendar_events_outside_range(
 
 
 @pytest.mark.parametrize("setup_base_integration", [{"method_name": "location_event_mocks"}], indirect=True)
-async def test_get_calendar_events_location_details(
+async def test_get_calendar_events_locations(
     hass: HomeAssistant,
     setup_base_integration,
 ) -> None:

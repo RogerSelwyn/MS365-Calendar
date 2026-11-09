@@ -84,11 +84,11 @@ def read_yaml_file(tmp_path):
 
 def location_fields(events):
     """Get the location fields of each event, by uid."""
-    return {
-        event["uid"]: {key: event[key] for key in ("location", "location_details", "locations")} for event in events
-    }
+    return {event["uid"]: {key: event[key] for key in ("location", "locations") if key in event} for event in events}
 
 
 def meeting_fields(events):
     """Get the online meeting and web link of each event, by uid."""
-    return {event["uid"]: {key: event[key] for key in ("online_meeting", "web_link")} for event in events}
+    return {
+        event["uid"]: {key: event[key] for key in ("online_meeting", "web_link") if key in event} for event in events
+    }

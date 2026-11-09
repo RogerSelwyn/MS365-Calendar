@@ -399,7 +399,7 @@ async def test_first_sync_error(
 
 
 @pytest.mark.parametrize("setup_base_integration", [{"method_name": "location_event_mocks"}], indirect=True)
-async def test_location_details(
+async def test_locations(
     hass: HomeAssistant,
     requests_mock: Mocker,
     setup_base_integration,
