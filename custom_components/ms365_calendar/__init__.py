@@ -22,7 +22,11 @@ from .const import (
     TOKEN_FILE_EXPIRED,
     TOKEN_FILE_MISSING,
 )
-from .helpers.utils import create_issue_id, get_credentials
+from .helpers.utils import (
+    async_check_personal_account,
+    create_issue_id,
+    get_credentials,
+)
 from .integration import setup_integration
 from .integration.const_integration import DOMAIN, PLATFORMS
 from .integration.permissions_integration import Permissions
@@ -77,9 +81,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: MS365ConfigEntry) -> Non
     coordinator, sensors, platforms = await setup_integration.async_do_setup(
         hass, entry, ha_account.account
     )
+    personal_account = await async_check_personal_account(hass, token_backend)
     entry.runtime_data = MS365Data(
         perms,
         ha_account,
+        personal_account,
         coordinator,
         sensors,
         entry.options,
