@@ -31,7 +31,7 @@ from .const_integration import (
 )
 from .sync.sync import MS365CalendarEventSyncManager
 from .sync.timeline import MS365Timeline
-from .utils_integration import get_end_date, get_start_date
+from .utils_integration import get_start_date
 
 _LOGGER = logging.getLogger(__name__)
 # Maximum number of upcoming events to consider for state changes between
@@ -153,68 +153,45 @@ class MS365CalendarSyncCoordinator(DataUpdateCoordinator):
             )
             return None
 
-        #
         # Get events that are current now
-        #
         today = dt_util.utcnow()
 
         current_events = self.data.overlapping(
             today,
             today,
         )
-        started_event = None
-        not_started_event = None
+
         all_day_event = None
         for event in current_events:
             if event.is_all_day:
                 if not all_day_event:
                     all_day_event = event
                 continue
-            if not started_event and self.is_started(event):
-                started_event = event
+            if self.is_started(event):
+                return event
 
-        #
+        if all_day_event:
+            return all_day_event
+
         # If no current events, then find unfinished event within next day
-        #
-        if not started_event and not all_day_event:
-            events = self.data.overlapping(
-                today,
-                today + timedelta(days=1),
-            )
-            for event in events:
-                if event.is_all_day:
-                    continue  # pragma: no cover
-                if self.is_started(event):
-                    continue  # pragma: no cover
-                if (
-                    not self.is_finished(event)
-                    and not event.is_all_day
-                    and not not_started_event
-                ):
-                    not_started_event = event
+        events = self.data.overlapping(
+            today,
+            today + timedelta(days=1),
+        )
+        for event in events:
+            if event.is_all_day:
+                if not all_day_event:
+                    all_day_event = event
+                continue
+            return event
 
-        vevent = None
-        if started_event:
-            vevent = started_event
-        elif all_day_event:
-            vevent = all_day_event
-        elif not_started_event:
-            vevent = not_started_event
-
-        return vevent
+        return all_day_event
 
     @staticmethod
     def is_started(vevent):
         """Is it over."""
         return dt_util.utcnow() >= MS365CalendarSyncCoordinator.to_datetime(
             get_start_date(vevent)
-        )
-
-    @staticmethod
-    def is_finished(vevent):
-        """Is it over."""
-        return dt_util.utcnow() >= MS365CalendarSyncCoordinator.to_datetime(
-            get_end_date(vevent)
         )
 
     @staticmethod

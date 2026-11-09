@@ -1,6 +1,7 @@
 {
   "domain": "ms365_calendar",
   "name": "Microsoft 365 - Calendar",
+  "categories": ["productivity_information.calendars_todos"],
   "codeowners": ["@RogerSelwyn"],
   "config_flow": true,
   "dependencies": ["http"],
@@ -15,5 +16,5 @@
     "ical>=10.0.0",
     "oauthlib"
   ],
-  "version": "v1.13.0"
+  "version": "v1.14.0"
 }

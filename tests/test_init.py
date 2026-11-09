@@ -11,7 +11,7 @@ from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er, issue_registry as ir
 
-from .const import ENTITY_NAME, TOKEN_LOCATION
+from .const import ENTITY_NAME, ENVIRONMENT_OPTIONS, TOKEN_LOCATION
 from .helpers.mock_config_entry import MS365MockConfigEntry
 from .helpers.utils import build_token_file
 from .integration.const_integration import BASE_TOKEN_PERMS, DOMAIN, FULL_INIT_ENTITY_NO
@@ -187,3 +187,21 @@ async def test_remove_entry_clears_repair_issue(
     await hass.async_block_till_done()
 
     assert not issue_registry.issues
+
+
+@pytest.mark.parametrize("base_config_entry", [ENVIRONMENT_OPTIONS], indirect=True)
+async def test_environment_variable_empty(
+    hass: HomeAssistant,
+    base_config_entry: MS365MockConfigEntry,
+    base_token,
+    requests_mock: Mocker,
+    caplog: pytest.LogCaptureFixture,
+):
+    """Test full MS365 initialisation."""
+    MS365MOCKS.standard_mocks(requests_mock)
+
+    base_config_entry.add_to_hass(hass)
+    await hass.config_entries.async_setup(base_config_entry.entry_id)
+
+    await hass.async_block_till_done()
+    assert "The specified client secret environment variable - MS365_CLIENT_SECRET - does not exist." in caplog.text

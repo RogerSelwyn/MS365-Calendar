@@ -5,16 +5,13 @@ import datetime as dt
 from itertools import groupby
 from typing import Any
 
-import voluptuous as vol
+import probatio
 
 from homeassistant.const import CONF_NAME
 import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers.selector import BooleanSelector
 from homeassistant.util import dt as dt_util
-from O365.calendar import (  # pylint: disable=no-name-in-module
-    AttendeeType,
-    EventSensitivity,
-    EventShowAs,
-)
+from O365.calendar import AttendeeType, EventSensitivity, EventShowAs  # pylint: disable=no-name-in-module
 
 from ..const import CONF_ENABLE_UPDATE, CONF_SHARED_MAILBOX
 from .const_integration import (
@@ -67,7 +64,7 @@ def _has_consistent_timezone(*keys: Any) -> Callable[[dict[str, Any]], dict[str,
                 tzinfos.append(obj.get(key).tzinfo)  # noqa: PERF401
         uniq_values = groupby(tzinfos)
         if len(list(uniq_values)) > 1:
-            raise vol.Invalid("Expected all values to have the same timezone")
+            raise probatio.Invalid("Expected all values to have the same timezone")
         return obj
 
     return validate
@@ -87,44 +84,44 @@ def _as_local_timezone(*keys: Any) -> Callable[[dict[str, Any]], dict[str, Any]]
 
 
 CONFIG_SCHEMA_INTEGRATION = {
-    vol.Optional(CONF_ENABLE_UPDATE, default=False): cv.boolean,
-    vol.Optional(CONF_BASIC_CALENDAR, default=False): cv.boolean,
-    vol.Optional(CONF_GROUPS, default=False): cv.boolean,
-    vol.Optional(CONF_SHARED_MAILBOX, default=""): cv.string,
+    probatio.Optional(CONF_ENABLE_UPDATE, default=False): BooleanSelector(),
+    probatio.Optional(CONF_BASIC_CALENDAR, default=False): BooleanSelector(),
+    probatio.Optional(CONF_GROUPS, default=False): BooleanSelector(),
+    probatio.Optional(CONF_SHARED_MAILBOX, default=""): cv.string,
 }
 
 CALENDAR_SERVICE_RESPOND_SCHEMA = {
-    vol.Required(ATTR_EVENT_ID): cv.string,
-    vol.Required(ATTR_RESPONSE, None): cv.enum(EventResponse),
-    vol.Optional(ATTR_SEND_RESPONSE, True): bool,
-    vol.Optional(ATTR_MESSAGE, None): cv.string,
+    probatio.Required(ATTR_EVENT_ID): cv.string,
+    probatio.Required(ATTR_RESPONSE, None): cv.enum(EventResponse),
+    probatio.Optional(ATTR_SEND_RESPONSE, True): bool,
+    probatio.Optional(ATTR_MESSAGE, None): cv.string,
 }
 
-CALENDAR_SERVICE_ATTENDEE_SCHEMA = vol.Schema(
+CALENDAR_SERVICE_ATTENDEE_SCHEMA = probatio.Schema(
     {
-        vol.Required(ATTR_EMAIL): cv.string,
-        vol.Required(ATTR_TYPE): cv.enum(AttendeeType),
+        probatio.Required(ATTR_EMAIL): cv.string,
+        probatio.Required(ATTR_TYPE): cv.enum(AttendeeType),
     }
 )
 
-CALENDAR_SERVICE_CREATE_SCHEMA = vol.All(
+CALENDAR_SERVICE_CREATE_SCHEMA = probatio.All(
     cv.make_entity_service_schema(
         {
-            vol.Required(ATTR_SUBJECT): cv.string,
-            vol.Required(ATTR_START): cv.datetime,
-            vol.Required(ATTR_END): cv.datetime,
-            vol.Optional(ATTR_BODY): cv.string,
-            vol.Optional(ATTR_LOCATION): cv.string,
-            vol.Optional(ATTR_CATEGORIES, default=list): vol.All(
+            probatio.Required(ATTR_SUBJECT): cv.string,
+            probatio.Required(ATTR_START): cv.datetime,
+            probatio.Required(ATTR_END): cv.datetime,
+            probatio.Optional(ATTR_BODY): cv.string,
+            probatio.Optional(ATTR_LOCATION): cv.string,
+            probatio.Optional(ATTR_CATEGORIES, default=list): probatio.All(
                 cv.ensure_list, [cv.string]
             ),
-            vol.Optional(ATTR_SENSITIVITY): vol.Coerce(EventSensitivity),
-            vol.Optional(ATTR_SHOW_AS): vol.Coerce(EventShowAs),
-            vol.Optional(ATTR_IS_ALL_DAY): bool,
-            vol.Optional(ATTR_ATTENDEES): [CALENDAR_SERVICE_ATTENDEE_SCHEMA],
-            vol.Optional(ATTR_IS_REMINDER_ON): bool,
-            vol.Optional(ATTR_REMIND_BEFORE_MINUTES): vol.All(
-                vol.Coerce(int), vol.Range(min=0, max=1440)
+            probatio.Optional(ATTR_SENSITIVITY): probatio.Coerce(EventSensitivity),
+            probatio.Optional(ATTR_SHOW_AS): probatio.Coerce(EventShowAs),
+            probatio.Optional(ATTR_IS_ALL_DAY): bool,
+            probatio.Optional(ATTR_ATTENDEES): [CALENDAR_SERVICE_ATTENDEE_SCHEMA],
+            probatio.Optional(ATTR_IS_REMINDER_ON): bool,
+            probatio.Optional(ATTR_REMIND_BEFORE_MINUTES): probatio.All(
+                probatio.Coerce(int), probatio.Range(min=0, max=1440)
             ),
         }
     ),
@@ -132,23 +129,25 @@ CALENDAR_SERVICE_CREATE_SCHEMA = vol.All(
     _as_local_timezone(ATTR_START, ATTR_END),
 )
 
-CALENDAR_SERVICE_MODIFY_SCHEMA = vol.All(
+CALENDAR_SERVICE_MODIFY_SCHEMA = probatio.All(
     cv.make_entity_service_schema(
         {
-            vol.Required(ATTR_EVENT_ID): cv.string,
-            vol.Optional(ATTR_START): cv.datetime,
-            vol.Optional(ATTR_END): cv.datetime,
-            vol.Optional(ATTR_SUBJECT): cv.string,
-            vol.Optional(ATTR_BODY): cv.string,
-            vol.Optional(ATTR_LOCATION): cv.string,
-            vol.Optional(ATTR_CATEGORIES): vol.All(cv.ensure_list, [cv.string]),
-            vol.Optional(ATTR_SENSITIVITY): vol.Coerce(EventSensitivity),
-            vol.Optional(ATTR_SHOW_AS): vol.Coerce(EventShowAs),
-            vol.Optional(ATTR_IS_ALL_DAY): bool,
-            vol.Optional(ATTR_ATTENDEES): [CALENDAR_SERVICE_ATTENDEE_SCHEMA],
-            vol.Optional(ATTR_IS_REMINDER_ON): bool,
-            vol.Optional(ATTR_REMIND_BEFORE_MINUTES): vol.All(
-                vol.Coerce(int), vol.Range(min=0, max=1440)
+            probatio.Required(ATTR_EVENT_ID): cv.string,
+            probatio.Optional(ATTR_START): cv.datetime,
+            probatio.Optional(ATTR_END): cv.datetime,
+            probatio.Optional(ATTR_SUBJECT): cv.string,
+            probatio.Optional(ATTR_BODY): cv.string,
+            probatio.Optional(ATTR_LOCATION): cv.string,
+            probatio.Optional(ATTR_CATEGORIES): probatio.All(
+                cv.ensure_list, [cv.string]
+            ),
+            probatio.Optional(ATTR_SENSITIVITY): probatio.Coerce(EventSensitivity),
+            probatio.Optional(ATTR_SHOW_AS): probatio.Coerce(EventShowAs),
+            probatio.Optional(ATTR_IS_ALL_DAY): bool,
+            probatio.Optional(ATTR_ATTENDEES): [CALENDAR_SERVICE_ATTENDEE_SCHEMA],
+            probatio.Optional(ATTR_IS_REMINDER_ON): bool,
+            probatio.Optional(ATTR_REMIND_BEFORE_MINUTES): probatio.All(
+                probatio.Coerce(int), probatio.Range(min=0, max=1440)
             ),
         }
     ),
@@ -158,40 +157,40 @@ CALENDAR_SERVICE_MODIFY_SCHEMA = vol.All(
 
 
 CALENDAR_SERVICE_REMOVE_SCHEMA = {
-    vol.Required(ATTR_EVENT_ID): cv.string,
+    probatio.Required(ATTR_EVENT_ID): cv.string,
 }
 
 CALENDAR_SERVICE_GET_EVENTS_SCHEMA = {
-    vol.Required(ATTR_START_DATE_TIME): cv.datetime,
-    vol.Required(ATTR_END_DATE_TIME): cv.datetime,
+    probatio.Required(ATTR_START_DATE_TIME): cv.datetime,
+    probatio.Required(ATTR_END_DATE_TIME): cv.datetime,
 }
 
-YAML_CALENDAR_ENTITY_SCHEMA = vol.Schema(
+YAML_CALENDAR_ENTITY_SCHEMA = probatio.Schema(
     {
-        vol.Required(CONF_NAME): cv.string,
-        vol.Required(CONF_DEVICE_ID): cv.string,
-        vol.Optional(
+        probatio.Required(CONF_NAME): cv.string,
+        probatio.Required(CONF_DEVICE_ID): cv.string,
+        probatio.Optional(
             CONF_HOURS_FORWARD_TO_GET, default=DEFAULT_HOURS_FORWARD_TO_GET
         ): int,
-        vol.Optional(
+        probatio.Optional(
             CONF_HOURS_BACKWARD_TO_GET, default=DEFAULT_HOURS_BACKWARD_TO_GET
         ): int,
-        vol.Required(CONF_TRACK): cv.boolean,
-        vol.Optional(CONF_SEARCH): cv.string,
-        vol.Optional(CONF_EXCLUDE): [cv.string],
-        vol.Optional(CONF_MAX_RESULTS): cv.positive_int,
-        vol.Optional(CONF_SENSITIVITY_EXCLUDE): vol.All(
-            cv.ensure_list, [vol.Coerce(EventSensitivity)]
+        probatio.Required(CONF_TRACK): cv.boolean,
+        probatio.Optional(CONF_SEARCH): cv.string,
+        probatio.Optional(CONF_EXCLUDE): [cv.string],
+        probatio.Optional(CONF_MAX_RESULTS): cv.positive_int,
+        probatio.Optional(CONF_SENSITIVITY_EXCLUDE): probatio.All(
+            cv.ensure_list, [probatio.Coerce(EventSensitivity)]
         ),
     }
 )
 
-YAML_CALENDAR_DEVICE_SCHEMA = vol.Schema(
+YAML_CALENDAR_DEVICE_SCHEMA = probatio.Schema(
     {
-        vol.Required(CONF_CAL_ID): cv.string,
-        vol.Required(CONF_ENTITIES, None): vol.All(
+        probatio.Required(CONF_CAL_ID): cv.string,
+        probatio.Required(CONF_ENTITIES, None): probatio.All(
             cv.ensure_list, [YAML_CALENDAR_ENTITY_SCHEMA]
         ),
     },
-    extra=vol.ALLOW_EXTRA,
+    extra=probatio.ALLOW_EXTRA,
 )

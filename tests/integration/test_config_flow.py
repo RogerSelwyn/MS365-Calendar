@@ -1,7 +1,6 @@
 # pylint: disable=line-too-long, unused-argument
 """Test the config flow."""
 
-from copy import deepcopy
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -29,14 +28,13 @@ from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 
-from ..helpers.mock_config_entry import MS365MockConfigEntry
+from ..const import BASE_CONFIG_ENTRY, RECONFIGURE_CONFIG_ENTRY
+from ..helpers.mock_config_entry import MS365MockConfigEntry, config_entry_setup
 from ..helpers.utils import build_token_file, build_token_url, get_schema_default, mock_token
 from .const_integration import (
     AUTH_CALLBACK_PATH_DEFAULT,
-    BASE_CONFIG_ENTRY,
     BASE_TOKEN_PERMS,
     DOMAIN,
-    RECONFIGURE_CONFIG_ENTRY,
     SHARED_TOKEN_PERMS,
     UPDATE_CALENDAR_LIST,
 )
@@ -213,9 +211,9 @@ async def test_invalid_combinations(
     assert result.get("type") is FlowResultType.FORM
     assert result["step_id"] == "user"
 
-    reconfigure_config_entry = deepcopy(RECONFIGURE_CONFIG_ENTRY)
-    reconfigure_config_entry["basic_calendar"] = True
-    reconfigure_config_entry["enable_update"] = True
+    reconfigure_config_entry = config_entry_setup(
+        RECONFIGURE_CONFIG_ENTRY, base_attributes={"basic_calendar": True, "enable_update": True}
+    )
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
@@ -226,9 +224,9 @@ async def test_invalid_combinations(
     assert "basic_calendar" in result["errors"]
     assert result["errors"]["basic_calendar"] == "cannot_have_basic_update"
 
-    reconfigure_config_entry = deepcopy(RECONFIGURE_CONFIG_ENTRY)
-    reconfigure_config_entry["basic_calendar"] = True
-    reconfigure_config_entry["shared_mailbox"] = "john@nospam.com"
+    reconfigure_config_entry = config_entry_setup(
+        RECONFIGURE_CONFIG_ENTRY, base_attributes={"basic_calendar": True, "shared_mailbox": "john@nospam.com"}
+    )
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
@@ -239,9 +237,9 @@ async def test_invalid_combinations(
     assert "basic_calendar" in result["errors"]
     assert result["errors"]["basic_calendar"] == "cannot_have_basic_shared"
 
-    reconfigure_config_entry = deepcopy(RECONFIGURE_CONFIG_ENTRY)
-    reconfigure_config_entry["groups"] = True
-    reconfigure_config_entry["shared_mailbox"] = "john@nospam.com"
+    reconfigure_config_entry = config_entry_setup(
+        RECONFIGURE_CONFIG_ENTRY, base_attributes={"groups": True, "shared_mailbox": "john@nospam.com"}
+    )
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
@@ -264,9 +262,9 @@ async def test_shared_email_invalid(
 
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
 
-    user_input = deepcopy(BASE_CONFIG_ENTRY)
     email = "john@nomail.com"
-    user_input["shared_mailbox"] = email
+    user_input = config_entry_setup(BASE_CONFIG_ENTRY, base_attributes={"shared_mailbox": email})
+
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         user_input=user_input,

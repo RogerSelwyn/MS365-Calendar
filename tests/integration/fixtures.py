@@ -9,7 +9,7 @@ from unittest.mock import Mock, patch
 from aiohttp import ClientWebSocketResponse
 from aiohttp.test_utils import TestClient
 import pytest
-from pytest_homeassistant_custom_component.typing import ClientSessionGenerator, WebSocketGenerator
+from pytest_homeassistant.typing import ClientSessionGenerator, WebSocketGenerator
 
 from custom_components.ms365_calendar.integration import filemgmt_integration
 from homeassistant.core import Event, HomeAssistant

@@ -5,6 +5,8 @@
 
 ![GitHub release](https://img.shields.io/github/v/release/RogerSelwyn/ms365-calendar) [![maintained](https://img.shields.io/maintenance/yes/2026.svg)](#) [![maintainer](https://img.shields.io/badge/maintainer-%20%40RogerSelwyn-blue.svg)](https://github.com/RogerSelwyn) [![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration) [![Community Forum](https://img.shields.io/badge/community-forum-brightgreen.svg)](https://community.home-assistant.io/t/office-365-calendar-access)
 
+[![Open your Home Assistant instance and open a repository in the Marketplace.](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/marketplace_repository/?owner=RogerSelwyn&repository=MS365-Calendar&category=integration)
+
 # Microsoft 365 Calendar Integration for Home Assistant
 
 This integration enables:

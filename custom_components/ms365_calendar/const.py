@@ -12,10 +12,12 @@ AUTH_CALLBACK_PATH_ALT = "/api/ms365"
 
 AUTH_ERROR_ALREADY_CONFIGURED = "already_configured"
 AUTH_ERROR_AUTHENTICATING = "error_authenticating"
+AUTH_ERROR_ENVIRONMENT_VARIABLE_EMPTY = "environment_variable_empty"
+AUTH_ERROR_ENVIRONMENT_VARIABLE_INVALID = "environment_variable_invalid"
 AUTH_ERROR_INVALID_TENANT = "invalid_tenant"
 
-
 CONF_ENTITY_NAME = "entity_name"
+CONF_ENVIRONMENT_SECRET = "environment_secret"
 CONF_ALT_AUTH_METHOD = "alt_auth_method"
 CONF_API_COUNTRY = "country"
 CONF_API_OPTIONS = "api_options"
@@ -23,6 +25,7 @@ CONF_TENANT_ID = "tenant_id"
 CONF_AUTH_URL = "auth_url"
 CONF_CLIENT_ID = "client_id"
 CONF_CLIENT_SECRET = "client_secret"  # nosec
+CONF_CLIENT_SECRET_VARIABLE = "client_sec_variable"
 CONF_ENABLE_UPDATE = "enable_update"
 CONF_ENTITY_KEY = "entity_key"
 CONF_ENTITY_TYPE = "entity_type"
@@ -38,6 +41,7 @@ DEFAULT_TENANT_ID = "common"
 
 EVENT_HA_EVENT = "ha_event"
 
+MS365_CLIENT_SECRET = "MS365_CLIENT_SECRET"
 MS365_STORAGE = "ms365_storage"
 MS365_STORAGE_TOKEN = ".MS365-token-cache"
 
@@ -45,7 +49,6 @@ PERM_USER_READ = "User.Read"
 PERM_SHARED = ".Shared"
 PERM_BASE_PERMISSIONS = [PERM_USER_READ]
 
-ERROR_IMPORTED_DUPLICATE = "Entry already imported for '%s' - '%s'"
 ERROR_INVALID_SHARED_MAILBOX = (
     "Login email address '%s' should not be "
     "entered as shared email address, config attribute removed."

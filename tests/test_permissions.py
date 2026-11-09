@@ -6,9 +6,10 @@ import pytest
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import issue_registry as ir
 
+from .const import ENTITY_NAME
 from .helpers.mock_config_entry import MS365MockConfigEntry
 from .helpers.utils import token_setup
-from .integration.const_integration import DOMAIN, ENTITY_NAME
+from .integration.const_integration import DOMAIN
 
 
 async def test_no_token(

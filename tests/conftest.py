@@ -1,7 +1,6 @@
 # pylint: disable=protected-access,redefined-outer-name, unused-argument, line-too-long, unused-import
 """Global fixtures for integration."""
 
-from copy import deepcopy
 import json
 import sys
 from unittest.mock import patch
@@ -11,24 +10,15 @@ from requests_mock import Mocker
 
 from homeassistant.core import HomeAssistant
 
-from .const import ENTITY_NAME, LEGACY_TOKEN, TOKEN_LOCATION
-from .helpers.mock_config_entry import MS365MockConfigEntry
+from .const import BASE_CONFIG_ENTRY, ENTITY_NAME, LEGACY_TOKEN, TOKEN_LOCATION
+from .helpers.mock_config_entry import MS365MockConfigEntry, config_entry_setup
 from .helpers.utils import build_token_file
 from .integration import api
-from .integration.const_integration import (
-    BASE_CONFIG_ENTRY,
-    BASE_TOKEN_PERMS,
-    DOMAIN,
-    UPDATE_OPTIONS,
-    UPDATE_TOKEN_PERMS,
-    MS365ConfigFlow,
-)
+from .integration.const_integration import BASE_TOKEN_PERMS, DOMAIN, UPDATE_OPTIONS, UPDATE_TOKEN_PERMS, MS365ConfigFlow
+from .integration.helpers_integration import utils_integration
 from .integration.helpers_integration.mocks import MS365MOCKS
 
-pytest_plugins = [
-    "pytest_homeassistant_custom_component",
-    "tests.integration.fixtures",
-]  # pylint: disable=invalid-name
+pytest_plugins = ["tests.integration.fixtures"]
 THIS_MODULE = sys.modules[__name__]
 
 
@@ -52,14 +42,6 @@ def token_storage_path_setup(tmp_path):
         yield
 
 
-# This fixture enables loading custom integrations in all tests.
-# Remove to enable selective use of this fixture
-@pytest.fixture(autouse=True)
-def auto_enable_custom_integrations(enable_custom_integrations):  # pylint: disable=unused-argument
-    """Automatically enable loading custom integrations in all tests."""
-    return
-
-
 @pytest.fixture(autouse=True)
 async def request_setup(current_request_with_host: None) -> None:  # pylint: disable=unused-argument
     """Request setup."""
@@ -81,20 +63,30 @@ def skip_notifications_fixture():
 @pytest.fixture
 def base_config_entry(request, hass: HomeAssistant) -> MS365MockConfigEntry:
     """Create MS365 entry in Home Assistant."""
-    data = deepcopy(BASE_CONFIG_ENTRY)
+    data = config_entry_setup(BASE_CONFIG_ENTRY)
     options = None
+
+    subentry_items = {}
     if hasattr(request, "param"):
         for key, value in request.param.items():
             if key == "options":
                 options = value
+            elif key == "subentry":
+                subentry_items = value
             else:
                 data[key] = value
+
+    subentries = None
+    if hasattr(utils_integration, "create_subentries"):
+        subentries = utils_integration.create_subentries(subentry_items)
+
     entry = MS365MockConfigEntry(
         domain=DOMAIN,
         title=ENTITY_NAME,
         unique_id=DOMAIN,
         data=data,
         options=options,
+        subentries_data=subentries,
         version=MS365ConfigFlow.VERSION,
         minor_version=MS365ConfigFlow.MINOR_VERSION,
     )
@@ -105,7 +97,7 @@ def base_config_entry(request, hass: HomeAssistant) -> MS365MockConfigEntry:
 @pytest.fixture
 def v1_config_entry(request, hass: HomeAssistant) -> MS365MockConfigEntry:
     """Create MS365 entry in Home Assistant."""
-    data = deepcopy(BASE_CONFIG_ENTRY)
+    data = config_entry_setup(BASE_CONFIG_ENTRY)
     options = None
     if hasattr(request, "param"):
         for key, value in request.param.items():
@@ -176,9 +168,7 @@ async def setup_update_integration(
     build_token_file(tmp_path, UPDATE_TOKEN_PERMS)
     MS365MOCKS.standard_mocks(requests_mock)
     base_config_entry.add_to_hass(hass)
-    data = deepcopy(BASE_CONFIG_ENTRY)
-    for key, value in UPDATE_OPTIONS.items():
-        data[key] = value
+    data = config_entry_setup(BASE_CONFIG_ENTRY, base_attributes=UPDATE_OPTIONS)
     hass.config_entries.async_update_entry(base_config_entry, data=data)
 
     await hass.config_entries.async_setup(base_config_entry.entry_id)

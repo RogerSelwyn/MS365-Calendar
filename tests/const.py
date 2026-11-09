@@ -2,6 +2,9 @@
 
 from pathlib import Path
 
+from .helpers.mock_config_entry import config_entry_setup
+from .integration.const_integration import BASE_CONFIG_ENTRY_INTEGRATION
+
 CLIENT_ID = "1234"
 CLIENT_SECRET = "5678"
 ENTITY_NAME = "test"
@@ -10,6 +13,7 @@ LEGACY_TOKEN = {
     "access_token": "fakelegacytoken",
 }
 
+ENVIRONMENT_OPTIONS = {"environment_secret": True, "client_sec_variable": "MS365_CLIENT_SECRET"}
 TENANT_OPTIONS = {"api_options": {"country": "Default", "tenant_id": ""}}
 
 TOKEN_PARAMS = "code=fake.code&state={0}&session_state=fakesessionstate"
@@ -20,3 +24,19 @@ TOKEN_LOCATION = "storage/tokens"
 
 TEST_DATA_LOCATION = Path(__file__).parent.joinpath("data")
 TEST_DATA_INTEGRATION_LOCATION = Path(__file__).parent.joinpath("integration/data_integration")
+
+
+ROOT_CONFIG_ENTRY = {
+    "entity_name": ENTITY_NAME,
+    "client_id": CLIENT_ID,
+    "environment_secret": False,
+    "client_secret": CLIENT_SECRET,
+    "alt_auth_method": False,
+    "api_options": {"country": "Default"},
+}
+
+BASE_CONFIG_ENTRY = config_entry_setup(ROOT_CONFIG_ENTRY, base_attributes=BASE_CONFIG_ENTRY_INTEGRATION)
+ALT_CONFIG_ENTRY = config_entry_setup(BASE_CONFIG_ENTRY, base_attributes={"alt_auth_method": True})
+COUNTRY_CONFIG_ENTRY = config_entry_setup(BASE_CONFIG_ENTRY, api_option_attributes={"country": "21Vianet (China)"})
+ENV_CONFIG_ENTRY = config_entry_setup(BASE_CONFIG_ENTRY, base_attributes={"environment_secret": True})
+RECONFIGURE_CONFIG_ENTRY = config_entry_setup(BASE_CONFIG_ENTRY, delete_attributes=["entity_name"])
