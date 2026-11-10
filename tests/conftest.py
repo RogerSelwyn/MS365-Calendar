@@ -159,13 +159,17 @@ async def setup_base_integration(
 
 @pytest.fixture
 async def setup_update_integration(
+    request,
     tmp_path,
     hass: HomeAssistant,
     requests_mock: Mocker,
     base_config_entry: MS365MockConfigEntry,
 ) -> None:
     """Fixture for setting up the component."""
-    build_token_file(tmp_path, UPDATE_TOKEN_PERMS)
+    tenant_id = "fake-home-id"
+    if hasattr(request, "param") and "tenant_id" in request.param:
+        tenant_id = request.param["tenant_id"]
+    build_token_file(tmp_path, UPDATE_TOKEN_PERMS, tenant_id=tenant_id)
     MS365MOCKS.standard_mocks(requests_mock)
     base_config_entry.add_to_hass(hass)
     data = config_entry_setup(BASE_CONFIG_ENTRY, base_attributes=UPDATE_OPTIONS)

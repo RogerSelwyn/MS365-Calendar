@@ -41,7 +41,7 @@ def mock_cn21v_token(requests_mock, scope):
     )
 
 
-def _build_file_token(scope):
+def _build_file_token(scope, tenant_id):
     """Build a token."""
     perms = f"{scope} User.Read email openid profile"
     expire = int(time.time() + TOKEN_TIME)
@@ -50,7 +50,7 @@ def _build_file_token(scope):
             f"fake-user-id.fake-home-id-login.microsoftonline.com-accesstoken-{CLIENT_ID}-common-{perms.lower()}": {
                 "credential_type": "AccessToken",
                 "secret": "fakeaccesstoken",
-                "home_account_id": "fake-user-id.fake-home-id",
+                "home_account_id": f"fake-user-id.{tenant_id}",
                 "environment": "login.microsoftonline.com",
                 "client_id": CLIENT_ID,
                 "target": perms,
@@ -63,7 +63,7 @@ def _build_file_token(scope):
         },
         "Account": {
             "fake-user-id.fake-home-id-login.microsoftonline.com-common": {
-                "home_account_id": "fake-user-id.fake-home-id",
+                "home_account_id": f"fake-user-id.{tenant_id}",
                 "environment": "login.microsoftonline.com",
                 "realm": "common",
                 "local_account_id": "fake-user-id",
@@ -76,7 +76,7 @@ def _build_file_token(scope):
             f"fake-user-id.fake-home-id-login.microsoftonline.com-idtoken-{CLIENT_ID}-common-": {
                 "credential_type": "IdToken",
                 "secret": "fakeidtoken",
-                "home_account_id": "fake-user-id.fake-home-id",
+                "home_account_id": f"fake-user-id.{tenant_id}",
                 "environment": "login.microsoftonline.com",
                 "realm": "common",
                 "client_id": CLIENT_ID,
@@ -86,7 +86,7 @@ def _build_file_token(scope):
             f"fake-user-id.fake-home-id-login.microsoftonline.com-refreshtoken-{CLIENT_ID}--{perms.lower()}": {
                 "credential_type": "RefreshToken",
                 "secret": "1.farkerh.fakerefreshtoken",
-                "home_account_id": "fake-user-id.fake-home-id",
+                "home_account_id": f"fake-user-id.{tenant_id}",
                 "environment": "login.microsoftonline.com",
                 "client_id": CLIENT_ID,
                 "target": perms,
@@ -126,9 +126,9 @@ def token_filename(tmp_path):
     return tmp_path / TOKEN_LOCATION / f"{DOMAIN}_{ENTITY_NAME}.token"
 
 
-def build_token_file(tmp_path, scope):
+def build_token_file(tmp_path, scope, tenant_id="fake-home-id"):
     """Build a token file."""
-    token = _build_file_token(scope)
+    token = _build_file_token(scope, tenant_id)
     filename = token_filename(tmp_path)
     with open(filename, "w", encoding="UTF8") as f:
         json.dump(token, f, ensure_ascii=False, indent=1)

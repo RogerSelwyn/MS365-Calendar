@@ -16,6 +16,7 @@ from ..const import (
     CONF_ENVIRONMENT_SECRET,
     CONF_TENANT_ID,
     DEFAULT_TENANT_ID,
+    PERSONAL_ACCOUNT_TENANTID,
     CountryOptions,
 )
 
@@ -73,3 +74,15 @@ def get_credentials(config):
         else:
             error = AUTH_ERROR_ENVIRONMENT_VARIABLE_INVALID
     return (config.get(CONF_CLIENT_ID), client_secret), error
+
+
+async def async_check_personal_account(hass: HomeAssistant, coordinator):
+    """Check if account is a personal account."""
+    account = await hass.async_add_executor_job(
+        coordinator.account.connection.token_backend.get_account
+    )
+
+    tenant_id = account["home_account_id"].removeprefix(
+        f"{account['local_account_id']}."
+    )
+    return tenant_id == PERSONAL_ACCOUNT_TENANTID

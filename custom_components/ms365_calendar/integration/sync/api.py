@@ -8,9 +8,7 @@ from requests.exceptions import HTTPError, RetryError
 
 from homeassistant.core import HomeAssistant
 from O365.calendar import Event  # pylint: disable=no-name-in-module
-from O365.utils.query import (  # pylint: disable=no-name-in-module, import-error
-    QueryBuilder,
-)
+from O365.utils.query import QueryBuilder  # pylint: disable=no-name-in-module, import-error
 
 from ...classes.config_entry import MS365ConfigEntry
 from ..const_integration import (
@@ -50,7 +48,7 @@ class MS365CalendarService:
         self.hass = hass
         self.calendar_id = calendar_id
         self.calendar = None
-        self._account = account
+        self.account = account
         self.group_calendar = calendar_id.startswith(CONST_GROUP)
         self._sensitivity_exclude = sensitivity_exclude
         self._limit = 999
@@ -63,7 +61,7 @@ class MS365CalendarService:
 
         if self.group_calendar:
             self.calendar = await self.hass.async_add_executor_job(
-                ft.partial(self._account.schedule, resource=self.calendar_id)
+                ft.partial(self.account.schedule, resource=self.calendar_id)
             )
             # The schedule makes no call, so check the group calendar can be read
             try:
@@ -82,7 +80,7 @@ class MS365CalendarService:
                 return False
             return True
 
-        schedule = await self.hass.async_add_executor_job(self._account.schedule)
+        schedule = await self.hass.async_add_executor_job(self.account.schedule)
         query = self._builder.select("name", "id", "canEdit", "color", "hexColor")
         try:
             self.calendar = await self.hass.async_add_executor_job(

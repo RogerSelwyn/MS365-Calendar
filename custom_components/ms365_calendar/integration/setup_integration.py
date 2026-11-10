@@ -39,7 +39,11 @@ from .utils_integration import async_delete_calendar, build_calendar_entity_id
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_do_setup(hass: HomeAssistant, entry: ConfigEntry, account):
+async def async_do_setup(
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    account,
+):
     """Run the setup after we have everything configured."""
 
     scanned_calendars, deleted_calendars = await async_scan_for_calendars(
@@ -137,7 +141,11 @@ async def _async_setup_coordinators(
                     )
                     coordinators.append(
                         MS365CalendarSyncCoordinator(
-                            hass, entry, sync_manager, unique_id, entity
+                            hass,
+                            entry,
+                            sync_manager,
+                            unique_id,
+                            entity,
                         )
                     )
             except HTTPError:

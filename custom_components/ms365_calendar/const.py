@@ -49,6 +49,8 @@ PERM_USER_READ = "User.Read"
 PERM_SHARED = ".Shared"
 PERM_BASE_PERMISSIONS = [PERM_USER_READ]
 
+PERSONAL_ACCOUNT_TENANTID = "9188040d-6c67-4c5b-b112-36a304b66dad"
+
 ERROR_INVALID_SHARED_MAILBOX = (
     "Login email address '%s' should not be "
     "entered as shared email address, config attribute removed."
