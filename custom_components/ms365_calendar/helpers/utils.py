@@ -73,14 +73,3 @@ def get_credentials(config):
         else:
             error = AUTH_ERROR_ENVIRONMENT_VARIABLE_INVALID
     return (config.get(CONF_CLIENT_ID), client_secret), error
-
-
-async def async_check_personal_account(hass: HomeAssistant, token_backend):
-    """Check if account is a personal account."""
-    account = await hass.async_add_executor_job(token_backend.token_backend.get_account)
-    if account:
-        tenant_id = account["home_account_id"].removeprefix(
-            f"{account['local_account_id']}."
-        )
-        return tenant_id == "9188040d-6c67-4c5b-b112-36a304b66dad"
-    return True
