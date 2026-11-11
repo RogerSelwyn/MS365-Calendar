@@ -2,7 +2,7 @@
 
 ## v1.15.0 (2026/11/11)
 ### ✨ Enhancements
-- [Add location details and online meetings to the event data](https://github.com/RogerSelwyn/MS365-Calendar/commit/7b9b9b5bf5bc0914e420a6c72d6132bf6461b451) - @buhito81
+- [Add location details and online meetings to the event data](https://github.com/RogerSelwyn/MS365-Calendar/pull/269) - @buhito81
 
 ### 🐛 Fixes
 - [Fix minor type](https://github.com/RogerSelwyn/MS365-Calendar/commit/aab8046ca611b007e86f5bca5af0d027b3f96227) - @RogerSelwyn
@@ -11,10 +11,11 @@
 - [Remove unrequired method](https://github.com/RogerSelwyn/MS365-Calendar/commit/f989fdd87d8f0f558ace050be29cc19c807f603d) - @RogerSelwyn
 - [Changes in support of Mail and remove O365 migration support](https://github.com/RogerSelwyn/MS365-Calendar/commit/a0c5ad06db64f2f9068306da78360ae6137665c7) - @RogerSelwyn
 - [Replace voluptuous with probatio](https://github.com/RogerSelwyn/MS365-Calendar/commit/d0dfecc3e01a205085e738f8037685e046dbafbd) - @RogerSelwyn
-- [Simplify the location and meeting fields after review](https://github.com/RogerSelwyn/MS365-Calendar/commit/a965020cc17308dc5c02519f691880ca469e916a) - @buhito81
-- [One locations list for every event, hide empty fields, pass the location type through](https://github.com/RogerSelwyn/MS365-Calendar/commit/87a290276ff74544dab2b9c70e5acba6bc7b1619) - @buhito81
 - [Configure Renovate and remove Dependabot](https://github.com/RogerSelwyn/MS365-Calendar/commit/1ee2e9c76ba8ad5fbaa1867e5ea2bb551cd75145) - @RogerSelwyn
 - [Identify personal accounts](https://github.com/RogerSelwyn/MS365-Calendar/commit/cb9e5b37bf05cef280854b8b2fdbf1ea941b2865) - @RogerSelwyn
+- [Add Marketplace badge to README](https://github.com/RogerSelwyn/MS365-Calendar/commit/ef2ee36ca4a6acd0b720ec44c3d2761b91407eee) - @RogerSelwyn
+- [Add renovate.json](https://github.com/RogerSelwyn/MS365-Calendar/commit/774fce8c43f3d1bfa1eadce92750b8f767799041) - @renovate[bot]
+- [Revert "maint: Identify personal accounts"](https://github.com/RogerSelwyn/MS365-Calendar/commit/a26b8a069b7d5224adcb952610d33ccb3c797027) - @RogerSelwyn
 - [Add support for personal account identification](https://github.com/RogerSelwyn/MS365-Calendar/commit/5518265b36a9727904480d22bd546a09f4608871) - @RogerSelwyn
 
 ### ⬆️ Dependencies
@@ -28,13 +29,6 @@
 
 ### 🔖 Release
 - [Release v1.15.0](https://github.com/RogerSelwyn/MS365-Calendar/commit/c336ccf17f26a848002573ddfbbaf792840a6d26) - @RogerSelwyn
-
-### Other
-- [Add Marketplace badge to README](https://github.com/RogerSelwyn/MS365-Calendar/commit/ef2ee36ca4a6acd0b720ec44c3d2761b91407eee) - @RogerSelwyn
-- [Add renovate.json](https://github.com/RogerSelwyn/MS365-Calendar/commit/774fce8c43f3d1bfa1eadce92750b8f767799041) - @renovate[bot]
-- [Revert "maint: Identify personal accounts"](https://github.com/RogerSelwyn/MS365-Calendar/commit/a26b8a069b7d5224adcb952610d33ccb3c797027) - @RogerSelwyn
-
-
 
 
 ## v1.14.0 (2026/11/05)
