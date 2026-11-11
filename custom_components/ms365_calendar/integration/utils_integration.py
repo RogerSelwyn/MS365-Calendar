@@ -35,6 +35,7 @@ from .const_integration import (
     DAYS,
     DOMAIN,
     INDEXES,
+    LOCATION_ADDRESS,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -62,13 +63,15 @@ def clean_html(html):
 def format_event_data(event):
     """Format the event data."""
     attendees = event.attendees._Attendees__attendees  # noqa: SLF001
-    return {
+    data = {
         "summary": event.subject,
         "start": get_hass_date(event.start, event.is_all_day),
         "end": get_hass_date(get_end_date(event), event.is_all_day),
         "all_day": event.is_all_day,
         "description": clean_html(event.body),
         "location": event.location["displayName"],
+        "locations": _locations(event.locations),
+        "online_meeting": _online_meeting(event),
         "categories": event.categories,
         "sensitivity": event.sensitivity.name,
         "show_as": event.show_as.name,
@@ -88,6 +91,60 @@ def format_event_data(event):
             for x in attendees
         ],
         "uid": event.object_id,
+        "web_link": event.web_link,
+    }
+    # Leave out the places and the online meeting when the event has none
+    for key in ("locations", "online_meeting"):
+        if not data[key]:
+            del data[key]
+    return data
+
+
+def _location_address(address):
+    return {key: address[graph_key] for key, graph_key in LOCATION_ADDRESS.items() if address.get(graph_key)}
+
+
+def _location_coordinates(coordinates):
+    latitude = coordinates.get("latitude")
+    longitude = coordinates.get("longitude")
+    # A place without coordinates can come with 0, 0, which is not a real place
+    if latitude is None or longitude is None or latitude == longitude == 0:
+        return None
+    return {"latitude": latitude, "longitude": longitude}
+
+
+def _locations(locations):
+    """Get each place of the event, one item for an event in one place."""
+    return [_location(place) for place in locations or []]
+
+
+def _location(place):
+    """Get the name of a place and what MS Graph has on it, leaving out empty parts."""
+    details = {
+        "type": place.get("locationType"),
+        "address": _location_address(place.get("address", {})),
+        "coordinates": _location_coordinates(place.get("coordinates", {})),
+        "email": place.get("locationEmailAddress"),
+        "uri": place.get("locationUri"),
+    }
+    return {
+        "name": place.get("displayName", ""),
+        **{key: value for key, value in details.items() if value},
+    }
+
+
+def _online_meeting(event):
+    """Get the service of an online meeting, such as Teams, and the link to join it."""
+    if not event.is_online_meeting:
+        return None
+    # MS Graph leaves onlineMeeting null until it has set the meeting up
+    join_url = (event.online_meeting or {}).get("joinUrl")
+    # MS Graph says unknown for a service it does not name, and O365 has no value
+    # for a service it does not know
+    provider = getattr(event.online_meeting_provider, "value", "unknown")
+    return {
+        "provider": None if provider == "unknown" else provider,
+        "join_url": join_url,
     }
 
 

@@ -1,0 +1,105 @@
+{
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('fake-user-id')/calendars('calendar1')/calendarView(subject,body,attendees,categories,sensitivity,start,seriesMasterId,isAllDay,end,showAs,location,isOnlineMeeting,onlineMeetingProvider,onlineMeeting,webLink)",
+    "value": [
+        {
+            "@odata.etag": "W/\"qIkRKy24jUSQwhcjI6uJIQAIopRuag==\"",
+            "id": "teams",
+            "categories": [],
+            "reminderMinutesBeforeStart": 0,
+            "isReminderOn": false,
+            "subject": "Teams meeting",
+            "sensitivity": "normal",
+            "isAllDay": false,
+            "seriesMasterId": null,
+            "showAs": "busy",
+            "body": {
+                "contentType": "text",
+                "content": "Plain Text"
+            },
+            "start": {
+                "dateTime": "2020-01-01T00:00:00.0000000",
+                "timeZone": "UTC"
+            },
+            "end": {
+                "dateTime": "2020-01-02T23:59:59.0000000",
+                "timeZone": "UTC"
+            },
+            "location": {
+                "displayName": "Microsoft Teams Meeting"
+            },
+            "isOnlineMeeting": true,
+            "onlineMeetingProvider": "teamsForBusiness",
+            "onlineMeeting": {
+                "joinUrl": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_ZmFrZS1tZWV0aW5nLWlk%40thread.v2/0?context=%7b%22Tid%22%3a%22fake-tenant-id%22%2c%22Oid%22%3a%22fake-user-id%22%7d",
+                "conferenceId": "123456789",
+                "tollNumber": "+31 20 000 0000"
+            },
+            "webLink": "https://outlook.office365.com/owa/?itemid=teams&exvsurl=1&path=/calendar/item",
+            "attendees": []
+        },
+        {
+            "@odata.etag": "W/\"qIkRKy24jUSQwhcjI6uJIQAIopRuag==\"",
+            "id": "not_set_up",
+            "categories": [],
+            "reminderMinutesBeforeStart": 0,
+            "isReminderOn": false,
+            "subject": "Teams meeting not set up yet",
+            "sensitivity": "normal",
+            "isAllDay": false,
+            "seriesMasterId": null,
+            "showAs": "busy",
+            "body": {
+                "contentType": "text",
+                "content": "Plain Text"
+            },
+            "start": {
+                "dateTime": "2020-01-01T00:00:00.0000000",
+                "timeZone": "UTC"
+            },
+            "end": {
+                "dateTime": "2020-01-02T23:59:59.0000000",
+                "timeZone": "UTC"
+            },
+            "location": {
+                "displayName": "Microsoft Teams Meeting"
+            },
+            "isOnlineMeeting": true,
+            "onlineMeetingProvider": "teamsForBusiness",
+            "onlineMeeting": null,
+            "webLink": "https://outlook.office365.com/owa/?itemid=not_set_up&exvsurl=1&path=/calendar/item",
+            "attendees": []
+        },
+        {
+            "@odata.etag": "W/\"qIkRKy24jUSQwhcjI6uJIQAIopRuag==\"",
+            "id": "in_person",
+            "categories": [],
+            "reminderMinutesBeforeStart": 0,
+            "isReminderOn": false,
+            "subject": "Meeting in a room",
+            "sensitivity": "normal",
+            "isAllDay": false,
+            "seriesMasterId": null,
+            "showAs": "busy",
+            "body": {
+                "contentType": "text",
+                "content": "Plain Text"
+            },
+            "start": {
+                "dateTime": "2020-01-01T00:00:00.0000000",
+                "timeZone": "UTC"
+            },
+            "end": {
+                "dateTime": "2020-01-02T23:59:59.0000000",
+                "timeZone": "UTC"
+            },
+            "location": {
+                "displayName": "Room 1"
+            },
+            "isOnlineMeeting": false,
+            "onlineMeetingProvider": "unknown",
+            "onlineMeeting": null,
+            "webLink": "https://outlook.office365.com/owa/?itemid=in_person&exvsurl=1&path=/calendar/item",
+            "attendees": []
+        }
+    ]
+}

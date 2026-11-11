@@ -115,6 +115,7 @@ class MS365CalendarService:
             "end",
             "is_all_day",
             "location",
+            "locations",
             "categories",
             "sensitivity",
             "show_as",
@@ -123,6 +124,10 @@ class MS365CalendarService:
             "series_master_id",
             "is_reminder_on",
             "reminderMinutesBeforeStart",
+            "is_online_meeting",
+            "online_meeting_provider",
+            "online_meeting",
+            "web_link",
         )
 
         if self._search is not None:
