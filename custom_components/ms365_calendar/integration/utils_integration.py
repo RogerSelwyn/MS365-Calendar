@@ -101,7 +101,11 @@ def format_event_data(event):
 
 
 def _location_address(address):
-    return {key: address[graph_key] for key, graph_key in LOCATION_ADDRESS.items() if address.get(graph_key)}
+    return {
+        key: address[graph_key]
+        for key, graph_key in LOCATION_ADDRESS.items()
+        if address.get(graph_key)
+    }
 
 
 def _location_coordinates(coordinates):

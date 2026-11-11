@@ -61,7 +61,7 @@ from .const import (
 from .helpers.utils import get_country, get_credentials, get_tenant_id
 from .integration import config_flow_integration
 from .integration.config_flow_integration import (
-    INRTEGRATION_CONFIG_MINOR_VERSION,
+    INTEGRATION_CONFIG_MINOR_VERSION,
     INTEGRATION_CONFIG_VERSION,
     MS365OptionsFlowHandler,
     integration_reconfigure_schema,
@@ -79,7 +79,7 @@ class MS365ConfigFlow(ConfigFlow, domain=DOMAIN):
     """Example config flow."""
 
     VERSION = INTEGRATION_CONFIG_VERSION
-    MINOR_VERSION = INRTEGRATION_CONFIG_MINOR_VERSION
+    MINOR_VERSION = INTEGRATION_CONFIG_MINOR_VERSION
 
     def __init__(self) -> None:
         """Initialise the configuration flow."""
