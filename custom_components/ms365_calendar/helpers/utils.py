@@ -3,7 +3,6 @@
 import os
 
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import async_generate_entity_id
 
 from ..const import (
     AUTH_ERROR_ENVIRONMENT_VARIABLE_EMPTY,
@@ -28,15 +27,6 @@ def add_attribute_to_item(item, user_input, attribute):
         item[attribute] = value
     elif attribute in item:
         del item[attribute]
-
-
-def build_entity_id(hass: HomeAssistant, entity_id_format, name):
-    """Build an entity ID."""
-    return async_generate_entity_id(
-        entity_id_format,
-        name,
-        hass=hass,
-    )
 
 
 def get_country(entry_data):

@@ -19,14 +19,14 @@ class MS365Entity(CoordinatorEntity):
         coordinator,
         entry: MS365ConfigEntry,
         name,
-        entity_id,
+        entity_key,
         unique_id,
-    ):
+    ) -> None:
         """Initialise the MS365 Sensor."""
         super().__init__(coordinator)
         self._entry = entry
         self._name = name
-        self._entity_id = entity_id
+        self._entity_key = entity_key
         self._unique_id = unique_id
 
     @property
@@ -37,7 +37,7 @@ class MS365Entity(CoordinatorEntity):
     @property
     def entity_key(self):
         """Entity Key property."""
-        return self._entity_id
+        return self._entity_key
 
     @property
     def unique_id(self):
