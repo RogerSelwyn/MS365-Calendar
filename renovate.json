@@ -1,20 +1,3 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended", 
-    ":disableDependencyDashboard",
-    "mergeConfidence:all-badges"],
-  "osvVulnerabilityAlerts": true,
-  "vulnerabilityAlerts": {
-    "enabled": true,
-    "labels": ["security"]
-  },
-
-  "packageRules": [
-    {
-      "matchPackageNames": ["ruff"],
-      "automerge": true
-    }
-  ]
+  "extends": ["github>RogerSelwyn/renovate-config"]
 }
- 
